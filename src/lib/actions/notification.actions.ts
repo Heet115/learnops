@@ -2,13 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import mongoose from "mongoose";
-import {
-  connectDB,
-  Notification,
-  User,
-  ALA,
-  SubjectOffering,
-} from "@/lib/db";
+import { connectDB, Notification, User, ALA, SubjectOffering } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 // Get current user's notifications
@@ -56,7 +50,7 @@ export async function markAsRead(notificationId: string) {
 
   await Notification.findOneAndUpdate(
     { _id: notificationId, userId: user._id },
-    { isRead: true }
+    { isRead: true },
   );
 
   revalidatePath("/");
@@ -74,7 +68,7 @@ export async function markAllAsRead() {
 
   await Notification.updateMany(
     { userId: user._id, isRead: false },
-    { isRead: true }
+    { isRead: true },
   );
 
   revalidatePath("/");
@@ -171,7 +165,7 @@ export async function notifySubmissionGraded(
   studentId: string,
   alaTitle: string,
   marks: number,
-  maxMarks: number
+  maxMarks: number,
 ) {
   await connectDB();
 
@@ -190,7 +184,7 @@ export async function notifySubmissionRejected(
   submissionId: string,
   studentId: string,
   alaTitle: string,
-  reason: string
+  reason: string,
 ) {
   await connectDB();
 

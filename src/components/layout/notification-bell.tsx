@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { Bell, Check, CheckCheck, Trash2, FileText, Clock, Award, XCircle } from "lucide-react";
+import {
+  Bell,
+  Check,
+  CheckCheck,
+  Trash2,
+  FileText,
+  Clock,
+  Award,
+  XCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,7 +31,12 @@ import Link from "next/link";
 
 interface Notification {
   _id: string;
-  type: "new_ala" | "deadline_reminder" | "submission_graded" | "submission_rejected" | "system";
+  type:
+    | "new_ala"
+    | "deadline_reminder"
+    | "submission_graded"
+    | "submission_rejected"
+    | "system";
   title: string;
   message: string;
   relatedId?: string;
@@ -61,7 +75,7 @@ export function NotificationBell({ role }: NotificationBellProps) {
     startTransition(async () => {
       await markAsRead(id);
       setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     });
@@ -101,9 +115,9 @@ export function NotificationBell({ role }: NotificationBellProps) {
 
   const getLink = (notification: Notification) => {
     if (!notification.relatedId) return null;
-    
+
     if (notification.relatedType === "ala") {
-      return role === "student" 
+      return role === "student"
         ? `/student/alas/${notification.relatedId}`
         : `/professor/alas/${notification.relatedId}`;
     }
@@ -138,7 +152,7 @@ export function NotificationBell({ role }: NotificationBellProps) {
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
+              className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs"
             >
               {unreadCount > 9 ? "9+" : unreadCount}
             </Badge>
@@ -164,8 +178,8 @@ export function NotificationBell({ role }: NotificationBellProps) {
         <ScrollArea className="h-[400px]">
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <Bell className="h-10 w-10 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">No notifications</p>
+              <Bell className="text-muted-foreground mb-2 h-10 w-10" />
+              <p className="text-muted-foreground text-sm">No notifications</p>
             </div>
           ) : (
             <div className="divide-y">
@@ -174,19 +188,24 @@ export function NotificationBell({ role }: NotificationBellProps) {
                 const content = (
                   <div
                     className={cn(
-                      "flex gap-3 p-3 hover:bg-muted/50 transition-colors",
-                      !notification.isRead && "bg-muted/30"
+                      "hover:bg-muted/50 flex gap-3 p-3 transition-colors",
+                      !notification.isRead && "bg-muted/30",
                     )}
                   >
                     <div className="mt-0.5">{getIcon(notification.type)}</div>
-                    <div className="flex-1 min-w-0">
-                      <p className={cn("text-sm", !notification.isRead && "font-medium")}>
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={cn(
+                          "text-sm",
+                          !notification.isRead && "font-medium",
+                        )}
+                      >
                         {notification.title}
                       </p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
+                      <p className="text-muted-foreground line-clamp-2 text-xs">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-muted-foreground mt-1 text-xs">
                         {formatTime(notification.createdAt)}
                       </p>
                     </div>
@@ -209,7 +228,7 @@ export function NotificationBell({ role }: NotificationBellProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                        className="text-muted-foreground hover:text-destructive h-6 w-6"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -228,7 +247,8 @@ export function NotificationBell({ role }: NotificationBellProps) {
                     key={notification._id}
                     href={link}
                     onClick={() => {
-                      if (!notification.isRead) handleMarkAsRead(notification._id);
+                      if (!notification.isRead)
+                        handleMarkAsRead(notification._id);
                       setIsOpen(false);
                     }}
                   >

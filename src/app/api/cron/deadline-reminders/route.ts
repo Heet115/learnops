@@ -14,12 +14,12 @@ export async function GET(request: Request) {
 
   try {
     const result = await createDeadlineReminders();
-    return NextResponse.json({ success: true, ...result });
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Error creating deadline reminders:", error);
     return NextResponse.json(
       { error: "Failed to create reminders" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -174,13 +174,14 @@ export async function gradeSubmission(
   );
 
   // Notify student about grading
-  const { notifySubmissionGraded } = await import("@/lib/actions/notification.actions");
+  const { notifySubmissionGraded } =
+    await import("@/lib/actions/notification.actions");
   await notifySubmissionGraded(
     submissionId,
     submission.studentId.toString(),
     ala.title,
     data.marks,
-    ala.maxMarks
+    ala.maxMarks,
   );
 
   // Also notify group members if it's a group submission
@@ -192,7 +193,7 @@ export async function gradeSubmission(
           memberId.toString(),
           ala.title,
           data.marks,
-          ala.maxMarks
+          ala.maxMarks,
         );
       }
     }
@@ -244,12 +245,13 @@ export async function rejectSubmission(submissionId: string, reason: string) {
   );
 
   // Notify student about rejection
-  const { notifySubmissionRejected } = await import("@/lib/actions/notification.actions");
+  const { notifySubmissionRejected } =
+    await import("@/lib/actions/notification.actions");
   await notifySubmissionRejected(
     submissionId,
     submission.studentId.toString(),
     ala.title,
-    reason
+    reason,
   );
 
   // Also notify group members if it's a group submission
@@ -260,7 +262,7 @@ export async function rejectSubmission(submissionId: string, reason: string) {
           submissionId,
           memberId.toString(),
           ala.title,
-          reason
+          reason,
         );
       }
     }

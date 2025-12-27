@@ -3,7 +3,12 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface INotification extends Document {
   _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
-  type: "new_ala" | "deadline_reminder" | "submission_graded" | "submission_rejected" | "system";
+  type:
+    | "new_ala"
+    | "deadline_reminder"
+    | "submission_graded"
+    | "submission_rejected"
+    | "system";
   title: string;
   message: string;
   relatedId?: mongoose.Types.ObjectId;
@@ -22,7 +27,13 @@ const NotificationSchema = new Schema<INotification>(
     },
     type: {
       type: String,
-      enum: ["new_ala", "deadline_reminder", "submission_graded", "submission_rejected", "system"],
+      enum: [
+        "new_ala",
+        "deadline_reminder",
+        "submission_graded",
+        "submission_rejected",
+        "system",
+      ],
       required: true,
     },
     title: {
@@ -50,7 +61,7 @@ const NotificationSchema = new Schema<INotification>(
   },
   {
     timestamps: { createdAt: true, updatedAt: false },
-  }
+  },
 );
 
 // Compound index for efficient queries
