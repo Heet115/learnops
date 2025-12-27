@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Eye, CheckCircle, Clock, XCircle, FileEdit } from "lucide-react";
+import { Eye, CheckCircle, Clock, XCircle } from "lucide-react";
 
 export default async function StudentSubmissionsPage() {
   const { sessionClaims } = await auth();
@@ -62,8 +62,8 @@ export default async function StudentSubmissionsPage() {
       default:
         return (
           <Badge variant="outline">
-            <FileEdit className="mr-1 h-3 w-3" />
-            Draft
+            <Clock className="mr-1 h-3 w-3" />
+            Pending
           </Badge>
         );
     }

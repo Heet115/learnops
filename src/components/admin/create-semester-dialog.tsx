@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DatePicker } from "@/components/ui/date-time-picker";
 import { createSemester } from "@/lib/actions/academic.actions";
 import { Loader2, Plus } from "lucide-react";
 import { ICourse } from "@/lib/db";
@@ -40,9 +41,9 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
     name: "",
     number: 1,
     courseId: "",
-    startDate: "",
-    endDate: "",
   });
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +56,11 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
       return;
     }
 
-    const result = await createSemester(formData);
+    const result = await createSemester({
+      ...formData,
+      startDate: startDate?.toISOString().split("T")[0] || "",
+      endDate: endDate?.toISOString().split("T")[0] || "",
+    });
 
     if (result.success) {
       setOpen(false);
@@ -63,9 +68,9 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
         name: "",
         number: 1,
         courseId: "",
-        startDate: "",
-        endDate: "",
       });
+      setStartDate(undefined);
+      setEndDate(undefined);
       router.refresh();
     } else {
       setError(result.error || "Failed to create semester");
@@ -159,30 +164,22 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date (Optional)</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={formData.startDate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, startDate: e.target.value })
-                  }
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="endDate">End Date (Optional)</Label>
-                <Input
-                  id="endDate"
-                  type="date"
-                  value={formData.endDate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, endDate: e.target.value })
-                  }
-                  disabled={isLoading}
-                />
-              </div>
+              <DatePicker
+                id="startDate"
+                label="Start Date (Optional)"
+                value={startDate}
+                onChange={setStartDate}
+                disabled={isLoading}
+                placeholder="Select start date"
+              />
+              <DatePicker
+                id="endDate"
+                label="End Date (Optional)"
+                value={endDate}
+                onChange={setEndDate}
+                disabled={isLoading}
+                placeholder="Select end date"
+              />
             </div>
           </div>
           <DialogFooter>

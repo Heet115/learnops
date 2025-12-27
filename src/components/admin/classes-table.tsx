@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { deleteClass } from "@/lib/actions/academic.actions";
 import { toast } from "sonner";
@@ -66,10 +67,20 @@ interface ClassesTableProps {
 
 export function ClassesTable({ classes, semesters }: ClassesTableProps) {
   const [editingClass, setEditingClass] = useState<ClassItem | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({
+    open: false,
+    id: "",
+    name: "",
+  });
   const router = useRouter();
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+  const handleDeleteClick = (id: string, name: string) => {
+    setDeleteConfirm({ open: true, id, name });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const { id } = deleteConfirm;
+    setDeleteConfirm({ open: false, id: "", name: "" });
 
     const result = await deleteClass(id);
     if (result.success) {
@@ -137,7 +148,7 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
                     <DropdownMenuItem
                       className="text-destructive"
                       onClick={() =>
-                        handleDelete(classItem._id, classItem.name)
+                        handleDeleteClick(classItem._id, classItem.name)
                       }
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
@@ -159,6 +170,16 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
           onOpenChange={(open) => !open && setEditingClass(null)}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        onOpenChange={(open) => !open && setDeleteConfirm({ open: false, id: "", name: "" })}
+        title="Delete Class"
+        description={`Are you sure you want to delete "${deleteConfirm.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="destructive"
+        onConfirm={handleDeleteConfirm}
+      />
     </>
   );
 }

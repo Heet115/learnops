@@ -20,7 +20,7 @@ export interface ISubmission extends Document {
   groupMembers?: mongoose.Types.ObjectId[];
   files: ISubmissionFile[];
   links: ISubmissionLink[];
-  status: "draft" | "submitted" | "graded" | "rejected";
+  status: "submitted" | "graded" | "rejected";
   marks?: number;
   feedback?: string;
   rejectionReason?: string;
@@ -73,8 +73,8 @@ const SubmissionSchema = new Schema<ISubmission>(
     links: { type: [SubmissionLinkSchema], default: [] },
     status: {
       type: String,
-      enum: ["draft", "submitted", "graded", "rejected"],
-      default: "draft",
+      enum: ["submitted", "graded", "rejected"],
+      default: "submitted",
     },
     marks: { type: Number, min: 0 },
     feedback: { type: String },

@@ -23,6 +23,8 @@ import {
   CheckCircle,
   XCircle,
   Users,
+  Download,
+  ExternalLink,
 } from "lucide-react";
 import { SubmissionForm } from "@/components/student/submission-form";
 import { GroupSection } from "@/components/student/group-section";
@@ -78,9 +80,6 @@ export default async function StudentALAPage({ params }: PageProps) {
     }
     if (isPastDeadline) {
       return <Badge variant="destructive">Overdue</Badge>;
-    }
-    if (submission?.status === "draft") {
-      return <Badge variant="outline">Draft</Badge>;
     }
     return <Badge variant="outline">Not Started</Badge>;
   };
@@ -191,6 +190,51 @@ export default async function StudentALAPage({ params }: PageProps) {
                       </p>
                     </div>
                   )}
+                  {submission.files?.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Your Files:</p>
+                      <div className="space-y-2">
+                        {submission.files.map(
+                          (file: { name: string; url: string }, i: number) => (
+                            <a
+                              key={i}
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:bg-muted flex items-center justify-between rounded-lg border p-3 transition-colors"
+                            >
+                              <div className="flex items-center gap-2">
+                                <FileText className="text-muted-foreground h-4 w-4" />
+                                <span className="text-sm">{file.name}</span>
+                              </div>
+                              <Download className="h-4 w-4 text-blue-600" />
+                            </a>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {submission.links?.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Your Links:</p>
+                      <div className="space-y-2">
+                        {submission.links.map(
+                          (link: { title: string; url: string }, i: number) => (
+                            <a
+                              key={i}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:bg-muted flex items-center justify-between rounded-lg border p-3 transition-colors"
+                            >
+                              <span className="text-sm">{link.title}</span>
+                              <ExternalLink className="h-4 w-4 text-blue-600" />
+                            </a>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ) : submission?.status === "rejected" ? (
@@ -239,36 +283,53 @@ export default async function StudentALAPage({ params }: PageProps) {
                     {new Date(submission.submittedAt).toLocaleString()}
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                   <p className="text-muted-foreground text-sm">
                     Your submission is being reviewed by the professor.
                   </p>
                   {submission.files?.length > 0 && (
-                    <div className="mt-4">
-                      <p className="mb-2 text-sm font-medium">
-                        Files submitted:
-                      </p>
-                      <ul className="text-muted-foreground space-y-1 text-sm">
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Your Files:</p>
+                      <div className="space-y-2">
                         {submission.files.map(
-                          (file: { name: string }, i: number) => (
-                            <li key={i}>• {file.name}</li>
+                          (file: { name: string; url: string }, i: number) => (
+                            <a
+                              key={i}
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:bg-muted flex items-center justify-between rounded-lg border p-3 transition-colors"
+                            >
+                              <div className="flex items-center gap-2">
+                                <FileText className="text-muted-foreground h-4 w-4" />
+                                <span className="text-sm">{file.name}</span>
+                              </div>
+                              <Download className="h-4 w-4 text-blue-600" />
+                            </a>
                           ),
                         )}
-                      </ul>
+                      </div>
                     </div>
                   )}
                   {submission.links?.length > 0 && (
-                    <div className="mt-4">
-                      <p className="mb-2 text-sm font-medium">
-                        Links submitted:
-                      </p>
-                      <ul className="text-muted-foreground space-y-1 text-sm">
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Your Links:</p>
+                      <div className="space-y-2">
                         {submission.links.map(
-                          (link: { title: string }, i: number) => (
-                            <li key={i}>• {link.title}</li>
+                          (link: { title: string; url: string }, i: number) => (
+                            <a
+                              key={i}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:bg-muted flex items-center justify-between rounded-lg border p-3 transition-colors"
+                            >
+                              <span className="text-sm">{link.title}</span>
+                              <ExternalLink className="h-4 w-4 text-blue-600" />
+                            </a>
                           ),
                         )}
-                      </ul>
+                      </div>
                     </div>
                   )}
                 </CardContent>

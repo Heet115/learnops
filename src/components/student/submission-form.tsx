@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -21,6 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Upload,
   Loader2,
@@ -29,19 +30,12 @@ import {
   Trash2,
   Plus,
   Send,
+  Download,
 } from "lucide-react";
-import {
-  getOrCreateSubmission,
-  addFileToSubmission,
-  removeFileFromSubmission,
-  addLinkToSubmission,
-  removeLinkFromSubmission,
-  submitSubmission,
-  clearAndResubmit,
-} from "@/lib/actions/submission.actions";
+import { createSubmission, updateSubmission } from "@/lib/actions/submission.actions";
 import { toast } from "sonner";
 
-interface SubmissionFile {
+interface ExistingFile {
   name: string;
   url: string;
   type: string;
@@ -55,9 +49,16 @@ interface SubmissionLink {
 
 interface Submission {
   _id: string;
-  files: SubmissionFile[];
+  files: ExistingFile[];
   links: SubmissionLink[];
   status: string;
+}
+
+interface LocalFile {
+  file: File;
+  name: string;
+  type: string;
+  size: number;
 }
 
 interface SubmissionFormProps {
@@ -72,420 +73,414 @@ interface SubmissionFormProps {
 export function SubmissionForm({
   alaId,
   studentId,
-  submission: initialSubmission,
+  submission: existingSubmission,
   allowedFileTypes = ["pdf", "docx", "ppt", "zip"],
   maxFileSize = 30 * 1024 * 1024,
   isResubmit = false,
 }: SubmissionFormProps) {
-  const [submission, setSubmission] = useState<Submission | null>(
-    initialSubmission || null,
+  const [localFiles, setLocalFiles] = useState<LocalFile[]>([]);
+  const [existingFiles, setExistingFiles] = useState<ExistingFile[]>(
+    existingSubmission?.files || []
   );
-  const [uploading, setUploading] = useState(false);
+  const [filesToDelete, setFilesToDelete] = useState<string[]>([]);
+  const [links, setLinks] = useState<SubmissionLink[]>(
+    existingSubmission?.links || []
+  );
   const [submitting, setSubmitting] = useState(false);
-  const [clearing, setClearing] = useState(false);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    if (!submission) {
-      initSubmission();
-    }
-  }, []);
-
-  const initSubmission = async () => {
-    const result = await getOrCreateSubmission(alaId);
-    if (result.success && result.submission) {
-      setSubmission(result.submission);
-    } else {
-      toast.error(result.error || "Failed to initialize submission");
-    }
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !submission) return;
+    if (!file) return;
 
-    // Validate file type
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (!ext || !allowedFileTypes.includes(ext)) {
       toast.error(
-        `File type not allowed. Allowed: ${allowedFileTypes.join(", ").toUpperCase()}`,
+        `File type not allowed. Allowed: ${allowedFileTypes.join(", ").toUpperCase()}`
       );
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
-    // Validate file size
     if (file.size > maxFileSize) {
       toast.error(
-        `File too large. Max size: ${Math.round(maxFileSize / (1024 * 1024))}MB`,
+        `File too large. Max size: ${Math.round(maxFileSize / (1024 * 1024))}MB`
       );
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
-    setUploading(true);
-
-    try {
-      // Upload to Cloudinary via API
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", `learnops/submissions/${alaId}/${studentId}`);
-
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const uploadData = await uploadRes.json();
-
-      if (!uploadRes.ok) {
-        throw new Error(uploadData.error || "Upload failed");
-      }
-
-      // Add file to submission
-      const result = await addFileToSubmission(submission._id, {
-        name: file.name,
-        url: uploadData.url,
-        type: ext,
-        size: file.size,
-      });
-
-      if (result.success) {
-        setSubmission(result.submission);
-        toast.success("File uploaded");
-      } else {
-        toast.error(result.error || "Failed to add file");
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Upload failed");
-    } finally {
-      setUploading(false);
+    const isDuplicate = localFiles.some((f) => f.name === file.name) ||
+      existingFiles.some((f) => f.name === file.name);
+    if (isDuplicate) {
+      toast.error("A file with this name already exists");
       if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
     }
+
+    setLocalFiles([
+      ...localFiles,
+      { file, name: file.name, type: ext, size: file.size },
+    ]);
+    toast.success("File added");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleRemoveFile = async (fileUrl: string) => {
-    if (!submission) return;
-
-    const result = await removeFileFromSubmission(submission._id, fileUrl);
-    if (result.success) {
-      setSubmission(result.submission);
-      toast.success("File removed");
-    } else {
-      toast.error(result.error || "Failed to remove file");
-    }
+  const handleRemoveLocalFile = (index: number) => {
+    setLocalFiles(localFiles.filter((_, i) => i !== index));
   };
 
-  const handleAddLink = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleAddLink = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!submission) return;
-
     const formData = new FormData(e.currentTarget);
     const link = {
       title: formData.get("title") as string,
       url: formData.get("url") as string,
     };
 
-    const result = await addLinkToSubmission(submission._id, link);
-    if (result.success) {
-      setSubmission(result.submission);
-      setLinkDialogOpen(false);
-      toast.success("Link added");
-    } else {
-      toast.error(result.error || "Failed to add link");
+    if (links.some((l) => l.url === link.url)) {
+      toast.error("This link already exists");
+      return;
     }
+
+    setLinks([...links, link]);
+    setLinkDialogOpen(false);
+    toast.success("Link added");
   };
 
-  const handleRemoveLink = async (linkUrl: string) => {
-    if (!submission) return;
-
-    const result = await removeLinkFromSubmission(submission._id, linkUrl);
-    if (result.success) {
-      setSubmission(result.submission);
-      toast.success("Link removed");
-    } else {
-      toast.error(result.error || "Failed to remove link");
-    }
+  const handleRemoveLink = (linkUrl: string) => {
+    setLinks(links.filter((l) => l.url !== linkUrl));
   };
 
-  const handleSubmit = async () => {
-    if (!submission) return;
-
-    if (submission.files.length === 0 && submission.links.length === 0) {
+  const handleSubmitClick = () => {
+    const totalFiles = localFiles.length + existingFiles.length;
+    if (totalFiles === 0 && links.length === 0) {
       toast.error("Please add at least one file or link");
       return;
     }
-
-    const message = isResubmit
-      ? "Are you sure you want to resubmit? This will update your previous submission."
-      : "Are you sure you want to submit? You can still modify before the deadline.";
-
-    if (!confirm(message)) {
-      return;
-    }
-
-    setSubmitting(true);
-    const result = await submitSubmission(submission._id);
-
-    if (result.success) {
-      toast.success(
-        isResubmit ? "Resubmission successful!" : "Submission successful!",
-      );
-      router.refresh();
-    } else {
-      toast.error(result.error || "Failed to submit");
-    }
-
-    setSubmitting(false);
+    setSubmitConfirmOpen(true);
   };
 
-  const handleClearAndResubmit = async () => {
-    if (!submission) return;
+  const handleSubmitConfirm = async () => {
+    setSubmitConfirmOpen(false);
+    setSubmitting(true);
 
-    if (
-      !confirm(
-        "This will delete all your current files and links. Are you sure?",
-      )
-    ) {
-      return;
+    try {
+      const uploadedFiles: ExistingFile[] = [];
+      
+      for (const localFile of localFiles) {
+        const formData = new FormData();
+        formData.append("file", localFile.file);
+        formData.append("folder", `learnops/submissions/${alaId}/${studentId}`);
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const uploadData = await uploadRes.json();
+
+        if (!uploadRes.ok) {
+          throw new Error(uploadData.error || `Failed to upload ${localFile.name}`);
+        }
+
+        uploadedFiles.push({
+          name: localFile.name,
+          url: uploadData.url,
+          type: localFile.type,
+          size: localFile.size,
+        });
+      }
+
+      const allFiles = [...existingFiles, ...uploadedFiles];
+
+      let result;
+      if (existingSubmission?._id) {
+        result = await updateSubmission(existingSubmission._id, {
+          files: allFiles,
+          links,
+          filesToDelete,
+        });
+      } else {
+        result = await createSubmission(alaId, {
+          files: allFiles,
+          links,
+        });
+      }
+
+      if (result.success) {
+        toast.success(isResubmit ? "Submission updated!" : "Submission successful!");
+        setLocalFiles([]);
+        setExistingFiles(allFiles);
+        setFilesToDelete([]);
+        router.refresh();
+      } else {
+        toast.error(result.error || "Failed to submit");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Submission failed");
+    } finally {
+      setSubmitting(false);
     }
+  };
 
-    setClearing(true);
-    const result = await clearAndResubmit(submission._id);
-
-    if (result.success) {
-      setSubmission(result.submission);
-      toast.success("Submission cleared. You can now upload new files.");
-      router.refresh();
-    } else {
-      toast.error(result.error || "Failed to clear submission");
-    }
-
-    setClearing(false);
+  const handleClearConfirm = () => {
+    setClearConfirmOpen(false);
+    setFilesToDelete([...filesToDelete, ...existingFiles.map((f) => f.url)]);
+    setExistingFiles([]);
+    setLocalFiles([]);
+    setLinks([]);
+    toast.success("Cleared all files and links");
   };
 
   const acceptTypes = allowedFileTypes.map((t) => `.${t}`).join(",");
+  const hasContent = localFiles.length > 0 || existingFiles.length > 0 || links.length > 0;
 
   return (
-    <Card className={isResubmit ? "border-blue-200" : ""}>
-      <CardHeader>
-        <CardTitle>
-          {isResubmit ? "Modify Submission" : "Your Submission"}
-        </CardTitle>
-        <CardDescription>
-          {isResubmit
-            ? "You can modify your submission before the deadline. Changes will update your previous submission."
-            : "Upload files or add links to submit your work"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Files Section */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label>Files</Label>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={acceptTypes}
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-            >
-              {uploading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Uploading...
-                </>
-              ) : (
-                <>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload File
-                </>
-              )}
-            </Button>
-          </div>
-
-          {submission?.files && submission.files.length > 0 ? (
-            <div className="space-y-2">
-              {submission.files.map((file, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between rounded-lg border p-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <FileText className="text-muted-foreground h-4 w-4" />
-                    <div>
-                      <p className="text-sm font-medium">{file.name}</p>
-                      <p className="text-muted-foreground text-xs">
-                        {(file.size / 1024).toFixed(1)} KB
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveFile(file.url)}
-                  >
-                    <Trash2 className="text-destructive h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+    <>
+      <Card className={isResubmit ? "border-blue-200" : ""}>
+        <CardHeader>
+          <CardTitle>
+            {isResubmit ? "Modify Submission" : "Your Submission"}
+          </CardTitle>
+          <CardDescription>
+            {isResubmit
+              ? "Update your submission before the deadline"
+              : "Add files and links, then click Submit"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Files</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={acceptTypes}
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={submitting}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add File
+              </Button>
             </div>
-          ) : (
-            <p className="text-muted-foreground text-sm">
-              No files uploaded yet
-            </p>
-          )}
 
-          <p className="text-muted-foreground text-xs">
-            Allowed: {allowedFileTypes.join(", ").toUpperCase()} (max{" "}
-            {Math.round(maxFileSize / (1024 * 1024))}MB)
-          </p>
-        </div>
+            {existingFiles.length > 0 && (
+              <div className="space-y-2">
+                {existingFiles.map((file, index) => (
+                  <a
+                    key={`existing-${index}`}
+                    href={file.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:bg-muted flex items-center justify-between rounded-lg border p-3 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileText className="text-muted-foreground h-4 w-4" />
+                      <div>
+                        <p className="text-sm font-medium">{file.name}</p>
+                        <p className="text-muted-foreground text-xs">
+                          {(file.size / 1024).toFixed(1)} KB • Uploaded
+                        </p>
+                      </div>
+                    </div>
+                    <Download className="h-4 w-4 text-blue-600" />
+                  </a>
+                ))}
+              </div>
+            )}
 
-        {/* Links Section */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label>Links</Label>
-            <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
-              <DialogTrigger asChild>
-                <Button type="button" variant="outline" size="sm">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Link
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <form onSubmit={handleAddLink}>
-                  <DialogHeader>
-                    <DialogTitle>Add Link</DialogTitle>
-                    <DialogDescription>
-                      Add a link to your work (GitHub, Google Drive, etc.)
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="title">Title</Label>
-                      <Input
-                        id="title"
-                        name="title"
-                        placeholder="e.g., GitHub Repository"
-                        required
-                      />
+            {localFiles.length > 0 && (
+              <div className="space-y-2">
+                {localFiles.map((file, index) => (
+                  <div
+                    key={`local-${index}`}
+                    className="flex items-center justify-between rounded-lg border border-dashed border-blue-300 bg-blue-50/50 p-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Upload className="h-4 w-4 text-blue-500" />
+                      <div>
+                        <p className="text-sm font-medium">{file.name}</p>
+                        <p className="text-xs text-blue-600">
+                          {(file.size / 1024).toFixed(1)} KB • Ready to upload
+                        </p>
+                      </div>
                     </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="url">URL</Label>
-                      <Input
-                        id="url"
-                        name="url"
-                        type="url"
-                        placeholder="https://..."
-                        required
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
                     <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setLinkDialogOpen(false)}
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveLocalFile(index)}
+                      disabled={submitting}
                     >
-                      Cancel
+                      <Trash2 className="text-destructive h-4 w-4" />
                     </Button>
-                    <Button type="submit">Add Link</Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {existingFiles.length === 0 && localFiles.length === 0 && (
+              <p className="text-muted-foreground text-sm">No files added yet</p>
+            )}
+
+            <p className="text-muted-foreground text-xs">
+              Allowed: {allowedFileTypes.join(", ").toUpperCase()} (max{" "}
+              {Math.round(maxFileSize / (1024 * 1024))}MB)
+            </p>
           </div>
 
-          {submission?.links && submission.links.length > 0 ? (
-            <div className="space-y-2">
-              {submission.links.map((link, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between rounded-lg border p-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <LinkIcon className="text-muted-foreground h-4 w-4" />
-                    <div>
-                      <p className="text-sm font-medium">{link.title}</p>
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block max-w-[250px] truncate text-xs text-blue-600 hover:underline"
-                      >
-                        {link.url}
-                      </a>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveLink(link.url)}
-                  >
-                    <Trash2 className="text-destructive h-4 w-4" />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Links</Label>
+              <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button type="button" variant="outline" size="sm" disabled={submitting}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Link
                   </Button>
-                </div>
-              ))}
+                </DialogTrigger>
+                <DialogContent>
+                  <form onSubmit={handleAddLink}>
+                    <DialogHeader>
+                      <DialogTitle>Add Link</DialogTitle>
+                      <DialogDescription>
+                        Add a link to your work (GitHub, Google Drive, etc.)
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="title">Title</Label>
+                        <Input
+                          id="title"
+                          name="title"
+                          placeholder="e.g., GitHub Repository"
+                          required
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="url">URL</Label>
+                        <Input
+                          id="url"
+                          name="url"
+                          type="url"
+                          placeholder="https://..."
+                          required
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setLinkDialogOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit">Add Link</Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
-          ) : (
-            <p className="text-muted-foreground text-sm">No links added yet</p>
-          )}
-        </div>
 
-        {/* Submit Button */}
-        <div className="flex gap-2">
-          {isResubmit && (
+            {links.length > 0 ? (
+              <div className="space-y-2">
+                {links.map((link, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between rounded-lg border p-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <LinkIcon className="text-muted-foreground h-4 w-4" />
+                      <div>
+                        <p className="text-sm font-medium">{link.title}</p>
+                        <p className="text-xs text-blue-600 truncate max-w-[250px]">
+                          {link.url}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveLink(link.url)}
+                      disabled={submitting}
+                    >
+                      <Trash2 className="text-destructive h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">No links added yet</p>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            {isResubmit && hasContent && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setClearConfirmOpen(true)}
+                disabled={submitting}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Clear All
+              </Button>
+            )}
             <Button
-              type="button"
-              variant="outline"
-              onClick={handleClearAndResubmit}
-              disabled={clearing || submitting}
+              onClick={handleSubmitClick}
+              disabled={submitting || !hasContent}
               className="flex-1"
             >
-              {clearing ? (
+              {submitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Clearing...
+                  {localFiles.length > 0 ? "Uploading & Submitting..." : "Submitting..."}
                 </>
               ) : (
                 <>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Clear & Start Fresh
+                  <Send className="mr-2 h-4 w-4" />
+                  {isResubmit ? "Update Submission" : "Submit"}
                 </>
               )}
             </Button>
-          )}
-          <Button
-            onClick={handleSubmit}
-            disabled={
-              submitting ||
-              clearing ||
-              (!submission?.files?.length && !submission?.links?.length)
-            }
-            className={isResubmit ? "flex-1" : "w-full"}
-          >
-            {submitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {isResubmit ? "Resubmitting..." : "Submitting..."}
-              </>
-            ) : (
-              <>
-                <Send className="mr-2 h-4 w-4" />
-                {isResubmit ? "Update Submission" : "Submit"}
-              </>
-            )}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+      </Card>
+
+      <ConfirmDialog
+        open={submitConfirmOpen}
+        onOpenChange={setSubmitConfirmOpen}
+        title={isResubmit ? "Update Submission" : "Submit Assignment"}
+        description={
+          isResubmit
+            ? "Are you sure you want to update your submission? Your previous submission will be replaced."
+            : "Are you sure you want to submit? Make sure you have added all required files and links."
+        }
+        confirmText={isResubmit ? "Update" : "Submit"}
+        onConfirm={handleSubmitConfirm}
+      />
+
+      <ConfirmDialog
+        open={clearConfirmOpen}
+        onOpenChange={setClearConfirmOpen}
+        title="Clear All"
+        description="This will remove all files and links. Are you sure?"
+        confirmText="Clear All"
+        variant="destructive"
+        onConfirm={handleClearConfirm}
+      />
+    </>
   );
 }

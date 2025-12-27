@@ -172,8 +172,14 @@ export async function getALAForSubmission(alaId: string) {
   );
 }
 
-// Create or get draft submission
-export async function getOrCreateSubmission(alaId: string) {
+// Create a new submission (files already uploaded to Cloudinary)
+export async function createSubmission(
+  alaId: string,
+  data: {
+    files: { name: string; url: string; type: string; size: number }[];
+    links: { title: string; url: string }[];
+  }
+) {
   const clerkId = await requireStudent();
   const student = await getStudentDbUser(clerkId!);
 
@@ -186,6 +192,26 @@ export async function getOrCreateSubmission(alaId: string) {
   if (ala.isLocked) {
     return { success: false, error: "This ALA is locked for submissions" };
   }
+
+  if (new Date(ala.deadline) < new Date()) {
+    return { success: false, error: "Deadline has passed" };
+  }
+
+  if (data.files.length === 0 && data.links.length === 0) {
+    return { success: false, error: "Please add at least one file or link" };
+  }
+
+  // Check if submission already exists
+  const existingSubmission = await Submission.findOne({
+    alaId,
+    studentId: student._id,
+  });
+
+  if (existingSubmission) {
+    return { success: false, error: "Submission already exists. Use update instead." };
+  }
+
+  let groupMembers: mongoose.Types.ObjectId[] = [];
 
   // For group submissions, verify student is in a group
   if (ala.isGroupSubmission) {
@@ -201,233 +227,77 @@ export async function getOrCreateSubmission(alaId: string) {
 
     // Check if any group member already has a submission
     const acceptedMembers = group.members.filter(
-      (m: { status: string }) => m.status === "accepted",
+      (m: { status: string }) => m.status === "accepted"
     );
     const groupMemberIds = acceptedMembers.map(
-      (m: { studentId: mongoose.Types.ObjectId }) => m.studentId,
+      (m: { studentId: mongoose.Types.ObjectId }) => m.studentId
     );
 
-    let submission = await Submission.findOne({
+    const existingGroupSubmission = await Submission.findOne({
       alaId,
       studentId: { $in: groupMemberIds },
     });
 
-    if (!submission) {
-      // Create submission with group members (exclude the submitter)
-      const otherMembers = groupMemberIds.filter(
-        (id) => id.toString() !== student._id.toString(),
-      );
-
-      submission = await Submission.create({
-        alaId,
-        studentId: student._id,
-        groupMembers: otherMembers,
-        status: "draft",
-      });
-
-      // Lock the group
-      await Group.findByIdAndUpdate(group._id, { isLocked: true });
+    if (existingGroupSubmission) {
+      return { success: false, error: "A group member has already submitted" };
     }
 
-    return {
-      success: true,
-      submission: JSON.parse(JSON.stringify(submission)),
-    };
+    // Get other members (exclude the submitter)
+    groupMembers = groupMemberIds.filter(
+      (id) => id.toString() !== student._id.toString()
+    );
+
+    // Lock the group
+    await Group.findByIdAndUpdate(group._id, { isLocked: true });
   }
 
-  // Individual submission
-  let submission = await Submission.findOne({
-    alaId,
+  // Create submission with status "submitted"
+  const submission = await Submission.create({
+    alaId: new mongoose.Types.ObjectId(alaId),
     studentId: student._id,
+    groupMembers,
+    files: data.files.map((f) => ({ ...f, uploadedAt: new Date() })),
+    links: data.links.map((l) => ({ ...l, addedAt: new Date() })),
+    status: "submitted",
+    submittedAt: new Date(),
   });
 
-  if (!submission) {
-    submission = await Submission.create({
-      alaId,
-      studentId: student._id,
-      status: "draft",
-    });
-  }
+  revalidatePath(`/student/alas/${alaId}`);
+  revalidatePath("/student/alas");
+  revalidatePath("/student/submissions");
 
   return { success: true, submission: JSON.parse(JSON.stringify(submission)) };
 }
 
-// Check if submission can be modified (before deadline and not graded)
-async function canModifySubmission(submission: {
-  alaId: unknown;
-  status: string;
-}) {
-  if (submission.status === "graded") return false;
-
-  const ala = await ALA.findById(submission.alaId);
-  if (!ala || ala.isLocked) return false;
-  if (new Date(ala.deadline) < new Date()) return false;
-
-  return true;
-}
-
-// Check if student can access submission (owner or group member)
-async function canAccessSubmission(
-  submission: {
-    studentId: { toString: () => string };
-    groupMembers?: { toString: () => string }[];
-  },
-  studentId: string,
-) {
-  if (submission.studentId.toString() === studentId) return true;
-  if (submission.groupMembers?.some((m) => m.toString() === studentId))
-    return true;
-  return false;
-}
-
-// Add file to submission
-export async function addFileToSubmission(
+// Update an existing submission
+export async function updateSubmission(
   submissionId: string,
-  file: { name: string; url: string; type: string; size: number },
+  data: {
+    files: { name: string; url: string; type: string; size: number }[];
+    links: { title: string; url: string }[];
+    filesToDelete?: string[];
+  }
 ) {
   const clerkId = await requireStudent();
   const student = await getStudentDbUser(clerkId!);
 
   const submission = await Submission.findById(submissionId);
-  if (
-    !submission ||
-    !(await canAccessSubmission(submission, student._id.toString()))
-  ) {
+  if (!submission) {
     return { success: false, error: "Submission not found" };
   }
 
-  if (!(await canModifySubmission(submission))) {
-    return { success: false, error: "Cannot modify this submission" };
+  // Check access
+  const hasAccess =
+    submission.studentId.toString() === student._id.toString() ||
+    submission.groupMembers?.some(
+      (m) => m.toString() === student._id.toString()
+    );
+
+  if (!hasAccess) {
+    return { success: false, error: "Unauthorized" };
   }
 
-  const updated = await Submission.findByIdAndUpdate(
-    submissionId,
-    {
-      $push: {
-        files: { ...file, uploadedAt: new Date() },
-      },
-      // If was submitted, keep as submitted (will resubmit)
-    },
-    { new: true },
-  );
-
-  revalidatePath(`/student/alas/${submission.alaId}`);
-  return { success: true, submission: JSON.parse(JSON.stringify(updated)) };
-}
-
-// Remove file from submission
-export async function removeFileFromSubmission(
-  submissionId: string,
-  fileUrl: string,
-) {
-  const clerkId = await requireStudent();
-  const student = await getStudentDbUser(clerkId!);
-
-  const submission = await Submission.findById(submissionId);
-  if (
-    !submission ||
-    !(await canAccessSubmission(submission, student._id.toString()))
-  ) {
-    return { success: false, error: "Submission not found" };
-  }
-
-  if (!(await canModifySubmission(submission))) {
-    return { success: false, error: "Cannot modify this submission" };
-  }
-
-  // Delete from Cloudinary
-  if (fileUrl.includes("cloudinary")) {
-    await deleteFromCloudinary(fileUrl);
-  }
-
-  const updated = await Submission.findByIdAndUpdate(
-    submissionId,
-    { $pull: { files: { url: fileUrl } } },
-    { new: true },
-  );
-
-  revalidatePath(`/student/alas/${submission.alaId}`);
-  return { success: true, submission: JSON.parse(JSON.stringify(updated)) };
-}
-
-// Add link to submission
-export async function addLinkToSubmission(
-  submissionId: string,
-  link: { title: string; url: string },
-) {
-  const clerkId = await requireStudent();
-  const student = await getStudentDbUser(clerkId!);
-
-  const submission = await Submission.findById(submissionId);
-  if (
-    !submission ||
-    !(await canAccessSubmission(submission, student._id.toString()))
-  ) {
-    return { success: false, error: "Submission not found" };
-  }
-
-  if (!(await canModifySubmission(submission))) {
-    return { success: false, error: "Cannot modify this submission" };
-  }
-
-  const updated = await Submission.findByIdAndUpdate(
-    submissionId,
-    {
-      $push: {
-        links: { ...link, addedAt: new Date() },
-      },
-    },
-    { new: true },
-  );
-
-  revalidatePath(`/student/alas/${submission.alaId}`);
-  return { success: true, submission: JSON.parse(JSON.stringify(updated)) };
-}
-
-// Remove link from submission
-export async function removeLinkFromSubmission(
-  submissionId: string,
-  linkUrl: string,
-) {
-  const clerkId = await requireStudent();
-  const student = await getStudentDbUser(clerkId!);
-
-  const submission = await Submission.findById(submissionId);
-  if (
-    !submission ||
-    !(await canAccessSubmission(submission, student._id.toString()))
-  ) {
-    return { success: false, error: "Submission not found" };
-  }
-
-  if (!(await canModifySubmission(submission))) {
-    return { success: false, error: "Cannot modify this submission" };
-  }
-
-  const updated = await Submission.findByIdAndUpdate(
-    submissionId,
-    { $pull: { links: { url: linkUrl } } },
-    { new: true },
-  );
-
-  revalidatePath(`/student/alas/${submission.alaId}`);
-  return { success: true, submission: JSON.parse(JSON.stringify(updated)) };
-}
-
-// Submit the submission (finalize)
-export async function submitSubmission(submissionId: string) {
-  const clerkId = await requireStudent();
-  const student = await getStudentDbUser(clerkId!);
-
-  const submission = await Submission.findById(submissionId);
-  if (
-    !submission ||
-    !(await canAccessSubmission(submission, student._id.toString()))
-  ) {
-    return { success: false, error: "Submission not found" };
-  }
-
-  // Allow submit for draft, rejected, or resubmitting (submitted but before deadline)
+  // Check if can modify
   if (submission.status === "graded") {
     return { success: false, error: "Cannot modify graded submission" };
   }
@@ -445,69 +315,35 @@ export async function submitSubmission(submissionId: string) {
     return { success: false, error: "Deadline has passed" };
   }
 
-  if (submission.files.length === 0 && submission.links.length === 0) {
+  if (data.files.length === 0 && data.links.length === 0) {
     return { success: false, error: "Please add at least one file or link" };
   }
 
+  // Delete old files from Cloudinary
+  if (data.filesToDelete && data.filesToDelete.length > 0) {
+    for (const fileUrl of data.filesToDelete) {
+      if (fileUrl.includes("cloudinary")) {
+        await deleteFromCloudinary(fileUrl);
+      }
+    }
+  }
+
+  // Update submission
   const updated = await Submission.findByIdAndUpdate(
     submissionId,
     {
+      files: data.files.map((f) => ({ ...f, uploadedAt: new Date() })),
+      links: data.links.map((l) => ({ ...l, addedAt: new Date() })),
       status: "submitted",
       submittedAt: new Date(),
     },
-    { new: true },
+    { new: true }
   );
 
   revalidatePath(`/student/alas/${submission.alaId}`);
   revalidatePath("/student/alas");
-  return { success: true, submission: JSON.parse(JSON.stringify(updated)) };
-}
+  revalidatePath("/student/submissions");
 
-// Resubmit - clear old files and start fresh
-export async function clearAndResubmit(submissionId: string) {
-  const clerkId = await requireStudent();
-  const student = await getStudentDbUser(clerkId!);
-
-  const submission = await Submission.findById(submissionId);
-  if (
-    !submission ||
-    !(await canAccessSubmission(submission, student._id.toString()))
-  ) {
-    return { success: false, error: "Submission not found" };
-  }
-
-  if (submission.status === "graded") {
-    return { success: false, error: "Cannot modify graded submission" };
-  }
-
-  const ala = await ALA.findById(submission.alaId);
-  if (!ala || ala.isLocked || new Date(ala.deadline) < new Date()) {
-    return {
-      success: false,
-      error: "Cannot modify - deadline passed or locked",
-    };
-  }
-
-  // Delete all files from Cloudinary
-  for (const file of submission.files) {
-    if (file.url.includes("cloudinary")) {
-      await deleteFromCloudinary(file.url);
-    }
-  }
-
-  // Clear submission and reset to draft
-  const updated = await Submission.findByIdAndUpdate(
-    submissionId,
-    {
-      files: [],
-      links: [],
-      status: "draft",
-      submittedAt: null,
-    },
-    { new: true },
-  );
-
-  revalidatePath(`/student/alas/${submission.alaId}`);
   return { success: true, submission: JSON.parse(JSON.stringify(updated)) };
 }
 

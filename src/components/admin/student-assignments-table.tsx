@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { MoreHorizontal, Pencil, UserMinus } from "lucide-react";
 import { removeStudentFromClass } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
@@ -75,12 +76,22 @@ export function StudentAssignmentsTable({
   classes,
 }: StudentAssignmentsTableProps) {
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [removeConfirm, setRemoveConfirm] = useState<{ open: boolean; id: string; name: string }>({
+    open: false,
+    id: "",
+    name: "",
+  });
   const router = useRouter();
 
-  const handleRemove = async (studentId: string, studentName: string) => {
-    if (!confirm(`Remove ${studentName} from their class?`)) return;
+  const handleRemoveClick = (studentId: string, studentName: string) => {
+    setRemoveConfirm({ open: true, id: studentId, name: studentName });
+  };
 
-    const result = await removeStudentFromClass(studentId);
+  const handleRemoveConfirm = async () => {
+    const { id } = removeConfirm;
+    setRemoveConfirm({ open: false, id: "", name: "" });
+
+    const result = await removeStudentFromClass(id);
     if (result.success) {
       toast.success("Student removed from class");
       router.refresh();
@@ -175,7 +186,7 @@ export function StudentAssignmentsTable({
                       <DropdownMenuItem
                         className="text-destructive"
                         onClick={() =>
-                          handleRemove(
+                          handleRemoveClick(
                             student._id,
                             `${student.firstName} ${student.lastName}`,
                           )
@@ -201,6 +212,16 @@ export function StudentAssignmentsTable({
           onOpenChange={(open) => !open && setEditingStudent(null)}
         />
       )}
+
+      <ConfirmDialog
+        open={removeConfirm.open}
+        onOpenChange={(open) => !open && setRemoveConfirm({ open: false, id: "", name: "" })}
+        title="Remove from Class"
+        description={`Remove ${removeConfirm.name} from their class?`}
+        confirmText="Remove"
+        variant="destructive"
+        onConfirm={handleRemoveConfirm}
+      />
     </>
   );
 }

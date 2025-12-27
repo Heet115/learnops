@@ -80,13 +80,6 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
         color: "text-red-600",
       };
     }
-    if (ala.submission?.status === "draft") {
-      return {
-        label: "Draft",
-        variant: "outline" as const,
-        color: "text-orange-600",
-      };
-    }
     return {
       label: "Pending",
       variant: "outline" as const,

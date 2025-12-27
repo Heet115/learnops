@@ -28,6 +28,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Plus,
   FileText,
@@ -74,6 +75,11 @@ export function ALAResourcesSection({
   const [resourceType, setResourceType] = useState("link");
   const [uploadedUrl, setUploadedUrl] = useState("");
   const [fileName, setFileName] = useState("");
+  const [removeConfirm, setRemoveConfirm] = useState<{ open: boolean; url: string; name: string }>({
+    open: false,
+    url: "",
+    name: "",
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -162,8 +168,13 @@ export function ALAResourcesSection({
     if (!isOpen) resetForm();
   };
 
-  const handleRemoveResource = async (url: string, name: string) => {
-    if (!confirm(`Remove "${name}"?`)) return;
+  const handleRemoveClick = (url: string, name: string) => {
+    setRemoveConfirm({ open: true, url, name });
+  };
+
+  const handleRemoveConfirm = async () => {
+    const { url } = removeConfirm;
+    setRemoveConfirm({ open: false, url: "", name: "" });
 
     const result = await removeResource(alaId, url);
     if (result.success) {
@@ -181,6 +192,7 @@ export function ALAResourcesSection({
   };
 
   return (
+    <>
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
@@ -343,9 +355,7 @@ export function ALAResourcesSection({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() =>
-                      handleRemoveResource(resource.url, resource.name)
-                    }
+                    onClick={() => handleRemoveClick(resource.url, resource.name)}
                   >
                     <Trash2 className="text-destructive h-4 w-4" />
                   </Button>
@@ -356,5 +366,16 @@ export function ALAResourcesSection({
         )}
       </CardContent>
     </Card>
+
+    <ConfirmDialog
+      open={removeConfirm.open}
+      onOpenChange={(open) => !open && setRemoveConfirm({ open: false, url: "", name: "" })}
+      title="Remove Resource"
+      description={`Remove "${removeConfirm.name}"? This action cannot be undone.`}
+      confirmText="Remove"
+      variant="destructive"
+      onConfirm={handleRemoveConfirm}
+    />
+    </>
   );
 }

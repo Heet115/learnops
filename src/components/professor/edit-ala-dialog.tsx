@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { updateALA } from "@/lib/actions/ala.actions";
 import { ALLOWED_FILE_TYPES } from "@/lib/validations/ala.validation";
 import { toast } from "sonner";
@@ -45,6 +46,9 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
   const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(
     ala.allowedFileTypes || ["pdf"],
   );
+  const [deadline, setDeadline] = useState<Date | undefined>(
+    new Date(ala.deadline)
+  );
   const router = useRouter();
 
   const handleFileTypeChange = (type: string, checked: boolean) => {
@@ -55,12 +59,6 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
     }
   };
 
-  // Format deadline for datetime-local input
-  const formatDeadlineForInput = (deadline: string) => {
-    const date = new Date(deadline);
-    return date.toISOString().slice(0, 16);
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -69,7 +67,7 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
     const data = {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
-      deadline: formData.get("deadline") as string,
+      deadline: deadline?.toISOString() || "",
       maxMarks: Number(formData.get("maxMarks")),
       isGroupSubmission,
       maxGroupSize: isGroupSubmission
@@ -125,16 +123,14 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="deadline">Deadline</Label>
-                <Input
-                  id="deadline"
-                  name="deadline"
-                  type="datetime-local"
-                  defaultValue={formatDeadlineForInput(ala.deadline)}
-                  required
-                />
-              </div>
+              <DateTimePicker
+                id="deadline"
+                label="Deadline"
+                value={deadline}
+                onChange={setDeadline}
+                required
+                placeholder="Select deadline"
+              />
               <div className="grid gap-2">
                 <Label htmlFor="maxMarks">Max Marks</Label>
                 <Input
@@ -225,7 +221,7 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
             </Button>
             <Button
               type="submit"
-              disabled={loading || selectedFileTypes.length === 0}
+              disabled={loading || selectedFileTypes.length === 0 || !deadline}
             >
               {loading ? "Saving..." : "Save Changes"}
             </Button>

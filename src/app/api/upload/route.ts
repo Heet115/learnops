@@ -51,6 +51,8 @@ export async function POST(request: NextRequest) {
               resource_type: "auto",
               use_filename: true,
               unique_filename: true,
+              access_mode: "public",
+              type: "upload",
             },
             (error, result) => {
               if (error) reject(error);

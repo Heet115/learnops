@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { deleteSubjectOffering } from "@/lib/actions/academic.actions";
 import { toast } from "sonner";
@@ -77,11 +78,19 @@ export function SubjectOfferingsTable({
 }: SubjectOfferingsTableProps) {
   const [editingOffering, setEditingOffering] =
     useState<SubjectOffering | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string }>({
+    open: false,
+    id: "",
+  });
   const router = useRouter();
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this subject offering?"))
-      return;
+  const handleDeleteClick = (id: string) => {
+    setDeleteConfirm({ open: true, id });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const { id } = deleteConfirm;
+    setDeleteConfirm({ open: false, id: "" });
 
     const result = await deleteSubjectOffering(id);
     if (result.success) {
@@ -170,7 +179,7 @@ export function SubjectOfferingsTable({
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-destructive"
-                      onClick={() => handleDelete(offering._id)}
+                      onClick={() => handleDeleteClick(offering._id)}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
@@ -191,6 +200,16 @@ export function SubjectOfferingsTable({
           onOpenChange={(open) => !open && setEditingOffering(null)}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        onOpenChange={(open) => !open && setDeleteConfirm({ open: false, id: "" })}
+        title="Delete Subject Offering"
+        description="Are you sure you want to delete this subject offering? This action cannot be undone."
+        confirmText="Delete"
+        variant="destructive"
+        onConfirm={handleDeleteConfirm}
+      />
     </>
   );
 }

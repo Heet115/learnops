@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Plus } from "lucide-react";
 import { createALA } from "@/lib/actions/ala.actions";
 import { ALLOWED_FILE_TYPES } from "@/lib/validations/ala.validation";
@@ -49,6 +50,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
     "student",
   );
   const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(["pdf"]);
+  const [deadline, setDeadline] = useState<Date | undefined>(undefined);
   const router = useRouter();
 
   const handleFileTypeChange = (type: string, checked: boolean) => {
@@ -68,7 +70,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
       subjectOfferingId: formData.get("subjectOfferingId") as string,
-      deadline: formData.get("deadline") as string,
+      deadline: deadline?.toISOString() || "",
       maxMarks: Number(formData.get("maxMarks")),
       isGroupSubmission,
       groupFormation: isGroupSubmission ? groupFormation : undefined,
@@ -87,6 +89,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
       setIsGroupSubmission(false);
       setGroupFormation("student");
       setSelectedFileTypes(["pdf"]);
+      setDeadline(undefined);
       router.refresh();
     } else {
       toast.error(result.error || "Failed to create ALA");
@@ -162,15 +165,14 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="deadline">Deadline</Label>
-                <Input
-                  id="deadline"
-                  name="deadline"
-                  type="datetime-local"
-                  required
-                />
-              </div>
+              <DateTimePicker
+                id="deadline"
+                label="Deadline"
+                value={deadline}
+                onChange={setDeadline}
+                required
+                placeholder="Select deadline"
+              />
               <div className="grid gap-2">
                 <Label htmlFor="maxMarks">Max Marks</Label>
                 <Input
@@ -296,7 +298,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
             </Button>
             <Button
               type="submit"
-              disabled={loading || selectedFileTypes.length === 0}
+              disabled={loading || selectedFileTypes.length === 0 || !deadline}
             >
               {loading ? "Creating..." : "Create ALA"}
             </Button>

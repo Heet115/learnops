@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   MoreHorizontal,
   Pencil,
@@ -66,10 +67,20 @@ interface ALAsTableProps {
 
 export function ALAsTable({ alas, offerings }: ALAsTableProps) {
   const [editingALA, setEditingALA] = useState<ALA | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; title: string }>({
+    open: false,
+    id: "",
+    title: "",
+  });
   const router = useRouter();
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Delete "${title}"? This action cannot be undone.`)) return;
+  const handleDeleteClick = (id: string, title: string) => {
+    setDeleteConfirm({ open: true, id, title });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const { id } = deleteConfirm;
+    setDeleteConfirm({ open: false, id: "", title: "" });
 
     const result = await deleteALA(id);
     if (result.success) {
@@ -198,7 +209,7 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="text-destructive"
-                        onClick={() => handleDelete(ala._id, ala.title)}
+                        onClick={() => handleDeleteClick(ala._id, ala.title)}
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete
@@ -219,6 +230,16 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
           onOpenChange={(open) => !open && setEditingALA(null)}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        onOpenChange={(open) => !open && setDeleteConfirm({ open: false, id: "", title: "" })}
+        title="Delete ALA"
+        description={`Delete "${deleteConfirm.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="destructive"
+        onConfirm={handleDeleteConfirm}
+      />
     </>
   );
 }

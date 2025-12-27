@@ -17,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { MoreHorizontal, Pencil, Trash2, Crown } from "lucide-react";
 import { deleteClassCoordinator } from "@/lib/actions/academic.actions";
 import { toast } from "sonner";
@@ -88,15 +89,20 @@ export function ClassCoordinatorsTable({
 }: ClassCoordinatorsTableProps) {
   const [editingCoordinator, setEditingCoordinator] =
     useState<ClassCoordinator | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; className: string }>({
+    open: false,
+    id: "",
+    className: "",
+  });
   const router = useRouter();
 
-  const handleDelete = async (id: string, className: string) => {
-    if (
-      !confirm(
-        `Are you sure you want to remove the coordinator for "${className}"?`,
-      )
-    )
-      return;
+  const handleDeleteClick = (id: string, className: string) => {
+    setDeleteConfirm({ open: true, id, className });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const { id } = deleteConfirm;
+    setDeleteConfirm({ open: false, id: "", className: "" });
 
     const result = await deleteClassCoordinator(id);
     if (result.success) {
@@ -181,7 +187,7 @@ export function ClassCoordinatorsTable({
                     <DropdownMenuItem
                       className="text-destructive"
                       onClick={() =>
-                        handleDelete(
+                        handleDeleteClick(
                           coordinator._id,
                           coordinator.classId?.name || "",
                         )
@@ -206,6 +212,16 @@ export function ClassCoordinatorsTable({
           onOpenChange={(open) => !open && setEditingCoordinator(null)}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        onOpenChange={(open) => !open && setDeleteConfirm({ open: false, id: "", className: "" })}
+        title="Remove Coordinator"
+        description={`Are you sure you want to remove the coordinator for "${deleteConfirm.className}"?`}
+        confirmText="Remove"
+        variant="destructive"
+        onConfirm={handleDeleteConfirm}
+      />
     </>
   );
 }

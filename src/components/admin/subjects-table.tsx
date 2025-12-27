@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { deleteSubject } from "@/lib/actions/academic.actions";
 import { toast } from "sonner";
@@ -67,10 +68,20 @@ interface SubjectsTableProps {
 
 export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({
+    open: false,
+    id: "",
+    name: "",
+  });
   const router = useRouter();
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+  const handleDeleteClick = (id: string, name: string) => {
+    setDeleteConfirm({ open: true, id, name });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const { id } = deleteConfirm;
+    setDeleteConfirm({ open: false, id: "", name: "" });
 
     const result = await deleteSubject(id);
     if (result.success) {
@@ -139,7 +150,7 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-destructive"
-                      onClick={() => handleDelete(subject._id, subject.name)}
+                      onClick={() => handleDeleteClick(subject._id, subject.name)}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
@@ -160,6 +171,16 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
           onOpenChange={(open) => !open && setEditingSubject(null)}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        onOpenChange={(open) => !open && setDeleteConfirm({ open: false, id: "", name: "" })}
+        title="Delete Subject"
+        description={`Are you sure you want to delete "${deleteConfirm.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="destructive"
+        onConfirm={handleDeleteConfirm}
+      />
     </>
   );
 }
