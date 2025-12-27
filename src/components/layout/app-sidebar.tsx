@@ -58,12 +58,6 @@ const getNavItems = (role: UserRole) => {
         title: "Users",
         url: "/admin/users",
         icon: Users,
-        items: [
-          { title: "All Users", url: "/admin/users" },
-          { title: "Professors", url: "/admin/users?role=professor" },
-          { title: "Students", url: "/admin/users?role=student" },
-          { title: "HODs", url: "/admin/users?role=hod" },
-        ],
       },
       {
         title: "Departments",
@@ -160,19 +154,11 @@ const getNavItems = (role: UserRole) => {
         title: "ALAs",
         url: "/professor/alas",
         icon: FileText,
-        items: [
-          { title: "All ALAs", url: "/professor/alas" },
-          { title: "Create ALA", url: "/professor/alas/create" },
-        ],
       },
       {
         title: "Submissions",
         url: "/professor/submissions",
         icon: ClipboardList,
-        items: [
-          { title: "Pending", url: "/professor/submissions?status=pending" },
-          { title: "Graded", url: "/professor/submissions?status=graded" },
-        ],
       },
       {
         title: "Students",
