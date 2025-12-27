@@ -194,21 +194,6 @@ export default async function ALADetailPage({ params }: PageProps) {
                 </div>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Submissions</CardTitle>
-                <CardDescription>
-                  Student submissions for this ALA
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground text-sm">
-                  No submissions yet
-                </p>
-                {/* TODO: Add submission stats and link to submissions page */}
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
