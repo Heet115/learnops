@@ -106,6 +106,9 @@ export async function createALA(input: CreateALAInput) {
       professorId,
       deadline: new Date(validated.deadline),
       maxFileSize: validated.maxFileSize * 1024 * 1024, // Convert MB to bytes
+      groupFormation: validated.isGroupSubmission
+        ? validated.groupFormation
+        : undefined,
       maxGroupSize: validated.isGroupSubmission
         ? validated.maxGroupSize
         : undefined,

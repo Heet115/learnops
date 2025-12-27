@@ -9,6 +9,7 @@ export { SubjectOffering } from "./models/subject-offering.model";
 export { ClassCoordinator } from "./models/class-coordinator.model";
 export { ALA } from "./models/ala.model";
 export { Submission } from "./models/submission.model";
+export { Group } from "./models/group.model";
 export type { IUser, UserRole } from "./models/user.model";
 export type { IDepartment } from "./models/department.model";
 export type { ICourse } from "./models/course.model";
@@ -23,3 +24,4 @@ export type {
   ISubmissionFile,
   ISubmissionLink,
 } from "./models/submission.model";
+export type { IGroup, IGroupMember } from "./models/group.model";

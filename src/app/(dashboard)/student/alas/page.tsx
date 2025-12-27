@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
 import { getStudentALAs } from "@/lib/actions/submission.actions";
+import { getStudentPendingInvites } from "@/lib/actions/group.actions";
 import { StudentALAsList } from "@/components/student/student-alas-list";
+import { GroupInvitations } from "@/components/student/group-invitations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Clock, CheckCircle, AlertCircle } from "lucide-react";
 
@@ -15,9 +17,10 @@ export default async function StudentALAsPage() {
     redirect("/unauthorized");
   }
 
-  const [dbUser, alas] = await Promise.all([
+  const [dbUser, alas, pendingInvites] = await Promise.all([
     getCurrentUserFromDB(),
     getStudentALAs(),
+    getStudentPendingInvites(),
   ]);
 
   const user = {
@@ -107,6 +110,8 @@ export default async function StudentALAsPage() {
             </CardContent>
           </Card>
         </div>
+
+        <GroupInvitations invitations={pendingInvites} />
 
         <StudentALAsList alas={alas} />
       </div>

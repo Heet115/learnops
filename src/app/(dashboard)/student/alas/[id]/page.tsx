@@ -22,8 +22,10 @@ import {
   Lock,
   CheckCircle,
   XCircle,
+  Users,
 } from "lucide-react";
 import { SubmissionForm } from "@/components/student/submission-form";
+import { GroupSection } from "@/components/student/group-section";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -155,6 +157,17 @@ export default async function StudentALAPage({ params }: PageProps) {
                   </div>
                 </CardContent>
               </Card>
+            )}
+
+            {/* Group Section for Group Submissions */}
+            {ala.isGroupSubmission && (
+              <GroupSection
+                alaId={ala._id}
+                studentId={studentId}
+                groupFormation={ala.groupFormation || "student"}
+                maxGroupSize={ala.maxGroupSize || 4}
+                canModify={canModify}
+              />
             )}
 
             {/* Submission Form or Result */}
@@ -326,6 +339,20 @@ export default async function StudentALAPage({ params }: PageProps) {
                     <p className="text-sm font-medium">Professor</p>
                     <p className="text-muted-foreground text-sm">
                       {ala.professorId?.firstName} {ala.professorId?.lastName}
+                    </p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="flex items-center gap-3">
+                  <Users className="text-muted-foreground h-4 w-4" />
+                  <div>
+                    <p className="text-sm font-medium">Submission Type</p>
+                    <p className="text-muted-foreground text-sm">
+                      {ala.isGroupSubmission
+                        ? `Group (max ${ala.maxGroupSize || 4} members)`
+                        : "Individual"}
                     </p>
                   </div>
                 </div>

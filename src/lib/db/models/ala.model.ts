@@ -15,6 +15,7 @@ export interface IALA extends Document {
   deadline: Date;
   maxMarks: number;
   isGroupSubmission: boolean;
+  groupFormation?: "student" | "professor";
   maxGroupSize?: number;
   allowedFileTypes: string[];
   maxFileSize: number;
@@ -52,6 +53,10 @@ const ALASchema = new Schema<IALA>(
     deadline: { type: Date, required: true },
     maxMarks: { type: Number, required: true, min: 1 },
     isGroupSubmission: { type: Boolean, default: false },
+    groupFormation: {
+      type: String,
+      enum: ["student", "professor"],
+    },
     maxGroupSize: { type: Number, min: 2 },
     allowedFileTypes: {
       type: [String],

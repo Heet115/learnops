@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Plus } from "lucide-react";
 import { createALA } from "@/lib/actions/ala.actions";
 import { ALLOWED_FILE_TYPES } from "@/lib/validations/ala.validation";
@@ -44,6 +45,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isGroupSubmission, setIsGroupSubmission] = useState(false);
+  const [groupFormation, setGroupFormation] = useState<"student" | "professor">("student");
   const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(["pdf"]);
   const router = useRouter();
 
@@ -67,6 +69,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
       deadline: formData.get("deadline") as string,
       maxMarks: Number(formData.get("maxMarks")),
       isGroupSubmission,
+      groupFormation: isGroupSubmission ? groupFormation : undefined,
       maxGroupSize: isGroupSubmission
         ? Number(formData.get("maxGroupSize"))
         : undefined,
@@ -80,6 +83,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
       toast.success("ALA created successfully");
       setOpen(false);
       setIsGroupSubmission(false);
+      setGroupFormation("student");
       setSelectedFileTypes(["pdf"]);
       router.refresh();
     } else {
@@ -229,17 +233,46 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
             </div>
 
             {isGroupSubmission && (
-              <div className="grid gap-2">
-                <Label htmlFor="maxGroupSize">Max Group Size</Label>
-                <Input
-                  id="maxGroupSize"
-                  name="maxGroupSize"
-                  type="number"
-                  min={2}
-                  max={10}
-                  defaultValue={4}
-                  required
-                />
+              <div className="space-y-4 rounded-lg border p-4">
+                <div className="grid gap-2">
+                  <Label>Group Formation</Label>
+                  <RadioGroup
+                    value={groupFormation}
+                    onValueChange={(v) => setGroupFormation(v as "student" | "professor")}
+                    className="flex gap-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="student" id="student-formed" />
+                      <Label htmlFor="student-formed" className="font-normal cursor-pointer">
+                        Students create groups
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="professor" id="professor-formed" />
+                      <Label htmlFor="professor-formed" className="font-normal cursor-pointer">
+                        I will assign groups
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                  <p className="text-xs text-muted-foreground">
+                    {groupFormation === "student"
+                      ? "Students will create their own groups and invite classmates"
+                      : "You will create groups and assign students after creating the ALA"}
+                  </p>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="maxGroupSize">Max Group Size</Label>
+                  <Input
+                    id="maxGroupSize"
+                    name="maxGroupSize"
+                    type="number"
+                    min={2}
+                    max={10}
+                    defaultValue={4}
+                    required
+                  />
+                </div>
               </div>
             )}
           </div>

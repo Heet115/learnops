@@ -9,6 +9,7 @@ export const createALASchema = z.object({
   deadline: z.string().min(1, "Deadline is required"),
   maxMarks: z.coerce.number().min(1, "Max marks must be at least 1").max(100),
   isGroupSubmission: z.coerce.boolean().default(false),
+  groupFormation: z.enum(["student", "professor"]).optional(),
   maxGroupSize: z.coerce.number().min(2).max(10).optional(),
   allowedFileTypes: z
     .array(z.string())
@@ -23,6 +24,7 @@ export const updateALASchema = z.object({
   deadline: z.string().optional(),
   maxMarks: z.coerce.number().min(1).max(100).optional(),
   isGroupSubmission: z.coerce.boolean().optional(),
+  groupFormation: z.enum(["student", "professor"]).optional().nullable(),
   maxGroupSize: z.coerce.number().min(2).max(10).optional().nullable(),
   allowedFileTypes: z.array(z.string()).min(1).optional(),
   maxFileSize: z.coerce.number().min(1).max(30).optional(),

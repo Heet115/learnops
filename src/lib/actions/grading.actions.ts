@@ -41,7 +41,7 @@ export async function getProfessorSubmissions(status?: string) {
   const submissions = await Submission.find(query)
     .populate({
       path: "alaId",
-      select: "title deadline maxMarks subjectOfferingId",
+      select: "title deadline maxMarks subjectOfferingId isGroupSubmission",
       populate: {
         path: "subjectOfferingId",
         select: "subjectId classId",
@@ -52,6 +52,7 @@ export async function getProfessorSubmissions(status?: string) {
       },
     })
     .populate("studentId", "firstName lastName email")
+    .populate("groupMembers", "firstName lastName")
     .sort({ submittedAt: -1 })
     .lean();
 
@@ -74,6 +75,7 @@ export async function getALASubmissions(alaId: string) {
     status: { $ne: "draft" } 
   })
     .populate("studentId", "firstName lastName email")
+    .populate("groupMembers", "firstName lastName")
     .sort({ submittedAt: -1 })
     .lean();
 
@@ -92,7 +94,7 @@ export async function getSubmissionForGrading(submissionId: string) {
   const submission = await Submission.findById(submissionId)
     .populate({
       path: "alaId",
-      select: "title description deadline maxMarks allowedFileTypes professorId subjectOfferingId",
+      select: "title description deadline maxMarks allowedFileTypes professorId subjectOfferingId isGroupSubmission",
       populate: {
         path: "subjectOfferingId",
         select: "subjectId classId",
@@ -103,6 +105,7 @@ export async function getSubmissionForGrading(submissionId: string) {
       },
     })
     .populate("studentId", "firstName lastName email")
+    .populate("groupMembers", "firstName lastName email")
     .populate("gradedBy", "firstName lastName")
     .lean();
 

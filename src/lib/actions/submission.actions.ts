@@ -1,7 +1,8 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { connectDB, User, ALA, Submission, SubjectOffering } from "@/lib/db";
+import mongoose from "mongoose";
+import { connectDB, User, ALA, Submission, SubjectOffering, Group } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -111,11 +112,34 @@ export async function getALAForSubmission(alaId: string) {
     return null;
   }
 
-  // Get or create submission
-  const submission = await Submission.findOne({
-    alaId,
-    studentId: student._id,
-  }).lean();
+  let submission = null;
+
+  // For group submissions, check if student is in a group and get group's submission
+  if (ala.isGroupSubmission) {
+    const group = await Group.findOne({
+      alaId,
+      "members.studentId": student._id,
+      "members.status": "accepted",
+    });
+
+    if (group) {
+      // Look for any submission from group members
+      const groupMemberIds = group.members
+        .filter((m: { status: string }) => m.status === "accepted")
+        .map((m: { studentId: { toString: () => string } }) => m.studentId.toString());
+
+      submission = await Submission.findOne({
+        alaId,
+        studentId: { $in: groupMemberIds },
+      }).lean();
+    }
+  } else {
+    // Individual submission
+    submission = await Submission.findOne({
+      alaId,
+      studentId: student._id,
+    }).lean();
+  }
 
   return JSON.parse(
     JSON.stringify({ ala, submission, studentId: student._id.toString() }),
@@ -137,6 +161,52 @@ export async function getOrCreateSubmission(alaId: string) {
     return { success: false, error: "This ALA is locked for submissions" };
   }
 
+  // For group submissions, verify student is in a group
+  if (ala.isGroupSubmission) {
+    const group = await Group.findOne({
+      alaId,
+      "members.studentId": student._id,
+      "members.status": "accepted",
+    });
+
+    if (!group) {
+      return { success: false, error: "You must be in a group to submit" };
+    }
+
+    // Check if any group member already has a submission
+    const acceptedMembers = group.members.filter(
+      (m: { status: string }) => m.status === "accepted"
+    );
+    const groupMemberIds = acceptedMembers.map(
+      (m: { studentId: mongoose.Types.ObjectId }) => m.studentId
+    );
+
+    let submission = await Submission.findOne({
+      alaId,
+      studentId: { $in: groupMemberIds },
+    });
+
+    if (!submission) {
+      // Create submission with group members (exclude the submitter)
+      const otherMembers = groupMemberIds.filter(
+        (id) => id.toString() !== student._id.toString()
+      );
+      
+      submission = await Submission.create({
+        alaId,
+        studentId: student._id,
+        groupMembers: otherMembers,
+        status: "draft",
+      });
+
+      // Lock the group
+      await Group.findByIdAndUpdate(group._id, { isLocked: true });
+    }
+
+    return { success: true, submission: JSON.parse(JSON.stringify(submission)) };
+  }
+
+  // Individual submission
   let submission = await Submission.findOne({
     alaId,
     studentId: student._id,
@@ -167,6 +237,13 @@ async function canModifySubmission(submission: {
   return true;
 }
 
+// Check if student can access submission (owner or group member)
+async function canAccessSubmission(submission: { studentId: { toString: () => string }; groupMembers?: { toString: () => string }[] }, studentId: string) {
+  if (submission.studentId.toString() === studentId) return true;
+  if (submission.groupMembers?.some((m) => m.toString() === studentId)) return true;
+  return false;
+}
+
 // Add file to submission
 export async function addFileToSubmission(
   submissionId: string,
@@ -176,10 +253,7 @@ export async function addFileToSubmission(
   const student = await getStudentDbUser(clerkId!);
 
   const submission = await Submission.findById(submissionId);
-  if (
-    !submission ||
-    submission.studentId.toString() !== student._id.toString()
-  ) {
+  if (!submission || !(await canAccessSubmission(submission, student._id.toString()))) {
     return { success: false, error: "Submission not found" };
   }
 
@@ -211,10 +285,7 @@ export async function removeFileFromSubmission(
   const student = await getStudentDbUser(clerkId!);
 
   const submission = await Submission.findById(submissionId);
-  if (
-    !submission ||
-    submission.studentId.toString() !== student._id.toString()
-  ) {
+  if (!submission || !(await canAccessSubmission(submission, student._id.toString()))) {
     return { success: false, error: "Submission not found" };
   }
 
@@ -224,7 +295,7 @@ export async function removeFileFromSubmission(
 
   // Delete from Cloudinary
   if (fileUrl.includes("cloudinary")) {
-    const deleted = await deleteFromCloudinary(fileUrl);
+    await deleteFromCloudinary(fileUrl);
   }
 
   const updated = await Submission.findByIdAndUpdate(
@@ -246,10 +317,7 @@ export async function addLinkToSubmission(
   const student = await getStudentDbUser(clerkId!);
 
   const submission = await Submission.findById(submissionId);
-  if (
-    !submission ||
-    submission.studentId.toString() !== student._id.toString()
-  ) {
+  if (!submission || !(await canAccessSubmission(submission, student._id.toString()))) {
     return { success: false, error: "Submission not found" };
   }
 
@@ -280,10 +348,7 @@ export async function removeLinkFromSubmission(
   const student = await getStudentDbUser(clerkId!);
 
   const submission = await Submission.findById(submissionId);
-  if (
-    !submission ||
-    submission.studentId.toString() !== student._id.toString()
-  ) {
+  if (!submission || !(await canAccessSubmission(submission, student._id.toString()))) {
     return { success: false, error: "Submission not found" };
   }
 
@@ -307,10 +372,7 @@ export async function submitSubmission(submissionId: string) {
   const student = await getStudentDbUser(clerkId!);
 
   const submission = await Submission.findById(submissionId);
-  if (
-    !submission ||
-    submission.studentId.toString() !== student._id.toString()
-  ) {
+  if (!submission || !(await canAccessSubmission(submission, student._id.toString()))) {
     return { success: false, error: "Submission not found" };
   }
 
@@ -356,10 +418,7 @@ export async function clearAndResubmit(submissionId: string) {
   const student = await getStudentDbUser(clerkId!);
 
   const submission = await Submission.findById(submissionId);
-  if (
-    !submission ||
-    submission.studentId.toString() !== student._id.toString()
-  ) {
+  if (!submission || !(await canAccessSubmission(submission, student._id.toString()))) {
     return { success: false, error: "Submission not found" };
   }
 
@@ -378,7 +437,7 @@ export async function clearAndResubmit(submissionId: string) {
   // Delete all files from Cloudinary
   for (const file of submission.files) {
     if (file.url.includes("cloudinary")) {
-      const deleted = await deleteFromCloudinary(file.url);
+      await deleteFromCloudinary(file.url);
     }
   }
 

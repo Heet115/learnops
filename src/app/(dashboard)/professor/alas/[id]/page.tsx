@@ -25,6 +25,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { ALAResourcesSection } from "@/components/professor/ala-resources-section";
+import { GroupManagement } from "@/components/professor/group-management";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -112,6 +113,13 @@ export default async function ALADetailPage({ params }: PageProps) {
               alaId={ala._id}
               resources={ala.resources || []}
             />
+
+            {ala.isGroupSubmission && ala.groupFormation === "professor" && (
+              <GroupManagement
+                alaId={ala._id}
+                maxGroupSize={ala.maxGroupSize || 4}
+              />
+            )}
           </div>
 
           <div className="space-y-6">
@@ -160,6 +168,13 @@ export default async function ALADetailPage({ params }: PageProps) {
                         ? `Group (max ${ala.maxGroupSize} members)`
                         : "Individual"}
                     </p>
+                    {ala.isGroupSubmission && (
+                      <p className="text-xs text-muted-foreground">
+                        {ala.groupFormation === "professor"
+                          ? "You assign groups"
+                          : "Students create groups"}
+                      </p>
+                    )}
                   </div>
                 </div>
 
