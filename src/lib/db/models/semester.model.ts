@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ISemester extends Document {
   name: string;
@@ -26,7 +26,7 @@ const SemesterSchema = new Schema<ISemester>(
     },
     courseId: {
       type: Schema.Types.ObjectId,
-      ref: 'Course',
+      ref: "Course",
       required: true,
     },
     startDate: {
@@ -42,10 +42,11 @@ const SemesterSchema = new Schema<ISemester>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 SemesterSchema.index({ courseId: 1, number: 1 });
 
 export const Semester: Model<ISemester> =
-  mongoose.models.Semester || mongoose.model<ISemester>('Semester', SemesterSchema);
+  mongoose.models.Semester ||
+  mongoose.model<ISemester>("Semester", SemesterSchema);

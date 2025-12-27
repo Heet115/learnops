@@ -15,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "LearnOps - ALA Management System",
-  description: "Active Learning Activities Management System for academic institutions",
+  description:
+    "Active Learning Activities Management System for academic institutions",
 };
 
 export default function RootLayout({

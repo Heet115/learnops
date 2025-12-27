@@ -1,24 +1,29 @@
-'use server';
+"use server";
 
-import { auth, clerkClient } from '@clerk/nextjs/server';
-import { connectDB, User } from '@/lib/db';
-import { createUserSchema, updateUserSchema, CreateUserInput, UpdateUserInput } from '@/lib/validations/user.validation';
-import { revalidatePath } from 'next/cache';
+import { auth, clerkClient } from "@clerk/nextjs/server";
+import { connectDB, User } from "@/lib/db";
+import {
+  createUserSchema,
+  updateUserSchema,
+  CreateUserInput,
+  UpdateUserInput,
+} from "@/lib/validations/user.validation";
+import { revalidatePath } from "next/cache";
 
 // Check if current user is admin
 async function requireAdmin() {
   const { sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
-  
-  if (role !== 'admin') {
-    throw new Error('Unauthorized: Admin access required');
+
+  if (role !== "admin") {
+    throw new Error("Unauthorized: Admin access required");
   }
 }
 
 // Create a new user via Clerk + MongoDB
 export async function createUser(input: CreateUserInput) {
   await requireAdmin();
-  
+
   const validated = createUserSchema.parse(input);
   const clerk = await clerkClient();
 
@@ -36,7 +41,7 @@ export async function createUser(input: CreateUserInput) {
 
     // Connect to DB and create user
     await connectDB();
-    
+
     const user = await User.create({
       clerkId: clerkUser.id,
       email: validated.email,
@@ -49,15 +54,15 @@ export async function createUser(input: CreateUserInput) {
       isActive: true,
     });
 
-    revalidatePath('/admin/users');
-    
+    revalidatePath("/admin/users");
+
     return { success: true, user: JSON.parse(JSON.stringify(user)) };
   } catch (error: unknown) {
-    console.error('Error creating user:', error);
+    console.error("Error creating user:", error);
     const clerkError = error as { errors?: { message: string }[] };
-    return { 
-      success: false, 
-      error: clerkError.errors?.[0]?.message || 'Failed to create user' 
+    return {
+      success: false,
+      error: clerkError.errors?.[0]?.message || "Failed to create user",
     };
   }
 }
@@ -66,7 +71,7 @@ export async function createUser(input: CreateUserInput) {
 export async function getAllUsers() {
   await requireAdmin();
   await connectDB();
-  
+
   const users = await User.find().sort({ createdAt: -1 }).lean();
   return JSON.parse(JSON.stringify(users));
 }
@@ -75,22 +80,24 @@ export async function getAllUsers() {
 export async function getUsersByRole(role: string) {
   await requireAdmin();
   await connectDB();
-  
-  const users = await User.find({ role, isActive: true }).sort({ createdAt: -1 }).lean();
+
+  const users = await User.find({ role, isActive: true })
+    .sort({ createdAt: -1 })
+    .lean();
   return JSON.parse(JSON.stringify(users));
 }
 
 // Update user
 export async function updateUser(userId: string, input: UpdateUserInput) {
   await requireAdmin();
-  
+
   const validated = updateUserSchema.parse(input);
   await connectDB();
 
   try {
     const user = await User.findById(userId);
     if (!user) {
-      return { success: false, error: 'User not found' };
+      return { success: false, error: "User not found" };
     }
 
     // Update Clerk if role changed
@@ -105,15 +112,15 @@ export async function updateUser(userId: string, input: UpdateUserInput) {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { ...validated },
-      { new: true }
+      { new: true },
     );
 
-    revalidatePath('/admin/users');
-    
+    revalidatePath("/admin/users");
+
     return { success: true, user: JSON.parse(JSON.stringify(updatedUser)) };
   } catch (error) {
-    console.error('Error updating user:', error);
-    return { success: false, error: 'Failed to update user' };
+    console.error("Error updating user:", error);
+    return { success: false, error: "Failed to update user" };
   }
 }
 
@@ -125,7 +132,7 @@ export async function deactivateUser(userId: string) {
   try {
     const user = await User.findById(userId);
     if (!user) {
-      return { success: false, error: 'User not found' };
+      return { success: false, error: "User not found" };
     }
 
     // Ban user in Clerk
@@ -135,12 +142,12 @@ export async function deactivateUser(userId: string) {
     // Deactivate in MongoDB
     await User.findByIdAndUpdate(userId, { isActive: false });
 
-    revalidatePath('/admin/users');
-    
+    revalidatePath("/admin/users");
+
     return { success: true };
   } catch (error) {
-    console.error('Error deactivating user:', error);
-    return { success: false, error: 'Failed to deactivate user' };
+    console.error("Error deactivating user:", error);
+    return { success: false, error: "Failed to deactivate user" };
   }
 }
 
@@ -152,7 +159,7 @@ export async function reactivateUser(userId: string) {
   try {
     const user = await User.findById(userId);
     if (!user) {
-      return { success: false, error: 'User not found' };
+      return { success: false, error: "User not found" };
     }
 
     // Unban user in Clerk
@@ -162,12 +169,12 @@ export async function reactivateUser(userId: string) {
     // Reactivate in MongoDB
     await User.findByIdAndUpdate(userId, { isActive: true });
 
-    revalidatePath('/admin/users');
-    
+    revalidatePath("/admin/users");
+
     return { success: true };
   } catch (error) {
-    console.error('Error reactivating user:', error);
-    return { success: false, error: 'Failed to reactivate user' };
+    console.error("Error reactivating user:", error);
+    return { success: false, error: "Failed to reactivate user" };
   }
 }
 
@@ -179,7 +186,7 @@ export async function deleteUser(userId: string) {
   try {
     const user = await User.findById(userId);
     if (!user) {
-      return { success: false, error: 'User not found' };
+      return { success: false, error: "User not found" };
     }
 
     // Delete from Clerk
@@ -189,12 +196,12 @@ export async function deleteUser(userId: string) {
     // Delete from MongoDB
     await User.findByIdAndDelete(userId);
 
-    revalidatePath('/admin/users');
-    
+    revalidatePath("/admin/users");
+
     return { success: true };
   } catch (error) {
-    console.error('Error deleting user:', error);
-    return { success: false, error: 'Failed to delete user' };
+    console.error("Error deleting user:", error);
+    return { success: false, error: "Failed to delete user" };
   }
 }
 
@@ -203,14 +210,15 @@ export async function getUserStats() {
   await requireAdmin();
   await connectDB();
 
-  const [total, admins, hods, professors, students, inactive] = await Promise.all([
-    User.countDocuments({ isActive: true }),
-    User.countDocuments({ role: 'admin', isActive: true }),
-    User.countDocuments({ role: 'hod', isActive: true }),
-    User.countDocuments({ role: 'professor', isActive: true }),
-    User.countDocuments({ role: 'student', isActive: true }),
-    User.countDocuments({ isActive: false }),
-  ]);
+  const [total, admins, hods, professors, students, inactive] =
+    await Promise.all([
+      User.countDocuments({ isActive: true }),
+      User.countDocuments({ role: "admin", isActive: true }),
+      User.countDocuments({ role: "hod", isActive: true }),
+      User.countDocuments({ role: "professor", isActive: true }),
+      User.countDocuments({ role: "student", isActive: true }),
+      User.countDocuments({ isActive: false }),
+    ]);
 
   return { total, admins, hods, professors, students, inactive };
 }

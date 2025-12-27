@@ -1,5 +1,9 @@
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Separator } from '@/components/ui/separator';
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,8 +11,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-import { AppSidebar, UserRole } from './app-sidebar';
+} from "@/components/ui/breadcrumb";
+import { AppSidebar, UserRole } from "./app-sidebar";
 
 interface BreadcrumbItemType {
   label: string;
@@ -26,7 +30,12 @@ interface DashboardLayoutProps {
   breadcrumbs?: BreadcrumbItemType[];
 }
 
-export function DashboardLayout({ children, role, user, breadcrumbs = [] }: DashboardLayoutProps) {
+export function DashboardLayout({
+  children,
+  role,
+  user,
+  breadcrumbs = [],
+}: DashboardLayoutProps) {
   return (
     <SidebarProvider>
       <AppSidebar role={role} user={user} />
@@ -34,14 +43,24 @@ export function DashboardLayout({ children, role, user, breadcrumbs = [] }: Dash
         <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4"
+            />
             <Breadcrumb>
               <BreadcrumbList>
                 {breadcrumbs.map((item, index) => (
-                  <BreadcrumbItem key={index} className={index === 0 ? 'hidden md:block' : ''}>
-                    {index > 0 && <BreadcrumbSeparator className="hidden md:block" />}
+                  <BreadcrumbItem
+                    key={index}
+                    className={index === 0 ? "hidden md:block" : ""}
+                  >
+                    {index > 0 && (
+                      <BreadcrumbSeparator className="hidden md:block" />
+                    )}
                     {item.href ? (
-                      <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
+                      <BreadcrumbLink href={item.href}>
+                        {item.label}
+                      </BreadcrumbLink>
                     ) : (
                       <BreadcrumbPage>{item.label}</BreadcrumbPage>
                     )}
@@ -51,9 +70,7 @@ export function DashboardLayout({ children, role, user, breadcrumbs = [] }: Dash
             </Breadcrumb>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          {children}
-        </div>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

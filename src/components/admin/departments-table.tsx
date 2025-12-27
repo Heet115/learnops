@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -9,15 +9,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,11 +27,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { deleteDepartment } from '@/lib/actions/academic.actions';
-import { MoreHorizontal, Trash2, Pencil } from 'lucide-react';
-import { IDepartment, IUser } from '@/lib/db';
-import { EditDepartmentDialog } from './edit-department-dialog';
+} from "@/components/ui/alert-dialog";
+import { deleteDepartment } from "@/lib/actions/academic.actions";
+import { MoreHorizontal, Trash2, Pencil } from "lucide-react";
+import { IDepartment, IUser } from "@/lib/db";
+import { EditDepartmentDialog } from "./edit-department-dialog";
 
 interface DepartmentsTableProps {
   departments: (IDepartment & { hodId?: IUser })[];
@@ -41,30 +41,32 @@ interface DepartmentsTableProps {
 export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(null);
+  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleDelete = async () => {
     if (!deleteId) return;
     setIsLoading(true);
-    setError('');
+    setError("");
 
     const result = await deleteDepartment(deleteId);
-    
+
     if (result.success) {
       setDeleteId(null);
       router.refresh();
     } else {
-      setError(result.error || 'Failed to delete');
+      setError(result.error || "Failed to delete");
     }
-    
+
     setIsLoading(false);
   };
 
   if (departments.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <div className="text-muted-foreground py-8 text-center">
         No departments found. Create your first department to get started.
       </div>
     );
@@ -85,18 +87,26 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
         </TableHeader>
         <TableBody>
           {departments.map((dept) => {
-            const id = (dept._id as unknown as { toString(): string }).toString();
+            const id = (
+              dept._id as unknown as { toString(): string }
+            ).toString();
             const hod = dept.hodId as unknown as IUser | undefined;
             return (
               <TableRow key={id}>
-                <TableCell className="font-mono font-medium">{dept.code}</TableCell>
+                <TableCell className="font-mono font-medium">
+                  {dept.code}
+                </TableCell>
                 <TableCell>{dept.name}</TableCell>
                 <TableCell>
-                  {hod ? `${hod.firstName} ${hod.lastName}` : <span className="text-muted-foreground">Not assigned</span>}
+                  {hod ? (
+                    `${hod.firstName} ${hod.lastName}`
+                  ) : (
+                    <span className="text-muted-foreground">Not assigned</span>
+                  )}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={dept.isActive ? 'default' : 'secondary'}>
-                    {dept.isActive ? 'Active' : 'Inactive'}
+                  <Badge variant={dept.isActive ? "default" : "secondary"}>
+                    {dept.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
@@ -135,7 +145,8 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Department</AlertDialogTitle>
             <AlertDialogDescription>
-              {error || 'Are you sure? This action cannot be undone. Departments with courses cannot be deleted.'}
+              {error ||
+                "Are you sure? This action cannot be undone. Departments with courses cannot be deleted."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -145,7 +156,7 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
               disabled={isLoading}
               className="bg-destructive hover:bg-destructive/90"
             >
-              {isLoading ? 'Deleting...' : 'Delete'}
+              {isLoading ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

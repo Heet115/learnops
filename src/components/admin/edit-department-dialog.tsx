@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -12,18 +12,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { updateDepartment } from '@/lib/actions/academic.actions';
-import { Loader2 } from 'lucide-react';
-import { IDepartment, IUser } from '@/lib/db';
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { updateDepartment } from "@/lib/actions/academic.actions";
+import { Loader2 } from "lucide-react";
+import { IDepartment, IUser } from "@/lib/db";
 
 interface EditDepartmentDialogProps {
   department: IDepartment;
@@ -32,23 +32,30 @@ interface EditDepartmentDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function EditDepartmentDialog({ department, hods, open, onOpenChange }: EditDepartmentDialogProps) {
+export function EditDepartmentDialog({
+  department,
+  hods,
+  open,
+  onOpenChange,
+}: EditDepartmentDialogProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const hodId = department.hodId as unknown as { toString(): string } | undefined;
+  const hodId = department.hodId as unknown as
+    | { toString(): string }
+    | undefined;
 
   const [formData, setFormData] = useState({
     name: department.name,
     code: department.code,
-    hodId: hodId?.toString() || '',
+    hodId: hodId?.toString() || "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     const id = (department._id as unknown as { toString(): string }).toString();
     const result = await updateDepartment(id, {
@@ -61,7 +68,7 @@ export function EditDepartmentDialog({ department, hods, open, onOpenChange }: E
       onOpenChange(false);
       router.refresh();
     } else {
-      setError(result.error || 'Failed to update department');
+      setError(result.error || "Failed to update department");
     }
 
     setIsLoading(false);
@@ -86,7 +93,9 @@ export function EditDepartmentDialog({ department, hods, open, onOpenChange }: E
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 required
                 disabled={isLoading}
               />
@@ -96,7 +105,12 @@ export function EditDepartmentDialog({ department, hods, open, onOpenChange }: E
               <Input
                 id="code"
                 value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    code: e.target.value.toUpperCase(),
+                  })
+                }
                 required
                 disabled={isLoading}
                 maxLength={10}
@@ -106,7 +120,9 @@ export function EditDepartmentDialog({ department, hods, open, onOpenChange }: E
               <Label htmlFor="hod">Head of Department</Label>
               <Select
                 value={formData.hodId}
-                onValueChange={(value) => setFormData({ ...formData, hodId: value })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, hodId: value })
+                }
                 disabled={isLoading}
               >
                 <SelectTrigger>
@@ -115,7 +131,14 @@ export function EditDepartmentDialog({ department, hods, open, onOpenChange }: E
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
                   {hods.map((hod) => (
-                    <SelectItem key={(hod._id as unknown as {toString(): string}).toString()} value={(hod._id as unknown as {toString(): string}).toString()}>
+                    <SelectItem
+                      key={(
+                        hod._id as unknown as { toString(): string }
+                      ).toString()}
+                      value={(
+                        hod._id as unknown as { toString(): string }
+                      ).toString()}
+                    >
                       {hod.firstName} {hod.lastName}
                     </SelectItem>
                   ))}
@@ -124,7 +147,12 @@ export function EditDepartmentDialog({ department, hods, open, onOpenChange }: E
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
@@ -134,7 +162,7 @@ export function EditDepartmentDialog({ department, hods, open, onOpenChange }: E
                   Saving...
                 </>
               ) : (
-                'Save Changes'
+                "Save Changes"
               )}
             </Button>
           </DialogFooter>

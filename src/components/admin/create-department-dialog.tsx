@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -13,18 +13,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { createDepartment } from '@/lib/actions/academic.actions';
-import { Loader2, Plus } from 'lucide-react';
-import { IUser } from '@/lib/db';
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { createDepartment } from "@/lib/actions/academic.actions";
+import { Loader2, Plus } from "lucide-react";
+import { IUser } from "@/lib/db";
 
 interface CreateDepartmentDialogProps {
   hods: IUser[];
@@ -34,18 +34,18 @@ export function CreateDepartmentDialog({ hods }: CreateDepartmentDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
-    name: '',
-    code: '',
-    hodId: '',
+    name: "",
+    code: "",
+    hodId: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     const result = await createDepartment({
       name: formData.name,
@@ -55,10 +55,10 @@ export function CreateDepartmentDialog({ hods }: CreateDepartmentDialogProps) {
 
     if (result.success) {
       setOpen(false);
-      setFormData({ name: '', code: '', hodId: '' });
+      setFormData({ name: "", code: "", hodId: "" });
       router.refresh();
     } else {
-      setError(result.error || 'Failed to create department');
+      setError(result.error || "Failed to create department");
     }
 
     setIsLoading(false);
@@ -90,7 +90,9 @@ export function CreateDepartmentDialog({ hods }: CreateDepartmentDialogProps) {
                 id="name"
                 placeholder="e.g., Computer Science & Engineering"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 required
                 disabled={isLoading}
               />
@@ -101,7 +103,12 @@ export function CreateDepartmentDialog({ hods }: CreateDepartmentDialogProps) {
                 id="code"
                 placeholder="e.g., CSE"
                 value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    code: e.target.value.toUpperCase(),
+                  })
+                }
                 required
                 disabled={isLoading}
                 maxLength={10}
@@ -111,7 +118,9 @@ export function CreateDepartmentDialog({ hods }: CreateDepartmentDialogProps) {
               <Label htmlFor="hod">Head of Department (Optional)</Label>
               <Select
                 value={formData.hodId}
-                onValueChange={(value) => setFormData({ ...formData, hodId: value })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, hodId: value })
+                }
                 disabled={isLoading}
               >
                 <SelectTrigger>
@@ -120,7 +129,14 @@ export function CreateDepartmentDialog({ hods }: CreateDepartmentDialogProps) {
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
                   {hods.map((hod) => (
-                    <SelectItem key={(hod._id as unknown as {toString(): string}).toString()} value={(hod._id as unknown as {toString(): string}).toString()}>
+                    <SelectItem
+                      key={(
+                        hod._id as unknown as { toString(): string }
+                      ).toString()}
+                      value={(
+                        hod._id as unknown as { toString(): string }
+                      ).toString()}
+                    >
                       {hod.firstName} {hod.lastName}
                     </SelectItem>
                   ))}
@@ -129,7 +145,12 @@ export function CreateDepartmentDialog({ hods }: CreateDepartmentDialogProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={isLoading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
@@ -139,7 +160,7 @@ export function CreateDepartmentDialog({ hods }: CreateDepartmentDialogProps) {
                   Creating...
                 </>
               ) : (
-                'Create'
+                "Create"
               )}
             </Button>
           </DialogFooter>

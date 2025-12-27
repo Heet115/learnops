@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -13,18 +13,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { createSemester } from '@/lib/actions/academic.actions';
-import { Loader2, Plus } from 'lucide-react';
-import { ICourse } from '@/lib/db';
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { createSemester } from "@/lib/actions/academic.actions";
+import { Loader2, Plus } from "lucide-react";
+import { ICourse } from "@/lib/db";
 
 interface CreateSemesterDialogProps {
   courses: ICourse[];
@@ -34,23 +34,23 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
-    name: '',
+    name: "",
     number: 1,
-    courseId: '',
-    startDate: '',
-    endDate: '',
+    courseId: "",
+    startDate: "",
+    endDate: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     if (!formData.courseId) {
-      setError('Please select a course');
+      setError("Please select a course");
       setIsLoading(false);
       return;
     }
@@ -59,10 +59,16 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
 
     if (result.success) {
       setOpen(false);
-      setFormData({ name: '', number: 1, courseId: '', startDate: '', endDate: '' });
+      setFormData({
+        name: "",
+        number: 1,
+        courseId: "",
+        startDate: "",
+        endDate: "",
+      });
       router.refresh();
     } else {
-      setError(result.error || 'Failed to create semester');
+      setError(result.error || "Failed to create semester");
     }
 
     setIsLoading(false);
@@ -92,7 +98,9 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
               <Label htmlFor="course">Course</Label>
               <Select
                 value={formData.courseId}
-                onValueChange={(value) => setFormData({ ...formData, courseId: value })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, courseId: value })
+                }
                 disabled={isLoading}
               >
                 <SelectTrigger>
@@ -100,7 +108,14 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
                 </SelectTrigger>
                 <SelectContent>
                   {courses.map((course) => (
-                    <SelectItem key={(course._id as unknown as {toString(): string}).toString()} value={(course._id as unknown as {toString(): string}).toString()}>
+                    <SelectItem
+                      key={(
+                        course._id as unknown as { toString(): string }
+                      ).toString()}
+                      value={(
+                        course._id as unknown as { toString(): string }
+                      ).toString()}
+                    >
                       {course.name} ({course.code})
                     </SelectItem>
                   ))}
@@ -114,7 +129,9 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
                   id="name"
                   placeholder="e.g., Semester 1"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
                   disabled={isLoading}
                 />
@@ -123,7 +140,9 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
                 <Label htmlFor="number">Semester Number</Label>
                 <Select
                   value={formData.number.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, number: parseInt(value) })}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, number: parseInt(value) })
+                  }
                   disabled={isLoading}
                 >
                   <SelectTrigger>
@@ -146,7 +165,9 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
                   id="startDate"
                   type="date"
                   value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, startDate: e.target.value })
+                  }
                   disabled={isLoading}
                 />
               </div>
@@ -156,14 +177,21 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
                   id="endDate"
                   type="date"
                   value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, endDate: e.target.value })
+                  }
                   disabled={isLoading}
                 />
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={isLoading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
@@ -173,7 +201,7 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
                   Creating...
                 </>
               ) : (
-                'Create'
+                "Create"
               )}
             </Button>
           </DialogFooter>

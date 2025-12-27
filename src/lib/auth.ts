@@ -1,11 +1,11 @@
-import { auth, currentUser } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-export type UserRole = 'admin' | 'hod' | 'professor' | 'student';
+export type UserRole = "admin" | "hod" | "professor" | "student";
 
 export async function getCurrentUser() {
   const { userId, sessionClaims } = await auth();
-  
+
   if (!userId) return null;
 
   const user = await currentUser();
@@ -23,7 +23,7 @@ export async function getCurrentUser() {
 
 export async function requireAuth() {
   const { userId, redirectToSignIn } = await auth();
-  
+
   if (!userId) {
     return redirectToSignIn();
   }
@@ -35,13 +35,13 @@ export async function requireRole(allowedRoles: UserRole[]) {
   const { userId, sessionClaims } = await auth();
 
   if (!userId) {
-    redirect('/sign-in');
+    redirect("/sign-in");
   }
 
   const role = (sessionClaims?.metadata as { role?: UserRole })?.role;
 
   if (!role || !allowedRoles.includes(role)) {
-    redirect('/unauthorized');
+    redirect("/unauthorized");
   }
 
   return { userId, role };
@@ -54,7 +54,7 @@ export async function getUserRole(): Promise<UserRole | undefined> {
 
 export async function getAuthSession() {
   const { userId, sessionClaims } = await auth();
-  
+
   if (!userId) return null;
 
   return {

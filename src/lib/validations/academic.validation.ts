@@ -1,9 +1,13 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Department
 export const createDepartmentSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  code: z.string().min(2, 'Code must be at least 2 characters').max(10).toUpperCase(),
+  name: z.string().min(2, "Name must be at least 2 characters").max(100),
+  code: z
+    .string()
+    .min(2, "Code must be at least 2 characters")
+    .max(10)
+    .toUpperCase(),
   hodId: z.string().optional(),
 });
 
@@ -16,10 +20,14 @@ export const updateDepartmentSchema = z.object({
 
 // Course
 export const createCourseSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  code: z.string().min(2, 'Code must be at least 2 characters').max(20).toUpperCase(),
-  departmentId: z.string().min(1, 'Department is required'),
-  duration: z.number().min(1, 'Duration must be at least 1 year').max(6),
+  name: z.string().min(2, "Name must be at least 2 characters").max(100),
+  code: z
+    .string()
+    .min(2, "Code must be at least 2 characters")
+    .max(20)
+    .toUpperCase(),
+  departmentId: z.string().min(1, "Department is required"),
+  duration: z.number().min(1, "Duration must be at least 1 year").max(6),
 });
 
 export const updateCourseSchema = z.object({
@@ -32,9 +40,9 @@ export const updateCourseSchema = z.object({
 
 // Semester
 export const createSemesterSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(50),
-  number: z.number().min(1, 'Semester number must be at least 1').max(12),
-  courseId: z.string().min(1, 'Course is required'),
+  name: z.string().min(1, "Name is required").max(50),
+  number: z.number().min(1, "Semester number must be at least 1").max(12),
+  courseId: z.string().min(1, "Course is required"),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
 });

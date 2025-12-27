@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'hod' | 'professor' | 'student';
+export type UserRole = "admin" | "hod" | "professor" | "student";
 
 export interface UserMetadata {
   role?: UserRole;

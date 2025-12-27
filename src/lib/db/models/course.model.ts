@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ICourse extends Document {
   name: string;
@@ -26,7 +26,7 @@ const CourseSchema = new Schema<ICourse>(
     },
     departmentId: {
       type: Schema.Types.ObjectId,
-      ref: 'Department',
+      ref: "Department",
       required: true,
     },
     duration: {
@@ -42,10 +42,10 @@ const CourseSchema = new Schema<ICourse>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 CourseSchema.index({ departmentId: 1 });
 
 export const Course: Model<ICourse> =
-  mongoose.models.Course || mongoose.model<ICourse>('Course', CourseSchema);
+  mongoose.models.Course || mongoose.model<ICourse>("Course", CourseSchema);

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -9,15 +9,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,13 +27,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { deleteSemester } from '@/lib/actions/academic.actions';
-import { MoreHorizontal, Trash2 } from 'lucide-react';
-import { ISemester, ICourse, IDepartment } from '@/lib/db';
+} from "@/components/ui/alert-dialog";
+import { deleteSemester } from "@/lib/actions/academic.actions";
+import { MoreHorizontal, Trash2 } from "lucide-react";
+import { ISemester, ICourse, IDepartment } from "@/lib/db";
 
 interface SemestersTableProps {
-  semesters: (ISemester & { courseId?: ICourse & { departmentId?: IDepartment } })[];
+  semesters: (ISemester & {
+    courseId?: ICourse & { departmentId?: IDepartment };
+  })[];
 }
 
 export function SemestersTable({ semesters }: SemestersTableProps) {
@@ -53,7 +55,7 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
 
   if (semesters.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <div className="text-muted-foreground py-8 text-center">
         No semesters found. Create your first semester to get started.
       </div>
     );
@@ -74,37 +76,46 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
         </TableHeader>
         <TableBody>
           {semesters.map((semester) => {
-            const id = (semester._id as unknown as { toString(): string }).toString();
-            const course = semester.courseId as unknown as (ICourse & { departmentId?: IDepartment }) | undefined;
-            const dept = course?.departmentId as unknown as IDepartment | undefined;
+            const id = (
+              semester._id as unknown as { toString(): string }
+            ).toString();
+            const course = semester.courseId as unknown as
+              | (ICourse & { departmentId?: IDepartment })
+              | undefined;
+            const dept = course?.departmentId as unknown as
+              | IDepartment
+              | undefined;
             return (
               <TableRow key={id}>
                 <TableCell>
                   <div>
                     <span className="font-medium">{semester.name}</span>
-                    <span className="text-muted-foreground ml-2">(#{semester.number})</span>
+                    <span className="text-muted-foreground ml-2">
+                      (#{semester.number})
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>
                   {course ? (
                     <Badge variant="outline">{course.code}</Badge>
-                  ) : '-'}
+                  ) : (
+                    "-"
+                  )}
                 </TableCell>
-                <TableCell>
-                  {dept ? dept.code : '-'}
-                </TableCell>
+                <TableCell>{dept ? dept.code : "-"}</TableCell>
                 <TableCell className="text-muted-foreground">
                   {semester.startDate && semester.endDate ? (
                     <>
-                      {new Date(semester.startDate).toLocaleDateString()} - {new Date(semester.endDate).toLocaleDateString()}
+                      {new Date(semester.startDate).toLocaleDateString()} -{" "}
+                      {new Date(semester.endDate).toLocaleDateString()}
                     </>
                   ) : (
-                    'Not set'
+                    "Not set"
                   )}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={semester.isActive ? 'default' : 'secondary'}>
-                    {semester.isActive ? 'Active' : 'Inactive'}
+                  <Badge variant={semester.isActive ? "default" : "secondary"}>
+                    {semester.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -146,7 +157,7 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
               disabled={isLoading}
               className="bg-destructive hover:bg-destructive/90"
             >
-              {isLoading ? 'Deleting...' : 'Delete'}
+              {isLoading ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Model } from "mongoose";
 
-export type UserRole = 'admin' | 'hod' | 'professor' | 'student';
+export type UserRole = "admin" | "hod" | "professor" | "student";
 
 export interface IUser extends Document {
   clerkId: string;
@@ -40,16 +40,16 @@ const UserSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['admin', 'hod', 'professor', 'student'],
+      enum: ["admin", "hod", "professor", "student"],
       required: true,
     },
     departmentId: {
       type: Schema.Types.ObjectId,
-      ref: 'Department',
+      ref: "Department",
     },
     classId: {
       type: Schema.Types.ObjectId,
-      ref: 'Class',
+      ref: "Class",
     },
     profileImage: {
       type: String,
@@ -61,11 +61,11 @@ const UserSchema = new Schema<IUser>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Compound indexes
 UserSchema.index({ role: 1, departmentId: 1 });
 
 export const User: Model<IUser> =
-  mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+  mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

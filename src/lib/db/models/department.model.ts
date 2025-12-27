@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IDepartment extends Document {
   name: string;
@@ -25,7 +25,7 @@ const DepartmentSchema = new Schema<IDepartment>(
     },
     hodId: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
     },
     isActive: {
       type: Boolean,
@@ -34,8 +34,9 @@ const DepartmentSchema = new Schema<IDepartment>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const Department: Model<IDepartment> =
-  mongoose.models.Department || mongoose.model<IDepartment>('Department', DepartmentSchema);
+  mongoose.models.Department ||
+  mongoose.model<IDepartment>("Department", DepartmentSchema);

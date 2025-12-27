@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
+import * as React from "react";
+import Link from "next/link";
 import {
   Building2,
   BookOpen,
@@ -18,11 +18,11 @@ import {
   ClipboardList,
   Clock,
   Bell,
-} from "lucide-react"
+} from "lucide-react";
 
-import { NavMain } from "@/components/layout/nav-main"
-import { NavSecondary } from "@/components/layout/nav-secondary"
-import { NavUser } from "@/components/layout/nav-user"
+import { NavMain } from "@/components/layout/nav-main";
+import { NavSecondary } from "@/components/layout/nav-secondary";
+import { NavUser } from "@/components/layout/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -31,17 +31,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
-export type UserRole = 'admin' | 'hod' | 'professor' | 'student'
+export type UserRole = "admin" | "hod" | "professor" | "student";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  role: UserRole
+  role: UserRole;
   user: {
-    name: string
-    email: string
-    avatar?: string
-  }
+    name: string;
+    email: string;
+    avatar?: string;
+  };
 }
 
 const getNavItems = (role: UserRole) => {
@@ -197,10 +197,10 @@ const getNavItems = (role: UserRole) => {
         icon: Bell,
       },
     ],
-  }
+  };
 
-  return navItems[role] || []
-}
+  return navItems[role] || [];
+};
 
 const navSecondary = [
   {
@@ -213,10 +213,10 @@ const navSecondary = [
     url: "#",
     icon: Send,
   },
-]
+];
 
 export function AppSidebar({ role, user, ...props }: AppSidebarProps) {
-  const navMain = getNavItems(role)
+  const navMain = getNavItems(role);
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -230,7 +230,9 @@ export function AppSidebar({ role, user, ...props }: AppSidebarProps) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">LearnOps</span>
-                  <span className="truncate text-xs capitalize">{role} Portal</span>
+                  <span className="truncate text-xs capitalize">
+                    {role} Portal
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -245,5 +247,5 @@ export function AppSidebar({ role, user, ...props }: AppSidebarProps) {
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
