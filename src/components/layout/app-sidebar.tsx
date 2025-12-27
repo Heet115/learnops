@@ -1,14 +1,23 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import {
+  Building2,
   BookOpen,
-  Bot,
-  Command,
+  Calendar,
+  Users,
+  GraduationCap,
+  FileText,
+  BarChart3,
+  Settings,
   LifeBuoy,
   Send,
-  Settings2,
-  SquareTerminal,
+  LayoutDashboard,
+  BookMarked,
+  ClipboardList,
+  Clock,
+  Bell,
 } from "lucide-react"
 
 import { NavMain } from "@/components/layout/nav-main"
@@ -24,139 +33,216 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const data = {
+export type UserRole = 'admin' | 'hod' | 'professor' | 'student'
+
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  role: UserRole
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
+    name: string
+    email: string
+    avatar?: string
+  }
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+const getNavItems = (role: UserRole) => {
+  const navItems = {
+    admin: [
+      {
+        title: "Dashboard",
+        url: "/admin",
+        icon: LayoutDashboard,
+        isActive: true,
+      },
+      {
+        title: "Users",
+        url: "/admin/users",
+        icon: Users,
+        items: [
+          { title: "All Users", url: "/admin/users" },
+          { title: "Professors", url: "/admin/users?role=professor" },
+          { title: "Students", url: "/admin/users?role=student" },
+          { title: "HODs", url: "/admin/users?role=hod" },
+        ],
+      },
+      {
+        title: "Departments",
+        url: "/admin/departments",
+        icon: Building2,
+      },
+      {
+        title: "Courses",
+        url: "/admin/courses",
+        icon: BookOpen,
+      },
+      {
+        title: "Semesters",
+        url: "/admin/semesters",
+        icon: Calendar,
+      },
+      {
+        title: "Subjects",
+        url: "/admin/subjects",
+        icon: BookMarked,
+      },
+      {
+        title: "Classes",
+        url: "/admin/classes",
+        icon: GraduationCap,
+      },
+      {
+        title: "Settings",
+        url: "/admin/settings",
+        icon: Settings,
+      },
+    ],
+    hod: [
+      {
+        title: "Dashboard",
+        url: "/hod",
+        icon: LayoutDashboard,
+        isActive: true,
+      },
+      {
+        title: "Department",
+        url: "/hod/department",
+        icon: Building2,
+      },
+      {
+        title: "Professors",
+        url: "/hod/professors",
+        icon: Users,
+      },
+      {
+        title: "Classes",
+        url: "/hod/classes",
+        icon: GraduationCap,
+      },
+      {
+        title: "Subjects",
+        url: "/hod/subjects",
+        icon: BookMarked,
+      },
+      {
+        title: "Analytics",
+        url: "/hod/analytics",
+        icon: BarChart3,
+      },
+    ],
+    professor: [
+      {
+        title: "Dashboard",
+        url: "/professor",
+        icon: LayoutDashboard,
+        isActive: true,
+      },
+      {
+        title: "My Subjects",
+        url: "/professor/subjects",
+        icon: BookMarked,
+      },
+      {
+        title: "ALAs",
+        url: "/professor/alas",
+        icon: FileText,
+        items: [
+          { title: "All ALAs", url: "/professor/alas" },
+          { title: "Create ALA", url: "/professor/alas/create" },
+        ],
+      },
+      {
+        title: "Submissions",
+        url: "/professor/submissions",
+        icon: ClipboardList,
+        items: [
+          { title: "Pending", url: "/professor/submissions?status=pending" },
+          { title: "Graded", url: "/professor/submissions?status=graded" },
+        ],
+      },
+      {
+        title: "Students",
+        url: "/professor/students",
+        icon: GraduationCap,
+      },
+    ],
+    student: [
+      {
+        title: "Dashboard",
+        url: "/student",
+        icon: LayoutDashboard,
+        isActive: true,
+      },
+      {
+        title: "My ALAs",
+        url: "/student/alas",
+        icon: FileText,
+      },
+      {
+        title: "Submissions",
+        url: "/student/submissions",
+        icon: ClipboardList,
+      },
+      {
+        title: "Deadlines",
+        url: "/student/deadlines",
+        icon: Clock,
+      },
+      {
+        title: "Grades",
+        url: "/student/grades",
+        icon: BarChart3,
+      },
+      {
+        title: "Notifications",
+        url: "/student/notifications",
+        icon: Bell,
+      },
+    ],
+  }
+
+  return navItems[role] || []
+}
+
+const navSecondary = [
+  {
+    title: "Support",
+    url: "#",
+    icon: LifeBuoy,
+  },
+  {
+    title: "Feedback",
+    url: "#",
+    icon: Send,
+  },
+]
+
+export function AppSidebar({ role, user, ...props }: AppSidebarProps) {
+  const navMain = getNavItems(role)
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link href={`/${role}`}>
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Command className="size-4" />
+                  <GraduationCap className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-medium">LearnOps</span>
+                  <span className="truncate text-xs capitalize">{role} Portal</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navMain} />
+        <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )

@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { DashboardHeader } from '@/components/layout/dashboard-header';
+import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { getCurrentUserFromDB } from '@/lib/actions/user.actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Users, Clock, CheckCircle } from 'lucide-react';
 
@@ -12,6 +13,14 @@ export default async function ProfessorDashboard() {
     redirect('/unauthorized');
   }
 
+  const dbUser = await getCurrentUserFromDB();
+
+  const user = {
+    name: `${dbUser?.firstName || 'Professor'} ${dbUser?.lastName || ''}`.trim(),
+    email: dbUser?.email || '',
+    avatar: dbUser?.profileImage,
+  };
+
   const stats = [
     { title: 'Active ALAs', value: '0', icon: FileText, description: 'Currently active' },
     { title: 'Students', value: '0', icon: Users, description: 'In your classes' },
@@ -20,10 +29,13 @@ export default async function ProfessorDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <DashboardHeader title="Professor Dashboard" />
-      <main className="p-6">
-        <div className="mb-8">
+    <DashboardLayout
+      role="professor"
+      user={user}
+      breadcrumbs={[{ label: 'Professor' }, { label: 'Dashboard' }]}
+    >
+      <div className="space-y-6 pt-4">
+        <div>
           <h2 className="text-2xl font-bold">Welcome, Professor</h2>
           <p className="text-muted-foreground">Manage your classes and ALAs</p>
         </div>
@@ -43,7 +55,7 @@ export default async function ProfessorDashboard() {
           ))}
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>Your Subjects</CardTitle>
@@ -63,7 +75,7 @@ export default async function ProfessorDashboard() {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

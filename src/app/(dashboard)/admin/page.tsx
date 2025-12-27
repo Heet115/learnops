@@ -1,12 +1,11 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { DashboardHeader } from '@/components/layout/dashboard-header';
+import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Users, Building2, BookOpen, GraduationCap, ArrowRight } from 'lucide-react';
+import { Users, Building2, BookOpen, GraduationCap } from 'lucide-react';
 import { getCurrentUserFromDB } from '@/lib/actions/user.actions';
 import { getUserStats } from '@/lib/actions/admin.actions';
+import { getAcademicStats } from '@/lib/actions/academic.actions';
 
 export default async function AdminDashboard() {
   const { sessionClaims } = await auth();
@@ -16,25 +15,31 @@ export default async function AdminDashboard() {
     redirect('/unauthorized');
   }
 
-  const [dbUser, stats] = await Promise.all([
+  const [dbUser, userStats, academicStats] = await Promise.all([
     getCurrentUserFromDB(),
     getUserStats(),
+    getAcademicStats(),
   ]);
 
+  const user = {
+    name: `${dbUser?.firstName || 'Admin'} ${dbUser?.lastName || ''}`.trim(),
+    email: dbUser?.email || '',
+    avatar: dbUser?.profileImage,
+  };
+
   const statCards = [
-    { title: 'Total Users', value: stats.total, icon: Users, description: 'Active users' },
-    { title: 'Departments', value: '0', icon: Building2, description: 'Active departments' },
-    { title: 'Subjects', value: '0', icon: BookOpen, description: 'Total subjects' },
-    { title: 'Students', value: stats.students, icon: GraduationCap, description: 'Enrolled students' },
+    { title: 'Total Users', value: userStats.total, icon: Users, description: 'Active users' },
+    { title: 'Departments', value: academicStats.departments, icon: Building2, description: 'Active departments' },
+    { title: 'Courses', value: academicStats.courses, icon: BookOpen, description: 'Total courses' },
+    { title: 'Students', value: userStats.students, icon: GraduationCap, description: 'Enrolled students' },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <DashboardHeader title="Admin Dashboard" />
-      <main className="p-6">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold">Welcome, {dbUser?.firstName || 'Admin'}</h2>
-          <p className="text-muted-foreground">Manage your institution from here</p>
+    <DashboardLayout role="admin" user={user} breadcrumbs={[{ label: 'Dashboard' }]}>
+      <div className="space-y-6 pt-4">
+        <div>
+          <h2 className="text-2xl font-bold">Welcome back, {dbUser?.firstName || 'Admin'}</h2>
+          <p className="text-muted-foreground">Here&apos;s what&apos;s happening in your institution</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -52,33 +57,7 @@ export default async function AdminDashboard() {
           ))}
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Common administrative tasks</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-3">
-              <Button asChild variant="outline" className="justify-between">
-                <Link href="/admin/users">
-                  Manage Users
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="justify-between">
-                <Link href="/admin/departments">
-                  Manage Departments
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="justify-between">
-                <Link href="/admin/courses">
-                  Manage Courses
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>
@@ -88,8 +67,20 @@ export default async function AdminDashboard() {
               <p className="text-sm text-muted-foreground">No recent activity</p>
             </CardContent>
           </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>System Status</CardTitle>
+              <CardDescription>Current system health</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-green-500" />
+                <span className="text-sm">All systems operational</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

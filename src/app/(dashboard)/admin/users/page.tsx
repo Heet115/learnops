@@ -1,7 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { DashboardHeader } from '@/components/layout/dashboard-header';
+import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { getAllUsers, getUserStats } from '@/lib/actions/admin.actions';
+import { getCurrentUserFromDB } from '@/lib/actions/user.actions';
 import { UsersTable } from '@/components/admin/users-table';
 import { CreateUserDialog } from '@/components/admin/create-user-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,10 +16,17 @@ export default async function UsersPage() {
     redirect('/unauthorized');
   }
 
-  const [users, stats] = await Promise.all([
+  const [users, stats, dbUser] = await Promise.all([
     getAllUsers(),
     getUserStats(),
+    getCurrentUserFromDB(),
   ]);
+
+  const user = {
+    name: `${dbUser?.firstName || 'Admin'} ${dbUser?.lastName || ''}`.trim(),
+    email: dbUser?.email || '',
+    avatar: dbUser?.profileImage,
+  };
 
   const statCards = [
     { title: 'Total Users', value: stats.total, icon: Users },
@@ -28,10 +36,13 @@ export default async function UsersPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <DashboardHeader title="User Management" />
-      <main className="p-6">
-        <div className="flex items-center justify-between mb-6">
+    <DashboardLayout
+      role="admin"
+      user={user}
+      breadcrumbs={[{ label: 'Admin', href: '/admin' }, { label: 'Users' }]}
+    >
+      <div className="space-y-6 pt-4">
+        <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold">Users</h2>
             <p className="text-muted-foreground">Manage all system users</p>
@@ -39,7 +50,7 @@ export default async function UsersPage() {
           <CreateUserDialog />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4 mb-6">
+        <div className="grid gap-4 md:grid-cols-4">
           {statCards.map((stat) => (
             <Card key={stat.title}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -61,7 +72,7 @@ export default async function UsersPage() {
             <UsersTable users={users} />
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
