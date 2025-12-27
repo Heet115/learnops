@@ -69,18 +69,35 @@ export async function getStudentALAs() {
     .sort({ deadline: 1 })
     .lean();
 
-  // Get student's submissions for these ALAs
+  // Get student's own submissions
   const alaIds = alas.map((a) => a._id);
-  const submissions = await Submission.find({
+  const ownSubmissions = await Submission.find({
     alaId: { $in: alaIds },
     studentId: student._id,
   })
     .select("alaId status marks submittedAt")
     .lean();
 
-  const submissionMap = new Map(
-    submissions.map((s) => [s.alaId.toString(), s]),
-  );
+  // Get submissions where student is a group member
+  const groupSubmissions = await Submission.find({
+    alaId: { $in: alaIds },
+    groupMembers: student._id,
+  })
+    .select("alaId status marks submittedAt")
+    .lean();
+
+  // Merge submissions - prefer own submission, fallback to group submission
+  const submissionMap = new Map<string, typeof ownSubmissions[0]>();
+  
+  // Add group submissions first
+  groupSubmissions.forEach((s) => {
+    submissionMap.set(s.alaId.toString(), s);
+  });
+  
+  // Override with own submissions (if student is the primary submitter)
+  ownSubmissions.forEach((s) => {
+    submissionMap.set(s.alaId.toString(), s);
+  });
 
   // Combine ALAs with submission status
   const alasWithStatus = alas.map((ala) => ({
