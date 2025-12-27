@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { AppSidebar, UserRole } from "./app-sidebar";
 import { ModeToggle } from "../mode-toggle";
+import { NotificationBell } from "./notification-bell";
 
 interface BreadcrumbItemType {
   label: string;
@@ -73,6 +74,7 @@ export function DashboardLayout({
             </div>
           </div>
           <div className="flex items-center justify-end gap-2 px-4">
+            <NotificationBell role={role} />
             <Separator
               orientation="vertical"
               className="mr-2 data-[orientation=vertical]:h-4"

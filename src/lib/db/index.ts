@@ -10,6 +10,7 @@ export { ClassCoordinator } from "./models/class-coordinator.model";
 export { ALA } from "./models/ala.model";
 export { Submission } from "./models/submission.model";
 export { Group } from "./models/group.model";
+export { Notification } from "./models/notification.model";
 export type { IUser, UserRole } from "./models/user.model";
 export type { IDepartment } from "./models/department.model";
 export type { ICourse } from "./models/course.model";
@@ -25,3 +26,4 @@ export type {
   ISubmissionLink,
 } from "./models/submission.model";
 export type { IGroup, IGroupMember } from "./models/group.model";
+export type { INotification } from "./models/notification.model";

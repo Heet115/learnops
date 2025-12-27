@@ -114,6 +114,10 @@ export async function createALA(input: CreateALAInput) {
         : undefined,
     });
 
+    // Notify students about new ALA
+    const { notifyNewALA } = await import("@/lib/actions/notification.actions");
+    await notifyNewALA(ala._id.toString());
+
     revalidatePath("/professor/alas");
     return { success: true, ala: JSON.parse(JSON.stringify(ala)) };
   } catch (error) {

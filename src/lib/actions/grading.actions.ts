@@ -143,6 +143,7 @@ export async function gradeSubmission(
     professorId: { toString: () => string };
     maxMarks: number;
     _id: string;
+    title: string;
   };
   if (ala.professorId.toString() !== professorId) {
     return { success: false, error: "Unauthorized" };
@@ -172,6 +173,31 @@ export async function gradeSubmission(
     { new: true },
   );
 
+  // Notify student about grading
+  const { notifySubmissionGraded } = await import("@/lib/actions/notification.actions");
+  await notifySubmissionGraded(
+    submissionId,
+    submission.studentId.toString(),
+    ala.title,
+    data.marks,
+    ala.maxMarks
+  );
+
+  // Also notify group members if it's a group submission
+  if (submission.groupMembers && submission.groupMembers.length > 0) {
+    for (const memberId of submission.groupMembers) {
+      if (memberId.toString() !== submission.studentId.toString()) {
+        await notifySubmissionGraded(
+          submissionId,
+          memberId.toString(),
+          ala.title,
+          data.marks,
+          ala.maxMarks
+        );
+      }
+    }
+  }
+
   revalidatePath("/professor/submissions");
   revalidatePath(`/professor/submissions/${submissionId}`);
   revalidatePath(`/professor/alas/${ala._id}`);
@@ -192,6 +218,7 @@ export async function rejectSubmission(submissionId: string, reason: string) {
   const ala = submission.alaId as unknown as {
     professorId: { toString: () => string };
     _id: string;
+    title: string;
   };
   if (ala.professorId.toString() !== professorId) {
     return { success: false, error: "Unauthorized" };
@@ -215,6 +242,29 @@ export async function rejectSubmission(submissionId: string, reason: string) {
     },
     { new: true },
   );
+
+  // Notify student about rejection
+  const { notifySubmissionRejected } = await import("@/lib/actions/notification.actions");
+  await notifySubmissionRejected(
+    submissionId,
+    submission.studentId.toString(),
+    ala.title,
+    reason
+  );
+
+  // Also notify group members if it's a group submission
+  if (submission.groupMembers && submission.groupMembers.length > 0) {
+    for (const memberId of submission.groupMembers) {
+      if (memberId.toString() !== submission.studentId.toString()) {
+        await notifySubmissionRejected(
+          submissionId,
+          memberId.toString(),
+          ala.title,
+          reason
+        );
+      }
+    }
+  }
 
   revalidatePath("/professor/submissions");
   revalidatePath(`/professor/submissions/${submissionId}`);
