@@ -49,7 +49,7 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
     setIsLoading(true);
 
     const result = await deleteSemester(deleteId);
-    
+
     if (result.success) {
       toast.success("Semester deleted successfully");
       setDeleteId(null);
@@ -57,7 +57,7 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
     } else {
       toast.error(result.error || "Failed to delete semester");
     }
-    
+
     setIsLoading(false);
   };
 

@@ -58,13 +58,20 @@ export async function createDepartment(input: CreateDepartmentInput) {
   await connectDB();
 
   // Convert "none" to undefined for hodId
+  const hodId = validated.hodId === "none" ? undefined : validated.hodId;
   const departmentData = {
     ...validated,
-    hodId: validated.hodId === "none" ? undefined : validated.hodId,
+    hodId,
   };
 
   try {
     const department = await Department.create(departmentData);
+
+    // Update HOD's departmentId if assigned
+    if (hodId) {
+      await User.findByIdAndUpdate(hodId, { departmentId: department._id });
+    }
+
     revalidatePath("/admin/departments");
     return {
       success: true,
@@ -104,16 +111,37 @@ export async function updateDepartment(
   const validated = updateDepartmentSchema.parse(input);
   await connectDB();
 
+  // Get current department to check for HOD changes
+  const currentDepartment = await Department.findById(id);
+  const oldHodId = currentDepartment?.hodId?.toString();
+
   // Convert "none" to null for hodId (to unset the field)
   const updateData: Record<string, unknown> = { ...validated };
+  let newHodId: string | null = null;
+
   if (validated.hodId === "none") {
     updateData.hodId = null;
+  } else if (validated.hodId) {
+    newHodId = validated.hodId;
   }
 
   try {
     const department = await Department.findByIdAndUpdate(id, updateData, {
       new: true,
     });
+
+    // Handle HOD departmentId updates
+    if (oldHodId !== newHodId) {
+      // Remove departmentId from old HOD
+      if (oldHodId) {
+        await User.findByIdAndUpdate(oldHodId, { $unset: { departmentId: 1 } });
+      }
+      // Set departmentId on new HOD
+      if (newHodId) {
+        await User.findByIdAndUpdate(newHodId, { departmentId: id });
+      }
+    }
+
     revalidatePath("/admin/departments");
     return {
       success: true,
