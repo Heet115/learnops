@@ -1,9 +1,12 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { DashboardHeader } from '@/components/layout/dashboard-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Building2, BookOpen, GraduationCap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Users, Building2, BookOpen, GraduationCap, ArrowRight } from 'lucide-react';
 import { getCurrentUserFromDB } from '@/lib/actions/user.actions';
+import { getUserStats } from '@/lib/actions/admin.actions';
 
 export default async function AdminDashboard() {
   const { sessionClaims } = await auth();
@@ -13,13 +16,16 @@ export default async function AdminDashboard() {
     redirect('/unauthorized');
   }
 
-  const dbUser = await getCurrentUserFromDB();
+  const [dbUser, stats] = await Promise.all([
+    getCurrentUserFromDB(),
+    getUserStats(),
+  ]);
 
-  const stats = [
-    { title: 'Total Users', value: '0', icon: Users, description: 'Active users' },
+  const statCards = [
+    { title: 'Total Users', value: stats.total, icon: Users, description: 'Active users' },
     { title: 'Departments', value: '0', icon: Building2, description: 'Active departments' },
     { title: 'Subjects', value: '0', icon: BookOpen, description: 'Total subjects' },
-    { title: 'Students', value: '0', icon: GraduationCap, description: 'Enrolled students' },
+    { title: 'Students', value: stats.students, icon: GraduationCap, description: 'Enrolled students' },
   ];
 
   return (
@@ -32,7 +38,7 @@ export default async function AdminDashboard() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
+          {statCards.map((stat) => (
             <Card key={stat.title}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
@@ -52,11 +58,25 @@ export default async function AdminDashboard() {
               <CardTitle>Quick Actions</CardTitle>
               <CardDescription>Common administrative tasks</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-2">
-              <p className="text-sm text-muted-foreground">• Create new department</p>
-              <p className="text-sm text-muted-foreground">• Add new user</p>
-              <p className="text-sm text-muted-foreground">• Manage courses</p>
-              <p className="text-sm text-muted-foreground">• View activity logs</p>
+            <CardContent className="grid gap-3">
+              <Button asChild variant="outline" className="justify-between">
+                <Link href="/admin/users">
+                  Manage Users
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="justify-between">
+                <Link href="/admin/departments">
+                  Manage Departments
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="justify-between">
+                <Link href="/admin/courses">
+                  Manage Courses
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
             </CardContent>
           </Card>
           <Card>

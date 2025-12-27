@@ -48,15 +48,20 @@ export async function POST(req: Request) {
     const role = (public_metadata?.role as string) || 'student';
 
     try {
-      await User.create({
-        clerkId: id,
-        email,
-        firstName: first_name || '',
-        lastName: last_name || '',
-        role,
-        profileImage: image_url,
-        isActive: true,
-      });
+      // Use upsert to handle case where user was already created by admin action
+      await User.findOneAndUpdate(
+        { clerkId: id },
+        {
+          clerkId: id,
+          email,
+          firstName: first_name || '',
+          lastName: last_name || '',
+          role,
+          profileImage: image_url,
+          isActive: true,
+        },
+        { upsert: true, new: true }
+      );
 
       return NextResponse.json({ message: 'User created' }, { status: 201 });
     } catch (error) {
