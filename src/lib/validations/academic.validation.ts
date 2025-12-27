@@ -75,6 +75,20 @@ export const updateSubjectSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+// Class
+export const createClassSchema = z.object({
+  name: z.string().min(1, "Name is required").max(50),
+  semesterId: z.string().min(1, "Semester is required"),
+  academicYear: z.string().min(1, "Academic year is required").max(20),
+});
+
+export const updateClassSchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  semesterId: z.string().optional(),
+  academicYear: z.string().min(1).max(20).optional(),
+  isActive: z.boolean().optional(),
+});
+
 export type CreateDepartmentInput = z.infer<typeof createDepartmentSchema>;
 export type UpdateDepartmentInput = z.infer<typeof updateDepartmentSchema>;
 export type CreateCourseInput = z.infer<typeof createCourseSchema>;
@@ -83,3 +97,5 @@ export type CreateSemesterInput = z.infer<typeof createSemesterSchema>;
 export type UpdateSemesterInput = z.infer<typeof updateSemesterSchema>;
 export type CreateSubjectInput = z.infer<typeof createSubjectSchema>;
 export type UpdateSubjectInput = z.infer<typeof updateSubjectSchema>;
+export type CreateClassInput = z.infer<typeof createClassSchema>;
+export type UpdateClassInput = z.infer<typeof updateClassSchema>;

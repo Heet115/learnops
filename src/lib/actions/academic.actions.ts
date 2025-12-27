@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { connectDB, Department, Course, Semester, Subject, User } from "@/lib/db";
+import { connectDB, Department, Course, Semester, Subject, Class, User } from "@/lib/db";
 import {
   createDepartmentSchema,
   updateDepartmentSchema,
@@ -11,6 +11,8 @@ import {
   updateSemesterSchema,
   createSubjectSchema,
   updateSubjectSchema,
+  createClassSchema,
+  updateClassSchema,
   CreateDepartmentInput,
   UpdateDepartmentInput,
   CreateCourseInput,
@@ -19,6 +21,8 @@ import {
   UpdateSemesterInput,
   CreateSubjectInput,
   UpdateSubjectInput,
+  CreateClassInput,
+  UpdateClassInput,
 } from "@/lib/validations/academic.validation";
 import { revalidatePath } from "next/cache";
 
@@ -359,15 +363,89 @@ export async function deleteSubject(id: string) {
   return { success: true, error: null };
 }
 
+// ==================== CLASSES ====================
+
+export async function createClass(input: CreateClassInput) {
+  await requireAdmin();
+  const validated = createClassSchema.parse(input);
+  await connectDB();
+
+  try {
+    const classDoc = await Class.create(validated);
+    revalidatePath("/admin/classes");
+    return { success: true, class: JSON.parse(JSON.stringify(classDoc)) };
+  } catch (error: unknown) {
+    const mongoError = error as { code?: number };
+    if (mongoError.code === 11000) {
+      return { success: false, error: "Class already exists for this semester and academic year" };
+    }
+    return { success: false, error: "Failed to create class" };
+  }
+}
+
+export async function getAllClasses() {
+  await connectDB();
+  const classes = await Class.find()
+    .populate({
+      path: "semesterId",
+      select: "name number courseId",
+      populate: {
+        path: "courseId",
+        select: "name code departmentId",
+        populate: { path: "departmentId", select: "name code" },
+      },
+    })
+    .sort({ academicYear: -1, name: 1 })
+    .lean();
+  return JSON.parse(JSON.stringify(classes));
+}
+
+export async function getClassesBySemester(semesterId: string) {
+  await connectDB();
+  const classes = await Class.find({ semesterId, isActive: true })
+    .sort({ name: 1 })
+    .lean();
+  return JSON.parse(JSON.stringify(classes));
+}
+
+export async function updateClass(id: string, input: UpdateClassInput) {
+  await requireAdmin();
+  const validated = updateClassSchema.parse(input);
+  await connectDB();
+
+  try {
+    const classDoc = await Class.findByIdAndUpdate(id, validated, { new: true });
+    revalidatePath("/admin/classes");
+    return { success: true, class: JSON.parse(JSON.stringify(classDoc)) };
+  } catch (error: unknown) {
+    const mongoError = error as { code?: number };
+    if (mongoError.code === 11000) {
+      return { success: false, error: "Class already exists for this semester and academic year" };
+    }
+    return { success: false, error: "Failed to update class" };
+  }
+}
+
+export async function deleteClass(id: string) {
+  await requireAdmin();
+  await connectDB();
+
+  // TODO: Check for students/subject offerings before deleting
+  await Class.findByIdAndDelete(id);
+  revalidatePath("/admin/classes");
+  return { success: true, error: null };
+}
+
 // ==================== STATS ====================
 
 export async function getAcademicStats() {
   await connectDB();
-  const [departments, courses, semesters, subjects] = await Promise.all([
+  const [departments, courses, semesters, subjects, classes] = await Promise.all([
     Department.countDocuments({ isActive: true }),
     Course.countDocuments({ isActive: true }),
     Semester.countDocuments({ isActive: true }),
     Subject.countDocuments({ isActive: true }),
+    Class.countDocuments({ isActive: true }),
   ]);
-  return { departments, courses, semesters, subjects };
+  return { departments, courses, semesters, subjects, classes };
 }
