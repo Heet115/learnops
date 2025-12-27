@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IClassCoordinator extends Document {
   classId: mongoose.Types.ObjectId;
@@ -13,12 +13,12 @@ const ClassCoordinatorSchema = new Schema<IClassCoordinator>(
   {
     classId: {
       type: Schema.Types.ObjectId,
-      ref: 'Class',
+      ref: "Class",
       required: true,
     },
     professorId: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     academicYear: {
@@ -33,17 +33,15 @@ const ClassCoordinatorSchema = new Schema<IClassCoordinator>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Only one coordinator per class per academic year
-ClassCoordinatorSchema.index(
-  { classId: 1, academicYear: 1 },
-  { unique: true }
-);
+ClassCoordinatorSchema.index({ classId: 1, academicYear: 1 }, { unique: true });
 
 // Index for professor queries
 ClassCoordinatorSchema.index({ professorId: 1, academicYear: 1 });
 
-export const ClassCoordinator = mongoose.models.ClassCoordinator || 
-  mongoose.model<IClassCoordinator>('ClassCoordinator', ClassCoordinatorSchema);
+export const ClassCoordinator =
+  mongoose.models.ClassCoordinator ||
+  mongoose.model<IClassCoordinator>("ClassCoordinator", ClassCoordinatorSchema);

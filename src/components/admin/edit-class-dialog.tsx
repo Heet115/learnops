@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,19 +10,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { updateClass } from '@/lib/actions/academic.actions';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { updateClass } from "@/lib/actions/academic.actions";
+import { toast } from "sonner";
 
 interface ClassItem {
   _id: string;
@@ -85,20 +85,20 @@ export function EditClassDialog({
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      name: formData.get('name') as string,
-      semesterId: formData.get('semesterId') as string,
-      academicYear: formData.get('academicYear') as string,
+      name: formData.get("name") as string,
+      semesterId: formData.get("semesterId") as string,
+      academicYear: formData.get("academicYear") as string,
       isActive,
     };
 
     const result = await updateClass(classItem._id, data);
 
     if (result.success) {
-      toast.success('Class updated successfully');
+      toast.success("Class updated successfully");
       onOpenChange(false);
       router.refresh();
     } else {
-      toast.error(result.error || 'Failed to update class');
+      toast.error(result.error || "Failed to update class");
     }
 
     setLoading(false);
@@ -110,9 +110,7 @@ export function EditClassDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Edit Class</DialogTitle>
-            <DialogDescription>
-              Update class details
-            </DialogDescription>
+            <DialogDescription>Update class details</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
@@ -133,7 +131,8 @@ export function EditClassDialog({
                 <SelectContent>
                   {semesters.map((semester) => (
                     <SelectItem key={semester._id} value={semester._id}>
-                      {semester.courseId.departmentId.code} - {semester.courseId.code} - {semester.name}
+                      {semester.courseId.departmentId.code} -{" "}
+                      {semester.courseId.code} - {semester.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -164,11 +163,15 @@ export function EditClassDialog({
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : 'Save Changes'}
+              {loading ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </form>

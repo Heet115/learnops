@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -9,19 +9,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
-import { deleteSubject } from '@/lib/actions/academic.actions';
-import { toast } from 'sonner';
-import { EditSubjectDialog } from './edit-subject-dialog';
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { deleteSubject } from "@/lib/actions/academic.actions";
+import { toast } from "sonner";
+import { EditSubjectDialog } from "./edit-subject-dialog";
 
 interface Subject {
   _id: string;
@@ -74,16 +74,16 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
 
     const result = await deleteSubject(id);
     if (result.success) {
-      toast.success('Subject deleted successfully');
+      toast.success("Subject deleted successfully");
       router.refresh();
     } else {
-      toast.error(result.error || 'Failed to delete subject');
+      toast.error(result.error || "Failed to delete subject");
     }
   };
 
   if (subjects.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <div className="text-muted-foreground py-8 text-center">
         No subjects found. Create your first subject to get started.
       </div>
     );
@@ -109,15 +109,18 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
             <TableRow key={subject._id}>
               <TableCell className="font-medium">{subject.code}</TableCell>
               <TableCell>{subject.name}</TableCell>
-              <TableCell>{subject.semesterId?.name || 'N/A'}</TableCell>
+              <TableCell>{subject.semesterId?.name || "N/A"}</TableCell>
               <TableCell>
-                {subject.semesterId?.courseId?.name || 'N/A'} ({subject.semesterId?.courseId?.code || ''})
+                {subject.semesterId?.courseId?.name || "N/A"} (
+                {subject.semesterId?.courseId?.code || ""})
               </TableCell>
-              <TableCell>{subject.semesterId?.courseId?.departmentId?.code || 'N/A'}</TableCell>
+              <TableCell>
+                {subject.semesterId?.courseId?.departmentId?.code || "N/A"}
+              </TableCell>
               <TableCell>{subject.credits}</TableCell>
               <TableCell>
-                <Badge variant={subject.isActive ? 'default' : 'secondary'}>
-                  {subject.isActive ? 'Active' : 'Inactive'}
+                <Badge variant={subject.isActive ? "default" : "secondary"}>
+                  {subject.isActive ? "Active" : "Inactive"}
                 </Badge>
               </TableCell>
               <TableCell>
@@ -128,7 +131,9 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setEditingSubject(subject)}>
+                    <DropdownMenuItem
+                      onClick={() => setEditingSubject(subject)}
+                    >
                       <Pencil className="mr-2 h-4 w-4" />
                       Edit
                     </DropdownMenuItem>

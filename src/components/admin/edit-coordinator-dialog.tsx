@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,17 +10,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { assignClassCoordinator } from '@/lib/actions/academic.actions';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { assignClassCoordinator } from "@/lib/actions/academic.actions";
+import { toast } from "sonner";
 
 interface ClassCoordinator {
   _id: string;
@@ -75,18 +75,18 @@ export function EditCoordinatorDialog({
     const formData = new FormData(e.currentTarget);
     const data = {
       classId: coordinator.classId._id,
-      professorId: formData.get('professorId') as string,
+      professorId: formData.get("professorId") as string,
       academicYear: coordinator.academicYear,
     };
 
     const result = await assignClassCoordinator(data);
 
     if (result.success) {
-      toast.success('Coordinator updated successfully');
+      toast.success("Coordinator updated successfully");
       onOpenChange(false);
       router.refresh();
     } else {
-      toast.error(result.error || 'Failed to update coordinator');
+      toast.error(result.error || "Failed to update coordinator");
     }
 
     setLoading(false);
@@ -105,21 +105,27 @@ export function EditCoordinatorDialog({
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label>Class</Label>
-              <div className="rounded-md border px-3 py-2 text-sm bg-muted">
-                {coordinator.classId?.semesterId?.courseId?.departmentId?.code} - {coordinator.classId?.semesterId?.courseId?.code} - {coordinator.classId?.semesterId?.name} - {coordinator.classId?.name}
+              <div className="bg-muted rounded-md border px-3 py-2 text-sm">
+                {coordinator.classId?.semesterId?.courseId?.departmentId?.code}{" "}
+                - {coordinator.classId?.semesterId?.courseId?.code} -{" "}
+                {coordinator.classId?.semesterId?.name} -{" "}
+                {coordinator.classId?.name}
               </div>
             </div>
 
             <div className="grid gap-2">
               <Label>Academic Year</Label>
-              <div className="rounded-md border px-3 py-2 text-sm bg-muted">
+              <div className="bg-muted rounded-md border px-3 py-2 text-sm">
                 {coordinator.academicYear}
               </div>
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="professorId">New Coordinator</Label>
-              <Select name="professorId" defaultValue={coordinator.professorId?._id}>
+              <Select
+                name="professorId"
+                defaultValue={coordinator.professorId?._id}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select professor" />
                 </SelectTrigger>
@@ -134,11 +140,15 @@ export function EditCoordinatorDialog({
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Updating...' : 'Update Coordinator'}
+              {loading ? "Updating..." : "Update Coordinator"}
             </Button>
           </DialogFooter>
         </form>

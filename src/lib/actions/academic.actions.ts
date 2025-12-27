@@ -1,7 +1,17 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { connectDB, Department, Course, Semester, Subject, Class, SubjectOffering, ClassCoordinator, User } from "@/lib/db";
+import {
+  connectDB,
+  Department,
+  Course,
+  Semester,
+  Subject,
+  Class,
+  SubjectOffering,
+  ClassCoordinator,
+  User,
+} from "@/lib/db";
 import {
   createDepartmentSchema,
   updateDepartmentSchema,
@@ -288,7 +298,10 @@ export async function deleteSemester(id: string) {
   // Check for subjects before deleting
   const subjectsCount = await Subject.countDocuments({ semesterId: id });
   if (subjectsCount > 0) {
-    return { success: false, error: "Cannot delete semester with existing subjects" };
+    return {
+      success: false,
+      error: "Cannot delete semester with existing subjects",
+    };
   }
 
   await Semester.findByIdAndDelete(id);
@@ -347,7 +360,9 @@ export async function updateSubject(id: string, input: UpdateSubjectInput) {
   await connectDB();
 
   try {
-    const subject = await Subject.findByIdAndUpdate(id, validated, { new: true });
+    const subject = await Subject.findByIdAndUpdate(id, validated, {
+      new: true,
+    });
     revalidatePath("/admin/subjects");
     return { success: true, subject: JSON.parse(JSON.stringify(subject)) };
   } catch (error: unknown) {
@@ -383,7 +398,10 @@ export async function createClass(input: CreateClassInput) {
   } catch (error: unknown) {
     const mongoError = error as { code?: number };
     if (mongoError.code === 11000) {
-      return { success: false, error: "Class already exists for this semester and academic year" };
+      return {
+        success: false,
+        error: "Class already exists for this semester and academic year",
+      };
     }
     return { success: false, error: "Failed to create class" };
   }
@@ -420,13 +438,18 @@ export async function updateClass(id: string, input: UpdateClassInput) {
   await connectDB();
 
   try {
-    const classDoc = await Class.findByIdAndUpdate(id, validated, { new: true });
+    const classDoc = await Class.findByIdAndUpdate(id, validated, {
+      new: true,
+    });
     revalidatePath("/admin/classes");
     return { success: true, class: JSON.parse(JSON.stringify(classDoc)) };
   } catch (error: unknown) {
     const mongoError = error as { code?: number };
     if (mongoError.code === 11000) {
-      return { success: false, error: "Class already exists for this semester and academic year" };
+      return {
+        success: false,
+        error: "Class already exists for this semester and academic year",
+      };
     }
     return { success: false, error: "Failed to update class" };
   }
@@ -439,7 +462,10 @@ export async function deleteClass(id: string) {
   // Check for subject offerings before deleting
   const offeringsCount = await SubjectOffering.countDocuments({ classId: id });
   if (offeringsCount > 0) {
-    return { success: false, error: "Cannot delete class with existing subject offerings" };
+    return {
+      success: false,
+      error: "Cannot delete class with existing subject offerings",
+    };
   }
 
   await Class.findByIdAndDelete(id);
@@ -461,7 +487,11 @@ export async function createSubjectOffering(input: CreateSubjectOfferingInput) {
   } catch (error: unknown) {
     const mongoError = error as { code?: number };
     if (mongoError.code === 11000) {
-      return { success: false, error: "This subject is already assigned to this class for this semester" };
+      return {
+        success: false,
+        error:
+          "This subject is already assigned to this class for this semester",
+      };
     }
     return { success: false, error: "Failed to create subject offering" };
   }
@@ -510,19 +540,27 @@ export async function getSubjectOfferingsByClass(classId: string) {
   return JSON.parse(JSON.stringify(offerings));
 }
 
-export async function updateSubjectOffering(id: string, input: UpdateSubjectOfferingInput) {
+export async function updateSubjectOffering(
+  id: string,
+  input: UpdateSubjectOfferingInput,
+) {
   await requireAdmin();
   const validated = updateSubjectOfferingSchema.parse(input);
   await connectDB();
 
   try {
-    const offering = await SubjectOffering.findByIdAndUpdate(id, validated, { new: true });
+    const offering = await SubjectOffering.findByIdAndUpdate(id, validated, {
+      new: true,
+    });
     revalidatePath("/admin/subject-offerings");
     return { success: true, offering: JSON.parse(JSON.stringify(offering)) };
   } catch (error: unknown) {
     const mongoError = error as { code?: number };
     if (mongoError.code === 11000) {
-      return { success: false, error: "This subject is already assigned to this class" };
+      return {
+        success: false,
+        error: "This subject is already assigned to this class",
+      };
     }
     return { success: false, error: "Failed to update subject offering" };
   }
@@ -549,7 +587,9 @@ export async function getAvailableProfessors() {
 
 // ==================== CLASS COORDINATORS ====================
 
-export async function assignClassCoordinator(input: AssignClassCoordinatorInput) {
+export async function assignClassCoordinator(
+  input: AssignClassCoordinatorInput,
+) {
   await requireAdmin();
   const validated = assignClassCoordinatorSchema.parse(input);
   await connectDB();
@@ -559,11 +599,14 @@ export async function assignClassCoordinator(input: AssignClassCoordinatorInput)
     const coordinator = await ClassCoordinator.findOneAndUpdate(
       { classId: validated.classId, academicYear: validated.academicYear },
       { ...validated, isActive: true },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
-    
+
     revalidatePath("/admin/class-coordinators");
-    return { success: true, coordinator: JSON.parse(JSON.stringify(coordinator)) };
+    return {
+      success: true,
+      coordinator: JSON.parse(JSON.stringify(coordinator)),
+    };
   } catch (error) {
     console.error("Error assigning class coordinator:", error);
     return { success: false, error: "Failed to assign class coordinator" };
@@ -592,7 +635,10 @@ export async function getAllClassCoordinators() {
   return JSON.parse(JSON.stringify(coordinators));
 }
 
-export async function getClassCoordinatorByClass(classId: string, academicYear: string) {
+export async function getClassCoordinatorByClass(
+  classId: string,
+  academicYear: string,
+) {
   await connectDB();
   const coordinator = await ClassCoordinator.findOne({
     classId,
@@ -606,7 +652,10 @@ export async function getClassCoordinatorByClass(classId: string, academicYear: 
 
 export async function getClassesByCoordinator(professorId: string) {
   await connectDB();
-  const coordinators = await ClassCoordinator.find({ professorId, isActive: true })
+  const coordinators = await ClassCoordinator.find({
+    professorId,
+    isActive: true,
+  })
     .populate({
       path: "classId",
       select: "name academicYear semesterId",
@@ -621,15 +670,18 @@ export async function getClassesByCoordinator(professorId: string) {
   return JSON.parse(JSON.stringify(coordinators));
 }
 
-export async function removeClassCoordinator(classId: string, academicYear: string) {
+export async function removeClassCoordinator(
+  classId: string,
+  academicYear: string,
+) {
   await requireAdmin();
   await connectDB();
 
   await ClassCoordinator.findOneAndUpdate(
     { classId, academicYear },
-    { isActive: false }
+    { isActive: false },
   );
-  
+
   revalidatePath("/admin/class-coordinators");
   return { success: true, error: null };
 }
@@ -647,7 +699,15 @@ export async function deleteClassCoordinator(id: string) {
 
 export async function getAcademicStats() {
   await connectDB();
-  const [departments, courses, semesters, subjects, classes, offerings, coordinators] = await Promise.all([
+  const [
+    departments,
+    courses,
+    semesters,
+    subjects,
+    classes,
+    offerings,
+    coordinators,
+  ] = await Promise.all([
     Department.countDocuments({ isActive: true }),
     Course.countDocuments({ isActive: true }),
     Semester.countDocuments({ isActive: true }),
@@ -656,5 +716,13 @@ export async function getAcademicStats() {
     SubjectOffering.countDocuments({ isActive: true }),
     ClassCoordinator.countDocuments({ isActive: true }),
   ]);
-  return { departments, courses, semesters, subjects, classes, offerings, coordinators };
+  return {
+    departments,
+    courses,
+    semesters,
+    subjects,
+    classes,
+    offerings,
+    coordinators,
+  };
 }

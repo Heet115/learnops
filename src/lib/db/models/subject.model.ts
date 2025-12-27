@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface ISubject extends Document {
   name: string;
@@ -26,7 +26,7 @@ const SubjectSchema = new Schema<ISubject>(
     },
     semesterId: {
       type: Schema.Types.ObjectId,
-      ref: 'Semester',
+      ref: "Semester",
       required: true,
     },
     credits: {
@@ -42,9 +42,10 @@ const SubjectSchema = new Schema<ISubject>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 SubjectSchema.index({ semesterId: 1 });
 
-export const Subject = mongoose.models.Subject || mongoose.model<ISubject>('Subject', SubjectSchema);
+export const Subject =
+  mongoose.models.Subject || mongoose.model<ISubject>("Subject", SubjectSchema);

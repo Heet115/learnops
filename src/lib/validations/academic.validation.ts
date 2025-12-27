@@ -122,6 +122,12 @@ export type CreateSubjectInput = z.infer<typeof createSubjectSchema>;
 export type UpdateSubjectInput = z.infer<typeof updateSubjectSchema>;
 export type CreateClassInput = z.infer<typeof createClassSchema>;
 export type UpdateClassInput = z.infer<typeof updateClassSchema>;
-export type CreateSubjectOfferingInput = z.infer<typeof createSubjectOfferingSchema>;
-export type UpdateSubjectOfferingInput = z.infer<typeof updateSubjectOfferingSchema>;
-export type AssignClassCoordinatorInput = z.infer<typeof assignClassCoordinatorSchema>;
+export type CreateSubjectOfferingInput = z.infer<
+  typeof createSubjectOfferingSchema
+>;
+export type UpdateSubjectOfferingInput = z.infer<
+  typeof updateSubjectOfferingSchema
+>;
+export type AssignClassCoordinatorInput = z.infer<
+  typeof assignClassCoordinatorSchema
+>;

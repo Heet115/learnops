@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IClass extends Document {
   name: string;
@@ -18,7 +18,7 @@ const ClassSchema = new Schema<IClass>(
     },
     semesterId: {
       type: Schema.Types.ObjectId,
-      ref: 'Semester',
+      ref: "Semester",
       required: true,
     },
     academicYear: {
@@ -33,10 +33,14 @@ const ClassSchema = new Schema<IClass>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 ClassSchema.index({ semesterId: 1, academicYear: 1 });
-ClassSchema.index({ name: 1, semesterId: 1, academicYear: 1 }, { unique: true });
+ClassSchema.index(
+  { name: 1, semesterId: 1, academicYear: 1 },
+  { unique: true },
+);
 
-export const Class = mongoose.models.Class || mongoose.model<IClass>('Class', ClassSchema);
+export const Class =
+  mongoose.models.Class || mongoose.model<IClass>("Class", ClassSchema);

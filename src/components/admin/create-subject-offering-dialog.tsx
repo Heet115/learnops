@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,18 +11,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Plus } from 'lucide-react';
-import { createSubjectOffering } from '@/lib/actions/academic.actions';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { Plus } from "lucide-react";
+import { createSubjectOffering } from "@/lib/actions/academic.actions";
+import { toast } from "sonner";
 
 interface Semester {
   _id: string;
@@ -89,7 +89,7 @@ export function CreateSubjectOfferingDialog({
 }: CreateSubjectOfferingDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedSemester, setSelectedSemester] = useState('');
+  const [selectedSemester, setSelectedSemester] = useState("");
   const router = useRouter();
 
   const academicYears = getAcademicYearOptions();
@@ -111,34 +111,37 @@ export function CreateSubjectOfferingDialog({
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      subjectId: formData.get('subjectId') as string,
-      classId: formData.get('classId') as string,
-      professorId: formData.get('professorId') as string,
+      subjectId: formData.get("subjectId") as string,
+      classId: formData.get("classId") as string,
+      professorId: formData.get("professorId") as string,
       semesterId: selectedSemester,
-      academicYear: formData.get('academicYear') as string,
+      academicYear: formData.get("academicYear") as string,
     };
 
     const result = await createSubjectOffering(data);
 
     if (result.success) {
-      toast.success('Subject offering created successfully');
+      toast.success("Subject offering created successfully");
       setOpen(false);
-      setSelectedSemester('');
+      setSelectedSemester("");
       router.refresh();
     } else {
-      toast.error(result.error || 'Failed to create subject offering');
+      toast.error(result.error || "Failed to create subject offering");
     }
 
     setLoading(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => {
-      setOpen(o);
-      if (!o) {
-        setSelectedSemester('');
-      }
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) {
+          setSelectedSemester("");
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -167,7 +170,8 @@ export function CreateSubjectOfferingDialog({
                 <SelectContent>
                   {semesters.map((semester) => (
                     <SelectItem key={semester._id} value={semester._id}>
-                      {semester.courseId.departmentId.code} - {semester.courseId.code} - {semester.name}
+                      {semester.courseId.departmentId.code} -{" "}
+                      {semester.courseId.code} - {semester.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -178,7 +182,13 @@ export function CreateSubjectOfferingDialog({
               <Label htmlFor="subjectId">Subject</Label>
               <Select name="subjectId" required disabled={!selectedSemester}>
                 <SelectTrigger>
-                  <SelectValue placeholder={selectedSemester ? "Select subject" : "Select semester first"} />
+                  <SelectValue
+                    placeholder={
+                      selectedSemester
+                        ? "Select subject"
+                        : "Select semester first"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {filteredSubjects.map((subject) => (
@@ -194,7 +204,13 @@ export function CreateSubjectOfferingDialog({
               <Label htmlFor="classId">Class</Label>
               <Select name="classId" required disabled={!selectedSemester}>
                 <SelectTrigger>
-                  <SelectValue placeholder={selectedSemester ? "Select class" : "Select semester first"} />
+                  <SelectValue
+                    placeholder={
+                      selectedSemester
+                        ? "Select class"
+                        : "Select semester first"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {filteredClasses.map((classItem) => (
@@ -239,11 +255,15 @@ export function CreateSubjectOfferingDialog({
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !selectedSemester}>
-              {loading ? 'Creating...' : 'Create Assignment'}
+              {loading ? "Creating..." : "Create Assignment"}
             </Button>
           </DialogFooter>
         </form>

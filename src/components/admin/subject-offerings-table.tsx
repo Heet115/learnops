@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -9,19 +9,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
-import { deleteSubjectOffering } from '@/lib/actions/academic.actions';
-import { toast } from 'sonner';
-import { EditSubjectOfferingDialog } from './edit-subject-offering-dialog';
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { deleteSubjectOffering } from "@/lib/actions/academic.actions";
+import { toast } from "sonner";
+import { EditSubjectOfferingDialog } from "./edit-subject-offering-dialog";
 
 interface SubjectOffering {
   _id: string;
@@ -75,24 +75,26 @@ export function SubjectOfferingsTable({
   offerings,
   professors,
 }: SubjectOfferingsTableProps) {
-  const [editingOffering, setEditingOffering] = useState<SubjectOffering | null>(null);
+  const [editingOffering, setEditingOffering] =
+    useState<SubjectOffering | null>(null);
   const router = useRouter();
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this subject offering?')) return;
+    if (!confirm("Are you sure you want to delete this subject offering?"))
+      return;
 
     const result = await deleteSubjectOffering(id);
     if (result.success) {
-      toast.success('Subject offering deleted successfully');
+      toast.success("Subject offering deleted successfully");
       router.refresh();
     } else {
-      toast.error(result.error || 'Failed to delete subject offering');
+      toast.error(result.error || "Failed to delete subject offering");
     }
   };
 
   if (offerings.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <div className="text-muted-foreground py-8 text-center">
         No subject offerings found. Create your first assignment to get started.
       </div>
     );
@@ -117,29 +119,39 @@ export function SubjectOfferingsTable({
             <TableRow key={offering._id}>
               <TableCell>
                 <div>
-                  <span className="font-medium">{offering.subjectId?.code}</span>
-                  <p className="text-sm text-muted-foreground">{offering.subjectId?.name}</p>
+                  <span className="font-medium">
+                    {offering.subjectId?.code}
+                  </span>
+                  <p className="text-muted-foreground text-sm">
+                    {offering.subjectId?.name}
+                  </p>
                 </div>
               </TableCell>
-              <TableCell>{offering.classId?.name || 'N/A'}</TableCell>
+              <TableCell>{offering.classId?.name || "N/A"}</TableCell>
               <TableCell>
                 <div>
-                  <span>{offering.professorId?.firstName} {offering.professorId?.lastName}</span>
-                  <p className="text-sm text-muted-foreground">{offering.professorId?.email}</p>
+                  <span>
+                    {offering.professorId?.firstName}{" "}
+                    {offering.professorId?.lastName}
+                  </span>
+                  <p className="text-muted-foreground text-sm">
+                    {offering.professorId?.email}
+                  </p>
                 </div>
               </TableCell>
               <TableCell>
                 <div>
                   <span>{offering.semesterId?.name}</span>
-                  <p className="text-sm text-muted-foreground">
-                    {offering.semesterId?.courseId?.departmentId?.code} - {offering.semesterId?.courseId?.code}
+                  <p className="text-muted-foreground text-sm">
+                    {offering.semesterId?.courseId?.departmentId?.code} -{" "}
+                    {offering.semesterId?.courseId?.code}
                   </p>
                 </div>
               </TableCell>
               <TableCell>{offering.academicYear}</TableCell>
               <TableCell>
-                <Badge variant={offering.isActive ? 'default' : 'secondary'}>
-                  {offering.isActive ? 'Active' : 'Inactive'}
+                <Badge variant={offering.isActive ? "default" : "secondary"}>
+                  {offering.isActive ? "Active" : "Inactive"}
                 </Badge>
               </TableCell>
               <TableCell>
@@ -150,7 +162,9 @@ export function SubjectOfferingsTable({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setEditingOffering(offering)}>
+                    <DropdownMenuItem
+                      onClick={() => setEditingOffering(offering)}
+                    >
                       <Pencil className="mr-2 h-4 w-4" />
                       Edit
                     </DropdownMenuItem>

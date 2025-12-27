@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,18 +11,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Crown } from 'lucide-react';
-import { assignClassCoordinator } from '@/lib/actions/academic.actions';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { Crown } from "lucide-react";
+import { assignClassCoordinator } from "@/lib/actions/academic.actions";
+import { toast } from "sonner";
 
 interface ClassItem {
   _id: string;
@@ -63,7 +63,10 @@ function getAcademicYearOptions() {
   return options;
 }
 
-export function AssignCoordinatorDialog({ classes, professors }: AssignCoordinatorDialogProps) {
+export function AssignCoordinatorDialog({
+  classes,
+  professors,
+}: AssignCoordinatorDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -76,19 +79,19 @@ export function AssignCoordinatorDialog({ classes, professors }: AssignCoordinat
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      classId: formData.get('classId') as string,
-      professorId: formData.get('professorId') as string,
-      academicYear: formData.get('academicYear') as string,
+      classId: formData.get("classId") as string,
+      professorId: formData.get("professorId") as string,
+      academicYear: formData.get("academicYear") as string,
     };
 
     const result = await assignClassCoordinator(data);
 
     if (result.success) {
-      toast.success('Class coordinator assigned successfully');
+      toast.success("Class coordinator assigned successfully");
       setOpen(false);
       router.refresh();
     } else {
-      toast.error(result.error || 'Failed to assign coordinator');
+      toast.error(result.error || "Failed to assign coordinator");
     }
 
     setLoading(false);
@@ -107,7 +110,8 @@ export function AssignCoordinatorDialog({ classes, professors }: AssignCoordinat
           <DialogHeader>
             <DialogTitle>Assign Class Coordinator</DialogTitle>
             <DialogDescription>
-              Assign a professor as the coordinator for a class. This will replace any existing coordinator.
+              Assign a professor as the coordinator for a class. This will
+              replace any existing coordinator.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -120,7 +124,9 @@ export function AssignCoordinatorDialog({ classes, professors }: AssignCoordinat
                 <SelectContent>
                   {classes.map((classItem) => (
                     <SelectItem key={classItem._id} value={classItem._id}>
-                      {classItem.semesterId?.courseId?.departmentId?.code} - {classItem.semesterId?.courseId?.code} - {classItem.semesterId?.name} - {classItem.name}
+                      {classItem.semesterId?.courseId?.departmentId?.code} -{" "}
+                      {classItem.semesterId?.courseId?.code} -{" "}
+                      {classItem.semesterId?.name} - {classItem.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -160,11 +166,15 @@ export function AssignCoordinatorDialog({ classes, professors }: AssignCoordinat
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Assigning...' : 'Assign Coordinator'}
+              {loading ? "Assigning..." : "Assign Coordinator"}
             </Button>
           </DialogFooter>
         </form>

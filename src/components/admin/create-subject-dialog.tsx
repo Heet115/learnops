@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,19 +11,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Plus } from 'lucide-react';
-import { createSubject } from '@/lib/actions/academic.actions';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { Plus } from "lucide-react";
+import { createSubject } from "@/lib/actions/academic.actions";
+import { toast } from "sonner";
 
 interface Semester {
   _id: string;
@@ -55,20 +55,20 @@ export function CreateSubjectDialog({ semesters }: CreateSubjectDialogProps) {
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      name: formData.get('name') as string,
-      code: formData.get('code') as string,
-      semesterId: formData.get('semesterId') as string,
-      credits: parseInt(formData.get('credits') as string, 10),
+      name: formData.get("name") as string,
+      code: formData.get("code") as string,
+      semesterId: formData.get("semesterId") as string,
+      credits: parseInt(formData.get("credits") as string, 10),
     };
 
     const result = await createSubject(data);
 
     if (result.success) {
-      toast.success('Subject created successfully');
+      toast.success("Subject created successfully");
       setOpen(false);
       router.refresh();
     } else {
-      toast.error(result.error || 'Failed to create subject');
+      toast.error(result.error || "Failed to create subject");
     }
 
     setLoading(false);
@@ -102,12 +102,7 @@ export function CreateSubjectDialog({ semesters }: CreateSubjectDialogProps) {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="code">Subject Code</Label>
-              <Input
-                id="code"
-                name="code"
-                placeholder="e.g., CS201"
-                required
-              />
+              <Input id="code" name="code" placeholder="e.g., CS201" required />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="semesterId">Semester</Label>
@@ -118,7 +113,8 @@ export function CreateSubjectDialog({ semesters }: CreateSubjectDialogProps) {
                 <SelectContent>
                   {semesters.map((semester) => (
                     <SelectItem key={semester._id} value={semester._id}>
-                      {semester.courseId.departmentId.code} - {semester.courseId.code} - {semester.name}
+                      {semester.courseId.departmentId.code} -{" "}
+                      {semester.courseId.code} - {semester.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -133,7 +129,7 @@ export function CreateSubjectDialog({ semesters }: CreateSubjectDialogProps) {
                 <SelectContent>
                   {[1, 2, 3, 4, 5, 6].map((credit) => (
                     <SelectItem key={credit} value={credit.toString()}>
-                      {credit} {credit === 1 ? 'Credit' : 'Credits'}
+                      {credit} {credit === 1 ? "Credit" : "Credits"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -141,11 +137,15 @@ export function CreateSubjectDialog({ semesters }: CreateSubjectDialogProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Subject'}
+              {loading ? "Creating..." : "Create Subject"}
             </Button>
           </DialogFooter>
         </form>

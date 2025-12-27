@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -9,19 +9,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
-import { deleteClass } from '@/lib/actions/academic.actions';
-import { toast } from 'sonner';
-import { EditClassDialog } from './edit-class-dialog';
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { deleteClass } from "@/lib/actions/academic.actions";
+import { toast } from "sonner";
+import { EditClassDialog } from "./edit-class-dialog";
 
 interface ClassItem {
   _id: string;
@@ -73,16 +73,16 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
 
     const result = await deleteClass(id);
     if (result.success) {
-      toast.success('Class deleted successfully');
+      toast.success("Class deleted successfully");
       router.refresh();
     } else {
-      toast.error(result.error || 'Failed to delete class');
+      toast.error(result.error || "Failed to delete class");
     }
   };
 
   if (classes.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <div className="text-muted-foreground py-8 text-center">
         No classes found. Create your first class to get started.
       </div>
     );
@@ -106,15 +106,18 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
           {classes.map((classItem) => (
             <TableRow key={classItem._id}>
               <TableCell className="font-medium">{classItem.name}</TableCell>
-              <TableCell>{classItem.semesterId?.name || 'N/A'}</TableCell>
+              <TableCell>{classItem.semesterId?.name || "N/A"}</TableCell>
               <TableCell>
-                {classItem.semesterId?.courseId?.name || 'N/A'} ({classItem.semesterId?.courseId?.code || ''})
+                {classItem.semesterId?.courseId?.name || "N/A"} (
+                {classItem.semesterId?.courseId?.code || ""})
               </TableCell>
-              <TableCell>{classItem.semesterId?.courseId?.departmentId?.code || 'N/A'}</TableCell>
+              <TableCell>
+                {classItem.semesterId?.courseId?.departmentId?.code || "N/A"}
+              </TableCell>
               <TableCell>{classItem.academicYear}</TableCell>
               <TableCell>
-                <Badge variant={classItem.isActive ? 'default' : 'secondary'}>
-                  {classItem.isActive ? 'Active' : 'Inactive'}
+                <Badge variant={classItem.isActive ? "default" : "secondary"}>
+                  {classItem.isActive ? "Active" : "Inactive"}
                 </Badge>
               </TableCell>
               <TableCell>
@@ -125,13 +128,17 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setEditingClass(classItem)}>
+                    <DropdownMenuItem
+                      onClick={() => setEditingClass(classItem)}
+                    >
                       <Pencil className="mr-2 h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-destructive"
-                      onClick={() => handleDelete(classItem._id, classItem.name)}
+                      onClick={() =>
+                        handleDelete(classItem._id, classItem.name)
+                      }
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
