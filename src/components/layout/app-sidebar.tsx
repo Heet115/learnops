@@ -101,6 +101,11 @@ const getNavItems = (role: UserRole) => {
         icon: Crown,
       },
       {
+        title: "Student Assignments",
+        url: "/admin/student-assignments",
+        icon: Users,
+      },
+      {
         title: "Settings",
         url: "/admin/settings",
         icon: Settings,
