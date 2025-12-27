@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { connectDB, Department, Course, Semester, User } from "@/lib/db";
+import { connectDB, Department, Course, Semester, Subject, User } from "@/lib/db";
 import {
   createDepartmentSchema,
   updateDepartmentSchema,
@@ -9,12 +9,16 @@ import {
   updateCourseSchema,
   createSemesterSchema,
   updateSemesterSchema,
+  createSubjectSchema,
+  updateSubjectSchema,
   CreateDepartmentInput,
   UpdateDepartmentInput,
   CreateCourseInput,
   UpdateCourseInput,
   CreateSemesterInput,
   UpdateSemesterInput,
+  CreateSubjectInput,
+  UpdateSubjectInput,
 } from "@/lib/validations/academic.validation";
 import { revalidatePath } from "next/cache";
 
@@ -271,20 +275,99 @@ export async function deleteSemester(id: string) {
   await requireAdmin();
   await connectDB();
 
-  // TODO: Check for subjects/classes before deleting
+  // Check for subjects before deleting
+  const subjectsCount = await Subject.countDocuments({ semesterId: id });
+  if (subjectsCount > 0) {
+    return { success: false, error: "Cannot delete semester with existing subjects" };
+  }
+
   await Semester.findByIdAndDelete(id);
   revalidatePath("/admin/semesters");
   return { success: true };
+}
+
+// ==================== SUBJECTS ====================
+
+export async function createSubject(input: CreateSubjectInput) {
+  await requireAdmin();
+  const validated = createSubjectSchema.parse(input);
+  await connectDB();
+
+  try {
+    const subject = await Subject.create(validated);
+    revalidatePath("/admin/subjects");
+    return { success: true, subject: JSON.parse(JSON.stringify(subject)) };
+  } catch (error: unknown) {
+    const mongoError = error as { code?: number };
+    if (mongoError.code === 11000) {
+      return { success: false, error: "Subject code already exists" };
+    }
+    return { success: false, error: "Failed to create subject" };
+  }
+}
+
+export async function getAllSubjects() {
+  await connectDB();
+  const subjects = await Subject.find()
+    .populate({
+      path: "semesterId",
+      select: "name number courseId",
+      populate: {
+        path: "courseId",
+        select: "name code departmentId",
+        populate: { path: "departmentId", select: "name code" },
+      },
+    })
+    .sort({ code: 1 })
+    .lean();
+  return JSON.parse(JSON.stringify(subjects));
+}
+
+export async function getSubjectsBySemester(semesterId: string) {
+  await connectDB();
+  const subjects = await Subject.find({ semesterId, isActive: true })
+    .sort({ name: 1 })
+    .lean();
+  return JSON.parse(JSON.stringify(subjects));
+}
+
+export async function updateSubject(id: string, input: UpdateSubjectInput) {
+  await requireAdmin();
+  const validated = updateSubjectSchema.parse(input);
+  await connectDB();
+
+  try {
+    const subject = await Subject.findByIdAndUpdate(id, validated, { new: true });
+    revalidatePath("/admin/subjects");
+    return { success: true, subject: JSON.parse(JSON.stringify(subject)) };
+  } catch (error: unknown) {
+    const mongoError = error as { code?: number };
+    if (mongoError.code === 11000) {
+      return { success: false, error: "Subject code already exists" };
+    }
+    return { success: false, error: "Failed to update subject" };
+  }
+}
+
+export async function deleteSubject(id: string) {
+  await requireAdmin();
+  await connectDB();
+
+  // TODO: Check for subject offerings before deleting
+  await Subject.findByIdAndDelete(id);
+  revalidatePath("/admin/subjects");
+  return { success: true, error: null };
 }
 
 // ==================== STATS ====================
 
 export async function getAcademicStats() {
   await connectDB();
-  const [departments, courses, semesters] = await Promise.all([
+  const [departments, courses, semesters, subjects] = await Promise.all([
     Department.countDocuments({ isActive: true }),
     Course.countDocuments({ isActive: true }),
     Semester.countDocuments({ isActive: true }),
+    Subject.countDocuments({ isActive: true }),
   ]);
-  return { departments, courses, semesters };
+  return { departments, courses, semesters, subjects };
 }
