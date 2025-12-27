@@ -4,7 +4,13 @@ import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
 import { getSubmissionForGrading } from "@/lib/actions/grading.actions";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -19,6 +25,7 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Users,
 } from "lucide-react";
 import { GradingForm } from "@/components/professor/grading-form";
 
@@ -52,15 +59,33 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
 
   const ala = submission.alaId;
   const student = submission.studentId;
+  const groupMembers = submission.groupMembers || [];
+  const isGroupSubmission = ala?.isGroupSubmission && groupMembers.length > 0;
+  const allMembers = isGroupSubmission ? [student, ...groupMembers] : [student];
 
   const getStatusBadge = () => {
     switch (submission.status) {
       case "graded":
-        return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" />Graded</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-800">
+            <CheckCircle className="mr-1 h-3 w-3" />
+            Graded
+          </Badge>
+        );
       case "submitted":
-        return <Badge className="bg-orange-100 text-orange-800"><Clock className="h-3 w-3 mr-1" />Pending Review</Badge>;
+        return (
+          <Badge className="bg-orange-100 text-orange-800">
+            <Clock className="mr-1 h-3 w-3" />
+            Pending Review
+          </Badge>
+        );
       case "rejected":
-        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
+        return (
+          <Badge variant="destructive">
+            <XCircle className="mr-1 h-3 w-3" />
+            Rejected
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{submission.status}</Badge>;
     }
@@ -95,7 +120,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          <div className="md:col-span-2 space-y-6">
+          <div className="space-y-6 md:col-span-2">
             {/* Submitted Files */}
             <Card>
               <CardHeader>
@@ -107,31 +132,42 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               <CardContent>
                 {submission.files && submission.files.length > 0 ? (
                   <div className="space-y-3">
-                    {submission.files.map((file: { name: string; url: string; size: number }, index: number) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-3 rounded-lg border"
-                      >
-                        <div className="flex items-center gap-3">
-                          <FileText className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="font-medium text-sm">{file.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {(file.size / 1024).toFixed(1)} KB
-                            </p>
+                    {submission.files.map(
+                      (
+                        file: { name: string; url: string; size: number },
+                        index: number,
+                      ) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between rounded-lg border p-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <FileText className="text-muted-foreground h-4 w-4" />
+                            <div>
+                              <p className="text-sm font-medium">{file.name}</p>
+                              <p className="text-muted-foreground text-xs">
+                                {(file.size / 1024).toFixed(1)} KB
+                              </p>
+                            </div>
                           </div>
+                          <Button variant="outline" size="sm" asChild>
+                            <a
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              Download
+                            </a>
+                          </Button>
                         </div>
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={file.url} target="_blank" rel="noopener noreferrer">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download
-                          </a>
-                        </Button>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No files submitted</p>
+                  <p className="text-muted-foreground text-sm">
+                    No files submitted
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -147,31 +183,41 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               <CardContent>
                 {submission.links && submission.links.length > 0 ? (
                   <div className="space-y-3">
-                    {submission.links.map((link: { title: string; url: string }, index: number) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-3 rounded-lg border"
-                      >
-                        <div className="flex items-center gap-3">
-                          <LinkIcon className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="font-medium text-sm">{link.title}</p>
-                            <p className="text-xs text-muted-foreground truncate max-w-[300px]">
-                              {link.url}
-                            </p>
+                    {submission.links.map(
+                      (link: { title: string; url: string }, index: number) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between rounded-lg border p-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <LinkIcon className="text-muted-foreground h-4 w-4" />
+                            <div>
+                              <p className="text-sm font-medium">
+                                {link.title}
+                              </p>
+                              <p className="text-muted-foreground max-w-[300px] truncate text-xs">
+                                {link.url}
+                              </p>
+                            </div>
                           </div>
+                          <Button variant="outline" size="sm" asChild>
+                            <a
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Open
+                            </a>
+                          </Button>
                         </div>
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={link.url} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Open
-                          </a>
-                        </Button>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No links submitted</p>
+                  <p className="text-muted-foreground text-sm">
+                    No links submitted
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -188,21 +234,76 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
           </div>
 
           <div className="space-y-6">
-            {/* Student Info */}
+            {/* Student/Group Info */}
             <Card>
               <CardHeader>
-                <CardTitle>Student</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  {isGroupSubmission ? (
+                    <>
+                      <Users className="h-4 w-4" />
+                      Group Submission
+                    </>
+                  ) : (
+                    "Student"
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <User className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">
-                      {student?.firstName} {student?.lastName}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{student?.email}</p>
+                {isGroupSubmission ? (
+                  <>
+                    <div>
+                      <p className="text-muted-foreground mb-2 text-xs">
+                        Group Members ({allMembers.length})
+                      </p>
+                      <div className="space-y-2">
+                        {allMembers.map(
+                          (
+                            member: {
+                              firstName: string;
+                              lastName: string;
+                              email?: string;
+                            },
+                            index: number,
+                          ) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2"
+                            >
+                              <User className="text-muted-foreground h-3 w-3" />
+                              <span className="text-sm">
+                                {member.firstName} {member.lastName}
+                              </span>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                    <Separator />
+                    <div>
+                      <p className="text-muted-foreground text-xs">
+                        Submitted by
+                      </p>
+                      <p className="text-sm font-medium">
+                        {student?.firstName} {student?.lastName}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        {student?.email}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <User className="text-muted-foreground h-4 w-4" />
+                    <div>
+                      <p className="text-sm font-medium">
+                        {student?.firstName} {student?.lastName}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        {student?.email}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
@@ -214,18 +315,19 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm font-medium">{ala?.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {ala?.subjectOfferingId?.subjectId?.code} - {ala?.subjectOfferingId?.subjectId?.name}
+                  <p className="text-muted-foreground text-xs">
+                    {ala?.subjectOfferingId?.subjectId?.code} -{" "}
+                    {ala?.subjectOfferingId?.subjectId?.name}
                   </p>
                 </div>
 
                 <Separator />
 
                 <div className="flex items-center gap-3">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="text-muted-foreground h-4 w-4" />
                   <div>
                     <p className="text-sm font-medium">Deadline</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-muted-foreground text-xs">
                       {new Date(ala?.deadline).toLocaleString()}
                     </p>
                   </div>
@@ -235,14 +337,16 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
 
                 <div>
                   <p className="text-sm font-medium">Max Marks</p>
-                  <p className="text-xs text-muted-foreground">{ala?.maxMarks}</p>
+                  <p className="text-muted-foreground text-xs">
+                    {ala?.maxMarks}
+                  </p>
                 </div>
 
                 <Separator />
 
                 <div>
                   <p className="text-sm font-medium">Submitted At</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {submission.submittedAt
                       ? new Date(submission.submittedAt).toLocaleString()
                       : "-"}
@@ -254,7 +358,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                     <Separator />
                     <div>
                       <p className="text-sm font-medium">Graded At</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {new Date(submission.gradedAt).toLocaleString()}
                       </p>
                     </div>

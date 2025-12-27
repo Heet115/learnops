@@ -45,7 +45,9 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isGroupSubmission, setIsGroupSubmission] = useState(false);
-  const [groupFormation, setGroupFormation] = useState<"student" | "professor">("student");
+  const [groupFormation, setGroupFormation] = useState<"student" | "professor">(
+    "student",
+  );
   const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(["pdf"]);
   const router = useRouter();
 
@@ -238,23 +240,31 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
                   <Label>Group Formation</Label>
                   <RadioGroup
                     value={groupFormation}
-                    onValueChange={(v) => setGroupFormation(v as "student" | "professor")}
+                    onValueChange={(v) =>
+                      setGroupFormation(v as "student" | "professor")
+                    }
                     className="flex gap-4"
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="student" id="student-formed" />
-                      <Label htmlFor="student-formed" className="font-normal cursor-pointer">
+                      <Label
+                        htmlFor="student-formed"
+                        className="cursor-pointer font-normal"
+                      >
                         Students create groups
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="professor" id="professor-formed" />
-                      <Label htmlFor="professor-formed" className="font-normal cursor-pointer">
+                      <Label
+                        htmlFor="professor-formed"
+                        className="cursor-pointer font-normal"
+                      >
                         I will assign groups
                       </Label>
                     </div>
                   </RadioGroup>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {groupFormation === "student"
                       ? "Students will create their own groups and invite classmates"
                       : "You will create groups and assign students after creating the ALA"}

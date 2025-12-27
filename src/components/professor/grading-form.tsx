@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +23,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
-import { gradeSubmission, rejectSubmission } from "@/lib/actions/grading.actions";
+import {
+  gradeSubmission,
+  rejectSubmission,
+} from "@/lib/actions/grading.actions";
 import { toast } from "sonner";
 
 interface GradingFormProps {
@@ -115,12 +124,12 @@ export function GradingForm({
           {currentFeedback && (
             <div>
               <p className="text-sm font-medium">Feedback</p>
-              <p className="text-sm text-muted-foreground">{currentFeedback}</p>
+              <p className="text-muted-foreground text-sm">{currentFeedback}</p>
             </div>
           )}
 
-          <div className="pt-4 border-t">
-            <p className="text-sm text-muted-foreground mb-3">Update grade:</p>
+          <div className="border-t pt-4">
+            <p className="text-muted-foreground mb-3 text-sm">Update grade:</p>
             <form onSubmit={handleGrade} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
@@ -136,7 +145,9 @@ export function GradingForm({
                   />
                 </div>
                 <div className="flex items-end">
-                  <span className="text-sm text-muted-foreground">/ {maxMarks}</span>
+                  <span className="text-muted-foreground text-sm">
+                    / {maxMarks}
+                  </span>
                 </div>
               </div>
               <div className="grid gap-2">
@@ -180,9 +191,11 @@ export function GradingForm({
         <CardContent>
           <div>
             <p className="text-sm font-medium">Reason</p>
-            <p className="text-sm text-muted-foreground">{currentRejectionReason}</p>
+            <p className="text-muted-foreground text-sm">
+              {currentRejectionReason}
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground mt-4">
+          <p className="text-muted-foreground mt-4 text-sm">
             The student can resubmit their work.
           </p>
         </CardContent>
@@ -213,7 +226,9 @@ export function GradingForm({
               />
             </div>
             <div className="flex items-end pb-2">
-              <span className="text-sm text-muted-foreground">/ {maxMarks}</span>
+              <span className="text-muted-foreground text-sm">
+                / {maxMarks}
+              </span>
             </div>
           </div>
 
@@ -276,7 +291,11 @@ export function GradingForm({
                     >
                       Cancel
                     </Button>
-                    <Button type="submit" variant="destructive" disabled={rejecting}>
+                    <Button
+                      type="submit"
+                      variant="destructive"
+                      disabled={rejecting}
+                    >
                       {rejecting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />

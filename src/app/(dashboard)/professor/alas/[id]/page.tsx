@@ -169,7 +169,7 @@ export default async function ALADetailPage({ params }: PageProps) {
                         : "Individual"}
                     </p>
                     {ala.isGroupSubmission && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {ala.groupFormation === "professor"
                           ? "You assign groups"
                           : "Students create groups"}

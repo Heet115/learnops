@@ -95,14 +95,14 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
   };
 
   const unassignedStudents = students.filter(
-    (s) => !assignedIds.includes(s._id)
+    (s) => !assignedIds.includes(s._id),
   );
 
   if (loading) {
     return (
       <Card>
         <CardContent className="py-8 text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+          <Loader2 className="text-muted-foreground mx-auto h-8 w-8 animate-spin" />
           <p className="text-muted-foreground mt-2">Loading groups...</p>
         </CardContent>
       </Card>
@@ -134,7 +134,7 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {groups.length === 0 ? (
-          <p className="text-muted-foreground text-center py-4">
+          <p className="text-muted-foreground py-4 text-center">
             No groups created yet. Click "Create Group" to get started.
           </p>
         ) : (
@@ -154,7 +154,7 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
 
         {unassignedStudents.length > 0 && (
           <div className="border-t pt-4">
-            <p className="text-sm font-medium mb-2">
+            <p className="mb-2 text-sm font-medium">
               Unassigned Students ({unassignedStudents.length})
             </p>
             <div className="flex flex-wrap gap-2">
@@ -170,7 +170,6 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
     </Card>
   );
 }
-
 
 // Create Group Dialog
 function CreateGroupDialog({
@@ -232,7 +231,7 @@ function CreateGroupDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm" disabled={students.length < 2}>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Create Group
         </Button>
       </DialogTrigger>
@@ -258,16 +257,16 @@ function CreateGroupDialog({
               <Label>
                 Select Students ({selectedIds.length}/{maxGroupSize})
               </Label>
-              <div className="border rounded-lg max-h-60 overflow-y-auto">
+              <div className="max-h-60 overflow-y-auto rounded-lg border">
                 {students.length === 0 ? (
-                  <p className="text-muted-foreground text-sm p-4 text-center">
+                  <p className="text-muted-foreground p-4 text-center text-sm">
                     All students are assigned to groups
                   </p>
                 ) : (
                   students.map((student) => (
                     <div
                       key={student._id}
-                      className="flex items-center gap-3 p-3 border-b last:border-0 hover:bg-muted/50 cursor-pointer"
+                      className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b p-3 last:border-0"
                       onClick={() => toggleStudent(student._id)}
                     >
                       <Checkbox
@@ -279,7 +278,7 @@ function CreateGroupDialog({
                         <p className="text-sm font-medium">
                           {student.firstName} {student.lastName}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           {student.email}
                         </p>
                       </div>
@@ -339,12 +338,12 @@ function GroupCard({
   // Available students = unassigned + current group members
   const currentMemberIds = group.members.map((m) => m.studentId._id);
   const availableStudents = allStudents.filter(
-    (s) => !assignedIds.includes(s._id) || currentMemberIds.includes(s._id)
+    (s) => !assignedIds.includes(s._id) || currentMemberIds.includes(s._id),
   );
 
   return (
-    <div className="border rounded-lg p-4">
-      <div className="flex items-center justify-between mb-3">
+    <div className="rounded-lg border p-4">
+      <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h4 className="font-medium">{group.name}</h4>
           {group.isLocked && (
@@ -366,7 +365,7 @@ function GroupCard({
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="ghost" size="icon" disabled={deleting}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
+                  <Trash2 className="text-destructive h-4 w-4" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -394,7 +393,7 @@ function GroupCard({
           </div>
         ))}
       </div>
-      <p className="text-xs text-muted-foreground mt-2">
+      <p className="text-muted-foreground mt-2 text-xs">
         {group.members.length} member{group.members.length !== 1 ? "s" : ""}
       </p>
     </div>
@@ -419,7 +418,7 @@ function EditGroupDialog({
 }) {
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(
-    group.members.map((m) => m.studentId._id)
+    group.members.map((m) => m.studentId._id),
   );
   const [name, setName] = useState(group.name);
 
@@ -482,11 +481,11 @@ function EditGroupDialog({
               <Label>
                 Members ({selectedIds.length}/{maxGroupSize})
               </Label>
-              <div className="border rounded-lg max-h-60 overflow-y-auto">
+              <div className="max-h-60 overflow-y-auto rounded-lg border">
                 {availableStudents.map((student) => (
                   <div
                     key={student._id}
-                    className="flex items-center gap-3 p-3 border-b last:border-0 hover:bg-muted/50 cursor-pointer"
+                    className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b p-3 last:border-0"
                     onClick={() => toggleStudent(student._id)}
                   >
                     <Checkbox
@@ -498,7 +497,7 @@ function EditGroupDialog({
                       <p className="text-sm font-medium">
                         {student.firstName} {student.lastName}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {student.email}
                       </p>
                     </div>

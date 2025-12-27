@@ -70,19 +70,19 @@ export async function getALASubmissions(alaId: string) {
     return { success: false, error: "ALA not found or unauthorized" };
   }
 
-  const submissions = await Submission.find({ 
-    alaId, 
-    status: { $ne: "draft" } 
+  const submissions = await Submission.find({
+    alaId,
+    status: { $ne: "draft" },
   })
     .populate("studentId", "firstName lastName email")
     .populate("groupMembers", "firstName lastName")
     .sort({ submittedAt: -1 })
     .lean();
 
-  return { 
-    success: true, 
+  return {
+    success: true,
     submissions: JSON.parse(JSON.stringify(submissions)),
-    ala: JSON.parse(JSON.stringify(ala))
+    ala: JSON.parse(JSON.stringify(ala)),
   };
 }
 
@@ -94,7 +94,8 @@ export async function getSubmissionForGrading(submissionId: string) {
   const submission = await Submission.findById(submissionId)
     .populate({
       path: "alaId",
-      select: "title description deadline maxMarks allowedFileTypes professorId subjectOfferingId isGroupSubmission",
+      select:
+        "title description deadline maxMarks allowedFileTypes professorId subjectOfferingId isGroupSubmission",
       populate: {
         path: "subjectOfferingId",
         select: "subjectId classId",
@@ -114,7 +115,10 @@ export async function getSubmissionForGrading(submissionId: string) {
   }
 
   // Verify professor owns this ALA
-  const ala = submission.alaId as unknown as { professorId: { toString: () => string }; _id: string };
+  const ala = submission.alaId as unknown as {
+    professorId: { toString: () => string };
+    _id: string;
+  };
   if (!ala || ala.professorId.toString() !== professorId) {
     return null;
   }
@@ -125,7 +129,7 @@ export async function getSubmissionForGrading(submissionId: string) {
 // Grade a submission
 export async function gradeSubmission(
   submissionId: string,
-  data: { marks: number; feedback?: string }
+  data: { marks: number; feedback?: string },
 ) {
   const clerkId = await requireProfessor();
   const professorId = await getProfessorDbId(clerkId!);
@@ -135,7 +139,11 @@ export async function gradeSubmission(
     return { success: false, error: "Submission not found" };
   }
 
-  const ala = submission.alaId as unknown as { professorId: { toString: () => string }; maxMarks: number; _id: string };
+  const ala = submission.alaId as unknown as {
+    professorId: { toString: () => string };
+    maxMarks: number;
+    _id: string;
+  };
   if (ala.professorId.toString() !== professorId) {
     return { success: false, error: "Unauthorized" };
   }
@@ -145,7 +153,10 @@ export async function gradeSubmission(
   }
 
   if (data.marks < 0 || data.marks > ala.maxMarks) {
-    return { success: false, error: `Marks must be between 0 and ${ala.maxMarks}` };
+    return {
+      success: false,
+      error: `Marks must be between 0 and ${ala.maxMarks}`,
+    };
   }
 
   const updated = await Submission.findByIdAndUpdate(
@@ -158,21 +169,18 @@ export async function gradeSubmission(
       gradedAt: new Date(),
       rejectionReason: null,
     },
-    { new: true }
+    { new: true },
   );
 
   revalidatePath("/professor/submissions");
   revalidatePath(`/professor/submissions/${submissionId}`);
   revalidatePath(`/professor/alas/${ala._id}`);
-  
+
   return { success: true, submission: JSON.parse(JSON.stringify(updated)) };
 }
 
 // Reject a submission
-export async function rejectSubmission(
-  submissionId: string,
-  reason: string
-) {
+export async function rejectSubmission(submissionId: string, reason: string) {
   const clerkId = await requireProfessor();
   const professorId = await getProfessorDbId(clerkId!);
 
@@ -181,7 +189,10 @@ export async function rejectSubmission(
     return { success: false, error: "Submission not found" };
   }
 
-  const ala = submission.alaId as unknown as { professorId: { toString: () => string }; _id: string };
+  const ala = submission.alaId as unknown as {
+    professorId: { toString: () => string };
+    _id: string;
+  };
   if (ala.professorId.toString() !== professorId) {
     return { success: false, error: "Unauthorized" };
   }
@@ -202,13 +213,13 @@ export async function rejectSubmission(
       marks: null,
       feedback: null,
     },
-    { new: true }
+    { new: true },
   );
 
   revalidatePath("/professor/submissions");
   revalidatePath(`/professor/submissions/${submissionId}`);
   revalidatePath(`/professor/alas/${ala._id}`);
-  
+
   return { success: true, submission: JSON.parse(JSON.stringify(updated)) };
 }
 
@@ -224,7 +235,10 @@ export async function getProfessorGradingStats() {
     Submission.countDocuments({ alaId: { $in: alaIds }, status: "submitted" }),
     Submission.countDocuments({ alaId: { $in: alaIds }, status: "graded" }),
     Submission.countDocuments({ alaId: { $in: alaIds }, status: "rejected" }),
-    Submission.countDocuments({ alaId: { $in: alaIds }, status: { $ne: "draft" } }),
+    Submission.countDocuments({
+      alaId: { $in: alaIds },
+      status: { $ne: "draft" },
+    }),
   ]);
 
   return { pending, graded, rejected, total };

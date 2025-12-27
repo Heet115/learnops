@@ -89,7 +89,7 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
       <CardContent className="space-y-4">
         {localInvites.map((invite) => {
           const acceptedMembers = invite.members.filter(
-            (m) => m.status === "accepted"
+            (m) => m.status === "accepted",
           );
           const deadline = new Date(invite.alaId.deadline);
           const isPastDeadline = deadline < new Date();
@@ -97,25 +97,23 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
           return (
             <div
               key={invite._id}
-              className="rounded-lg border bg-white p-4 space-y-3"
+              className="space-y-3 rounded-lg border bg-white p-4"
             >
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-medium">{invite.name}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Invited by {invite.createdBy.firstName}{" "}
                     {invite.createdBy.lastName}
                   </p>
                 </div>
-                {isPastDeadline && (
-                  <Badge variant="destructive">Expired</Badge>
-                )}
+                {isPastDeadline && <Badge variant="destructive">Expired</Badge>}
               </div>
 
               <div className="text-sm">
                 <Link
                   href={`/student/alas/${invite.alaId._id}`}
-                  className="text-blue-600 hover:underline font-medium"
+                  className="font-medium text-blue-600 hover:underline"
                 >
                   {invite.alaId.title}
                 </Link>
@@ -127,7 +125,8 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
 
               <div className="text-sm">
                 <p className="text-muted-foreground">
-                  Current members: {acceptedMembers.map((m) => m.studentId.firstName).join(", ")}
+                  Current members:{" "}
+                  {acceptedMembers.map((m) => m.studentId.firstName).join(", ")}
                 </p>
               </div>
 
@@ -142,7 +141,7 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <>
-                        <Check className="h-4 w-4 mr-1" />
+                        <Check className="mr-1 h-4 w-4" />
                         Accept
                       </>
                     )}
@@ -153,7 +152,7 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
                     onClick={() => handleRespond(invite._id, false)}
                     disabled={responding === invite._id}
                   >
-                    <X className="h-4 w-4 mr-1" />
+                    <X className="mr-1 h-4 w-4" />
                     Decline
                   </Button>
                 </div>

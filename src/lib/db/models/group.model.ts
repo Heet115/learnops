@@ -31,7 +31,7 @@ const GroupMemberSchema = new Schema<IGroupMember>(
     },
     joinedAt: { type: Date },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const GroupSchema = new Schema<IGroup>(
@@ -55,7 +55,7 @@ const GroupSchema = new Schema<IGroup>(
     members: { type: [GroupMemberSchema], default: [] },
     isLocked: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Indexes

@@ -78,7 +78,7 @@ export async function getStudentsForGroupAssignment(alaId: string) {
 // Professor creates a group and assigns students
 export async function createGroupByProfessor(
   alaId: string,
-  data: { name: string; studentIds: string[] }
+  data: { name: string; studentIds: string[] },
 ) {
   const clerkId = await requireProfessor();
   const { id: professorId } = await getUserDbId(clerkId!);
@@ -89,7 +89,10 @@ export async function createGroupByProfessor(
   }
 
   if (!ala.isGroupSubmission || ala.groupFormation !== "professor") {
-    return { success: false, error: "This ALA doesn't allow professor-assigned groups" };
+    return {
+      success: false,
+      error: "This ALA doesn't allow professor-assigned groups",
+    };
   }
 
   if (data.studentIds.length < 2) {
@@ -97,7 +100,10 @@ export async function createGroupByProfessor(
   }
 
   if (ala.maxGroupSize && data.studentIds.length > ala.maxGroupSize) {
-    return { success: false, error: `Group cannot exceed ${ala.maxGroupSize} members` };
+    return {
+      success: false,
+      error: `Group cannot exceed ${ala.maxGroupSize} members`,
+    };
   }
 
   // Check if any student is already in a group for this ALA
@@ -107,7 +113,10 @@ export async function createGroupByProfessor(
   });
 
   if (existingGroups.length > 0) {
-    return { success: false, error: "Some students are already assigned to a group" };
+    return {
+      success: false,
+      error: "Some students are already assigned to a group",
+    };
   }
 
   const group = await Group.create({
@@ -129,7 +138,7 @@ export async function createGroupByProfessor(
 // Professor updates a group
 export async function updateGroupByProfessor(
   groupId: string,
-  data: { name?: string; studentIds?: string[] }
+  data: { name?: string; studentIds?: string[] },
 ) {
   const clerkId = await requireProfessor();
   const { id: professorId } = await getUserDbId(clerkId!);
@@ -139,7 +148,11 @@ export async function updateGroupByProfessor(
     return { success: false, error: "Group not found" };
   }
 
-  const ala = group.alaId as unknown as { professorId: { toString: () => string }; maxGroupSize?: number; _id: string };
+  const ala = group.alaId as unknown as {
+    professorId: { toString: () => string };
+    maxGroupSize?: number;
+    _id: string;
+  };
   if (ala.professorId.toString() !== professorId) {
     return { success: false, error: "Unauthorized" };
   }
@@ -156,7 +169,10 @@ export async function updateGroupByProfessor(
       return { success: false, error: "Group must have at least 2 members" };
     }
     if (ala.maxGroupSize && data.studentIds.length > ala.maxGroupSize) {
-      return { success: false, error: `Group cannot exceed ${ala.maxGroupSize} members` };
+      return {
+        success: false,
+        error: `Group cannot exceed ${ala.maxGroupSize} members`,
+      };
     }
 
     // Check if new students are already in other groups
@@ -167,7 +183,10 @@ export async function updateGroupByProfessor(
     });
 
     if (existingGroups.length > 0) {
-      return { success: false, error: "Some students are already in other groups" };
+      return {
+        success: false,
+        error: "Some students are already in other groups",
+      };
     }
 
     updateData.members = data.studentIds.map((studentId) => ({
@@ -177,7 +196,9 @@ export async function updateGroupByProfessor(
     }));
   }
 
-  const updated = await Group.findByIdAndUpdate(groupId, updateData, { new: true });
+  const updated = await Group.findByIdAndUpdate(groupId, updateData, {
+    new: true,
+  });
   revalidatePath(`/professor/alas/${ala._id}`);
   return { success: true, group: JSON.parse(JSON.stringify(updated)) };
 }
@@ -192,7 +213,10 @@ export async function deleteGroupByProfessor(groupId: string) {
     return { success: false, error: "Group not found" };
   }
 
-  const ala = group.alaId as unknown as { professorId: { toString: () => string }; _id: string };
+  const ala = group.alaId as unknown as {
+    professorId: { toString: () => string };
+    _id: string;
+  };
   if (ala.professorId.toString() !== professorId) {
     return { success: false, error: "Unauthorized" };
   }
@@ -205,7 +229,6 @@ export async function deleteGroupByProfessor(groupId: string) {
   revalidatePath(`/professor/alas/${ala._id}`);
   return { success: true };
 }
-
 
 // ============ STUDENT GROUP ACTIONS ============
 
@@ -236,7 +259,10 @@ export async function getClassmatesForInvite(alaId: string) {
 
   const ala = await ALA.findById(alaId);
   if (!ala || !ala.isGroupSubmission || ala.groupFormation !== "student") {
-    return { success: false, error: "This ALA doesn't allow student-created groups" };
+    return {
+      success: false,
+      error: "This ALA doesn't allow student-created groups",
+    };
   }
 
   // Get classmates
@@ -263,7 +289,7 @@ export async function getClassmatesForInvite(alaId: string) {
 
   // Filter out taken students
   const availableClassmates = classmates.filter(
-    (c) => !takenStudentIds.has(c._id.toString())
+    (c) => !takenStudentIds.has(c._id.toString()),
   );
 
   return {
@@ -276,7 +302,7 @@ export async function getClassmatesForInvite(alaId: string) {
 // Student creates a group and invites classmates
 export async function createGroupByStudent(
   alaId: string,
-  data: { name: string; inviteIds: string[] }
+  data: { name: string; inviteIds: string[] },
 ) {
   const clerkId = await requireStudent();
   const { id: studentId } = await getUserDbId(clerkId!);
@@ -287,11 +313,17 @@ export async function createGroupByStudent(
   }
 
   if (!ala.isGroupSubmission || ala.groupFormation !== "student") {
-    return { success: false, error: "This ALA doesn't allow student-created groups" };
+    return {
+      success: false,
+      error: "This ALA doesn't allow student-created groups",
+    };
   }
 
   if (ala.isLocked || new Date(ala.deadline) < new Date()) {
-    return { success: false, error: "Cannot create group - deadline passed or locked" };
+    return {
+      success: false,
+      error: "Cannot create group - deadline passed or locked",
+    };
   }
 
   // Check if student is already in a group
@@ -311,7 +343,10 @@ export async function createGroupByStudent(
     return { success: false, error: "Group must have at least 2 members" };
   }
   if (ala.maxGroupSize && totalMembers > ala.maxGroupSize) {
-    return { success: false, error: `Group cannot exceed ${ala.maxGroupSize} members` };
+    return {
+      success: false,
+      error: `Group cannot exceed ${ala.maxGroupSize} members`,
+    };
   }
 
   // Check if invited students are available
@@ -327,7 +362,11 @@ export async function createGroupByStudent(
 
   // Create group with creator as accepted, others as pending
   const members = [
-    { studentId: new mongoose.Types.ObjectId(studentId), status: "accepted" as const, joinedAt: new Date() },
+    {
+      studentId: new mongoose.Types.ObjectId(studentId),
+      status: "accepted" as const,
+      joinedAt: new Date(),
+    },
     ...data.inviteIds.map((id) => ({
       studentId: new mongoose.Types.ObjectId(id),
       status: "pending" as const,
@@ -347,10 +386,7 @@ export async function createGroupByStudent(
 }
 
 // Student responds to group invitation
-export async function respondToGroupInvite(
-  groupId: string,
-  accept: boolean
-) {
+export async function respondToGroupInvite(groupId: string, accept: boolean) {
   const clerkId = await requireStudent();
   const { id: studentId } = await getUserDbId(clerkId!);
 
@@ -359,14 +395,21 @@ export async function respondToGroupInvite(
     return { success: false, error: "Group not found" };
   }
 
-  const ala = group.alaId as unknown as { isLocked: boolean; deadline: Date; _id: string };
+  const ala = group.alaId as unknown as {
+    isLocked: boolean;
+    deadline: Date;
+    _id: string;
+  };
   if (ala.isLocked || new Date(ala.deadline) < new Date()) {
-    return { success: false, error: "Cannot respond - deadline passed or locked" };
+    return {
+      success: false,
+      error: "Cannot respond - deadline passed or locked",
+    };
   }
 
   // Find member entry
   const memberIndex = group.members.findIndex(
-    (m) => m.studentId.toString() === studentId && m.status === "pending"
+    (m) => m.studentId.toString() === studentId && m.status === "pending",
   );
 
   if (memberIndex === -1) {
@@ -422,7 +465,10 @@ export async function getStudentPendingInvites() {
   // Filter to only include groups where this student's status is pending
   const pendingGroups = groups.map((g) => ({
     ...g,
-    members: g.members.filter((m) => m.status === "accepted" || m.studentId._id.toString() === studentId),
+    members: g.members.filter(
+      (m) =>
+        m.status === "accepted" || m.studentId._id.toString() === studentId,
+    ),
   }));
 
   return JSON.parse(JSON.stringify(pendingGroups));
@@ -438,9 +484,16 @@ export async function leaveGroup(groupId: string) {
     return { success: false, error: "Group not found" };
   }
 
-  const ala = group.alaId as unknown as { isLocked: boolean; deadline: Date; _id: string };
+  const ala = group.alaId as unknown as {
+    isLocked: boolean;
+    deadline: Date;
+    _id: string;
+  };
   if (ala.isLocked || new Date(ala.deadline) < new Date()) {
-    return { success: false, error: "Cannot leave - deadline passed or locked" };
+    return {
+      success: false,
+      error: "Cannot leave - deadline passed or locked",
+    };
   }
 
   if (group.isLocked) {

@@ -99,7 +99,7 @@ export function GroupSection({
     return (
       <Card>
         <CardContent className="py-6 text-center">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+          <Loader2 className="text-muted-foreground mx-auto h-6 w-6 animate-spin" />
         </CardContent>
       </Card>
     );
@@ -109,10 +109,10 @@ export function GroupSection({
   if (group) {
     const isCreator = group.createdBy._id === studentId;
     const myMembership = group.members.find(
-      (m) => m.studentId._id === studentId
+      (m) => m.studentId._id === studentId,
     );
     const acceptedMembers = group.members.filter(
-      (m) => m.status === "accepted"
+      (m) => m.status === "accepted",
     );
     const pendingMembers = group.members.filter((m) => m.status === "pending");
 
@@ -131,14 +131,12 @@ export function GroupSection({
                   : `Created by ${group.createdBy.firstName} ${group.createdBy.lastName}`}
               </CardDescription>
             </div>
-            {group.isLocked && (
-              <Badge variant="secondary">Submitted</Badge>
-            )}
+            {group.isLocked && <Badge variant="secondary">Submitted</Badge>}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <p className="text-sm font-medium mb-2">Members</p>
+            <p className="mb-2 text-sm font-medium">Members</p>
             <div className="space-y-2">
               {acceptedMembers.map((member) => (
                 <div
@@ -151,7 +149,7 @@ export function GroupSection({
                     {member.studentId._id === group.createdBy._id && " ★"}
                   </span>
                   <Badge variant="outline" className="text-green-600">
-                    <Check className="h-3 w-3 mr-1" />
+                    <Check className="mr-1 h-3 w-3" />
                     Joined
                   </Badge>
                 </div>
@@ -165,7 +163,7 @@ export function GroupSection({
                     {member.studentId.firstName} {member.studentId.lastName}
                   </span>
                   <Badge variant="outline">
-                    <Clock className="h-3 w-3 mr-1" />
+                    <Clock className="mr-1 h-3 w-3" />
                     Pending
                   </Badge>
                 </div>
@@ -233,7 +231,6 @@ export function GroupSection({
     </Card>
   );
 }
-
 
 // Create Group Dialog for Students
 function CreateGroupDialog({
@@ -307,7 +304,7 @@ function CreateGroupDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Create Group
         </Button>
       </DialogTrigger>
@@ -335,19 +332,19 @@ function CreateGroupDialog({
                 Invite Classmates ({selectedIds.length}/{maxGroupSize - 1})
               </Label>
               {loadingClassmates ? (
-                <div className="border rounded-lg p-4 text-center">
-                  <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                <div className="rounded-lg border p-4 text-center">
+                  <Loader2 className="mx-auto h-5 w-5 animate-spin" />
                 </div>
               ) : classmates.length === 0 ? (
-                <div className="border rounded-lg p-4 text-center text-muted-foreground text-sm">
+                <div className="text-muted-foreground rounded-lg border p-4 text-center text-sm">
                   No available classmates to invite
                 </div>
               ) : (
-                <div className="border rounded-lg max-h-60 overflow-y-auto">
+                <div className="max-h-60 overflow-y-auto rounded-lg border">
                   {classmates.map((classmate) => (
                     <div
                       key={classmate._id}
-                      className="flex items-center gap-3 p-3 border-b last:border-0 hover:bg-muted/50 cursor-pointer"
+                      className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b p-3 last:border-0"
                       onClick={() => toggleClassmate(classmate._id)}
                     >
                       <Checkbox
@@ -359,7 +356,7 @@ function CreateGroupDialog({
                         <p className="text-sm font-medium">
                           {classmate.firstName} {classmate.lastName}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           {classmate.email}
                         </p>
                       </div>
@@ -415,7 +412,7 @@ function LeaveGroupButton({
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="outline" className="w-full" disabled={leaving}>
-          <LogOut className="h-4 w-4 mr-2" />
+          <LogOut className="mr-2 h-4 w-4" />
           {isCreator ? "Delete Group" : "Leave Group"}
         </Button>
       </AlertDialogTrigger>
