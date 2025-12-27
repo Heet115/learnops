@@ -20,7 +20,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, Pencil, Trash2, Lock, Unlock, Eye, Users } from "lucide-react";
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Lock,
+  Unlock,
+  Eye,
+  Users,
+} from "lucide-react";
 import { deleteALA, toggleALALock } from "@/lib/actions/ala.actions";
 import { toast } from "sonner";
 import { EditALADialog } from "./edit-ala-dialog";
@@ -83,9 +91,11 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
   };
 
   const getStatus = (ala: ALA) => {
-    if (ala.isLocked) return { label: "Locked", variant: "destructive" as const };
+    if (ala.isLocked)
+      return { label: "Locked", variant: "destructive" as const };
     const deadline = new Date(ala.deadline);
-    if (deadline < new Date()) return { label: "Past Due", variant: "secondary" as const };
+    if (deadline < new Date())
+      return { label: "Past Due", variant: "secondary" as const };
     return { label: "Active", variant: "default" as const };
   };
 
@@ -102,7 +112,7 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
 
   if (alas.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <div className="text-muted-foreground py-8 text-center">
         No ALAs created yet. Create your first ALA to get started.
       </div>
     );
@@ -128,7 +138,7 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
             const status = getStatus(ala);
             return (
               <TableRow key={ala._id}>
-                <TableCell className="font-medium max-w-[200px] truncate">
+                <TableCell className="max-w-[200px] truncate font-medium">
                   {ala.title}
                 </TableCell>
                 <TableCell>

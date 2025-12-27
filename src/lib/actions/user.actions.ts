@@ -62,8 +62,10 @@ export async function assignStudentToClass(
 
   try {
     const updateData = classId ? { classId } : { $unset: { classId: 1 } };
-    const student = await User.findByIdAndUpdate(studentId, updateData, { new: true });
-    
+    const student = await User.findByIdAndUpdate(studentId, updateData, {
+      new: true,
+    });
+
     revalidatePath("/admin/student-assignments");
     return { success: true, student: JSON.parse(JSON.stringify(student)) };
   } catch (error) {
@@ -81,9 +83,9 @@ export async function bulkAssignStudentsToClass(
   try {
     await User.updateMany(
       { _id: { $in: studentIds }, role: "student" },
-      { classId }
+      { classId },
     );
-    
+
     revalidatePath("/admin/student-assignments");
     return { success: true };
   } catch (error) {
@@ -99,9 +101,9 @@ export async function removeStudentFromClass(studentId: string) {
     const student = await User.findByIdAndUpdate(
       studentId,
       { $unset: { classId: 1 } },
-      { new: true }
+      { new: true },
     );
-    
+
     revalidatePath("/admin/student-assignments");
     return { success: true, student: JSON.parse(JSON.stringify(student)) };
   } catch (error) {
@@ -142,10 +144,10 @@ export async function getStudentsByClass(classId: string) {
 
 export async function getUnassignedStudents() {
   await connectDB();
-  const students = await User.find({ 
-    role: "student", 
+  const students = await User.find({
+    role: "student",
     isActive: true,
-    classId: { $exists: false }
+    classId: { $exists: false },
   })
     .select("_id firstName lastName email")
     .sort({ firstName: 1, lastName: 1 })

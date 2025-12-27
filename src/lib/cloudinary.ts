@@ -6,7 +6,8 @@
 
 export const CLOUDINARY_FOLDERS = {
   ALA_RESOURCES: (alaId: string) => `learnops/alas/${alaId}/resources`,
-  SUBMISSIONS: (alaId: string, visitorId: string) => `learnops/submissions/${alaId}/${visitorId}`,
+  SUBMISSIONS: (alaId: string, visitorId: string) =>
+    `learnops/submissions/${alaId}/${visitorId}`,
   PROFILES: "learnops/profiles",
 } as const;
 
@@ -89,13 +90,16 @@ export const MAX_SUBMISSION_SIZE = 30 * 1024 * 1024; // 30MB
 export function validateFile(
   file: File,
   allowedTypes: string[],
-  maxSize: number
+  maxSize: number,
 ): { valid: boolean; error?: string } {
   if (!allowedTypes.includes(file.type)) {
     return { valid: false, error: "File type not allowed" };
   }
   if (file.size > maxSize) {
-    return { valid: false, error: `File size must be less than ${maxSize / (1024 * 1024)}MB` };
+    return {
+      valid: false,
+      error: `File size must be less than ${maxSize / (1024 * 1024)}MB`,
+    };
   }
   return { valid: true };
 }

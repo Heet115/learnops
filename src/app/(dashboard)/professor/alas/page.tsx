@@ -2,7 +2,10 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
-import { getALAsByProfessor, getProfessorSubjectOfferings } from "@/lib/actions/ala.actions";
+import {
+  getALAsByProfessor,
+  getProfessorSubjectOfferings,
+} from "@/lib/actions/ala.actions";
 import { ALAsTable } from "@/components/professor/alas-table";
 import { CreateALADialog } from "@/components/professor/create-ala-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,25 +32,33 @@ export default async function ProfessorALAsPage() {
   };
 
   const now = new Date();
-  const activeCount = alas.filter((a: { deadline: string; isLocked: boolean }) => 
-    new Date(a.deadline) > now && !a.isLocked
+  const activeCount = alas.filter(
+    (a: { deadline: string; isLocked: boolean }) =>
+      new Date(a.deadline) > now && !a.isLocked,
   ).length;
-  const pastDeadline = alas.filter((a: { deadline: string }) => 
-    new Date(a.deadline) <= now
+  const pastDeadline = alas.filter(
+    (a: { deadline: string }) => new Date(a.deadline) <= now,
   ).length;
-  const lockedCount = alas.filter((a: { isLocked: boolean }) => a.isLocked).length;
+  const lockedCount = alas.filter(
+    (a: { isLocked: boolean }) => a.isLocked,
+  ).length;
 
   return (
     <DashboardLayout
       role="professor"
       user={user}
-      breadcrumbs={[{ label: "Professor", href: "/professor" }, { label: "ALAs" }]}
+      breadcrumbs={[
+        { label: "Professor", href: "/professor" },
+        { label: "ALAs" },
+      ]}
     >
       <div className="space-y-6 pt-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold">Active Learning Activities</h2>
-            <p className="text-muted-foreground">Create and manage ALAs for your subjects</p>
+            <p className="text-muted-foreground">
+              Create and manage ALAs for your subjects
+            </p>
           </div>
           <CreateALADialog offerings={offerings} />
         </div>
@@ -56,7 +67,7 @@ export default async function ProfessorALAsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Total ALAs</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+              <FileText className="text-muted-foreground h-4 w-4" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{alas.length}</div>
@@ -68,16 +79,22 @@ export default async function ProfessorALAsPage() {
               <CheckCircle className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{activeCount}</div>
+              <div className="text-2xl font-bold text-green-600">
+                {activeCount}
+              </div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Past Deadline</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Past Deadline
+              </CardTitle>
               <Clock className="h-4 w-4 text-orange-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{pastDeadline}</div>
+              <div className="text-2xl font-bold text-orange-600">
+                {pastDeadline}
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -86,7 +103,9 @@ export default async function ProfessorALAsPage() {
               <Lock className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{lockedCount}</div>
+              <div className="text-2xl font-bold text-red-600">
+                {lockedCount}
+              </div>
             </CardContent>
           </Card>
         </div>

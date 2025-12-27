@@ -31,7 +31,10 @@ export async function POST(request: NextRequest) {
 
     // Validate file size (30MB max)
     if (file.size > 30 * 1024 * 1024) {
-      return NextResponse.json({ error: "File too large (max 30MB)" }, { status: 400 });
+      return NextResponse.json(
+        { error: "File too large (max 30MB)" },
+        { status: 400 },
+      );
     }
 
     // Convert file to buffer
@@ -39,22 +42,24 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     // Upload to Cloudinary
-    const result = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            folder: folder || "learnops/uploads",
-            resource_type: "auto",
-            use_filename: true,
-            unique_filename: true,
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result as { secure_url: string; public_id: string });
-          }
-        )
-        .end(buffer);
-    });
+    const result = await new Promise<{ secure_url: string; public_id: string }>(
+      (resolve, reject) => {
+        cloudinary.uploader
+          .upload_stream(
+            {
+              folder: folder || "learnops/uploads",
+              resource_type: "auto",
+              use_filename: true,
+              unique_filename: true,
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result as { secure_url: string; public_id: string });
+            },
+          )
+          .end(buffer);
+      },
+    );
 
     return NextResponse.json({
       success: true,
@@ -65,7 +70,7 @@ export async function POST(request: NextRequest) {
     console.error("Upload error:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Upload failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

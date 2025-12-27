@@ -17,7 +17,7 @@ function extractPublicIdFromUrl(url: string): string | null {
     const urlObj = new URL(url);
     const pathParts = urlObj.pathname.split("/upload/");
     if (pathParts.length < 2) return null;
-    
+
     // Get everything after /upload/ and remove version if present
     let publicIdWithExt = pathParts[1];
     if (publicIdWithExt.startsWith("v")) {
@@ -26,7 +26,7 @@ function extractPublicIdFromUrl(url: string): string | null {
         publicIdWithExt = publicIdWithExt.substring(versionEnd + 1);
       }
     }
-    
+
     // Remove file extension for the public_id
     const lastDotIndex = publicIdWithExt.lastIndexOf(".");
     if (lastDotIndex > 0) {
@@ -57,20 +57,27 @@ export async function POST(request: NextRequest) {
     }
 
     const publicId = extractPublicIdFromUrl(url);
-    
+
     if (!publicId) {
       console.warn("Could not extract public_id from URL:", url);
-      return NextResponse.json({ error: "Invalid Cloudinary URL" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid Cloudinary URL" },
+        { status: 400 },
+      );
     }
 
     console.log("Deleting from Cloudinary:", publicId);
 
     // Try deleting as raw first (for documents), then as image
-    let result = await cloudinary.uploader.destroy(publicId, { resource_type: "raw" });
-    
+    let result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: "raw",
+    });
+
     if (result.result !== "ok" && result.result !== "not found") {
       // Try as image
-      result = await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
+      result = await cloudinary.uploader.destroy(publicId, {
+        resource_type: "image",
+      });
     }
 
     if (result.result === "ok" || result.result === "not found") {
@@ -82,7 +89,7 @@ export async function POST(request: NextRequest) {
     console.error("Delete error:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Delete failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

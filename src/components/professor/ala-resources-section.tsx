@@ -2,7 +2,13 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +28,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, FileText, Link as LinkIcon, Trash2, ExternalLink, Upload, Loader2 } from "lucide-react";
+import {
+  Plus,
+  FileText,
+  Link as LinkIcon,
+  Trash2,
+  ExternalLink,
+  Upload,
+  Loader2,
+} from "lucide-react";
 import { addResource, removeResource } from "@/lib/actions/ala.actions";
 import {
   uploadToCloudinary,
@@ -50,7 +64,10 @@ const RESOURCE_TYPES = [
   { value: "link", label: "Link (URL)", icon: LinkIcon },
 ];
 
-export function ALAResourcesSection({ alaId, resources }: ALAResourcesSectionProps) {
+export function ALAResourcesSection({
+  alaId,
+  resources,
+}: ALAResourcesSectionProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -64,7 +81,11 @@ export function ALAResourcesSection({ alaId, resources }: ALAResourcesSectionPro
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const validation = validateFile(file, ALLOWED_RESOURCE_TYPES, MAX_RESOURCE_SIZE);
+    const validation = validateFile(
+      file,
+      ALLOWED_RESOURCE_TYPES,
+      MAX_RESOURCE_SIZE,
+    );
     if (!validation.valid) {
       toast.error(validation.error);
       return;
@@ -94,10 +115,17 @@ export function ALAResourcesSection({ alaId, resources }: ALAResourcesSectionPro
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const url = resourceType === "document" ? uploadedUrl : (formData.get("url") as string);
+    const url =
+      resourceType === "document"
+        ? uploadedUrl
+        : (formData.get("url") as string);
 
     if (!url) {
-      toast.error(resourceType === "document" ? "Please upload a file first" : "Please enter a URL");
+      toast.error(
+        resourceType === "document"
+          ? "Please upload a file first"
+          : "Please enter a URL",
+      );
       setLoading(false);
       return;
     }
@@ -157,7 +185,9 @@ export function ALAResourcesSection({ alaId, resources }: ALAResourcesSectionPro
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Resources</CardTitle>
-          <CardDescription>Study materials and references for students</CardDescription>
+          <CardDescription>
+            Study materials and references for students
+          </CardDescription>
         </div>
         <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
@@ -244,11 +274,12 @@ export function ALAResourcesSection({ alaId, resources }: ALAResourcesSectionPro
                         )}
                       </Button>
                       {fileName && (
-                        <p className="text-sm text-muted-foreground">
-                          {uploadedUrl ? "✓ " : ""}{fileName}
+                        <p className="text-muted-foreground text-sm">
+                          {uploadedUrl ? "✓ " : ""}
+                          {fileName}
                         </p>
                       )}
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         PDF, DOC, DOCX, PPT, PPTX (max 10MB)
                       </p>
                     </div>
@@ -256,12 +287,20 @@ export function ALAResourcesSection({ alaId, resources }: ALAResourcesSectionPro
                 )}
               </div>
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleOpenChange(false)}
+                >
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
-                  disabled={loading || uploading || (resourceType === "document" && !uploadedUrl)}
+                <Button
+                  type="submit"
+                  disabled={
+                    loading ||
+                    uploading ||
+                    (resourceType === "document" && !uploadedUrl)
+                  }
                 >
                   {loading ? "Adding..." : "Add Resource"}
                 </Button>
@@ -272,7 +311,7 @@ export function ALAResourcesSection({ alaId, resources }: ALAResourcesSectionPro
       </CardHeader>
       <CardContent>
         {resources.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             No resources added yet. Add study materials for your students.
           </p>
         ) : (
@@ -280,29 +319,35 @@ export function ALAResourcesSection({ alaId, resources }: ALAResourcesSectionPro
             {resources.map((resource, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between p-3 rounded-lg border"
+                className="flex items-center justify-between rounded-lg border p-3"
               >
                 <div className="flex items-center gap-3">
                   {getResourceIcon(resource.type)}
                   <div>
-                    <p className="font-medium text-sm">{resource.name}</p>
-                    <p className="text-xs text-muted-foreground truncate max-w-[300px]">
+                    <p className="text-sm font-medium">{resource.name}</p>
+                    <p className="text-muted-foreground max-w-[300px] truncate text-xs">
                       {resource.url}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="icon" asChild>
-                    <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={resource.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleRemoveResource(resource.url, resource.name)}
+                    onClick={() =>
+                      handleRemoveResource(resource.url, resource.name)
+                    }
                   >
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                    <Trash2 className="text-destructive h-4 w-4" />
                   </Button>
                 </div>
               </div>

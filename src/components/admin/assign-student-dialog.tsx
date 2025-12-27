@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,18 +11,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { UserPlus } from 'lucide-react';
-import { assignStudentToClass } from '@/lib/actions/user.actions';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { UserPlus } from "lucide-react";
+import { assignStudentToClass } from "@/lib/actions/user.actions";
+import { toast } from "sonner";
 
 interface Student {
   _id: string;
@@ -54,7 +54,10 @@ interface AssignStudentDialogProps {
   classes: ClassItem[];
 }
 
-export function AssignStudentDialog({ students, classes }: AssignStudentDialogProps) {
+export function AssignStudentDialog({
+  students,
+  classes,
+}: AssignStudentDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -66,17 +69,17 @@ export function AssignStudentDialog({ students, classes }: AssignStudentDialogPr
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const studentId = formData.get('studentId') as string;
-    const classId = formData.get('classId') as string;
+    const studentId = formData.get("studentId") as string;
+    const classId = formData.get("classId") as string;
 
     const result = await assignStudentToClass(studentId, classId);
 
     if (result.success) {
-      toast.success('Student assigned to class successfully');
+      toast.success("Student assigned to class successfully");
       setOpen(false);
       router.refresh();
     } else {
-      toast.error(result.error || 'Failed to assign student');
+      toast.error(result.error || "Failed to assign student");
     }
 
     setLoading(false);
@@ -130,9 +133,10 @@ export function AssignStudentDialog({ students, classes }: AssignStudentDialogPr
                 <SelectContent>
                   {classes.map((classItem) => (
                     <SelectItem key={classItem._id} value={classItem._id}>
-                      {classItem.semesterId?.courseId?.departmentId?.code} -{' '}
-                      {classItem.semesterId?.courseId?.code} -{' '}
-                      {classItem.semesterId?.name} - {classItem.name} ({classItem.academicYear})
+                      {classItem.semesterId?.courseId?.departmentId?.code} -{" "}
+                      {classItem.semesterId?.courseId?.code} -{" "}
+                      {classItem.semesterId?.name} - {classItem.name} (
+                      {classItem.academicYear})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -140,11 +144,18 @@ export function AssignStudentDialog({ students, classes }: AssignStudentDialogPr
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || unassignedStudents.length === 0}>
-              {loading ? 'Assigning...' : 'Assign Student'}
+            <Button
+              type="submit"
+              disabled={loading || unassignedStudents.length === 0}
+            >
+              {loading ? "Assigning..." : "Assign Student"}
             </Button>
           </DialogFooter>
         </form>

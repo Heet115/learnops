@@ -39,9 +39,11 @@ interface EditALADialogProps {
 
 export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
   const [loading, setLoading] = useState(false);
-  const [isGroupSubmission, setIsGroupSubmission] = useState(ala.isGroupSubmission);
+  const [isGroupSubmission, setIsGroupSubmission] = useState(
+    ala.isGroupSubmission,
+  );
   const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(
-    ala.allowedFileTypes || ["pdf"]
+    ala.allowedFileTypes || ["pdf"],
   );
   const router = useRouter();
 
@@ -70,7 +72,9 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
       deadline: formData.get("deadline") as string,
       maxMarks: Number(formData.get("maxMarks")),
       isGroupSubmission,
-      maxGroupSize: isGroupSubmission ? Number(formData.get("maxGroupSize")) : null,
+      maxGroupSize: isGroupSubmission
+        ? Number(formData.get("maxGroupSize"))
+        : null,
       allowedFileTypes: selectedFileTypes,
       maxFileSize: Number(formData.get("maxFileSize")),
     };
@@ -90,7 +94,7 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[550px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Edit ALA</DialogTitle>
@@ -153,7 +157,9 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
                 type="number"
                 min={1}
                 max={30}
-                defaultValue={ala.maxFileSize ? ala.maxFileSize / (1024 * 1024) : 30}
+                defaultValue={
+                  ala.maxFileSize ? ala.maxFileSize / (1024 * 1024) : 30
+                }
                 required
               />
             </div>
@@ -170,7 +176,10 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
                         handleFileTypeChange(type, checked as boolean)
                       }
                     />
-                    <label htmlFor={`edit-type-${type}`} className="text-sm uppercase">
+                    <label
+                      htmlFor={`edit-type-${type}`}
+                      className="text-sm uppercase"
+                    >
                       {type}
                     </label>
                   </div>
@@ -182,7 +191,9 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
               <Checkbox
                 id="edit-isGroupSubmission"
                 checked={isGroupSubmission}
-                onCheckedChange={(checked) => setIsGroupSubmission(checked as boolean)}
+                onCheckedChange={(checked) =>
+                  setIsGroupSubmission(checked as boolean)
+                }
               />
               <label htmlFor="edit-isGroupSubmission" className="text-sm">
                 Allow group submissions
@@ -205,10 +216,17 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
             )}
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || selectedFileTypes.length === 0}>
+            <Button
+              type="submit"
+              disabled={loading || selectedFileTypes.length === 0}
+            >
               {loading ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>

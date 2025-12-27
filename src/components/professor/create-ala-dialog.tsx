@@ -67,7 +67,9 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
       deadline: formData.get("deadline") as string,
       maxMarks: Number(formData.get("maxMarks")),
       isGroupSubmission,
-      maxGroupSize: isGroupSubmission ? Number(formData.get("maxGroupSize")) : undefined,
+      maxGroupSize: isGroupSubmission
+        ? Number(formData.get("maxGroupSize"))
+        : undefined,
       allowedFileTypes: selectedFileTypes,
       maxFileSize: Number(formData.get("maxFileSize")),
     };
@@ -104,7 +106,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
           Create ALA
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[550px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create New ALA</DialogTitle>
@@ -122,7 +124,8 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
                 <SelectContent>
                   {offerings.map((o) => (
                     <SelectItem key={o._id} value={o._id}>
-                      {o.subjectId.code} - {o.subjectId.name} | {o.classId.name} ({o.academicYear})
+                      {o.subjectId.code} - {o.subjectId.name} | {o.classId.name}{" "}
+                      ({o.academicYear})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -201,7 +204,10 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
                         handleFileTypeChange(type, checked as boolean)
                       }
                     />
-                    <label htmlFor={`type-${type}`} className="text-sm uppercase">
+                    <label
+                      htmlFor={`type-${type}`}
+                      className="text-sm uppercase"
+                    >
                       {type}
                     </label>
                   </div>
@@ -213,7 +219,9 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
               <Checkbox
                 id="isGroupSubmission"
                 checked={isGroupSubmission}
-                onCheckedChange={(checked) => setIsGroupSubmission(checked as boolean)}
+                onCheckedChange={(checked) =>
+                  setIsGroupSubmission(checked as boolean)
+                }
               />
               <label htmlFor="isGroupSubmission" className="text-sm">
                 Allow group submissions
@@ -236,10 +244,17 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
             )}
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || selectedFileTypes.length === 0}>
+            <Button
+              type="submit"
+              disabled={loading || selectedFileTypes.length === 0}
+            >
               {loading ? "Creating..." : "Create ALA"}
             </Button>
           </DialogFooter>

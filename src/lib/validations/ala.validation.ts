@@ -10,7 +10,10 @@ export const createALASchema = z.object({
   maxMarks: z.coerce.number().min(1, "Max marks must be at least 1").max(100),
   isGroupSubmission: z.coerce.boolean().default(false),
   maxGroupSize: z.coerce.number().min(2).max(10).optional(),
-  allowedFileTypes: z.array(z.string()).min(1, "Select at least one file type").default(["pdf"]),
+  allowedFileTypes: z
+    .array(z.string())
+    .min(1, "Select at least one file type")
+    .default(["pdf"]),
   maxFileSize: z.coerce.number().min(1).max(30).default(30), // In MB
 });
 

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,17 +10,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { assignStudentToClass } from '@/lib/actions/user.actions';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { assignStudentToClass } from "@/lib/actions/user.actions";
+import { toast } from "sonner";
 
 interface Student {
   _id: string;
@@ -71,16 +71,16 @@ export function ChangeClassDialog({
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const classId = formData.get('classId') as string;
+    const classId = formData.get("classId") as string;
 
     const result = await assignStudentToClass(student._id, classId);
 
     if (result.success) {
-      toast.success('Student class updated successfully');
+      toast.success("Student class updated successfully");
       onOpenChange(false);
       router.refresh();
     } else {
-      toast.error(result.error || 'Failed to update student class');
+      toast.error(result.error || "Failed to update student class");
     }
 
     setLoading(false);
@@ -92,7 +92,7 @@ export function ChangeClassDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
-              {student.classId ? 'Change Class' : 'Assign Class'}
+              {student.classId ? "Change Class" : "Assign Class"}
             </DialogTitle>
             <DialogDescription>
               {student.classId
@@ -103,7 +103,7 @@ export function ChangeClassDialog({
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label>Student</Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {student.firstName} {student.lastName} ({student.email})
               </p>
             </div>
@@ -111,22 +111,29 @@ export function ChangeClassDialog({
             {student.classId && (
               <div className="grid gap-2">
                 <Label>Current Class</Label>
-                <p className="text-sm text-muted-foreground">{student.classId.name}</p>
+                <p className="text-muted-foreground text-sm">
+                  {student.classId.name}
+                </p>
               </div>
             )}
 
             <div className="grid gap-2">
               <Label htmlFor="classId">New Class</Label>
-              <Select name="classId" defaultValue={student.classId?._id} required>
+              <Select
+                name="classId"
+                defaultValue={student.classId?._id}
+                required
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select class" />
                 </SelectTrigger>
                 <SelectContent>
                   {classes.map((classItem) => (
                     <SelectItem key={classItem._id} value={classItem._id}>
-                      {classItem.semesterId?.courseId?.departmentId?.code} -{' '}
-                      {classItem.semesterId?.courseId?.code} -{' '}
-                      {classItem.semesterId?.name} - {classItem.name} ({classItem.academicYear})
+                      {classItem.semesterId?.courseId?.departmentId?.code} -{" "}
+                      {classItem.semesterId?.courseId?.code} -{" "}
+                      {classItem.semesterId?.name} - {classItem.name} (
+                      {classItem.academicYear})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -134,11 +141,15 @@ export function ChangeClassDialog({
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : 'Save Changes'}
+              {loading ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </form>

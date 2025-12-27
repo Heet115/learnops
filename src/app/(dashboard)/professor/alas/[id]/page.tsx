@@ -4,7 +4,13 @@ import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
 import { getALAById } from "@/lib/actions/ala.actions";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -52,8 +58,10 @@ export default async function ALADetailPage({ params }: PageProps) {
   const isPastDeadline = deadline < new Date();
 
   const getStatus = () => {
-    if (ala.isLocked) return { label: "Locked", variant: "destructive" as const };
-    if (isPastDeadline) return { label: "Past Due", variant: "secondary" as const };
+    if (ala.isLocked)
+      return { label: "Locked", variant: "destructive" as const };
+    if (isPastDeadline)
+      return { label: "Past Due", variant: "secondary" as const };
     return { label: "Active", variant: "default" as const };
   };
 
@@ -82,14 +90,15 @@ export default async function ALADetailPage({ params }: PageProps) {
               <Badge variant={status.variant}>{status.label}</Badge>
             </div>
             <p className="text-muted-foreground">
-              {ala.subjectOfferingId?.subjectId?.code} - {ala.subjectOfferingId?.subjectId?.name} |{" "}
+              {ala.subjectOfferingId?.subjectId?.code} -{" "}
+              {ala.subjectOfferingId?.subjectId?.name} |{" "}
               {ala.subjectOfferingId?.classId?.name}
             </p>
           </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          <div className="md:col-span-2 space-y-6">
+          <div className="space-y-6 md:col-span-2">
             <Card>
               <CardHeader>
                 <CardTitle>Description</CardTitle>
@@ -99,7 +108,10 @@ export default async function ALADetailPage({ params }: PageProps) {
               </CardContent>
             </Card>
 
-            <ALAResourcesSection alaId={ala._id} resources={ala.resources || []} />
+            <ALAResourcesSection
+              alaId={ala._id}
+              resources={ala.resources || []}
+            />
           </div>
 
           <div className="space-y-6">
@@ -109,10 +121,10 @@ export default async function ALADetailPage({ params }: PageProps) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="text-muted-foreground h-4 w-4" />
                   <div>
                     <p className="text-sm font-medium">Deadline</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {deadline.toLocaleString("en-US", {
                         weekday: "short",
                         month: "short",
@@ -128,20 +140,22 @@ export default async function ALADetailPage({ params }: PageProps) {
                 <Separator />
 
                 <div className="flex items-center gap-3">
-                  <BookOpen className="h-4 w-4 text-muted-foreground" />
+                  <BookOpen className="text-muted-foreground h-4 w-4" />
                   <div>
                     <p className="text-sm font-medium">Max Marks</p>
-                    <p className="text-sm text-muted-foreground">{ala.maxMarks}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {ala.maxMarks}
+                    </p>
                   </div>
                 </div>
 
                 <Separator />
 
                 <div className="flex items-center gap-3">
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <Users className="text-muted-foreground h-4 w-4" />
                   <div>
                     <p className="text-sm font-medium">Submission Type</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {ala.isGroupSubmission
                         ? `Group (max ${ala.maxGroupSize} members)`
                         : "Individual"}
@@ -152,10 +166,10 @@ export default async function ALADetailPage({ params }: PageProps) {
                 <Separator />
 
                 <div className="flex items-center gap-3">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <FileText className="text-muted-foreground h-4 w-4" />
                   <div>
                     <p className="text-sm font-medium">Allowed Files</p>
-                    <p className="text-sm text-muted-foreground uppercase">
+                    <p className="text-muted-foreground text-sm uppercase">
                       {ala.allowedFileTypes?.join(", ") || "PDF"}
                     </p>
                   </div>
@@ -171,8 +185,10 @@ export default async function ALADetailPage({ params }: PageProps) {
                   )}
                   <div>
                     <p className="text-sm font-medium">Status</p>
-                    <p className="text-sm text-muted-foreground">
-                      {ala.isLocked ? "Submissions locked" : "Accepting submissions"}
+                    <p className="text-muted-foreground text-sm">
+                      {ala.isLocked
+                        ? "Submissions locked"
+                        : "Accepting submissions"}
                     </p>
                   </div>
                 </div>
@@ -182,10 +198,14 @@ export default async function ALADetailPage({ params }: PageProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Submissions</CardTitle>
-                <CardDescription>Student submissions for this ALA</CardDescription>
+                <CardDescription>
+                  Student submissions for this ALA
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">No submissions yet</p>
+                <p className="text-muted-foreground text-sm">
+                  No submissions yet
+                </p>
                 {/* TODO: Add submission stats and link to submissions page */}
               </CardContent>
             </Card>

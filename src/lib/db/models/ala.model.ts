@@ -32,7 +32,7 @@ const ALAResourceSchema = new Schema<IALAResource>(
     type: { type: String, required: true },
     uploadedAt: { type: Date, default: Date.now },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const ALASchema = new Schema<IALA>(
@@ -62,7 +62,7 @@ const ALASchema = new Schema<IALA>(
     isLocked: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Index for efficient queries

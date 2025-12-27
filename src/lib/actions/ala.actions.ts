@@ -25,13 +25,13 @@ function extractPublicIdFromUrl(url: string): string | null {
     const urlObj = new URL(url);
     const pathParts = urlObj.pathname.split("/upload/");
     if (pathParts.length < 2) return null;
-    
+
     let publicIdWithExt = pathParts[1];
     // Remove version if present (v1234567890/)
     if (publicIdWithExt.match(/^v\d+\//)) {
       publicIdWithExt = publicIdWithExt.replace(/^v\d+\//, "");
     }
-    
+
     // Remove file extension
     const lastDotIndex = publicIdWithExt.lastIndexOf(".");
     if (lastDotIndex > 0) {
@@ -52,13 +52,17 @@ async function deleteFromCloudinary(url: string): Promise<boolean> {
 
   try {
     // Try as raw first (for documents like PDF, DOCX)
-    let result = await cloudinary.uploader.destroy(publicId, { resource_type: "raw" });
-    
+    let result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: "raw",
+    });
+
     if (result.result === "ok") return true;
-    
+
     // Try as image if raw didn't work
-    result = await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
-    
+    result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: "image",
+    });
+
     return result.result === "ok" || result.result === "not found";
   } catch (error) {
     console.error("Cloudinary delete error:", error);
@@ -90,7 +94,10 @@ export async function createALA(input: CreateALAInput) {
   // Verify professor owns this subject offering
   const offering = await SubjectOffering.findById(validated.subjectOfferingId);
   if (!offering || offering.professorId.toString() !== professorId) {
-    return { success: false, error: "You can only create ALAs for your assigned subjects" };
+    return {
+      success: false,
+      error: "You can only create ALAs for your assigned subjects",
+    };
   }
 
   try {
@@ -99,7 +106,9 @@ export async function createALA(input: CreateALAInput) {
       professorId,
       deadline: new Date(validated.deadline),
       maxFileSize: validated.maxFileSize * 1024 * 1024, // Convert MB to bytes
-      maxGroupSize: validated.isGroupSubmission ? validated.maxGroupSize : undefined,
+      maxGroupSize: validated.isGroupSubmission
+        ? validated.maxGroupSize
+        : undefined,
     });
 
     revalidatePath("/professor/alas");
@@ -218,7 +227,7 @@ export async function toggleALALock(id: string) {
   const updated = await ALA.findByIdAndUpdate(
     id,
     { isLocked: !ala.isLocked },
-    { new: true }
+    { new: true },
   );
 
   revalidatePath("/professor/alas");
@@ -227,7 +236,7 @@ export async function toggleALALock(id: string) {
 
 export async function addResource(
   alaId: string,
-  resource: { name: string; url: string; type: string }
+  resource: { name: string; url: string; type: string },
 ) {
   const clerkId = await requireProfessor();
   const professorId = await getProfessorDbId(clerkId!);
@@ -244,7 +253,7 @@ export async function addResource(
         resources: { ...resource, uploadedAt: new Date() },
       },
     },
-    { new: true }
+    { new: true },
   );
 
   revalidatePath(`/professor/alas/${alaId}`);
@@ -261,8 +270,10 @@ export async function removeResource(alaId: string, resourceUrl: string) {
   }
 
   // Find the resource to check if it's a document (uploaded file)
-  const resource = ala.resources.find((r: { url: string }) => r.url === resourceUrl);
-  
+  const resource = ala.resources.find(
+    (r: { url: string }) => r.url === resourceUrl,
+  );
+
   // Delete from Cloudinary if it's an uploaded document
   if (resource?.type === "document" && resourceUrl.includes("cloudinary")) {
     const deleted = await deleteFromCloudinary(resourceUrl);
@@ -271,7 +282,7 @@ export async function removeResource(alaId: string, resourceUrl: string) {
   const updated = await ALA.findByIdAndUpdate(
     alaId,
     { $pull: { resources: { url: resourceUrl } } },
-    { new: true }
+    { new: true },
   );
 
   revalidatePath(`/professor/alas/${alaId}`);

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -9,19 +9,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Pencil, UserMinus } from 'lucide-react';
-import { removeStudentFromClass } from '@/lib/actions/user.actions';
-import { toast } from 'sonner';
-import { ChangeClassDialog } from './change-class-dialog';
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { MoreHorizontal, Pencil, UserMinus } from "lucide-react";
+import { removeStudentFromClass } from "@/lib/actions/user.actions";
+import { toast } from "sonner";
+import { ChangeClassDialog } from "./change-class-dialog";
 
 interface Student {
   _id: string;
@@ -70,7 +70,10 @@ interface StudentAssignmentsTableProps {
   classes: ClassItem[];
 }
 
-export function StudentAssignmentsTable({ students, classes }: StudentAssignmentsTableProps) {
+export function StudentAssignmentsTable({
+  students,
+  classes,
+}: StudentAssignmentsTableProps) {
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const router = useRouter();
 
@@ -79,16 +82,16 @@ export function StudentAssignmentsTable({ students, classes }: StudentAssignment
 
     const result = await removeStudentFromClass(studentId);
     if (result.success) {
-      toast.success('Student removed from class');
+      toast.success("Student removed from class");
       router.refresh();
     } else {
-      toast.error(result.error || 'Failed to remove student');
+      toast.error(result.error || "Failed to remove student");
     }
   };
 
   if (students.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <div className="text-muted-foreground py-8 text-center">
         No students found. Create students first to assign them to classes.
       </div>
     );
@@ -118,13 +121,17 @@ export function StudentAssignmentsTable({ students, classes }: StudentAssignment
               <TableCell>{student.email}</TableCell>
               <TableCell>
                 {student.classId ? (
-                  <span>{student.classId.name} ({student.classId.academicYear})</span>
+                  <span>
+                    {student.classId.name} ({student.classId.academicYear})
+                  </span>
                 ) : (
                   <span className="text-muted-foreground">-</span>
                 )}
               </TableCell>
               <TableCell>
-                {student.classId?.semesterId?.name || <span className="text-muted-foreground">-</span>}
+                {student.classId?.semesterId?.name || (
+                  <span className="text-muted-foreground">-</span>
+                )}
               </TableCell>
               <TableCell>
                 {student.classId?.semesterId?.courseId ? (
@@ -142,7 +149,10 @@ export function StudentAssignmentsTable({ students, classes }: StudentAssignment
                 {student.classId ? (
                   <Badge variant="default">Assigned</Badge>
                 ) : (
-                  <Badge variant="outline" className="text-orange-600 border-orange-300">
+                  <Badge
+                    variant="outline"
+                    className="border-orange-300 text-orange-600"
+                  >
                     Unassigned
                   </Badge>
                 )}
@@ -155,14 +165,21 @@ export function StudentAssignmentsTable({ students, classes }: StudentAssignment
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setEditingStudent(student)}>
+                    <DropdownMenuItem
+                      onClick={() => setEditingStudent(student)}
+                    >
                       <Pencil className="mr-2 h-4 w-4" />
-                      {student.classId ? 'Change Class' : 'Assign Class'}
+                      {student.classId ? "Change Class" : "Assign Class"}
                     </DropdownMenuItem>
                     {student.classId && (
                       <DropdownMenuItem
                         className="text-destructive"
-                        onClick={() => handleRemove(student._id, `${student.firstName} ${student.lastName}`)}
+                        onClick={() =>
+                          handleRemove(
+                            student._id,
+                            `${student.firstName} ${student.lastName}`,
+                          )
+                        }
                       >
                         <UserMinus className="mr-2 h-4 w-4" />
                         Remove from Class
