@@ -8,6 +8,7 @@ export { Class } from "./models/class.model";
 export { SubjectOffering } from "./models/subject-offering.model";
 export { ClassCoordinator } from "./models/class-coordinator.model";
 export { ALA } from "./models/ala.model";
+export { Submission } from "./models/submission.model";
 export type { IUser, UserRole } from "./models/user.model";
 export type { IDepartment } from "./models/department.model";
 export type { ICourse } from "./models/course.model";
@@ -17,3 +18,8 @@ export type { IClass } from "./models/class.model";
 export type { ISubjectOffering } from "./models/subject-offering.model";
 export type { IClassCoordinator } from "./models/class-coordinator.model";
 export type { IALA, IALAResource } from "./models/ala.model";
+export type {
+  ISubmission,
+  ISubmissionFile,
+  ISubmissionLink,
+} from "./models/submission.model";
