@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { connectDB, Department, Course, Semester, Subject, Class, User } from "@/lib/db";
+import { connectDB, Department, Course, Semester, Subject, Class, SubjectOffering, ClassCoordinator, User } from "@/lib/db";
 import {
   createDepartmentSchema,
   updateDepartmentSchema,
@@ -13,6 +13,9 @@ import {
   updateSubjectSchema,
   createClassSchema,
   updateClassSchema,
+  createSubjectOfferingSchema,
+  updateSubjectOfferingSchema,
+  assignClassCoordinatorSchema,
   CreateDepartmentInput,
   UpdateDepartmentInput,
   CreateCourseInput,
@@ -23,6 +26,9 @@ import {
   UpdateSubjectInput,
   CreateClassInput,
   UpdateClassInput,
+  CreateSubjectOfferingInput,
+  UpdateSubjectOfferingInput,
+  AssignClassCoordinatorInput,
 } from "@/lib/validations/academic.validation";
 import { revalidatePath } from "next/cache";
 
@@ -430,9 +436,210 @@ export async function deleteClass(id: string) {
   await requireAdmin();
   await connectDB();
 
-  // TODO: Check for students/subject offerings before deleting
+  // Check for subject offerings before deleting
+  const offeringsCount = await SubjectOffering.countDocuments({ classId: id });
+  if (offeringsCount > 0) {
+    return { success: false, error: "Cannot delete class with existing subject offerings" };
+  }
+
   await Class.findByIdAndDelete(id);
   revalidatePath("/admin/classes");
+  return { success: true, error: null };
+}
+
+// ==================== SUBJECT OFFERINGS ====================
+
+export async function createSubjectOffering(input: CreateSubjectOfferingInput) {
+  await requireAdmin();
+  const validated = createSubjectOfferingSchema.parse(input);
+  await connectDB();
+
+  try {
+    const offering = await SubjectOffering.create(validated);
+    revalidatePath("/admin/subject-offerings");
+    return { success: true, offering: JSON.parse(JSON.stringify(offering)) };
+  } catch (error: unknown) {
+    const mongoError = error as { code?: number };
+    if (mongoError.code === 11000) {
+      return { success: false, error: "This subject is already assigned to this class for this semester" };
+    }
+    return { success: false, error: "Failed to create subject offering" };
+  }
+}
+
+export async function getAllSubjectOfferings() {
+  await connectDB();
+  const offerings = await SubjectOffering.find()
+    .populate("subjectId", "name code credits")
+    .populate({
+      path: "classId",
+      select: "name academicYear semesterId",
+    })
+    .populate("professorId", "firstName lastName email")
+    .populate({
+      path: "semesterId",
+      select: "name number courseId",
+      populate: {
+        path: "courseId",
+        select: "name code departmentId",
+        populate: { path: "departmentId", select: "name code" },
+      },
+    })
+    .sort({ academicYear: -1, "semesterId.number": 1 })
+    .lean();
+  return JSON.parse(JSON.stringify(offerings));
+}
+
+export async function getSubjectOfferingsByProfessor(professorId: string) {
+  await connectDB();
+  const offerings = await SubjectOffering.find({ professorId, isActive: true })
+    .populate("subjectId", "name code credits")
+    .populate("classId", "name academicYear")
+    .populate("semesterId", "name number")
+    .sort({ academicYear: -1 })
+    .lean();
+  return JSON.parse(JSON.stringify(offerings));
+}
+
+export async function getSubjectOfferingsByClass(classId: string) {
+  await connectDB();
+  const offerings = await SubjectOffering.find({ classId, isActive: true })
+    .populate("subjectId", "name code credits")
+    .populate("professorId", "firstName lastName email")
+    .lean();
+  return JSON.parse(JSON.stringify(offerings));
+}
+
+export async function updateSubjectOffering(id: string, input: UpdateSubjectOfferingInput) {
+  await requireAdmin();
+  const validated = updateSubjectOfferingSchema.parse(input);
+  await connectDB();
+
+  try {
+    const offering = await SubjectOffering.findByIdAndUpdate(id, validated, { new: true });
+    revalidatePath("/admin/subject-offerings");
+    return { success: true, offering: JSON.parse(JSON.stringify(offering)) };
+  } catch (error: unknown) {
+    const mongoError = error as { code?: number };
+    if (mongoError.code === 11000) {
+      return { success: false, error: "This subject is already assigned to this class" };
+    }
+    return { success: false, error: "Failed to update subject offering" };
+  }
+}
+
+export async function deleteSubjectOffering(id: string) {
+  await requireAdmin();
+  await connectDB();
+
+  // TODO: Check for ALAs before deleting
+  await SubjectOffering.findByIdAndDelete(id);
+  revalidatePath("/admin/subject-offerings");
+  return { success: true, error: null };
+}
+
+export async function getAvailableProfessors() {
+  await connectDB();
+  const professors = await User.find({ role: "professor", isActive: true })
+    .select("_id firstName lastName email")
+    .sort({ firstName: 1 })
+    .lean();
+  return JSON.parse(JSON.stringify(professors));
+}
+
+// ==================== CLASS COORDINATORS ====================
+
+export async function assignClassCoordinator(input: AssignClassCoordinatorInput) {
+  await requireAdmin();
+  const validated = assignClassCoordinatorSchema.parse(input);
+  await connectDB();
+
+  try {
+    // Use upsert to replace existing coordinator for this class/year
+    const coordinator = await ClassCoordinator.findOneAndUpdate(
+      { classId: validated.classId, academicYear: validated.academicYear },
+      { ...validated, isActive: true },
+      { upsert: true, new: true }
+    );
+    
+    revalidatePath("/admin/class-coordinators");
+    return { success: true, coordinator: JSON.parse(JSON.stringify(coordinator)) };
+  } catch (error) {
+    console.error("Error assigning class coordinator:", error);
+    return { success: false, error: "Failed to assign class coordinator" };
+  }
+}
+
+export async function getAllClassCoordinators() {
+  await connectDB();
+  const coordinators = await ClassCoordinator.find({ isActive: true })
+    .populate({
+      path: "classId",
+      select: "name academicYear semesterId",
+      populate: {
+        path: "semesterId",
+        select: "name number courseId",
+        populate: {
+          path: "courseId",
+          select: "name code departmentId",
+          populate: { path: "departmentId", select: "name code" },
+        },
+      },
+    })
+    .populate("professorId", "firstName lastName email")
+    .sort({ academicYear: -1 })
+    .lean();
+  return JSON.parse(JSON.stringify(coordinators));
+}
+
+export async function getClassCoordinatorByClass(classId: string, academicYear: string) {
+  await connectDB();
+  const coordinator = await ClassCoordinator.findOne({
+    classId,
+    academicYear,
+    isActive: true,
+  })
+    .populate("professorId", "firstName lastName email")
+    .lean();
+  return coordinator ? JSON.parse(JSON.stringify(coordinator)) : null;
+}
+
+export async function getClassesByCoordinator(professorId: string) {
+  await connectDB();
+  const coordinators = await ClassCoordinator.find({ professorId, isActive: true })
+    .populate({
+      path: "classId",
+      select: "name academicYear semesterId",
+      populate: {
+        path: "semesterId",
+        select: "name number courseId",
+        populate: { path: "courseId", select: "name code" },
+      },
+    })
+    .sort({ academicYear: -1 })
+    .lean();
+  return JSON.parse(JSON.stringify(coordinators));
+}
+
+export async function removeClassCoordinator(classId: string, academicYear: string) {
+  await requireAdmin();
+  await connectDB();
+
+  await ClassCoordinator.findOneAndUpdate(
+    { classId, academicYear },
+    { isActive: false }
+  );
+  
+  revalidatePath("/admin/class-coordinators");
+  return { success: true, error: null };
+}
+
+export async function deleteClassCoordinator(id: string) {
+  await requireAdmin();
+  await connectDB();
+
+  await ClassCoordinator.findByIdAndDelete(id);
+  revalidatePath("/admin/class-coordinators");
   return { success: true, error: null };
 }
 
@@ -440,12 +647,14 @@ export async function deleteClass(id: string) {
 
 export async function getAcademicStats() {
   await connectDB();
-  const [departments, courses, semesters, subjects, classes] = await Promise.all([
+  const [departments, courses, semesters, subjects, classes, offerings, coordinators] = await Promise.all([
     Department.countDocuments({ isActive: true }),
     Course.countDocuments({ isActive: true }),
     Semester.countDocuments({ isActive: true }),
     Subject.countDocuments({ isActive: true }),
     Class.countDocuments({ isActive: true }),
+    SubjectOffering.countDocuments({ isActive: true }),
+    ClassCoordinator.countDocuments({ isActive: true }),
   ]);
-  return { departments, courses, semesters, subjects, classes };
+  return { departments, courses, semesters, subjects, classes, offerings, coordinators };
 }

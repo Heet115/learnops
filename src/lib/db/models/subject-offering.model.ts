@@ -6,7 +6,6 @@ export interface ISubjectOffering extends Document {
   professorId: mongoose.Types.ObjectId;
   semesterId: mongoose.Types.ObjectId;
   academicYear: string;
-  isClassCoordinator: boolean;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -39,10 +38,6 @@ const SubjectOfferingSchema = new Schema<ISubjectOffering>(
       required: true,
       trim: true,
     },
-    isClassCoordinator: {
-      type: Boolean,
-      default: false,
-    },
     isActive: {
       type: Boolean,
       default: true,
@@ -61,9 +56,6 @@ SubjectOfferingSchema.index(
 
 // Index for professor queries
 SubjectOfferingSchema.index({ professorId: 1, semesterId: 1, academicYear: 1 });
-
-// Index for class coordinator queries
-SubjectOfferingSchema.index({ classId: 1, isClassCoordinator: 1 });
 
 export const SubjectOffering = mongoose.models.SubjectOffering || 
   mongoose.model<ISubjectOffering>('SubjectOffering', SubjectOfferingSchema);

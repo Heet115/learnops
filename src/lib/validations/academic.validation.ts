@@ -89,6 +89,29 @@ export const updateClassSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+// Subject Offering (Teaching Assignment)
+export const createSubjectOfferingSchema = z.object({
+  subjectId: z.string().min(1, "Subject is required"),
+  classId: z.string().min(1, "Class is required"),
+  professorId: z.string().min(1, "Professor is required"),
+  semesterId: z.string().min(1, "Semester is required"),
+  academicYear: z.string().min(1, "Academic year is required").max(20),
+});
+
+export const updateSubjectOfferingSchema = z.object({
+  subjectId: z.string().optional(),
+  classId: z.string().optional(),
+  professorId: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
+
+// Class Coordinator
+export const assignClassCoordinatorSchema = z.object({
+  classId: z.string().min(1, "Class is required"),
+  professorId: z.string().min(1, "Professor is required"),
+  academicYear: z.string().min(1, "Academic year is required").max(20),
+});
+
 export type CreateDepartmentInput = z.infer<typeof createDepartmentSchema>;
 export type UpdateDepartmentInput = z.infer<typeof updateDepartmentSchema>;
 export type CreateCourseInput = z.infer<typeof createCourseSchema>;
@@ -99,3 +122,6 @@ export type CreateSubjectInput = z.infer<typeof createSubjectSchema>;
 export type UpdateSubjectInput = z.infer<typeof updateSubjectSchema>;
 export type CreateClassInput = z.infer<typeof createClassSchema>;
 export type UpdateClassInput = z.infer<typeof updateClassSchema>;
+export type CreateSubjectOfferingInput = z.infer<typeof createSubjectOfferingSchema>;
+export type UpdateSubjectOfferingInput = z.infer<typeof updateSubjectOfferingSchema>;
+export type AssignClassCoordinatorInput = z.infer<typeof assignClassCoordinatorSchema>;

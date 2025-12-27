@@ -18,6 +18,7 @@ import {
   ClipboardList,
   Clock,
   Bell,
+  Crown,
 } from "lucide-react";
 
 import { NavMain } from "@/components/layout/nav-main";
@@ -88,6 +89,16 @@ const getNavItems = (role: UserRole) => {
         title: "Classes",
         url: "/admin/classes",
         icon: GraduationCap,
+      },
+      {
+        title: "Subject Offerings",
+        url: "/admin/subject-offerings",
+        icon: ClipboardList,
+      },
+      {
+        title: "Class Coordinators",
+        url: "/admin/class-coordinators",
+        icon: Crown,
       },
       {
         title: "Settings",
