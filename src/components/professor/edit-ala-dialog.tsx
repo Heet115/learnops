@@ -47,7 +47,7 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
     ala.allowedFileTypes || ["pdf"],
   );
   const [deadline, setDeadline] = useState<Date | undefined>(
-    new Date(ala.deadline)
+    new Date(ala.deadline),
   );
   const router = useRouter();
 

@@ -47,7 +47,7 @@ export function ConfirmDialog({
             onClick={onConfirm}
             className={cn(
               variant === "destructive" &&
-                buttonVariants({ variant: "destructive" })
+                buttonVariants({ variant: "destructive" }),
             )}
           >
             {confirmText}

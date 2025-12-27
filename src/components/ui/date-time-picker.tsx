@@ -40,7 +40,7 @@ export function DatePicker({
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [internalDate, setInternalDate] = React.useState<Date | undefined>(
-    value || defaultValue
+    value || defaultValue,
   );
 
   const date = value !== undefined ? value : internalDate;
@@ -66,7 +66,7 @@ export function DatePicker({
             disabled={disabled}
             className={cn(
               "w-full justify-between font-normal",
-              !date && "text-muted-foreground"
+              !date && "text-muted-foreground",
             )}
           >
             {date ? date.toLocaleDateString() : placeholder}
@@ -121,7 +121,7 @@ export function DateTimePicker({
 }: DateTimePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [internalDate, setInternalDate] = React.useState<Date | undefined>(
-    value || defaultValue
+    value || defaultValue,
   );
 
   const date = value !== undefined ? value : internalDate;
@@ -183,7 +183,7 @@ export function DateTimePicker({
             disabled={disabled}
             className={cn(
               "w-full justify-between font-normal",
-              !date && "text-muted-foreground"
+              !date && "text-muted-foreground",
             )}
           >
             <span className="flex items-center gap-2">
@@ -209,11 +209,7 @@ export function DateTimePicker({
                 onChange={handleTimeChange}
                 className="w-auto"
               />
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => setOpen(false)}
-              >
+              <Button type="button" size="sm" onClick={() => setOpen(false)}>
                 Done
               </Button>
             </div>

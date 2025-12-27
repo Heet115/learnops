@@ -75,7 +75,11 @@ export function ALAResourcesSection({
   const [resourceType, setResourceType] = useState("link");
   const [uploadedUrl, setUploadedUrl] = useState("");
   const [fileName, setFileName] = useState("");
-  const [removeConfirm, setRemoveConfirm] = useState<{ open: boolean; url: string; name: string }>({
+  const [removeConfirm, setRemoveConfirm] = useState<{
+    open: boolean;
+    url: string;
+    name: string;
+  }>({
     open: false,
     url: "",
     name: "",
@@ -193,189 +197,196 @@ export function ALAResourcesSection({
 
   return (
     <>
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Resources</CardTitle>
-          <CardDescription>
-            Study materials and references for students
-          </CardDescription>
-        </div>
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-          <DialogTrigger asChild>
-            <Button size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Resource
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <form onSubmit={handleAddResource}>
-              <DialogHeader>
-                <DialogTitle>Add Resource</DialogTitle>
-                <DialogDescription>
-                  Upload a document or add a link for students.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="type">Resource Type</Label>
-                  <Select value={resourceType} onValueChange={setResourceType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {RESOURCE_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    placeholder="e.g., Lecture Notes Chapter 1"
-                    required
-                  />
-                </div>
-
-                {resourceType === "link" ? (
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Resources</CardTitle>
+            <CardDescription>
+              Study materials and references for students
+            </CardDescription>
+          </div>
+          <Dialog open={open} onOpenChange={handleOpenChange}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Resource
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <form onSubmit={handleAddResource}>
+                <DialogHeader>
+                  <DialogTitle>Add Resource</DialogTitle>
+                  <DialogDescription>
+                    Upload a document or add a link for students.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="url">URL</Label>
+                    <Label htmlFor="type">Resource Type</Label>
+                    <Select
+                      value={resourceType}
+                      onValueChange={setResourceType}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {RESOURCE_TYPES.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Name</Label>
                     <Input
-                      id="url"
-                      name="url"
-                      type="url"
-                      placeholder="https://..."
+                      id="name"
+                      name="name"
+                      placeholder="e.g., Lecture Notes Chapter 1"
                       required
                     />
                   </div>
-                ) : (
-                  <div className="grid gap-2">
-                    <Label>Upload File</Label>
-                    <div className="flex flex-col gap-2">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".pdf,.doc,.docx,.ppt,.pptx"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        id="file-upload"
+
+                  {resourceType === "link" ? (
+                    <div className="grid gap-2">
+                      <Label htmlFor="url">URL</Label>
+                      <Input
+                        id="url"
+                        name="url"
+                        type="url"
+                        placeholder="https://..."
+                        required
                       />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploading}
-                        className="w-full"
-                      >
-                        {uploading ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Uploading...
-                          </>
-                        ) : (
-                          <>
-                            <Upload className="mr-2 h-4 w-4" />
-                            Choose File
-                          </>
+                    </div>
+                  ) : (
+                    <div className="grid gap-2">
+                      <Label>Upload File</Label>
+                      <div className="flex flex-col gap-2">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".pdf,.doc,.docx,.ppt,.pptx"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                          id="file-upload"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploading}
+                          className="w-full"
+                        >
+                          {uploading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="mr-2 h-4 w-4" />
+                              Choose File
+                            </>
+                          )}
+                        </Button>
+                        {fileName && (
+                          <p className="text-muted-foreground text-sm">
+                            {uploadedUrl ? "✓ " : ""}
+                            {fileName}
+                          </p>
                         )}
-                      </Button>
-                      {fileName && (
-                        <p className="text-muted-foreground text-sm">
-                          {uploadedUrl ? "✓ " : ""}
-                          {fileName}
+                        <p className="text-muted-foreground text-xs">
+                          PDF, DOC, DOCX, PPT, PPTX (max 10MB)
                         </p>
-                      )}
-                      <p className="text-muted-foreground text-xs">
-                        PDF, DOC, DOCX, PPT, PPTX (max 10MB)
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleOpenChange(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={
+                      loading ||
+                      uploading ||
+                      (resourceType === "document" && !uploadedUrl)
+                    }
+                  >
+                    {loading ? "Adding..." : "Add Resource"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          {resources.length === 0 ? (
+            <p className="text-muted-foreground text-sm">
+              No resources added yet. Add study materials for your students.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {resources.map((resource, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-lg border p-3"
+                >
+                  <div className="flex items-center gap-3">
+                    {getResourceIcon(resource.type)}
+                    <div>
+                      <p className="text-sm font-medium">{resource.name}</p>
+                      <p className="text-muted-foreground max-w-[300px] truncate text-xs">
+                        {resource.url}
                       </p>
                     </div>
                   </div>
-                )}
-              </div>
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => handleOpenChange(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={
-                    loading ||
-                    uploading ||
-                    (resourceType === "document" && !uploadedUrl)
-                  }
-                >
-                  {loading ? "Adding..." : "Add Resource"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </CardHeader>
-      <CardContent>
-        {resources.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            No resources added yet. Add study materials for your students.
-          </p>
-        ) : (
-          <div className="space-y-3">
-            {resources.map((resource, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between rounded-lg border p-3"
-              >
-                <div className="flex items-center gap-3">
-                  {getResourceIcon(resource.type)}
-                  <div>
-                    <p className="text-sm font-medium">{resource.name}</p>
-                    <p className="text-muted-foreground max-w-[300px] truncate text-xs">
-                      {resource.url}
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon" asChild>
+                      <a
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        handleRemoveClick(resource.url, resource.name)
+                      }
+                    >
+                      <Trash2 className="text-destructive h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" asChild>
-                    <a
-                      href={resource.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveClick(resource.url, resource.name)}
-                  >
-                    <Trash2 className="text-destructive h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-    <ConfirmDialog
-      open={removeConfirm.open}
-      onOpenChange={(open) => !open && setRemoveConfirm({ open: false, url: "", name: "" })}
-      title="Remove Resource"
-      description={`Remove "${removeConfirm.name}"? This action cannot be undone.`}
-      confirmText="Remove"
-      variant="destructive"
-      onConfirm={handleRemoveConfirm}
-    />
+      <ConfirmDialog
+        open={removeConfirm.open}
+        onOpenChange={(open) =>
+          !open && setRemoveConfirm({ open: false, url: "", name: "" })
+        }
+        title="Remove Resource"
+        description={`Remove "${removeConfirm.name}"? This action cannot be undone.`}
+        confirmText="Remove"
+        variant="destructive"
+        onConfirm={handleRemoveConfirm}
+      />
     </>
   );
 }

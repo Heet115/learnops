@@ -87,13 +87,13 @@ export async function getStudentALAs() {
     .lean();
 
   // Merge submissions - prefer own submission, fallback to group submission
-  const submissionMap = new Map<string, typeof ownSubmissions[0]>();
-  
+  const submissionMap = new Map<string, (typeof ownSubmissions)[0]>();
+
   // Add group submissions first
   groupSubmissions.forEach((s) => {
     submissionMap.set(s.alaId.toString(), s);
   });
-  
+
   // Override with own submissions (if student is the primary submitter)
   ownSubmissions.forEach((s) => {
     submissionMap.set(s.alaId.toString(), s);
@@ -178,7 +178,7 @@ export async function createSubmission(
   data: {
     files: { name: string; url: string; type: string; size: number }[];
     links: { title: string; url: string }[];
-  }
+  },
 ) {
   const clerkId = await requireStudent();
   const student = await getStudentDbUser(clerkId!);
@@ -208,7 +208,10 @@ export async function createSubmission(
   });
 
   if (existingSubmission) {
-    return { success: false, error: "Submission already exists. Use update instead." };
+    return {
+      success: false,
+      error: "Submission already exists. Use update instead.",
+    };
   }
 
   let groupMembers: mongoose.Types.ObjectId[] = [];
@@ -227,10 +230,10 @@ export async function createSubmission(
 
     // Check if any group member already has a submission
     const acceptedMembers = group.members.filter(
-      (m: { status: string }) => m.status === "accepted"
+      (m: { status: string }) => m.status === "accepted",
     );
     const groupMemberIds = acceptedMembers.map(
-      (m: { studentId: mongoose.Types.ObjectId }) => m.studentId
+      (m: { studentId: mongoose.Types.ObjectId }) => m.studentId,
     );
 
     const existingGroupSubmission = await Submission.findOne({
@@ -244,7 +247,7 @@ export async function createSubmission(
 
     // Get other members (exclude the submitter)
     groupMembers = groupMemberIds.filter(
-      (id) => id.toString() !== student._id.toString()
+      (id) => id.toString() !== student._id.toString(),
     );
 
     // Lock the group
@@ -276,7 +279,7 @@ export async function updateSubmission(
     files: { name: string; url: string; type: string; size: number }[];
     links: { title: string; url: string }[];
     filesToDelete?: string[];
-  }
+  },
 ) {
   const clerkId = await requireStudent();
   const student = await getStudentDbUser(clerkId!);
@@ -290,7 +293,7 @@ export async function updateSubmission(
   const hasAccess =
     submission.studentId.toString() === student._id.toString() ||
     submission.groupMembers?.some(
-      (m) => m.toString() === student._id.toString()
+      (m) => m.toString() === student._id.toString(),
     );
 
   if (!hasAccess) {
@@ -337,7 +340,7 @@ export async function updateSubmission(
       status: "submitted",
       submittedAt: new Date(),
     },
-    { new: true }
+    { new: true },
   );
 
   revalidatePath(`/student/alas/${submission.alaId}`);

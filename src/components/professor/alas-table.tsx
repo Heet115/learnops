@@ -67,7 +67,11 @@ interface ALAsTableProps {
 
 export function ALAsTable({ alas, offerings }: ALAsTableProps) {
   const [editingALA, setEditingALA] = useState<ALA | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; title: string }>({
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    open: boolean;
+    id: string;
+    title: string;
+  }>({
     open: false,
     id: "",
     title: "",
@@ -233,7 +237,9 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
 
       <ConfirmDialog
         open={deleteConfirm.open}
-        onOpenChange={(open) => !open && setDeleteConfirm({ open: false, id: "", title: "" })}
+        onOpenChange={(open) =>
+          !open && setDeleteConfirm({ open: false, id: "", title: "" })
+        }
         title="Delete ALA"
         description={`Delete "${deleteConfirm.title}"? This action cannot be undone.`}
         confirmText="Delete"

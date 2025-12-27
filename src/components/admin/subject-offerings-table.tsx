@@ -78,7 +78,10 @@ export function SubjectOfferingsTable({
 }: SubjectOfferingsTableProps) {
   const [editingOffering, setEditingOffering] =
     useState<SubjectOffering | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string }>({
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    open: boolean;
+    id: string;
+  }>({
     open: false,
     id: "",
   });
@@ -203,7 +206,9 @@ export function SubjectOfferingsTable({
 
       <ConfirmDialog
         open={deleteConfirm.open}
-        onOpenChange={(open) => !open && setDeleteConfirm({ open: false, id: "" })}
+        onOpenChange={(open) =>
+          !open && setDeleteConfirm({ open: false, id: "" })
+        }
         title="Delete Subject Offering"
         description="Are you sure you want to delete this subject offering? This action cannot be undone."
         confirmText="Delete"

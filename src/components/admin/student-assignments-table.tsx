@@ -76,7 +76,11 @@ export function StudentAssignmentsTable({
   classes,
 }: StudentAssignmentsTableProps) {
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-  const [removeConfirm, setRemoveConfirm] = useState<{ open: boolean; id: string; name: string }>({
+  const [removeConfirm, setRemoveConfirm] = useState<{
+    open: boolean;
+    id: string;
+    name: string;
+  }>({
     open: false,
     id: "",
     name: "",
@@ -215,7 +219,9 @@ export function StudentAssignmentsTable({
 
       <ConfirmDialog
         open={removeConfirm.open}
-        onOpenChange={(open) => !open && setRemoveConfirm({ open: false, id: "", name: "" })}
+        onOpenChange={(open) =>
+          !open && setRemoveConfirm({ open: false, id: "", name: "" })
+        }
         title="Remove from Class"
         description={`Remove ${removeConfirm.name} from their class?`}
         confirmText="Remove"

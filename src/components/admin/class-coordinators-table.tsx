@@ -89,7 +89,11 @@ export function ClassCoordinatorsTable({
 }: ClassCoordinatorsTableProps) {
   const [editingCoordinator, setEditingCoordinator] =
     useState<ClassCoordinator | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; className: string }>({
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    open: boolean;
+    id: string;
+    className: string;
+  }>({
     open: false,
     id: "",
     className: "",
@@ -215,7 +219,9 @@ export function ClassCoordinatorsTable({
 
       <ConfirmDialog
         open={deleteConfirm.open}
-        onOpenChange={(open) => !open && setDeleteConfirm({ open: false, id: "", className: "" })}
+        onOpenChange={(open) =>
+          !open && setDeleteConfirm({ open: false, id: "", className: "" })
+        }
         title="Remove Coordinator"
         description={`Are you sure you want to remove the coordinator for "${deleteConfirm.className}"?`}
         confirmText="Remove"

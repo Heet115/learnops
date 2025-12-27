@@ -68,7 +68,11 @@ interface SubjectsTableProps {
 
 export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    open: boolean;
+    id: string;
+    name: string;
+  }>({
     open: false,
     id: "",
     name: "",
@@ -150,7 +154,9 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-destructive"
-                      onClick={() => handleDeleteClick(subject._id, subject.name)}
+                      onClick={() =>
+                        handleDeleteClick(subject._id, subject.name)
+                      }
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
@@ -174,7 +180,9 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
 
       <ConfirmDialog
         open={deleteConfirm.open}
-        onOpenChange={(open) => !open && setDeleteConfirm({ open: false, id: "", name: "" })}
+        onOpenChange={(open) =>
+          !open && setDeleteConfirm({ open: false, id: "", name: "" })
+        }
         title="Delete Subject"
         description={`Are you sure you want to delete "${deleteConfirm.name}"? This action cannot be undone.`}
         confirmText="Delete"

@@ -32,7 +32,10 @@ import {
   Send,
   Download,
 } from "lucide-react";
-import { createSubmission, updateSubmission } from "@/lib/actions/submission.actions";
+import {
+  createSubmission,
+  updateSubmission,
+} from "@/lib/actions/submission.actions";
 import { toast } from "sonner";
 
 interface ExistingFile {
@@ -80,11 +83,11 @@ export function SubmissionForm({
 }: SubmissionFormProps) {
   const [localFiles, setLocalFiles] = useState<LocalFile[]>([]);
   const [existingFiles, setExistingFiles] = useState<ExistingFile[]>(
-    existingSubmission?.files || []
+    existingSubmission?.files || [],
   );
   const [filesToDelete, setFilesToDelete] = useState<string[]>([]);
   const [links, setLinks] = useState<SubmissionLink[]>(
-    existingSubmission?.links || []
+    existingSubmission?.links || [],
   );
   const [submitting, setSubmitting] = useState(false);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
@@ -100,7 +103,7 @@ export function SubmissionForm({
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (!ext || !allowedFileTypes.includes(ext)) {
       toast.error(
-        `File type not allowed. Allowed: ${allowedFileTypes.join(", ").toUpperCase()}`
+        `File type not allowed. Allowed: ${allowedFileTypes.join(", ").toUpperCase()}`,
       );
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
@@ -108,13 +111,14 @@ export function SubmissionForm({
 
     if (file.size > maxFileSize) {
       toast.error(
-        `File too large. Max size: ${Math.round(maxFileSize / (1024 * 1024))}MB`
+        `File too large. Max size: ${Math.round(maxFileSize / (1024 * 1024))}MB`,
       );
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
-    const isDuplicate = localFiles.some((f) => f.name === file.name) ||
+    const isDuplicate =
+      localFiles.some((f) => f.name === file.name) ||
       existingFiles.some((f) => f.name === file.name);
     if (isDuplicate) {
       toast.error("A file with this name already exists");
@@ -171,7 +175,7 @@ export function SubmissionForm({
 
     try {
       const uploadedFiles: ExistingFile[] = [];
-      
+
       for (const localFile of localFiles) {
         const formData = new FormData();
         formData.append("file", localFile.file);
@@ -185,7 +189,9 @@ export function SubmissionForm({
         const uploadData = await uploadRes.json();
 
         if (!uploadRes.ok) {
-          throw new Error(uploadData.error || `Failed to upload ${localFile.name}`);
+          throw new Error(
+            uploadData.error || `Failed to upload ${localFile.name}`,
+          );
         }
 
         uploadedFiles.push({
@@ -213,7 +219,9 @@ export function SubmissionForm({
       }
 
       if (result.success) {
-        toast.success(isResubmit ? "Submission updated!" : "Submission successful!");
+        toast.success(
+          isResubmit ? "Submission updated!" : "Submission successful!",
+        );
         setLocalFiles([]);
         setExistingFiles(allFiles);
         setFilesToDelete([]);
@@ -238,7 +246,8 @@ export function SubmissionForm({
   };
 
   const acceptTypes = allowedFileTypes.map((t) => `.${t}`).join(",");
-  const hasContent = localFiles.length > 0 || existingFiles.length > 0 || links.length > 0;
+  const hasContent =
+    localFiles.length > 0 || existingFiles.length > 0 || links.length > 0;
 
   return (
     <>
@@ -331,7 +340,9 @@ export function SubmissionForm({
             )}
 
             {existingFiles.length === 0 && localFiles.length === 0 && (
-              <p className="text-muted-foreground text-sm">No files added yet</p>
+              <p className="text-muted-foreground text-sm">
+                No files added yet
+              </p>
             )}
 
             <p className="text-muted-foreground text-xs">
@@ -345,7 +356,12 @@ export function SubmissionForm({
               <Label>Links</Label>
               <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button type="button" variant="outline" size="sm" disabled={submitting}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={submitting}
+                  >
                     <Plus className="mr-2 h-4 w-4" />
                     Add Link
                   </Button>
@@ -405,7 +421,7 @@ export function SubmissionForm({
                       <LinkIcon className="text-muted-foreground h-4 w-4" />
                       <div>
                         <p className="text-sm font-medium">{link.title}</p>
-                        <p className="text-xs text-blue-600 truncate max-w-[250px]">
+                        <p className="max-w-[250px] truncate text-xs text-blue-600">
                           {link.url}
                         </p>
                       </div>
@@ -422,7 +438,9 @@ export function SubmissionForm({
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground text-sm">No links added yet</p>
+              <p className="text-muted-foreground text-sm">
+                No links added yet
+              </p>
             )}
           </div>
 
@@ -446,7 +464,9 @@ export function SubmissionForm({
               {submitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {localFiles.length > 0 ? "Uploading & Submitting..." : "Submitting..."}
+                  {localFiles.length > 0
+                    ? "Uploading & Submitting..."
+                    : "Submitting..."}
                 </>
               ) : (
                 <>

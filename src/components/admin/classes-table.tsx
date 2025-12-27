@@ -67,7 +67,11 @@ interface ClassesTableProps {
 
 export function ClassesTable({ classes, semesters }: ClassesTableProps) {
   const [editingClass, setEditingClass] = useState<ClassItem | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    open: boolean;
+    id: string;
+    name: string;
+  }>({
     open: false,
     id: "",
     name: "",
@@ -173,7 +177,9 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
 
       <ConfirmDialog
         open={deleteConfirm.open}
-        onOpenChange={(open) => !open && setDeleteConfirm({ open: false, id: "", name: "" })}
+        onOpenChange={(open) =>
+          !open && setDeleteConfirm({ open: false, id: "", name: "" })
+        }
         title="Delete Class"
         description={`Are you sure you want to delete "${deleteConfirm.name}"? This action cannot be undone.`}
         confirmText="Delete"
