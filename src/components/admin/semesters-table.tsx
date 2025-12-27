@@ -31,6 +31,7 @@ import {
 import { deleteSemester } from "@/lib/actions/academic.actions";
 import { MoreHorizontal, Trash2 } from "lucide-react";
 import { ISemester, ICourse, IDepartment } from "@/lib/db";
+import { toast } from "sonner";
 
 interface SemestersTableProps {
   semesters: (ISemester & {
@@ -47,10 +48,17 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
     if (!deleteId) return;
     setIsLoading(true);
 
-    await deleteSemester(deleteId);
-    setDeleteId(null);
+    const result = await deleteSemester(deleteId);
+    
+    if (result.success) {
+      toast.success("Semester deleted successfully");
+      setDeleteId(null);
+      router.refresh();
+    } else {
+      toast.error(result.error || "Failed to delete semester");
+    }
+    
     setIsLoading(false);
-    router.refresh();
   };
 
   if (semesters.length === 0) {

@@ -36,6 +36,7 @@ import {
 } from "@/lib/actions/admin.actions";
 import { MoreHorizontal, UserX, UserCheck, Trash2 } from "lucide-react";
 import { IUser } from "@/lib/db";
+import { toast } from "sonner";
 
 interface UsersTableProps {
   users: IUser[];
@@ -65,18 +66,30 @@ export function UsersTable({ users }: UsersTableProps) {
       selectedUser._id as unknown as { toString(): string }
     ).toString();
 
+    let result;
     if (actionType === "deactivate") {
-      await deactivateUser(userId);
+      result = await deactivateUser(userId);
     } else if (actionType === "reactivate") {
-      await reactivateUser(userId);
+      result = await reactivateUser(userId);
     } else if (actionType === "delete") {
-      await deleteUser(userId);
+      result = await deleteUser(userId);
+    }
+
+    if (result?.success) {
+      const messages = {
+        deactivate: "User deactivated successfully",
+        reactivate: "User reactivated successfully",
+        delete: "User deleted successfully",
+      };
+      toast.success(messages[actionType]);
+      router.refresh();
+    } else {
+      toast.error(result?.error || `Failed to ${actionType} user`);
     }
 
     setIsLoading(false);
     setSelectedUser(null);
     setActionType(null);
-    router.refresh();
   };
 
   const getInitials = (firstName: string, lastName: string) => {

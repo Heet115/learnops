@@ -24,6 +24,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createUser } from "@/lib/actions/admin.actions";
 import { Loader2, Plus } from "lucide-react";
+import { toast } from "sonner";
 
 export function CreateUserDialog() {
   const router = useRouter();
@@ -56,6 +57,7 @@ export function CreateUserDialog() {
     });
 
     if (result.success) {
+      toast.success("User created successfully");
       setOpen(false);
       setFormData({
         email: "",
@@ -66,6 +68,7 @@ export function CreateUserDialog() {
       });
       router.refresh();
     } else {
+      toast.error(result.error || "Failed to create user");
       setError(result.error || "Failed to create user");
     }
 

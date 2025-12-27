@@ -32,6 +32,7 @@ import { deleteDepartment } from "@/lib/actions/academic.actions";
 import { MoreHorizontal, Trash2, Pencil } from "lucide-react";
 import { IDepartment, IUser } from "@/lib/db";
 import { EditDepartmentDialog } from "./edit-department-dialog";
+import { toast } from "sonner";
 
 interface DepartmentsTableProps {
   departments: (IDepartment & { hodId?: IUser })[];
@@ -55,9 +56,11 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
     const result = await deleteDepartment(deleteId);
 
     if (result.success) {
+      toast.success("Department deleted successfully");
       setDeleteId(null);
       router.refresh();
     } else {
+      toast.error(result.error || "Failed to delete department");
       setError(result.error || "Failed to delete");
     }
 

@@ -24,6 +24,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { updateDepartment } from "@/lib/actions/academic.actions";
 import { Loader2 } from "lucide-react";
 import { IDepartment, IUser } from "@/lib/db";
+import { toast } from "sonner";
 
 interface EditDepartmentDialogProps {
   department: IDepartment;
@@ -65,9 +66,11 @@ export function EditDepartmentDialog({
     });
 
     if (result.success) {
+      toast.success("Department updated successfully");
       onOpenChange(false);
       router.refresh();
     } else {
+      toast.error(result.error || "Failed to update department");
       setError(result.error || "Failed to update department");
     }
 

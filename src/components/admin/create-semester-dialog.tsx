@@ -26,6 +26,7 @@ import { DatePicker } from "@/components/ui/date-time-picker";
 import { createSemester } from "@/lib/actions/academic.actions";
 import { Loader2, Plus } from "lucide-react";
 import { ICourse } from "@/lib/db";
+import { toast } from "sonner";
 
 interface CreateSemesterDialogProps {
   courses: ICourse[];
@@ -63,6 +64,7 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
     });
 
     if (result.success) {
+      toast.success("Semester created successfully");
       setOpen(false);
       setFormData({
         name: "",
@@ -73,6 +75,7 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
       setEndDate(undefined);
       router.refresh();
     } else {
+      toast.error(result.error || "Failed to create semester");
       setError(result.error || "Failed to create semester");
     }
 

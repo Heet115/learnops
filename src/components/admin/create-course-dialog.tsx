@@ -25,6 +25,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createCourse } from "@/lib/actions/academic.actions";
 import { Loader2, Plus } from "lucide-react";
 import { IDepartment } from "@/lib/db";
+import { toast } from "sonner";
 
 interface CreateCourseDialogProps {
   departments: IDepartment[];
@@ -57,10 +58,12 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
     const result = await createCourse(formData);
 
     if (result.success) {
+      toast.success("Course created successfully");
       setOpen(false);
       setFormData({ name: "", code: "", departmentId: "", duration: 4 });
       router.refresh();
     } else {
+      toast.error(result.error || "Failed to create course");
       setError(result.error || "Failed to create course");
     }
 

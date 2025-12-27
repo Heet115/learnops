@@ -31,6 +31,7 @@ import {
 import { deleteCourse } from "@/lib/actions/academic.actions";
 import { MoreHorizontal, Trash2 } from "lucide-react";
 import { ICourse, IDepartment } from "@/lib/db";
+import { toast } from "sonner";
 
 interface CoursesTableProps {
   courses: (ICourse & { departmentId?: IDepartment })[];
@@ -51,9 +52,11 @@ export function CoursesTable({ courses }: CoursesTableProps) {
     const result = await deleteCourse(deleteId);
 
     if (result.success) {
+      toast.success("Course deleted successfully");
       setDeleteId(null);
       router.refresh();
     } else {
+      toast.error(result.error || "Failed to delete course");
       setError(result.error || "Failed to delete");
     }
 

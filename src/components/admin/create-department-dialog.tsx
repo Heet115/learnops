@@ -25,6 +25,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createDepartment } from "@/lib/actions/academic.actions";
 import { Loader2, Plus } from "lucide-react";
 import { IUser } from "@/lib/db";
+import { toast } from "sonner";
 
 interface CreateDepartmentDialogProps {
   hods: IUser[];
@@ -54,10 +55,12 @@ export function CreateDepartmentDialog({ hods }: CreateDepartmentDialogProps) {
     });
 
     if (result.success) {
+      toast.success("Department created successfully");
       setOpen(false);
       setFormData({ name: "", code: "", hodId: "" });
       router.refresh();
     } else {
+      toast.error(result.error || "Failed to create department");
       setError(result.error || "Failed to create department");
     }
 
