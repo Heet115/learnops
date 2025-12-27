@@ -13,6 +13,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { AppSidebar, UserRole } from "./app-sidebar";
+import { ModeToggle } from "../mode-toggle";
 
 interface BreadcrumbItemType {
   label: string;
@@ -40,34 +41,43 @@ export function DashboardLayout({
     <SidebarProvider>
       <AppSidebar role={role} user={user} />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
+        <header className="flex h-16 shrink-0 items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 px-4">
+            <div className="flex items-center gap-2 px-4">
+              <SidebarTrigger className="-ml-1" />
+              <Separator
+                orientation="vertical"
+                className="mr-2 data-[orientation=vertical]:h-4"
+              />
+              <Breadcrumb>
+                <BreadcrumbList>
+                  {breadcrumbs.map((item, index) => (
+                    <BreadcrumbItem
+                      key={index}
+                      className={index === 0 ? "hidden md:block" : ""}
+                    >
+                      {index > 0 && (
+                        <BreadcrumbSeparator className="hidden md:block" />
+                      )}
+                      {item.href ? (
+                        <BreadcrumbLink href={item.href}>
+                          {item.label}
+                        </BreadcrumbLink>
+                      ) : (
+                        <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                      )}
+                    </BreadcrumbItem>
+                  ))}
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-2 px-4">
             <Separator
               orientation="vertical"
               className="mr-2 data-[orientation=vertical]:h-4"
             />
-            <Breadcrumb>
-              <BreadcrumbList>
-                {breadcrumbs.map((item, index) => (
-                  <BreadcrumbItem
-                    key={index}
-                    className={index === 0 ? "hidden md:block" : ""}
-                  >
-                    {index > 0 && (
-                      <BreadcrumbSeparator className="hidden md:block" />
-                    )}
-                    {item.href ? (
-                      <BreadcrumbLink href={item.href}>
-                        {item.label}
-                      </BreadcrumbLink>
-                    ) : (
-                      <BreadcrumbPage>{item.label}</BreadcrumbPage>
-                    )}
-                  </BreadcrumbItem>
-                ))}
-              </BreadcrumbList>
-            </Breadcrumb>
+            <ModeToggle />
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>

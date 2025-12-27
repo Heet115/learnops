@@ -1,7 +1,13 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
+import {
+  getProfessorDashboardStats,
+  getProfessorRecentSubmissions,
+  getProfessorSubjects,
+} from "@/lib/actions/dashboard.actions";
 import {
   Card,
   CardContent,
@@ -9,7 +15,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FileText, Users, Clock, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  FileText,
+  Users,
+  Clock,
+  CheckCircle,
+  ArrowRight,
+  BookOpen,
+} from "lucide-react";
 
 export default async function ProfessorDashboard() {
   const { sessionClaims } = await auth();
@@ -19,7 +34,12 @@ export default async function ProfessorDashboard() {
     redirect("/unauthorized");
   }
 
-  const dbUser = await getCurrentUserFromDB();
+  const [dbUser, stats, recentSubmissions, subjects] = await Promise.all([
+    getCurrentUserFromDB(),
+    getProfessorDashboardStats(),
+    getProfessorRecentSubmissions(),
+    getProfessorSubjects(),
+  ]);
 
   const user = {
     name: `${dbUser?.firstName || "Professor"} ${dbUser?.lastName || ""}`.trim(),
@@ -27,32 +47,49 @@ export default async function ProfessorDashboard() {
     avatar: dbUser?.profileImage,
   };
 
-  const stats = [
+  const statCards = [
     {
       title: "Active ALAs",
-      value: "0",
+      value: stats.activeALAs,
       icon: FileText,
       description: "Currently active",
+      color: "text-blue-600",
     },
     {
       title: "Students",
-      value: "0",
+      value: stats.studentCount,
       icon: Users,
       description: "In your classes",
+      color: "text-purple-600",
     },
     {
-      title: "Pending",
-      value: "0",
+      title: "Pending Review",
+      value: stats.pendingSubmissions,
       icon: Clock,
-      description: "Awaiting review",
+      description: "Awaiting grading",
+      color: "text-orange-600",
     },
     {
       title: "Graded",
-      value: "0",
+      value: stats.gradedThisMonth,
       icon: CheckCircle,
-      description: "This month",
+      description: "Total graded",
+      color: "text-green-600",
     },
   ];
+
+  const formatTime = (date: string) => {
+    const d = new Date(date);
+    const now = new Date();
+    const diff = now.getTime() - d.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(hours / 24);
+
+    if (hours < 1) return "Just now";
+    if (hours < 24) return `${hours}h ago`;
+    if (days === 1) return "Yesterday";
+    return `${days} days ago`;
+  };
 
   return (
     <DashboardLayout
@@ -62,21 +99,25 @@ export default async function ProfessorDashboard() {
     >
       <div className="space-y-6 pt-4">
         <div>
-          <h2 className="text-2xl font-bold">Welcome, Professor</h2>
+          <h2 className="text-2xl font-bold">
+            Welcome back, Prof. {dbUser?.lastName || dbUser?.firstName || ""}
+          </h2>
           <p className="text-muted-foreground">Manage your classes and ALAs</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
+          {statCards.map((stat) => (
             <Card key={stat.title}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">
                   {stat.title}
                 </CardTitle>
-                <stat.icon className="text-muted-foreground h-4 w-4" />
+                <stat.icon className={`h-4 w-4 ${stat.color}`} />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
+                <div className={`text-2xl font-bold ${stat.color}`}>
+                  {stat.value}
+                </div>
                 <CardDescription>{stat.description}</CardDescription>
               </CardContent>
             </Card>
@@ -85,25 +126,106 @@ export default async function ProfessorDashboard() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
-            <CardHeader>
-              <CardTitle>Your Subjects</CardTitle>
-              <CardDescription>Assigned teaching subjects</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Your Subjects</CardTitle>
+                <CardDescription>Assigned teaching subjects</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/professor/alas">
+                  Manage ALAs
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground text-sm">
-                No subjects assigned yet
-              </p>
+              {subjects.length === 0 ? (
+                <p className="text-muted-foreground text-sm">
+                  No subjects assigned yet
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {subjects.map(
+                    (offering: {
+                      _id: string;
+                      subjectId: { name: string; code: string };
+                      classId: { name: string };
+                    }) => (
+                      <div
+                        key={offering._id}
+                        className="flex items-center justify-between rounded-lg border p-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <BookOpen className="text-muted-foreground h-4 w-4" />
+                          <div>
+                            <p className="text-sm font-medium">
+                              {offering.subjectId.code} -{" "}
+                              {offering.subjectId.name}
+                            </p>
+                            <p className="text-muted-foreground text-xs">
+                              {offering.classId.name}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ),
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
+
           <Card>
-            <CardHeader>
-              <CardTitle>Recent Submissions</CardTitle>
-              <CardDescription>Latest student submissions</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Recent Submissions</CardTitle>
+                <CardDescription>Latest student submissions</CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/professor/submissions">
+                  View all
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground text-sm">
-                No submissions yet
-              </p>
+              {recentSubmissions.length === 0 ? (
+                <p className="text-muted-foreground text-sm">
+                  No submissions yet
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {recentSubmissions.map(
+                    (sub: {
+                      _id: string;
+                      submittedAt: string;
+                      studentId: { firstName: string; lastName: string };
+                      alaId: { _id: string; title: string };
+                    }) => (
+                      <Link
+                        key={sub._id}
+                        href={`/professor/submissions/${sub._id}`}
+                        className="hover:bg-muted flex items-center justify-between rounded-lg border p-3 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Clock className="h-4 w-4 text-orange-500" />
+                          <div>
+                            <p className="text-sm font-medium">
+                              {sub.studentId.firstName} {sub.studentId.lastName}
+                            </p>
+                            <p className="text-muted-foreground text-xs">
+                              {sub.alaId.title}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge variant="outline">
+                          {formatTime(sub.submittedAt)}
+                        </Badge>
+                      </Link>
+                    ),
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
