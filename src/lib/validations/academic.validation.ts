@@ -19,6 +19,8 @@ export const updateDepartmentSchema = z.object({
 });
 
 // Course
+export const courseTypeEnum = z.enum(["diploma", "ug", "pg"]);
+
 export const createCourseSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
   code: z
@@ -27,14 +29,18 @@ export const createCourseSchema = z.object({
     .max(20)
     .toUpperCase(),
   departmentId: z.string().min(1, "Department is required"),
+  courseType: courseTypeEnum,
   duration: z.number().min(1, "Duration must be at least 1 year").max(6),
+  semestersPerYear: z.number().min(1).max(3).default(2),
 });
 
 export const updateCourseSchema = z.object({
   name: z.string().min(2).max(100).optional(),
   code: z.string().min(2).max(20).toUpperCase().optional(),
   departmentId: z.string().optional(),
+  courseType: courseTypeEnum.optional(),
   duration: z.number().min(1).max(6).optional(),
+  semestersPerYear: z.number().min(1).max(3).optional(),
   isActive: z.boolean().optional(),
 });
 

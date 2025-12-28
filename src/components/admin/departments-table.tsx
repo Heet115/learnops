@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Table,
@@ -28,6 +28,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DataTableFilter,
+  FilterConfig,
+  FilterValue,
+} from "@/components/ui/data-table-filter";
 import { deleteDepartment } from "@/lib/actions/academic.actions";
 import { MoreHorizontal, Trash2, Pencil } from "lucide-react";
 import { IDepartment, IUser } from "@/lib/db";
@@ -39,14 +44,66 @@ interface DepartmentsTableProps {
   hods: IUser[];
 }
 
+const filterConfigs: FilterConfig[] = [
+  { key: "search", label: "Search", type: "text", placeholder: "Search by name or code..." },
+  {
+    key: "status",
+    label: "Status",
+    type: "select",
+    options: [
+      { label: "Active", value: "active" },
+      { label: "Inactive", value: "inactive" },
+    ],
+  },
+  {
+    key: "hasHod",
+    label: "HOD Assigned",
+    type: "select",
+    options: [
+      { label: "Assigned", value: "yes" },
+      { label: "Not Assigned", value: "no" },
+    ],
+  },
+];
+
 export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(
-    null,
-  );
+  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [filters, setFilters] = useState<FilterValue>({
+    search: "",
+    status: "",
+    hasHod: "",
+  });
+
+  const filteredDepartments = useMemo(() => {
+    return departments.filter((dept) => {
+      const search = (filters.search as string)?.toLowerCase() || "";
+      const status = filters.status as string;
+      const hasHod = filters.hasHod as string;
+      const hod = dept.hodId as unknown as IUser | undefined;
+
+      if (search) {
+        if (!dept.name.toLowerCase().includes(search) && !dept.code.toLowerCase().includes(search)) {
+          return false;
+        }
+      }
+
+      if (status && status !== "all") {
+        if (status === "active" && !dept.isActive) return false;
+        if (status === "inactive" && dept.isActive) return false;
+      }
+
+      if (hasHod && hasHod !== "all") {
+        if (hasHod === "yes" && !hod) return false;
+        if (hasHod === "no" && hod) return false;
+      }
+
+      return true;
+    });
+  }, [departments, filters]);
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -77,71 +134,85 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
 
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Code</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>HOD</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead className="w-[50px]"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {departments.map((dept) => {
-            const id = (
-              dept._id as unknown as { toString(): string }
-            ).toString();
-            const hod = dept.hodId as unknown as IUser | undefined;
-            return (
-              <TableRow key={id}>
-                <TableCell className="font-mono font-medium">
-                  {dept.code}
-                </TableCell>
-                <TableCell>{dept.name}</TableCell>
-                <TableCell>
-                  {hod ? (
-                    `${hod.firstName} ${hod.lastName}`
-                  ) : (
-                    <span className="text-muted-foreground">Not assigned</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={dept.isActive ? "default" : "secondary"}>
-                    {dept.isActive ? "Active" : "Inactive"}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {new Date(dept.createdAt).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => setEditDepartment(dept)}>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={() => setDeleteId(id)}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+      <div className="space-y-4">
+        <DataTableFilter
+          filters={filterConfigs}
+          values={filters}
+          onChange={setFilters}
+        />
+
+        {filteredDepartments.length === 0 ? (
+          <div className="text-muted-foreground py-8 text-center">
+            No departments match your filters.
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Code</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>HOD</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead className="w-[50px]"></TableHead>
               </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+            </TableHeader>
+            <TableBody>
+              {filteredDepartments.map((dept) => {
+                const id = (
+                  dept._id as unknown as { toString(): string }
+                ).toString();
+                const hod = dept.hodId as unknown as IUser | undefined;
+                return (
+                  <TableRow key={id}>
+                    <TableCell className="font-mono font-medium">
+                      {dept.code}
+                    </TableCell>
+                    <TableCell>{dept.name}</TableCell>
+                    <TableCell>
+                      {hod ? (
+                        `${hod.firstName} ${hod.lastName}`
+                      ) : (
+                        <span className="text-muted-foreground">Not assigned</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={dept.isActive ? "default" : "secondary"}>
+                        {dept.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {new Date(dept.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setEditDepartment(dept)}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => setDeleteId(id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
+      </div>
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>

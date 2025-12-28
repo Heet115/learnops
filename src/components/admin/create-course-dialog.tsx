@@ -31,6 +31,12 @@ interface CreateCourseDialogProps {
   departments: IDepartment[];
 }
 
+const courseTypes = [
+  { value: "diploma", label: "Diploma", defaultDuration: 3 },
+  { value: "ug", label: "Undergraduate (UG)", defaultDuration: 4 },
+  { value: "pg", label: "Postgraduate (PG)", defaultDuration: 2 },
+] as const;
+
 export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -41,8 +47,21 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
     name: "",
     code: "",
     departmentId: "",
+    courseType: "" as "diploma" | "ug" | "pg" | "",
     duration: 4,
+    semestersPerYear: 2,
   });
+
+  const totalSemesters = formData.duration * formData.semestersPerYear;
+
+  const handleCourseTypeChange = (value: "diploma" | "ug" | "pg") => {
+    const courseType = courseTypes.find((ct) => ct.value === value);
+    setFormData({
+      ...formData,
+      courseType: value,
+      duration: courseType?.defaultDuration || formData.duration,
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,12 +74,34 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
       return;
     }
 
-    const result = await createCourse(formData);
+    if (!formData.courseType) {
+      setError("Please select a course type");
+      setIsLoading(false);
+      return;
+    }
+
+    const result = await createCourse({
+      name: formData.name,
+      code: formData.code,
+      departmentId: formData.departmentId,
+      courseType: formData.courseType,
+      duration: formData.duration,
+      semestersPerYear: formData.semestersPerYear,
+    });
 
     if (result.success) {
-      toast.success("Course created successfully");
+      toast.success(
+        `Course created with ${result.semestersCreated} semesters`,
+      );
       setOpen(false);
-      setFormData({ name: "", code: "", departmentId: "", duration: 4 });
+      setFormData({
+        name: "",
+        code: "",
+        departmentId: "",
+        courseType: "",
+        duration: 4,
+        semestersPerYear: 2,
+      });
       router.refresh();
     } else {
       toast.error(result.error || "Failed to create course");
@@ -81,7 +122,9 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Create Course</DialogTitle>
-          <DialogDescription>Add a new academic course</DialogDescription>
+          <DialogDescription>
+            Add a new academic course. Semesters will be auto-generated.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
@@ -149,26 +192,77 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="duration">Duration (Years)</Label>
+              <Label htmlFor="courseType">Course Type</Label>
               <Select
-                value={formData.duration.toString()}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, duration: parseInt(value) })
-                }
+                value={formData.courseType}
+                onValueChange={handleCourseTypeChange}
                 disabled={isLoading}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select course type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[1, 2, 3, 4, 5, 6].map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year} {year === 1 ? "Year" : "Years"}
+                  {courseTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="duration">Duration (Years)</Label>
+                <Select
+                  value={formData.duration.toString()}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, duration: parseInt(value) })
+                  }
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6].map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year} {year === 1 ? "Year" : "Years"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="semestersPerYear">Semesters/Year</Label>
+                <Select
+                  value={formData.semestersPerYear.toString()}
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      semestersPerYear: parseInt(value),
+                    })
+                  }
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3].map((num) => (
+                      <SelectItem key={num} value={num.toString()}>
+                        {num}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {formData.courseType && (
+              <div className="rounded-md bg-muted p-3 text-sm">
+                <span className="font-medium">Total Semesters:</span>{" "}
+                {totalSemesters} (will be auto-created)
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button

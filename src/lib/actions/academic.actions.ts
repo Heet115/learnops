@@ -189,10 +189,34 @@ export async function createCourse(input: CreateCourseInput) {
   const validated = createCourseSchema.parse(input);
   await connectDB();
 
+  const semestersPerYear = validated.semestersPerYear ?? 2;
+  const totalSemesters = validated.duration * semestersPerYear;
+
   try {
-    const course = await Course.create(validated);
+    // Create course with calculated totalSemesters
+    const course = await Course.create({
+      ...validated,
+      semestersPerYear,
+      totalSemesters,
+    });
+
+    // Auto-generate semesters for this course
+    const semesterDocs = Array.from({ length: totalSemesters }, (_, i) => ({
+      name: `Semester ${i + 1}`,
+      number: i + 1,
+      courseId: course._id,
+      isActive: true,
+    }));
+
+    await Semester.insertMany(semesterDocs);
+
     revalidatePath("/admin/courses");
-    return { success: true, course: JSON.parse(JSON.stringify(course)) };
+    revalidatePath("/admin/semesters");
+    return {
+      success: true,
+      course: JSON.parse(JSON.stringify(course)),
+      semestersCreated: totalSemesters,
+    };
   } catch (error: unknown) {
     const mongoError = error as { code?: number };
     if (mongoError.code === 11000) {
@@ -241,16 +265,28 @@ export async function deleteCourse(id: string) {
   await requireAdmin();
   await connectDB();
 
-  const semestersCount = await Semester.countDocuments({ courseId: id });
-  if (semestersCount > 0) {
-    return {
-      success: false,
-      error: "Cannot delete course with existing semesters",
-    };
+  // Check if any semester has subjects
+  const semesters = await Semester.find({ courseId: id }).select("_id");
+  const semesterIds = semesters.map((s) => s._id);
+
+  if (semesterIds.length > 0) {
+    const subjectsCount = await Subject.countDocuments({
+      semesterId: { $in: semesterIds },
+    });
+    if (subjectsCount > 0) {
+      return {
+        success: false,
+        error: "Cannot delete course with existing subjects in its semesters",
+      };
+    }
   }
 
+  // Delete all auto-generated semesters for this course
+  await Semester.deleteMany({ courseId: id });
   await Course.findByIdAndDelete(id);
+
   revalidatePath("/admin/courses");
+  revalidatePath("/admin/semesters");
   return { success: true };
 }
 

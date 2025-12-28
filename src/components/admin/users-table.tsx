@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Table,
@@ -30,6 +30,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
+  DataTableFilter,
+  FilterConfig,
+  FilterValue,
+} from "@/components/ui/data-table-filter";
+import {
   deactivateUser,
   reactivateUser,
   deleteUser,
@@ -49,6 +54,30 @@ const roleBadgeVariant = {
   student: "outline",
 } as const;
 
+const filterConfigs: FilterConfig[] = [
+  { key: "search", label: "Search", type: "text", placeholder: "Search by name or email..." },
+  {
+    key: "role",
+    label: "Role",
+    type: "select",
+    options: [
+      { label: "Admin", value: "admin" },
+      { label: "HOD", value: "hod" },
+      { label: "Professor", value: "professor" },
+      { label: "Student", value: "student" },
+    ],
+  },
+  {
+    key: "status",
+    label: "Status",
+    type: "select",
+    options: [
+      { label: "Active", value: "active" },
+      { label: "Inactive", value: "inactive" },
+    ],
+  },
+];
+
 export function UsersTable({ users }: UsersTableProps) {
   const router = useRouter();
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
@@ -56,6 +85,33 @@ export function UsersTable({ users }: UsersTableProps) {
     "deactivate" | "reactivate" | "delete" | null
   >(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [filters, setFilters] = useState<FilterValue>({
+    search: "",
+    role: "",
+    status: "",
+  });
+
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) => {
+      const search = (filters.search as string)?.toLowerCase() || "";
+      const role = filters.role as string;
+      const status = filters.status as string;
+
+      if (search) {
+        const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+        const email = user.email.toLowerCase();
+        if (!fullName.includes(search) && !email.includes(search)) return false;
+      }
+
+      if (role && role !== "all" && user.role !== role) return false;
+      if (status && status !== "all") {
+        if (status === "active" && !user.isActive) return false;
+        if (status === "inactive" && user.isActive) return false;
+      }
+
+      return true;
+    });
+  }, [users, filters]);
 
   const handleAction = async () => {
     if (!selectedUser || !actionType) return;
@@ -106,95 +162,109 @@ export function UsersTable({ users }: UsersTableProps) {
 
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>User</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead className="w-[50px]"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((user) => (
-            <TableRow
-              key={(user._id as unknown as { toString(): string }).toString()}
-            >
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.profileImage} />
-                    <AvatarFallback>
-                      {getInitials(user.firstName, user.lastName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium">
-                    {user.firstName} {user.lastName}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>
-                <Badge variant={roleBadgeVariant[user.role]}>
-                  {user.role.toUpperCase()}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant={user.isActive ? "default" : "destructive"}>
-                  {user.isActive ? "Active" : "Inactive"}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-muted-foreground">
-                {new Date(user.createdAt).toLocaleDateString()}
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {user.isActive ? (
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setActionType("deactivate");
-                        }}
-                      >
-                        <UserX className="mr-2 h-4 w-4" />
-                        Deactivate
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setActionType("reactivate");
-                        }}
-                      >
-                        <UserCheck className="mr-2 h-4 w-4" />
-                        Reactivate
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem
-                      className="text-destructive"
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setActionType("delete");
-                      }}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <div className="space-y-4">
+        <DataTableFilter
+          filters={filterConfigs}
+          values={filters}
+          onChange={setFilters}
+        />
+
+        {filteredUsers.length === 0 ? (
+          <div className="text-muted-foreground py-8 text-center">
+            No users match your filters.
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead className="w-[50px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredUsers.map((user) => (
+                <TableRow
+                  key={(user._id as unknown as { toString(): string }).toString()}
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.profileImage} />
+                        <AvatarFallback>
+                          {getInitials(user.firstName, user.lastName)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium">
+                        {user.firstName} {user.lastName}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <Badge variant={roleBadgeVariant[user.role]}>
+                      {user.role.toUpperCase()}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={user.isActive ? "default" : "destructive"}>
+                      {user.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {new Date(user.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {user.isActive ? (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setActionType("deactivate");
+                            }}
+                          >
+                            <UserX className="mr-2 h-4 w-4" />
+                            Deactivate
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setActionType("reactivate");
+                            }}
+                          >
+                            <UserCheck className="mr-2 h-4 w-4" />
+                            Reactivate
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setActionType("delete");
+                          }}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
 
       <AlertDialog open={!!actionType} onOpenChange={() => setActionType(null)}>
         <AlertDialogContent>
