@@ -16,6 +16,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -39,12 +40,14 @@ import {
   reactivateUser,
   deleteUser,
 } from "@/lib/actions/admin.actions";
-import { MoreHorizontal, UserX, UserCheck, Trash2 } from "lucide-react";
-import { IUser } from "@/lib/db";
+import { MoreHorizontal, UserX, UserCheck, Trash2, UserCog } from "lucide-react";
+import { IUser, ICourse } from "@/lib/db";
 import { toast } from "sonner";
+import { StudentProfileDialog } from "./student-profile-dialog";
 
 interface UsersTableProps {
   users: IUser[];
+  courses?: ICourse[];
 }
 
 const roleBadgeVariant = {
@@ -78,7 +81,7 @@ const filterConfigs: FilterConfig[] = [
   },
 ];
 
-export function UsersTable({ users }: UsersTableProps) {
+export function UsersTable({ users, courses = [] }: UsersTableProps) {
   const router = useRouter();
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const [actionType, setActionType] = useState<
@@ -90,6 +93,7 @@ export function UsersTable({ users }: UsersTableProps) {
     role: "",
     status: "",
   });
+  const [profileDialogUser, setProfileDialogUser] = useState<IUser | null>(null);
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
@@ -225,6 +229,17 @@ export function UsersTable({ users }: UsersTableProps) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        {user.role === "student" && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => setProfileDialogUser(user)}
+                            >
+                              <UserCog className="mr-2 h-4 w-4" />
+                              Manage Profile
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                          </>
+                        )}
                         {user.isActive ? (
                           <DropdownMenuItem
                             onClick={() => {
@@ -300,6 +315,20 @@ export function UsersTable({ users }: UsersTableProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {profileDialogUser && (
+        <StudentProfileDialog
+          open={!!profileDialogUser}
+          onOpenChange={(open) => !open && setProfileDialogUser(null)}
+          userId={(profileDialogUser._id as unknown as { toString(): string }).toString()}
+          userName={`${profileDialogUser.firstName} ${profileDialogUser.lastName}`}
+          courses={courses.map((c) => ({
+            _id: (c._id as unknown as { toString(): string }).toString(),
+            name: c.name,
+            code: c.code,
+          }))}
+        />
+      )}
     </>
   );
 }

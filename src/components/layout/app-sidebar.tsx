@@ -19,6 +19,8 @@ import {
   Clock,
   Bell,
   Crown,
+  User,
+  FileCheck,
 } from "lucide-react";
 
 import { NavMain } from "@/components/layout/nav-main";
@@ -100,6 +102,11 @@ const getNavItems = (role: UserRole) => {
         icon: Users,
       },
       {
+        title: "Profile Requests",
+        url: "/admin/profile-requests",
+        icon: FileCheck,
+      },
+      {
         title: "Settings",
         url: "/admin/settings",
         icon: Settings,
@@ -172,6 +179,11 @@ const getNavItems = (role: UserRole) => {
         url: "/student",
         icon: LayoutDashboard,
         isActive: true,
+      },
+      {
+        title: "My Profile",
+        url: "/student/profile",
+        icon: User,
       },
       {
         title: "My ALAs",

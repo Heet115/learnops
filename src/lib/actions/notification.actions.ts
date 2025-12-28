@@ -95,6 +95,25 @@ export async function deleteNotification(notificationId: string) {
 
 // ==================== NOTIFICATION CREATORS ====================
 
+// Generic create notification (for internal use)
+export async function createNotification(data: {
+  userId: string;
+  type: "new_ala" | "deadline_reminder" | "submission_graded" | "submission_rejected" | "system";
+  title: string;
+  message: string;
+  relatedId?: string;
+}) {
+  await connectDB();
+
+  await Notification.create({
+    userId: new mongoose.Types.ObjectId(data.userId),
+    type: data.type,
+    title: data.title,
+    message: data.message,
+    relatedId: data.relatedId ? new mongoose.Types.ObjectId(data.relatedId) : undefined,
+  });
+}
+
 // Create notification for new ALA (notify all students in the class)
 export async function notifyNewALA(alaId: string) {
   await connectDB();

@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getAllUsers, getUserStats } from "@/lib/actions/admin.actions";
+import { getAllCourses } from "@/lib/actions/academic.actions";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
 import { UsersTable } from "@/components/admin/users-table";
 import { CreateUserDialog } from "@/components/admin/create-user-dialog";
@@ -16,10 +17,11 @@ export default async function UsersPage() {
     redirect("/unauthorized");
   }
 
-  const [users, stats, dbUser] = await Promise.all([
+  const [users, stats, dbUser, courses] = await Promise.all([
     getAllUsers(),
     getUserStats(),
     getCurrentUserFromDB(),
+    getAllCourses(),
   ]);
 
   const user = {
@@ -71,7 +73,7 @@ export default async function UsersPage() {
             <CardTitle>All Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <UsersTable users={users} />
+            <UsersTable users={users} courses={courses} />
           </CardContent>
         </Card>
       </div>

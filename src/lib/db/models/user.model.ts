@@ -12,6 +12,7 @@ export interface IUser extends Document {
   classId?: mongoose.Types.ObjectId;
   profileImage?: string;
   isActive: boolean;
+  lastLoginAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,6 +58,9 @@ const UserSchema = new Schema<IUser>(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    lastLoginAt: {
+      type: Date,
     },
   },
   {
