@@ -107,26 +107,45 @@ export function StudentAssignmentsTable({
     students.forEach((s) => {
       const dept = s.classId?.semesterId?.courseId?.departmentId;
       if (dept) {
-        deptMap.set(dept.code, { label: `${dept.code} - ${dept.name}`, value: dept.code });
+        deptMap.set(dept.code, {
+          label: `${dept.code} - ${dept.name}`,
+          value: dept.code,
+        });
       }
     });
-    return { classOptions: classOpts, departmentOptions: Array.from(deptMap.values()) };
+    return {
+      classOptions: classOpts,
+      departmentOptions: Array.from(deptMap.values()),
+    };
   }, [classes, students]);
 
-  const filterConfigs: FilterConfig[] = useMemo(() => [
-    { key: "search", label: "Search", type: "text", placeholder: "Search by name or email..." },
-    { key: "class", label: "Class", type: "select", options: classOptions },
-    { key: "department", label: "Department", type: "select", options: departmentOptions },
-    {
-      key: "assignmentStatus",
-      label: "Assignment",
-      type: "select",
-      options: [
-        { label: "Assigned", value: "assigned" },
-        { label: "Unassigned", value: "unassigned" },
-      ],
-    },
-  ], [classOptions, departmentOptions]);
+  const filterConfigs: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: "search",
+        label: "Search",
+        type: "text",
+        placeholder: "Search by name or email...",
+      },
+      { key: "class", label: "Class", type: "select", options: classOptions },
+      {
+        key: "department",
+        label: "Department",
+        type: "select",
+        options: departmentOptions,
+      },
+      {
+        key: "assignmentStatus",
+        label: "Assignment",
+        type: "select",
+        options: [
+          { label: "Assigned", value: "assigned" },
+          { label: "Unassigned", value: "unassigned" },
+        ],
+      },
+    ],
+    [classOptions, departmentOptions],
+  );
 
   const filteredStudents = useMemo(() => {
     return students.filter((student) => {
@@ -136,12 +155,27 @@ export function StudentAssignmentsTable({
       const assignmentStatus = filters.assignmentStatus as string;
 
       if (search) {
-        const fullName = `${student.firstName} ${student.lastName}`.toLowerCase();
-        if (!fullName.includes(search) && !student.email.toLowerCase().includes(search)) return false;
+        const fullName =
+          `${student.firstName} ${student.lastName}`.toLowerCase();
+        if (
+          !fullName.includes(search) &&
+          !student.email.toLowerCase().includes(search)
+        )
+          return false;
       }
 
-      if (classFilter && classFilter !== "all" && student.classId?._id !== classFilter) return false;
-      if (department && department !== "all" && student.classId?.semesterId?.courseId?.departmentId?.code !== department) return false;
+      if (
+        classFilter &&
+        classFilter !== "all" &&
+        student.classId?._id !== classFilter
+      )
+        return false;
+      if (
+        department &&
+        department !== "all" &&
+        student.classId?.semesterId?.courseId?.departmentId?.code !== department
+      )
+        return false;
 
       if (assignmentStatus && assignmentStatus !== "all") {
         if (assignmentStatus === "assigned" && !student.classId) return false;
@@ -233,7 +267,8 @@ export function StudentAssignmentsTable({
                     )}
                   </TableCell>
                   <TableCell>
-                    {student.classId?.semesterId?.courseId?.departmentId?.code || (
+                    {student.classId?.semesterId?.courseId?.departmentId
+                      ?.code || (
                       <span className="text-muted-foreground">-</span>
                     )}
                   </TableCell>

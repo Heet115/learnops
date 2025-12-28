@@ -90,9 +90,7 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
     });
 
     if (result.success) {
-      toast.success(
-        `Course created with ${result.semestersCreated} semesters`,
-      );
+      toast.success(`Course created with ${result.semestersCreated} semesters`);
       setOpen(false);
       setFormData({
         name: "",
@@ -258,7 +256,7 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
               </div>
             </div>
             {formData.courseType && (
-              <div className="rounded-md bg-muted p-3 text-sm">
+              <div className="bg-muted rounded-md p-3 text-sm">
                 <span className="font-medium">Total Semesters:</span>{" "}
                 {totalSemesters} (will be auto-created)
               </div>

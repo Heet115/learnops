@@ -2,7 +2,10 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
-import { getMyProfile, getMyUpdateRequests } from "@/lib/actions/student-profile.actions";
+import {
+  getMyProfile,
+  getMyUpdateRequests,
+} from "@/lib/actions/student-profile.actions";
 import { StudentProfileView } from "@/components/student/student-profile-view";
 import { ProfileUpdateRequests } from "@/components/student/profile-update-requests";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,13 +35,17 @@ export default async function StudentProfilePage() {
       <DashboardLayout
         role="student"
         user={user}
-        breadcrumbs={[{ label: "Student", href: "/student" }, { label: "Profile" }]}
+        breadcrumbs={[
+          { label: "Student", href: "/student" },
+          { label: "Profile" },
+        ]}
       >
         <div className="pt-4">
           <div className="rounded-lg border border-dashed p-8 text-center">
             <h2 className="text-lg font-semibold">Profile Not Found</h2>
             <p className="text-muted-foreground mt-2">
-              Your profile has not been set up yet. Please contact the administrator.
+              Your profile has not been set up yet. Please contact the
+              administrator.
             </p>
           </div>
         </div>
@@ -50,7 +57,10 @@ export default async function StudentProfilePage() {
     <DashboardLayout
       role="student"
       user={user}
-      breadcrumbs={[{ label: "Student", href: "/student" }, { label: "Profile" }]}
+      breadcrumbs={[
+        { label: "Student", href: "/student" },
+        { label: "Profile" },
+      ]}
     >
       <div className="space-y-6 pt-4">
         <div>
@@ -65,9 +75,16 @@ export default async function StudentProfilePage() {
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="requests">
               Update Requests
-              {updateRequests.filter((r: { requestStatus: string }) => r.requestStatus === "pending").length > 0 && (
-                <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
-                  {updateRequests.filter((r: { requestStatus: string }) => r.requestStatus === "pending").length}
+              {updateRequests.filter(
+                (r: { requestStatus: string }) => r.requestStatus === "pending",
+              ).length > 0 && (
+                <span className="bg-primary text-primary-foreground ml-2 rounded-full px-2 py-0.5 text-xs">
+                  {
+                    updateRequests.filter(
+                      (r: { requestStatus: string }) =>
+                        r.requestStatus === "pending",
+                    ).length
+                  }
                 </span>
               )}
             </TabsTrigger>

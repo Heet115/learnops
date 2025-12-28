@@ -62,7 +62,9 @@ function formatDate(dateString: string) {
   });
 }
 
-export function ProfileUpdateRequests({ requests }: ProfileUpdateRequestsProps) {
+export function ProfileUpdateRequests({
+  requests,
+}: ProfileUpdateRequestsProps) {
   if (requests.length === 0) {
     return (
       <Card>
@@ -95,9 +97,10 @@ export function ProfileUpdateRequests({ requests }: ProfileUpdateRequestsProps) 
                     <div className="flex-1">
                       <span className="font-medium">
                         {request.requestedChanges.length} field
-                        {request.requestedChanges.length > 1 ? "s" : ""} requested
+                        {request.requestedChanges.length > 1 ? "s" : ""}{" "}
+                        requested
                       </span>
-                      <span className="text-muted-foreground text-sm ml-2">
+                      <span className="text-muted-foreground ml-2 text-sm">
                         {formatDate(request.requestedAt)}
                       </span>
                     </div>
@@ -108,14 +111,16 @@ export function ProfileUpdateRequests({ requests }: ProfileUpdateRequestsProps) 
                   <div className="space-y-4 pt-2">
                     {/* Requested Changes */}
                     <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Requested Changes:</h4>
+                      <h4 className="text-sm font-medium">
+                        Requested Changes:
+                      </h4>
                       <div className="rounded-md border">
                         {request.requestedChanges.map((change, idx) => (
                           <div
                             key={idx}
-                            className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 p-3 border-b last:border-b-0"
+                            className="flex flex-col gap-1 border-b p-3 last:border-b-0 sm:flex-row sm:items-center sm:gap-4"
                           >
-                            <span className="font-medium text-sm min-w-[140px]">
+                            <span className="min-w-[140px] text-sm font-medium">
                               {change.fieldLabel}
                             </span>
                             <div className="flex items-center gap-2 text-sm">
@@ -134,9 +139,11 @@ export function ProfileUpdateRequests({ requests }: ProfileUpdateRequestsProps) 
 
                     {/* Review Info */}
                     {request.requestStatus !== "pending" && (
-                      <div className="space-y-2 rounded-md bg-muted p-3">
+                      <div className="bg-muted space-y-2 rounded-md p-3">
                         <div className="flex items-center gap-2 text-sm">
-                          <span className="text-muted-foreground">Reviewed by:</span>
+                          <span className="text-muted-foreground">
+                            Reviewed by:
+                          </span>
                           <span className="font-medium">
                             {request.reviewedBy
                               ? `${request.reviewedBy.firstName} ${request.reviewedBy.lastName}`
@@ -145,13 +152,17 @@ export function ProfileUpdateRequests({ requests }: ProfileUpdateRequestsProps) 
                         </div>
                         {request.reviewedAt && (
                           <div className="flex items-center gap-2 text-sm">
-                            <span className="text-muted-foreground">Reviewed on:</span>
+                            <span className="text-muted-foreground">
+                              Reviewed on:
+                            </span>
                             <span>{formatDate(request.reviewedAt)}</span>
                           </div>
                         )}
                         {request.reviewComment && (
                           <div className="text-sm">
-                            <span className="text-muted-foreground">Comment: </span>
+                            <span className="text-muted-foreground">
+                              Comment:{" "}
+                            </span>
                             <span>{request.reviewComment}</span>
                           </div>
                         )}

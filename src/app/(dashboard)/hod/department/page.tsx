@@ -2,7 +2,15 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
-import { connectDB, User, Department, Course, Semester, Subject, Class } from "@/lib/db";
+import {
+  connectDB,
+  User,
+  Department,
+  Course,
+  Semester,
+  Subject,
+  Class,
+} from "@/lib/db";
 import {
   Card,
   CardContent,
@@ -11,7 +19,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, BookOpen, Calendar, GraduationCap, BookMarked } from "lucide-react";
+import {
+  Building2,
+  BookOpen,
+  Calendar,
+  GraduationCap,
+  BookMarked,
+} from "lucide-react";
 
 async function getHodDepartmentDetails() {
   const { userId } = await auth();
@@ -24,11 +38,17 @@ async function getHodDepartmentDetails() {
   const department = await Department.findById(hod.departmentId).lean();
   if (!department) return null;
 
-  const courses = await Course.find({ departmentId: department._id, isActive: true }).lean();
-  const courseIds = courses.map(c => c._id);
+  const courses = await Course.find({
+    departmentId: department._id,
+    isActive: true,
+  }).lean();
+  const courseIds = courses.map((c) => c._id);
 
-  const semesters = await Semester.find({ courseId: { $in: courseIds }, isActive: true }).lean();
-  const semesterIds = semesters.map(s => s._id);
+  const semesters = await Semester.find({
+    courseId: { $in: courseIds },
+    isActive: true,
+  }).lean();
+  const semesterIds = semesters.map((s) => s._id);
 
   const [subjects, classes] = await Promise.all([
     Subject.find({ semesterId: { $in: semesterIds }, isActive: true }).lean(),
@@ -65,8 +85,12 @@ export default async function HodDepartmentPage() {
 
   if (!data) {
     return (
-      <DashboardLayout role="hod" user={user} breadcrumbs={[{ label: "HOD" }, { label: "Department" }]}>
-        <div className="flex items-center justify-center h-64">
+      <DashboardLayout
+        role="hod"
+        user={user}
+        breadcrumbs={[{ label: "HOD" }, { label: "Department" }]}
+      >
+        <div className="flex h-64 items-center justify-center">
           <p className="text-muted-foreground">No department assigned</p>
         </div>
       </DashboardLayout>
@@ -74,22 +98,48 @@ export default async function HodDepartmentPage() {
   }
 
   const stats = [
-    { label: "Courses", value: data.courses.length, icon: BookOpen, color: "text-blue-600" },
-    { label: "Semesters", value: data.semesters.length, icon: Calendar, color: "text-purple-600" },
-    { label: "Subjects", value: data.subjects.length, icon: BookMarked, color: "text-green-600" },
-    { label: "Classes", value: data.classes.length, icon: GraduationCap, color: "text-orange-600" },
+    {
+      label: "Courses",
+      value: data.courses.length,
+      icon: BookOpen,
+      color: "text-blue-600",
+    },
+    {
+      label: "Semesters",
+      value: data.semesters.length,
+      icon: Calendar,
+      color: "text-purple-600",
+    },
+    {
+      label: "Subjects",
+      value: data.subjects.length,
+      icon: BookMarked,
+      color: "text-green-600",
+    },
+    {
+      label: "Classes",
+      value: data.classes.length,
+      icon: GraduationCap,
+      color: "text-orange-600",
+    },
   ];
 
   return (
-    <DashboardLayout role="hod" user={user} breadcrumbs={[{ label: "HOD" }, { label: "Department" }]}>
+    <DashboardLayout
+      role="hod"
+      user={user}
+      breadcrumbs={[{ label: "HOD" }, { label: "Department" }]}
+    >
       <div className="space-y-6 pt-4">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-            <Building2 className="h-6 w-6 text-primary" />
+          <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+            <Building2 className="text-primary h-6 w-6" />
           </div>
           <div>
             <h2 className="text-2xl font-bold">{data.department.name}</h2>
-            <p className="text-muted-foreground">Department Code: {data.department.code}</p>
+            <p className="text-muted-foreground">
+              Department Code: {data.department.code}
+            </p>
           </div>
         </div>
 
@@ -97,11 +147,15 @@ export default async function HodDepartmentPage() {
           {stats.map((stat) => (
             <Card key={stat.label}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {stat.label}
+                </CardTitle>
                 <stat.icon className={`h-4 w-4 ${stat.color}`} />
               </CardHeader>
               <CardContent>
-                <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
+                <div className={`text-2xl font-bold ${stat.color}`}>
+                  {stat.value}
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -111,21 +165,37 @@ export default async function HodDepartmentPage() {
           <Card>
             <CardHeader>
               <CardTitle>Courses</CardTitle>
-              <CardDescription>Programs offered in this department</CardDescription>
+              <CardDescription>
+                Programs offered in this department
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {data.courses.map((course: { _id: string; name: string; code: string; duration: number }) => (
-                  <div key={course._id} className="flex items-center justify-between rounded-lg border p-3">
-                    <div>
-                      <p className="font-medium">{course.name}</p>
-                      <p className="text-sm text-muted-foreground">{course.code}</p>
+                {data.courses.map(
+                  (course: {
+                    _id: string;
+                    name: string;
+                    code: string;
+                    duration: number;
+                  }) => (
+                    <div
+                      key={course._id}
+                      className="flex items-center justify-between rounded-lg border p-3"
+                    >
+                      <div>
+                        <p className="font-medium">{course.name}</p>
+                        <p className="text-muted-foreground text-sm">
+                          {course.code}
+                        </p>
+                      </div>
+                      <Badge variant="outline">{course.duration} years</Badge>
                     </div>
-                    <Badge variant="outline">{course.duration} years</Badge>
-                  </div>
-                ))}
+                  ),
+                )}
                 {data.courses.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No courses found</p>
+                  <p className="text-muted-foreground text-sm">
+                    No courses found
+                  </p>
                 )}
               </div>
             </CardContent>
@@ -138,17 +208,32 @@ export default async function HodDepartmentPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {data.classes.slice(0, 6).map((cls: { _id: string; name: string; academicYear: string }) => (
-                  <div key={cls._id} className="flex items-center justify-between rounded-lg border p-3">
-                    <p className="font-medium">{cls.name}</p>
-                    <Badge variant="secondary">{cls.academicYear}</Badge>
-                  </div>
-                ))}
+                {data.classes
+                  .slice(0, 6)
+                  .map(
+                    (cls: {
+                      _id: string;
+                      name: string;
+                      academicYear: string;
+                    }) => (
+                      <div
+                        key={cls._id}
+                        className="flex items-center justify-between rounded-lg border p-3"
+                      >
+                        <p className="font-medium">{cls.name}</p>
+                        <Badge variant="secondary">{cls.academicYear}</Badge>
+                      </div>
+                    ),
+                  )}
                 {data.classes.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No classes found</p>
+                  <p className="text-muted-foreground text-sm">
+                    No classes found
+                  </p>
                 )}
                 {data.classes.length > 6 && (
-                  <p className="text-center text-sm text-muted-foreground">+{data.classes.length - 6} more</p>
+                  <p className="text-muted-foreground text-center text-sm">
+                    +{data.classes.length - 6} more
+                  </p>
                 )}
               </div>
             </CardContent>

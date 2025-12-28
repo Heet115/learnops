@@ -45,7 +45,12 @@ interface DepartmentsTableProps {
 }
 
 const filterConfigs: FilterConfig[] = [
-  { key: "search", label: "Search", type: "text", placeholder: "Search by name or code..." },
+  {
+    key: "search",
+    label: "Search",
+    type: "text",
+    placeholder: "Search by name or code...",
+  },
   {
     key: "status",
     label: "Status",
@@ -69,7 +74,9 @@ const filterConfigs: FilterConfig[] = [
 export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(null);
+  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [filters, setFilters] = useState<FilterValue>({
@@ -86,7 +93,10 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
       const hod = dept.hodId as unknown as IUser | undefined;
 
       if (search) {
-        if (!dept.name.toLowerCase().includes(search) && !dept.code.toLowerCase().includes(search)) {
+        if (
+          !dept.name.toLowerCase().includes(search) &&
+          !dept.code.toLowerCase().includes(search)
+        ) {
           return false;
         }
       }
@@ -173,7 +183,9 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
                       {hod ? (
                         `${hod.firstName} ${hod.lastName}`
                       ) : (
-                        <span className="text-muted-foreground">Not assigned</span>
+                        <span className="text-muted-foreground">
+                          Not assigned
+                        </span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -192,7 +204,9 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setEditDepartment(dept)}>
+                          <DropdownMenuItem
+                            onClick={() => setEditDepartment(dept)}
+                          >
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>

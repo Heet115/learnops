@@ -57,42 +57,64 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
   const courseOptions = useMemo(() => {
     const uniqueCourses = new Map<string, { label: string; value: string }>();
     semesters.forEach((sem) => {
-      const course = sem.courseId as unknown as (ICourse & { departmentId?: IDepartment }) | undefined;
+      const course = sem.courseId as unknown as
+        | (ICourse & { departmentId?: IDepartment })
+        | undefined;
       if (course) {
         const id = (course._id as unknown as { toString(): string }).toString();
         if (!uniqueCourses.has(id)) {
-          uniqueCourses.set(id, { label: `${course.code} - ${course.name}`, value: id });
+          uniqueCourses.set(id, {
+            label: `${course.code} - ${course.name}`,
+            value: id,
+          });
         }
       }
     });
     return Array.from(uniqueCourses.values());
   }, [semesters]);
 
-  const filterConfigs: FilterConfig[] = useMemo(() => [
-    { key: "search", label: "Search", type: "text", placeholder: "Search by name..." },
-    { key: "course", label: "Course", type: "select", options: courseOptions },
-    {
-      key: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { label: "Active", value: "active" },
-        { label: "Inactive", value: "inactive" },
-      ],
-    },
-  ], [courseOptions]);
+  const filterConfigs: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: "search",
+        label: "Search",
+        type: "text",
+        placeholder: "Search by name...",
+      },
+      {
+        key: "course",
+        label: "Course",
+        type: "select",
+        options: courseOptions,
+      },
+      {
+        key: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { label: "Active", value: "active" },
+          { label: "Inactive", value: "inactive" },
+        ],
+      },
+    ],
+    [courseOptions],
+  );
 
   const filteredSemesters = useMemo(() => {
     return semesters.filter((semester) => {
       const search = (filters.search as string)?.toLowerCase() || "";
       const courseFilter = filters.course as string;
       const status = filters.status as string;
-      const course = semester.courseId as unknown as (ICourse & { departmentId?: IDepartment }) | undefined;
+      const course = semester.courseId as unknown as
+        | (ICourse & { departmentId?: IDepartment })
+        | undefined;
 
       if (search && !semester.name.toLowerCase().includes(search)) return false;
 
       if (courseFilter && courseFilter !== "all") {
-        const courseId = course ? (course._id as unknown as { toString(): string }).toString() : "";
+        const courseId = course
+          ? (course._id as unknown as { toString(): string }).toString()
+          : "";
         if (courseId !== courseFilter) return false;
       }
 
@@ -195,7 +217,9 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={semester.isActive ? "default" : "secondary"}>
+                      <Badge
+                        variant={semester.isActive ? "default" : "secondary"}
+                      >
                         {semester.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>

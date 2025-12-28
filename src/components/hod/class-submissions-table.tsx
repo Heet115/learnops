@@ -49,10 +49,23 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
     return Array.from(courses).map((c) => ({ label: c, value: c }));
   }, [data]);
 
-  const filterConfigs: FilterConfig[] = useMemo(() => [
-    { key: "search", label: "Search", type: "text", placeholder: "Search by class name..." },
-    { key: "course", label: "Course", type: "select", options: courseOptions },
-  ], [courseOptions]);
+  const filterConfigs: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: "search",
+        label: "Search",
+        type: "text",
+        placeholder: "Search by class name...",
+      },
+      {
+        key: "course",
+        label: "Course",
+        type: "select",
+        options: courseOptions,
+      },
+    ],
+    [courseOptions],
+  );
 
   const filteredData = useMemo(() => {
     return data.filter((cls) => {
@@ -130,8 +143,12 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
                         {cls.semester}
                       </span>
                     </TableCell>
-                    <TableCell className="text-center">{cls.students}</TableCell>
-                    <TableCell className="text-center">{cls.submitted}</TableCell>
+                    <TableCell className="text-center">
+                      {cls.students}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {cls.submitted}
+                    </TableCell>
                     <TableCell className="text-center">
                       <span className="text-green-600">{cls.graded}</span>
                       {cls.pending > 0 && (
@@ -142,7 +159,10 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Progress value={progressPercent} className="h-2 w-20" />
+                        <Progress
+                          value={progressPercent}
+                          className="h-2 w-20"
+                        />
                         <span className="text-muted-foreground w-10 text-xs">
                           {progressPercent}%
                         </span>

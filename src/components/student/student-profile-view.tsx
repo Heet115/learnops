@@ -74,7 +74,10 @@ interface StudentProfileViewProps {
   data: ProfileData;
 }
 
-const statusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+const statusColors: Record<
+  string,
+  "default" | "secondary" | "destructive" | "outline"
+> = {
   active: "default",
   regular: "secondary",
   detained: "destructive",
@@ -117,7 +120,7 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
       {/* Header Card */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <Avatar className="h-20 w-20">
               <AvatarImage src={user.profileImage} alt={fullName} />
               <AvatarFallback className="text-xl">{initials}</AvatarFallback>
@@ -125,7 +128,7 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
             <div className="flex-1">
               <h2 className="text-2xl font-bold">{fullName}</h2>
               <p className="text-muted-foreground">{user.email}</p>
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="mt-2 flex flex-wrap gap-2">
                 {profile && (
                   <>
                     <Badge variant="outline">{profile.studentId}</Badge>
@@ -135,7 +138,9 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
                     </Badge>
                   </>
                 )}
-                {!user.isActive && <Badge variant="destructive">Inactive</Badge>}
+                {!user.isActive && (
+                  <Badge variant="destructive">Inactive</Badge>
+                )}
               </div>
             </div>
             <Button onClick={() => setShowRequestDialog(true)}>
@@ -157,7 +162,10 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <ProfileField label="Student ID" value={profile?.studentId} />
-            <ProfileField label="Enrollment Number" value={profile?.enrollmentNumber} />
+            <ProfileField
+              label="Enrollment Number"
+              value={profile?.enrollmentNumber}
+            />
             <ProfileField label="Full Name" value={fullName} />
             <ProfileField label="Father's Name" value={profile?.fatherName} />
             <ProfileField label="Mother's Name" value={profile?.motherName} />
@@ -166,7 +174,10 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
               label="Gender"
               value={profile?.gender ? genderLabels[profile.gender] : undefined}
             />
-            <ProfileField label="Date of Birth" value={formatDate(profile?.dateOfBirth)} />
+            <ProfileField
+              label="Date of Birth"
+              value={formatDate(profile?.dateOfBirth)}
+            />
             <ProfileField label="Blood Group" value={profile?.bloodGroup} />
           </CardContent>
         </Card>
@@ -181,7 +192,10 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <ProfileField label="Primary Email" value={user.email} />
-            <ProfileField label="Alternate Email" value={profile?.alternateEmail} />
+            <ProfileField
+              label="Alternate Email"
+              value={profile?.alternateEmail}
+            />
           </CardContent>
         </Card>
 
@@ -220,10 +234,17 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
             />
             <Separator />
             <ProfileField label="Batch" value={profile?.batch} />
-            <ProfileField label="Academic Session" value={profile?.academicSession} />
+            <ProfileField
+              label="Academic Session"
+              value={profile?.academicSession}
+            />
             <ProfileField
               label="Semester"
-              value={semester ? `${semester.name} (Sem ${semester.number})` : undefined}
+              value={
+                semester
+                  ? `${semester.name} (Sem ${semester.number})`
+                  : undefined
+              }
             />
             <ProfileField
               label="Class / Section"
@@ -235,7 +256,10 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
             />
             <ProfileField label="Roll Number" value={profile?.rollNumber} />
             <Separator />
-            <ProfileField label="Admission Date" value={formatDate(profile?.admissionDate)} />
+            <ProfileField
+              label="Admission Date"
+              value={formatDate(profile?.admissionDate)}
+            />
           </CardContent>
         </Card>
 
@@ -248,12 +272,24 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <ProfileField label="Address Line 1" value={profile?.presentAddressLine1} />
-            <ProfileField label="Address Line 2" value={profile?.presentAddressLine2} />
-            <ProfileField label="City / District" value={profile?.presentCity} />
+            <ProfileField
+              label="Address Line 1"
+              value={profile?.presentAddressLine1}
+            />
+            <ProfileField
+              label="Address Line 2"
+              value={profile?.presentAddressLine2}
+            />
+            <ProfileField
+              label="City / District"
+              value={profile?.presentCity}
+            />
             <ProfileField label="State" value={profile?.presentState} />
             <ProfileField label="Country" value={profile?.presentCountry} />
-            <ProfileField label="Postal Code" value={profile?.presentPostalCode} />
+            <ProfileField
+              label="Postal Code"
+              value={profile?.presentPostalCode}
+            />
           </CardContent>
         </Card>
       </div>
@@ -268,7 +304,10 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2">
-            <ProfileField label="Account Created" value={formatDate(user.createdAt)} />
+            <ProfileField
+              label="Account Created"
+              value={formatDate(user.createdAt)}
+            />
             <ProfileField
               label="Account Status"
               value={user.isActive ? "Active" : "Inactive"}
@@ -304,7 +343,7 @@ function ProfileField({
   return (
     <div className="flex justify-between gap-4">
       <span className="text-muted-foreground text-sm">{label}</span>
-      <span className="text-sm font-medium text-right">
+      <span className="text-right text-sm font-medium">
         {value || <span className="text-muted-foreground">-</span>}
       </span>
     </div>

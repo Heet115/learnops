@@ -116,19 +116,46 @@ export function ClassCoordinatorsTable({
     coordinators.forEach((c) => {
       const dept = c.classId?.semesterId?.courseId?.departmentId;
       if (dept) {
-        deptMap.set(dept.code, { label: `${dept.code} - ${dept.name}`, value: dept.code });
+        deptMap.set(dept.code, {
+          label: `${dept.code} - ${dept.name}`,
+          value: dept.code,
+        });
       }
       if (c.academicYear) yearSet.add(c.academicYear);
     });
-    const yearOpts = Array.from(yearSet).sort().reverse().map((y) => ({ label: y, value: y }));
-    return { departmentOptions: Array.from(deptMap.values()), yearOptions: yearOpts };
+    const yearOpts = Array.from(yearSet)
+      .sort()
+      .reverse()
+      .map((y) => ({ label: y, value: y }));
+    return {
+      departmentOptions: Array.from(deptMap.values()),
+      yearOptions: yearOpts,
+    };
   }, [coordinators]);
 
-  const filterConfigs: FilterConfig[] = useMemo(() => [
-    { key: "search", label: "Search", type: "text", placeholder: "Search by class or professor..." },
-    { key: "department", label: "Department", type: "select", options: departmentOptions },
-    { key: "academicYear", label: "Academic Year", type: "select", options: yearOptions },
-  ], [departmentOptions, yearOptions]);
+  const filterConfigs: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: "search",
+        label: "Search",
+        type: "text",
+        placeholder: "Search by class or professor...",
+      },
+      {
+        key: "department",
+        label: "Department",
+        type: "select",
+        options: departmentOptions,
+      },
+      {
+        key: "academicYear",
+        label: "Academic Year",
+        type: "select",
+        options: yearOptions,
+      },
+    ],
+    [departmentOptions, yearOptions],
+  );
 
   const filteredCoordinators = useMemo(() => {
     return coordinators.filter((coordinator) => {
@@ -138,12 +165,25 @@ export function ClassCoordinatorsTable({
 
       if (search) {
         const className = coordinator.classId?.name?.toLowerCase() || "";
-        const profName = `${coordinator.professorId?.firstName} ${coordinator.professorId?.lastName}`.toLowerCase();
-        if (!className.includes(search) && !profName.includes(search)) return false;
+        const profName =
+          `${coordinator.professorId?.firstName} ${coordinator.professorId?.lastName}`.toLowerCase();
+        if (!className.includes(search) && !profName.includes(search))
+          return false;
       }
 
-      if (department && department !== "all" && coordinator.classId?.semesterId?.courseId?.departmentId?.code !== department) return false;
-      if (academicYear && academicYear !== "all" && coordinator.academicYear !== academicYear) return false;
+      if (
+        department &&
+        department !== "all" &&
+        coordinator.classId?.semesterId?.courseId?.departmentId?.code !==
+          department
+      )
+        return false;
+      if (
+        academicYear &&
+        academicYear !== "all" &&
+        coordinator.academicYear !== academicYear
+      )
+        return false;
 
       return true;
     });

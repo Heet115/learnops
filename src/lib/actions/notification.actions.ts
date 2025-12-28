@@ -98,7 +98,12 @@ export async function deleteNotification(notificationId: string) {
 // Generic create notification (for internal use)
 export async function createNotification(data: {
   userId: string;
-  type: "new_ala" | "deadline_reminder" | "submission_graded" | "submission_rejected" | "system";
+  type:
+    | "new_ala"
+    | "deadline_reminder"
+    | "submission_graded"
+    | "submission_rejected"
+    | "system";
   title: string;
   message: string;
   relatedId?: string;
@@ -110,7 +115,9 @@ export async function createNotification(data: {
     type: data.type,
     title: data.title,
     message: data.message,
-    relatedId: data.relatedId ? new mongoose.Types.ObjectId(data.relatedId) : undefined,
+    relatedId: data.relatedId
+      ? new mongoose.Types.ObjectId(data.relatedId)
+      : undefined,
   });
 }
 

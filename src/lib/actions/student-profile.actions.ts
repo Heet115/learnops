@@ -188,14 +188,21 @@ export async function createProfileUpdateRequest(
   const currentUser = await getCurrentUser();
 
   if (currentUser.role !== "student") {
-    return { success: false, error: "Only students can request profile updates" };
+    return {
+      success: false,
+      error: "Only students can request profile updates",
+    };
   }
 
   const validated = createProfileUpdateRequestSchema.parse(input);
 
   // Validate that only allowed fields are being requested
   for (const change of validated.requestedChanges) {
-    if (!allowedUpdateFields.includes(change.fieldKey as typeof allowedUpdateFields[number])) {
+    if (
+      !allowedUpdateFields.includes(
+        change.fieldKey as (typeof allowedUpdateFields)[number],
+      )
+    ) {
       return {
         success: false,
         error: `Field "${change.fieldLabel}" cannot be updated by students`,
@@ -234,7 +241,9 @@ export async function createProfileUpdateRequest(
         type: "system",
         title: "Profile Update Request",
         message: `${currentUser.firstName} ${currentUser.lastName} has requested a profile update`,
-        relatedId: (request._id as unknown as { toString(): string }).toString(),
+        relatedId: (
+          request._id as unknown as { toString(): string }
+        ).toString(),
       });
     }
 
@@ -305,7 +314,11 @@ export async function reviewProfileUpdateRequest(
       // Apply the changes to student profile
       const updateData: Record<string, string> = {};
       for (const change of request.requestedChanges) {
-        if (allowedUpdateFields.includes(change.fieldKey as typeof allowedUpdateFields[number])) {
+        if (
+          allowedUpdateFields.includes(
+            change.fieldKey as (typeof allowedUpdateFields)[number],
+          )
+        ) {
           updateData[change.fieldKey] = change.requestedValue;
         }
       }
@@ -317,7 +330,8 @@ export async function reviewProfileUpdateRequest(
     }
 
     // Update request status
-    request.requestStatus = validated.action === "approve" ? "approved" : "rejected";
+    request.requestStatus =
+      validated.action === "approve" ? "approved" : "rejected";
     request.reviewedBy = adminUser?._id as mongoose.Types.ObjectId;
     request.reviewComment = validated.reviewComment;
     request.reviewedAt = new Date();
@@ -325,7 +339,9 @@ export async function reviewProfileUpdateRequest(
 
     // Notify student
     await createNotification({
-      userId: (request.requestedBy as unknown as { toString(): string }).toString(),
+      userId: (
+        request.requestedBy as unknown as { toString(): string }
+      ).toString(),
       type: "system",
       title: `Profile Update ${validated.action === "approve" ? "Approved" : "Rejected"}`,
       message:

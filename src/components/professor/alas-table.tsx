@@ -97,39 +97,58 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
       const subject = ala.subjectOfferingId?.subjectId;
       const cls = ala.subjectOfferingId?.classId;
       if (subject) {
-        subjectMap.set(subject.code, { label: `${subject.code} - ${subject.name}`, value: subject.code });
+        subjectMap.set(subject.code, {
+          label: `${subject.code} - ${subject.name}`,
+          value: subject.code,
+        });
       }
       if (cls) {
         classMap.set(cls.name, { label: cls.name, value: cls.name });
       }
     });
-    return { subjectOptions: Array.from(subjectMap.values()), classOptions: Array.from(classMap.values()) };
+    return {
+      subjectOptions: Array.from(subjectMap.values()),
+      classOptions: Array.from(classMap.values()),
+    };
   }, [alas]);
 
-  const filterConfigs: FilterConfig[] = useMemo(() => [
-    { key: "search", label: "Search", type: "text", placeholder: "Search by title..." },
-    { key: "subject", label: "Subject", type: "select", options: subjectOptions },
-    { key: "class", label: "Class", type: "select", options: classOptions },
-    {
-      key: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { label: "Active", value: "active" },
-        { label: "Locked", value: "locked" },
-        { label: "Past Due", value: "past" },
-      ],
-    },
-    {
-      key: "type",
-      label: "Type",
-      type: "select",
-      options: [
-        { label: "Individual", value: "individual" },
-        { label: "Group", value: "group" },
-      ],
-    },
-  ], [subjectOptions, classOptions]);
+  const filterConfigs: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: "search",
+        label: "Search",
+        type: "text",
+        placeholder: "Search by title...",
+      },
+      {
+        key: "subject",
+        label: "Subject",
+        type: "select",
+        options: subjectOptions,
+      },
+      { key: "class", label: "Class", type: "select", options: classOptions },
+      {
+        key: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { label: "Active", value: "active" },
+          { label: "Locked", value: "locked" },
+          { label: "Past Due", value: "past" },
+        ],
+      },
+      {
+        key: "type",
+        label: "Type",
+        type: "select",
+        options: [
+          { label: "Individual", value: "individual" },
+          { label: "Group", value: "group" },
+        ],
+      },
+    ],
+    [subjectOptions, classOptions],
+  );
 
   const filteredALAs = useMemo(() => {
     return alas.filter((ala) => {
@@ -140,8 +159,18 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
       const type = filters.type as string;
 
       if (search && !ala.title.toLowerCase().includes(search)) return false;
-      if (subject && subject !== "all" && ala.subjectOfferingId?.subjectId?.code !== subject) return false;
-      if (classFilter && classFilter !== "all" && ala.subjectOfferingId?.classId?.name !== classFilter) return false;
+      if (
+        subject &&
+        subject !== "all" &&
+        ala.subjectOfferingId?.subjectId?.code !== subject
+      )
+        return false;
+      if (
+        classFilter &&
+        classFilter !== "all" &&
+        ala.subjectOfferingId?.classId?.name !== classFilter
+      )
+        return false;
 
       if (status && status !== "all") {
         const alaStatus = getStatus(ala);
@@ -289,7 +318,9 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleToggleLock(ala._id, ala.isLocked)}
+                            onClick={() =>
+                              handleToggleLock(ala._id, ala.isLocked)
+                            }
                           >
                             {ala.isLocked ? (
                               <>
@@ -306,7 +337,9 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             className="text-destructive"
-                            onClick={() => handleDeleteClick(ala._id, ala.title)}
+                            onClick={() =>
+                              handleDeleteClick(ala._id, ala.title)
+                            }
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete

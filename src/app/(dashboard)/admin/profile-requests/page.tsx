@@ -28,7 +28,10 @@ export default async function ProfileRequestsPage() {
     <DashboardLayout
       role="admin"
       user={user}
-      breadcrumbs={[{ label: "Admin", href: "/admin" }, { label: "Profile Requests" }]}
+      breadcrumbs={[
+        { label: "Admin", href: "/admin" },
+        { label: "Profile Requests" },
+      ]}
     >
       <div className="space-y-6 pt-4">
         <div>

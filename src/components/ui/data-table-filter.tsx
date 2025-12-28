@@ -28,7 +28,12 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 
-export type FilterType = "text" | "select" | "date" | "dateRange" | "multiSelect";
+export type FilterType =
+  | "text"
+  | "select"
+  | "date"
+  | "dateRange"
+  | "multiSelect";
 
 export interface FilterOption {
   label: string;
@@ -44,7 +49,12 @@ export interface FilterConfig {
 }
 
 export interface FilterValue {
-  [key: string]: string | string[] | Date | { from?: Date; to?: Date } | undefined;
+  [key: string]:
+    | string
+    | string[]
+    | Date
+    | { from?: Date; to?: Date }
+    | undefined;
 }
 
 interface DataTableFilterProps {
@@ -79,20 +89,30 @@ export function DataTableFilter({
     const resetValues: FilterValue = {};
     filters.forEach((f) => {
       if (f.type === "multiSelect") resetValues[f.key] = [];
-      else if (f.type === "dateRange") resetValues[f.key] = { from: undefined, to: undefined };
+      else if (f.type === "dateRange")
+        resetValues[f.key] = { from: undefined, to: undefined };
       else resetValues[f.key] = "";
     });
     onChange(resetValues);
   };
 
-  const searchFilter = filters.find((f) => f.type === "text" && f.key === "search");
-  const otherFilters = filters.filter((f) => !(f.type === "text" && f.key === "search"));
+  const searchFilter = filters.find(
+    (f) => f.type === "text" && f.key === "search",
+  );
+  const otherFilters = filters.filter(
+    (f) => !(f.type === "text" && f.key === "search"),
+  );
 
   return (
-    <div className={cn("flex flex-col gap-3 sm:flex-row sm:items-center", className)}>
+    <div
+      className={cn(
+        "flex flex-col gap-3 sm:flex-row sm:items-center",
+        className,
+      )}
+    >
       {searchFilter && (
-        <div className="relative flex-1 max-w-sm">
-          <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+        <div className="relative max-w-sm flex-1">
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             placeholder={searchFilter.placeholder || searchPlaceholder}
             value={(values[searchFilter.key] as string) || ""}
@@ -161,9 +181,14 @@ export function DataTableFilter({
               displayValue = `${value.length} selected`;
             } else if (filter.type === "date" && value instanceof Date) {
               displayValue = format(value, "MMM d, yyyy");
-            } else if (filter.type === "dateRange" && typeof value === "object" && "from" in value) {
+            } else if (
+              filter.type === "dateRange" &&
+              typeof value === "object" &&
+              "from" in value
+            ) {
               const { from, to } = value;
-              if (from && to) displayValue = `${format(from, "MMM d")} - ${format(to, "MMM d")}`;
+              if (from && to)
+                displayValue = `${format(from, "MMM d")} - ${format(to, "MMM d")}`;
               else if (from) displayValue = `From ${format(from, "MMM d")}`;
               else if (to) displayValue = `Until ${format(to, "MMM d")}`;
               else return null;
@@ -172,15 +197,24 @@ export function DataTableFilter({
             }
 
             return (
-              <Badge key={filter.key} variant="secondary" className="gap-1 pr-1">
+              <Badge
+                key={filter.key}
+                variant="secondary"
+                className="gap-1 pr-1"
+              >
                 {filter.label}: {displayValue}
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-4 w-4 p-0 hover:bg-transparent"
                   onClick={() => {
-                    if (filter.type === "multiSelect") handleChange(filter.key, []);
-                    else if (filter.type === "dateRange") handleChange(filter.key, { from: undefined, to: undefined });
+                    if (filter.type === "multiSelect")
+                      handleChange(filter.key, []);
+                    else if (filter.type === "dateRange")
+                      handleChange(filter.key, {
+                        from: undefined,
+                        to: undefined,
+                      });
                     else handleChange(filter.key, "");
                   }}
                 >
@@ -194,7 +228,6 @@ export function DataTableFilter({
     </div>
   );
 }
-
 
 interface FilterFieldProps {
   filter: FilterConfig;
@@ -252,7 +285,7 @@ function FilterField({ filter, value, onChange }: FilterFieldProps) {
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-full p-2" align="start">
-            <div className="space-y-1 max-h-48 overflow-y-auto">
+            <div className="max-h-48 space-y-1 overflow-y-auto">
               {filter.options.map((opt) => {
                 const isSelected = selectedValues.includes(opt.value);
                 return (
@@ -290,11 +323,13 @@ function FilterField({ filter, value, onChange }: FilterFieldProps) {
               variant="outline"
               className={cn(
                 "w-full justify-start text-left font-normal",
-                !value && "text-muted-foreground"
+                !value && "text-muted-foreground",
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {value instanceof Date ? format(value, "PPP") : filter.placeholder || "Pick a date"}
+              {value instanceof Date
+                ? format(value, "PPP")
+                : filter.placeholder || "Pick a date"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -321,14 +356,15 @@ function FilterField({ filter, value, onChange }: FilterFieldProps) {
               variant="outline"
               className={cn(
                 "w-full justify-start text-left font-normal",
-                !dateRange.from && "text-muted-foreground"
+                !dateRange.from && "text-muted-foreground",
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
               {dateRange.from ? (
                 dateRange.to ? (
                   <>
-                    {format(dateRange.from, "LLL dd")} - {format(dateRange.to, "LLL dd")}
+                    {format(dateRange.from, "LLL dd")} -{" "}
+                    {format(dateRange.to, "LLL dd")}
                   </>
                 ) : (
                   format(dateRange.from, "LLL dd, y")
@@ -342,7 +378,9 @@ function FilterField({ filter, value, onChange }: FilterFieldProps) {
             <Calendar
               mode="range"
               selected={{ from: dateRange.from, to: dateRange.to }}
-              onSelect={(range) => onChange({ from: range?.from, to: range?.to })}
+              onSelect={(range) =>
+                onChange({ from: range?.from, to: range?.to })
+              }
               numberOfMonths={2}
               initialFocus
             />

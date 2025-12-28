@@ -99,26 +99,50 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
     subjects.forEach((sub) => {
       const dept = sub.semesterId?.courseId?.departmentId;
       if (dept) {
-        deptMap.set(dept.code, { label: `${dept.code} - ${dept.name}`, value: dept.code });
+        deptMap.set(dept.code, {
+          label: `${dept.code} - ${dept.name}`,
+          value: dept.code,
+        });
       }
     });
-    return { semesterOptions: semOpts, departmentOptions: Array.from(deptMap.values()) };
+    return {
+      semesterOptions: semOpts,
+      departmentOptions: Array.from(deptMap.values()),
+    };
   }, [semesters, subjects]);
 
-  const filterConfigs: FilterConfig[] = useMemo(() => [
-    { key: "search", label: "Search", type: "text", placeholder: "Search by name or code..." },
-    { key: "semester", label: "Semester", type: "select", options: semesterOptions },
-    { key: "department", label: "Department", type: "select", options: departmentOptions },
-    {
-      key: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { label: "Active", value: "active" },
-        { label: "Inactive", value: "inactive" },
-      ],
-    },
-  ], [semesterOptions, departmentOptions]);
+  const filterConfigs: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: "search",
+        label: "Search",
+        type: "text",
+        placeholder: "Search by name or code...",
+      },
+      {
+        key: "semester",
+        label: "Semester",
+        type: "select",
+        options: semesterOptions,
+      },
+      {
+        key: "department",
+        label: "Department",
+        type: "select",
+        options: departmentOptions,
+      },
+      {
+        key: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { label: "Active", value: "active" },
+          { label: "Inactive", value: "inactive" },
+        ],
+      },
+    ],
+    [semesterOptions, departmentOptions],
+  );
 
   const filteredSubjects = useMemo(() => {
     return subjects.filter((subject) => {
@@ -128,13 +152,26 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
       const status = filters.status as string;
 
       if (search) {
-        if (!subject.name.toLowerCase().includes(search) && !subject.code.toLowerCase().includes(search)) {
+        if (
+          !subject.name.toLowerCase().includes(search) &&
+          !subject.code.toLowerCase().includes(search)
+        ) {
           return false;
         }
       }
 
-      if (semester && semester !== "all" && subject.semesterId?._id !== semester) return false;
-      if (department && department !== "all" && subject.semesterId?.courseId?.departmentId?.code !== department) return false;
+      if (
+        semester &&
+        semester !== "all" &&
+        subject.semesterId?._id !== semester
+      )
+        return false;
+      if (
+        department &&
+        department !== "all" &&
+        subject.semesterId?.courseId?.departmentId?.code !== department
+      )
+        return false;
 
       if (status && status !== "all") {
         if (status === "active" && !subject.isActive) return false;

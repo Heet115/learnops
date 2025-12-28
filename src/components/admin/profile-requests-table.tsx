@@ -82,7 +82,9 @@ function formatDate(dateString: string) {
 export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [selectedRequest, setSelectedRequest] = useState<UpdateRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<UpdateRequest | null>(
+    null,
+  );
   const [reviewComment, setReviewComment] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -91,7 +93,9 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
     return requests.filter((r) => r.requestStatus === statusFilter);
   }, [requests, statusFilter]);
 
-  const pendingCount = requests.filter((r) => r.requestStatus === "pending").length;
+  const pendingCount = requests.filter(
+    (r) => r.requestStatus === "pending",
+  ).length;
 
   const handleReview = async (action: "approve" | "reject") => {
     if (!selectedRequest) return;
@@ -107,7 +111,7 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
       toast.success(
         action === "approve"
           ? "Request approved and profile updated"
-          : "Request rejected"
+          : "Request rejected",
       );
       setSelectedRequest(null);
       setReviewComment("");
@@ -121,7 +125,7 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
 
   if (requests.length === 0) {
     return (
-      <div className="text-muted-foreground py-8 text-center border rounded-lg">
+      <div className="text-muted-foreground rounded-lg border py-8 text-center">
         No profile update requests found.
       </div>
     );
@@ -138,7 +142,9 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Requests</SelectItem>
-                <SelectItem value="pending">Pending ({pendingCount})</SelectItem>
+                <SelectItem value="pending">
+                  Pending ({pendingCount})
+                </SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
               </SelectContent>
@@ -166,9 +172,10 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
                   <TableCell>
                     <div>
                       <p className="font-medium">
-                        {request.requestedBy.firstName} {request.requestedBy.lastName}
+                        {request.requestedBy.firstName}{" "}
+                        {request.requestedBy.lastName}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         {request.requestedBy.email}
                       </p>
                     </div>
@@ -186,7 +193,9 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
                     {formatDate(request.requestedAt)}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={statusConfig[request.requestStatus].variant}>
+                    <Badge
+                      variant={statusConfig[request.requestStatus].variant}
+                    >
                       {statusConfig[request.requestStatus].label}
                     </Badge>
                   </TableCell>
@@ -196,7 +205,7 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
                       size="sm"
                       onClick={() => setSelectedRequest(request)}
                     >
-                      <Eye className="h-4 w-4 mr-1" />
+                      <Eye className="mr-1 h-4 w-4" />
                       View
                     </Button>
                   </TableCell>
@@ -220,7 +229,8 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
             <DialogTitle>Review Profile Update Request</DialogTitle>
             <DialogDescription>
               {selectedRequest?.requestedBy.firstName}{" "}
-              {selectedRequest?.requestedBy.lastName} ({selectedRequest?.requestedBy.email})
+              {selectedRequest?.requestedBy.lastName} (
+              {selectedRequest?.requestedBy.email})
             </DialogDescription>
           </DialogHeader>
 
@@ -229,10 +239,10 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
               {/* Requested Changes */}
               <div className="space-y-2">
                 <Label>Requested Changes</Label>
-                <div className="rounded-md border divide-y">
+                <div className="divide-y rounded-md border">
                   {selectedRequest.requestedChanges.map((change, idx) => (
-                    <div key={idx} className="p-3 space-y-1">
-                      <p className="font-medium text-sm">{change.fieldLabel}</p>
+                    <div key={idx} className="space-y-1 p-3">
+                      <p className="text-sm font-medium">{change.fieldLabel}</p>
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-muted-foreground">
                           {change.currentValue || "(empty)"}
@@ -249,23 +259,31 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
 
               {/* Status Info for reviewed requests */}
               {selectedRequest.requestStatus !== "pending" && (
-                <div className="rounded-md bg-muted p-3 space-y-1 text-sm">
+                <div className="bg-muted space-y-1 rounded-md p-3 text-sm">
                   <p>
                     <span className="text-muted-foreground">Status: </span>
-                    <Badge variant={statusConfig[selectedRequest.requestStatus].variant}>
+                    <Badge
+                      variant={
+                        statusConfig[selectedRequest.requestStatus].variant
+                      }
+                    >
                       {statusConfig[selectedRequest.requestStatus].label}
                     </Badge>
                   </p>
                   {selectedRequest.reviewedBy && (
                     <p>
-                      <span className="text-muted-foreground">Reviewed by: </span>
+                      <span className="text-muted-foreground">
+                        Reviewed by:{" "}
+                      </span>
                       {selectedRequest.reviewedBy.firstName}{" "}
                       {selectedRequest.reviewedBy.lastName}
                     </p>
                   )}
                   {selectedRequest.reviewedAt && (
                     <p>
-                      <span className="text-muted-foreground">Reviewed on: </span>
+                      <span className="text-muted-foreground">
+                        Reviewed on:{" "}
+                      </span>
                       {formatDate(selectedRequest.reviewedAt)}
                     </p>
                   )}
@@ -306,24 +324,30 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <>
-                      <X className="h-4 w-4 mr-1" />
+                      <X className="mr-1 h-4 w-4" />
                       Reject
                     </>
                   )}
                 </Button>
-                <Button onClick={() => handleReview("approve")} disabled={isLoading}>
+                <Button
+                  onClick={() => handleReview("approve")}
+                  disabled={isLoading}
+                >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <>
-                      <Check className="h-4 w-4 mr-1" />
+                      <Check className="mr-1 h-4 w-4" />
                       Approve
                     </>
                   )}
                 </Button>
               </>
             ) : (
-              <Button variant="outline" onClick={() => setSelectedRequest(null)}>
+              <Button
+                variant="outline"
+                onClick={() => setSelectedRequest(null)}
+              >
                 Close
               </Button>
             )}

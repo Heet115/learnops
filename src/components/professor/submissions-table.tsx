@@ -67,30 +67,49 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
       const subject = sub.alaId?.subjectOfferingId?.subjectId;
       const cls = sub.alaId?.subjectOfferingId?.classId;
       if (subject) {
-        subjectMap.set(subject.code, { label: `${subject.code} - ${subject.name}`, value: subject.code });
+        subjectMap.set(subject.code, {
+          label: `${subject.code} - ${subject.name}`,
+          value: subject.code,
+        });
       }
       if (cls) {
         classMap.set(cls.name, { label: cls.name, value: cls.name });
       }
     });
-    return { subjectOptions: Array.from(subjectMap.values()), classOptions: Array.from(classMap.values()) };
+    return {
+      subjectOptions: Array.from(subjectMap.values()),
+      classOptions: Array.from(classMap.values()),
+    };
   }, [submissions]);
 
-  const filterConfigs: FilterConfig[] = useMemo(() => [
-    { key: "search", label: "Search", type: "text", placeholder: "Search by student or ALA..." },
-    { key: "subject", label: "Subject", type: "select", options: subjectOptions },
-    { key: "class", label: "Class", type: "select", options: classOptions },
-    {
-      key: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { label: "Pending", value: "submitted" },
-        { label: "Graded", value: "graded" },
-        { label: "Rejected", value: "rejected" },
-      ],
-    },
-  ], [subjectOptions, classOptions]);
+  const filterConfigs: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: "search",
+        label: "Search",
+        type: "text",
+        placeholder: "Search by student or ALA...",
+      },
+      {
+        key: "subject",
+        label: "Subject",
+        type: "select",
+        options: subjectOptions,
+      },
+      { key: "class", label: "Class", type: "select", options: classOptions },
+      {
+        key: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { label: "Pending", value: "submitted" },
+          { label: "Graded", value: "graded" },
+          { label: "Rejected", value: "rejected" },
+        ],
+      },
+    ],
+    [subjectOptions, classOptions],
+  );
 
   const filteredSubmissions = useMemo(() => {
     return submissions.filter((sub) => {
@@ -100,13 +119,25 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
       const status = filters.status as string;
 
       if (search) {
-        const studentName = `${sub.studentId?.firstName} ${sub.studentId?.lastName}`.toLowerCase();
+        const studentName =
+          `${sub.studentId?.firstName} ${sub.studentId?.lastName}`.toLowerCase();
         const alaTitle = sub.alaId?.title?.toLowerCase() || "";
-        if (!studentName.includes(search) && !alaTitle.includes(search)) return false;
+        if (!studentName.includes(search) && !alaTitle.includes(search))
+          return false;
       }
 
-      if (subject && subject !== "all" && sub.alaId?.subjectOfferingId?.subjectId?.code !== subject) return false;
-      if (classFilter && classFilter !== "all" && sub.alaId?.subjectOfferingId?.classId?.name !== classFilter) return false;
+      if (
+        subject &&
+        subject !== "all" &&
+        sub.alaId?.subjectOfferingId?.subjectId?.code !== subject
+      )
+        return false;
+      if (
+        classFilter &&
+        classFilter !== "all" &&
+        sub.alaId?.subjectOfferingId?.classId?.name !== classFilter
+      )
+        return false;
       if (status && status !== "all" && sub.status !== status) return false;
 
       return true;
@@ -217,7 +248,8 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
                           ) : (
                             <>
                               <p className="font-medium">
-                                {sub.studentId?.firstName} {sub.studentId?.lastName}
+                                {sub.studentId?.firstName}{" "}
+                                {sub.studentId?.lastName}
                               </p>
                               <p className="text-muted-foreground text-xs">
                                 {sub.studentId?.email}
@@ -237,16 +269,23 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
                       </TableCell>
                       <TableCell>
                         {sub.submittedAt
-                          ? new Date(sub.submittedAt).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              hour: "numeric",
-                              minute: "2-digit",
-                            })
+                          ? new Date(sub.submittedAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                hour: "numeric",
+                                minute: "2-digit",
+                              },
+                            )
                           : "-"}
                       </TableCell>
                       <TableCell>
-                        {getStatusBadge(sub.status, sub.marks, sub.alaId?.maxMarks)}
+                        {getStatusBadge(
+                          sub.status,
+                          sub.marks,
+                          sub.alaId?.maxMarks,
+                        )}
                       </TableCell>
                       <TableCell>
                         <Button variant="ghost" size="icon" asChild>

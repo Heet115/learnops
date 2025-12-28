@@ -59,21 +59,34 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
     };
   }, [data]);
 
-  const filterConfigs: FilterConfig[] = useMemo(() => [
-    { key: "search", label: "Search", type: "text", placeholder: "Search by title..." },
-    { key: "subject", label: "Subject", type: "select", options: subjectOptions },
-    { key: "class", label: "Class", type: "select", options: classOptions },
-    {
-      key: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { label: "Active", value: "active" },
-        { label: "Locked", value: "locked" },
-        { label: "Overdue", value: "overdue" },
-      ],
-    },
-  ], [subjectOptions, classOptions]);
+  const filterConfigs: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: "search",
+        label: "Search",
+        type: "text",
+        placeholder: "Search by title...",
+      },
+      {
+        key: "subject",
+        label: "Subject",
+        type: "select",
+        options: subjectOptions,
+      },
+      { key: "class", label: "Class", type: "select", options: classOptions },
+      {
+        key: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { label: "Active", value: "active" },
+          { label: "Locked", value: "locked" },
+          { label: "Overdue", value: "overdue" },
+        ],
+      },
+    ],
+    [subjectOptions, classOptions],
+  );
 
   const filteredData = useMemo(() => {
     return data.filter((ala) => {
@@ -84,7 +97,8 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
 
       if (search && !ala.title.toLowerCase().includes(search)) return false;
       if (subject && subject !== "all" && ala.subject !== subject) return false;
-      if (classFilter && classFilter !== "all" && ala.class !== classFilter) return false;
+      if (classFilter && classFilter !== "all" && ala.class !== classFilter)
+        return false;
 
       if (status && status !== "all") {
         if (status === "active" && (ala.isLocked || ala.isPast)) return false;
@@ -190,7 +204,10 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
                       <span className="text-muted-foreground">/</span>
                       <span>{ala.total}</span>
                       {ala.pending > 0 && (
-                        <Badge variant="outline" className="ml-2 text-orange-600">
+                        <Badge
+                          variant="outline"
+                          className="ml-2 text-orange-600"
+                        >
                           {ala.pending} pending
                         </Badge>
                       )}

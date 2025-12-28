@@ -31,12 +31,20 @@ async function getProfessorStudents() {
   if (!professor) return { students: [], classMap: new Map() };
 
   // Get professor's offerings
-  const offerings = await SubjectOffering.find({ professorId: professor._id, isActive: true })
+  const offerings = await SubjectOffering.find({
+    professorId: professor._id,
+    isActive: true,
+  })
     .populate("classId", "name")
     .lean();
 
-  const classIds = [...new Set(offerings.map(o => o.classId._id.toString()))];
-  const classMap = new Map(offerings.map(o => [o.classId._id.toString(), (o.classId as { name: string }).name]));
+  const classIds = [...new Set(offerings.map((o) => o.classId._id.toString()))];
+  const classMap = new Map(
+    offerings.map((o) => [
+      o.classId._id.toString(),
+      (o.classId as { name: string }).name,
+    ]),
+  );
 
   // Get students in those classes
   const students = await User.find({
@@ -49,22 +57,25 @@ async function getProfessorStudents() {
     .lean();
 
   // Get ALAs for professor
-  const alas = await ALA.find({ professorId: professor._id, isActive: true }).select("_id");
-  const alaIds = alas.map(a => a._id);
+  const alas = await ALA.find({
+    professorId: professor._id,
+    isActive: true,
+  }).select("_id");
+  const alaIds = alas.map((a) => a._id);
 
   // Get submission stats for each student
   const studentStats = await Promise.all(
     students.map(async (student) => {
       const [submitted, graded] = await Promise.all([
-        Submission.countDocuments({ 
-          studentId: student._id, 
+        Submission.countDocuments({
+          studentId: student._id,
           alaId: { $in: alaIds },
-          status: { $in: ["submitted", "graded"] }
+          status: { $in: ["submitted", "graded"] },
         }),
-        Submission.countDocuments({ 
-          studentId: student._id, 
+        Submission.countDocuments({
+          studentId: student._id,
           alaId: { $in: alaIds },
-          status: "graded"
+          status: "graded",
         }),
       ]);
 
@@ -73,7 +84,9 @@ async function getProfessorStudents() {
         studentId: student._id,
         alaId: { $in: alaIds },
         status: "graded",
-      }).populate("alaId", "maxMarks").lean();
+      })
+        .populate("alaId", "maxMarks")
+        .lean();
 
       let avgPercentage = 0;
       if (gradedSubmissions.length > 0) {
@@ -86,12 +99,14 @@ async function getProfessorStudents() {
 
       return {
         ...student,
-        className: student.classId ? classMap.get(student.classId.toString()) || "Unknown" : "Unknown",
+        className: student.classId
+          ? classMap.get(student.classId.toString()) || "Unknown"
+          : "Unknown",
         submitted,
         graded,
         avgPercentage,
       };
-    })
+    }),
   );
 
   return JSON.parse(JSON.stringify(studentStats));
@@ -117,14 +132,18 @@ export default async function ProfessorStudentsPage() {
   };
 
   return (
-    <DashboardLayout role="professor" user={user} breadcrumbs={[{ label: "Professor" }, { label: "Students" }]}>
+    <DashboardLayout
+      role="professor"
+      user={user}
+      breadcrumbs={[{ label: "Professor" }, { label: "Students" }]}
+    >
       <div className="space-y-6 pt-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold">My Students</h2>
             <p className="text-muted-foreground">Students in your classes</p>
           </div>
-          <Badge variant="secondary" className="text-lg px-4 py-2">
+          <Badge variant="secondary" className="px-4 py-2 text-lg">
             <GraduationCap className="mr-2 h-4 w-4" />
             {students.length} Students
           </Badge>
@@ -133,11 +152,15 @@ export default async function ProfessorStudentsPage() {
         <Card>
           <CardHeader>
             <CardTitle>All Students</CardTitle>
-            <CardDescription>View student performance and submissions</CardDescription>
+            <CardDescription>
+              View student performance and submissions
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {students.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No students in your classes</p>
+              <p className="text-muted-foreground py-8 text-center">
+                No students in your classes
+              </p>
             ) : (
               <Table>
                 <TableHeader>
@@ -151,50 +174,65 @@ export default async function ProfessorStudentsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students.map((student: {
-                    _id: string;
-                    firstName: string;
-                    lastName: string;
-                    email: string;
-                    profileImage?: string;
-                    className: string;
-                    submitted: number;
-                    graded: number;
-                    avgPercentage: number;
-                  }) => (
-                    <TableRow key={student._id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={student.profileImage} />
-                            <AvatarFallback>
-                              {student.firstName[0]}{student.lastName[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">
-                            {student.firstName} {student.lastName}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{student.email}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{student.className}</Badge>
-                      </TableCell>
-                      <TableCell className="text-center">{student.submitted}</TableCell>
-                      <TableCell className="text-center">{student.graded}</TableCell>
-                      <TableCell className="text-center">
-                        {student.graded > 0 ? (
-                          <Badge 
-                            variant={student.avgPercentage >= 70 ? "default" : student.avgPercentage >= 50 ? "secondary" : "destructive"}
-                          >
-                            {student.avgPercentage}%
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {students.map(
+                    (student: {
+                      _id: string;
+                      firstName: string;
+                      lastName: string;
+                      email: string;
+                      profileImage?: string;
+                      className: string;
+                      submitted: number;
+                      graded: number;
+                      avgPercentage: number;
+                    }) => (
+                      <TableRow key={student._id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={student.profileImage} />
+                              <AvatarFallback>
+                                {student.firstName[0]}
+                                {student.lastName[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium">
+                              {student.firstName} {student.lastName}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {student.email}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{student.className}</Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {student.submitted}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {student.graded}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {student.graded > 0 ? (
+                            <Badge
+                              variant={
+                                student.avgPercentage >= 70
+                                  ? "default"
+                                  : student.avgPercentage >= 50
+                                    ? "secondary"
+                                    : "destructive"
+                              }
+                            >
+                              {student.avgPercentage}%
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ),
+                  )}
                 </TableBody>
               </Table>
             )}

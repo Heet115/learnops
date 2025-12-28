@@ -1,7 +1,15 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export type Gender = "male" | "female" | "other";
-export type BloodGroup = "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+export type BloodGroup =
+  | "A+"
+  | "A-"
+  | "B+"
+  | "B-"
+  | "AB+"
+  | "AB-"
+  | "O+"
+  | "O-";
 export type StudentStatus = "active" | "regular" | "detained" | "alumni";
 
 export interface IStudentProfile extends Document {

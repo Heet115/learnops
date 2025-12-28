@@ -110,28 +110,44 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
     alas.forEach((ala) => {
       const subject = ala.subjectOfferingId?.subjectId;
       if (subject) {
-        subjects.set(subject.code, { label: `${subject.code} - ${subject.name}`, value: subject.code });
+        subjects.set(subject.code, {
+          label: `${subject.code} - ${subject.name}`,
+          value: subject.code,
+        });
       }
     });
     return Array.from(subjects.values());
   }, [alas]);
 
-  const filterConfigs: FilterConfig[] = useMemo(() => [
-    { key: "search", label: "Search", type: "text", placeholder: "Search by title..." },
-    { key: "subject", label: "Subject", type: "select", options: subjectOptions },
-    {
-      key: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { label: "Pending", value: "pending" },
-        { label: "Submitted", value: "submitted" },
-        { label: "Graded", value: "graded" },
-        { label: "Rejected", value: "rejected" },
-        { label: "Overdue", value: "overdue" },
-      ],
-    },
-  ], [subjectOptions]);
+  const filterConfigs: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: "search",
+        label: "Search",
+        type: "text",
+        placeholder: "Search by title...",
+      },
+      {
+        key: "subject",
+        label: "Subject",
+        type: "select",
+        options: subjectOptions,
+      },
+      {
+        key: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { label: "Pending", value: "pending" },
+          { label: "Submitted", value: "submitted" },
+          { label: "Graded", value: "graded" },
+          { label: "Rejected", value: "rejected" },
+          { label: "Overdue", value: "overdue" },
+        ],
+      },
+    ],
+    [subjectOptions],
+  );
 
   const filteredALAs = useMemo(() => {
     return alas.filter((ala) => {
@@ -140,7 +156,12 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
       const statusFilter = filters.status as string;
 
       if (search && !ala.title.toLowerCase().includes(search)) return false;
-      if (subject && subject !== "all" && ala.subjectOfferingId?.subjectId?.code !== subject) return false;
+      if (
+        subject &&
+        subject !== "all" &&
+        ala.subjectOfferingId?.subjectId?.code !== subject
+      )
+        return false;
 
       if (statusFilter && statusFilter !== "all") {
         const status = getStatus(ala);

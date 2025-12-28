@@ -109,29 +109,62 @@ export function SubjectOfferingsTable({
     offerings.forEach((off) => {
       const dept = off.semesterId?.courseId?.departmentId;
       if (dept) {
-        deptMap.set(dept.code, { label: `${dept.code} - ${dept.name}`, value: dept.code });
+        deptMap.set(dept.code, {
+          label: `${dept.code} - ${dept.name}`,
+          value: dept.code,
+        });
       }
       if (off.academicYear) yearSet.add(off.academicYear);
     });
-    const yearOpts = Array.from(yearSet).sort().reverse().map((y) => ({ label: y, value: y }));
-    return { professorOptions: profOpts, departmentOptions: Array.from(deptMap.values()), yearOptions: yearOpts };
+    const yearOpts = Array.from(yearSet)
+      .sort()
+      .reverse()
+      .map((y) => ({ label: y, value: y }));
+    return {
+      professorOptions: profOpts,
+      departmentOptions: Array.from(deptMap.values()),
+      yearOptions: yearOpts,
+    };
   }, [professors, offerings]);
 
-  const filterConfigs: FilterConfig[] = useMemo(() => [
-    { key: "search", label: "Search", type: "text", placeholder: "Search by subject..." },
-    { key: "professor", label: "Professor", type: "select", options: professorOptions },
-    { key: "department", label: "Department", type: "select", options: departmentOptions },
-    { key: "academicYear", label: "Academic Year", type: "select", options: yearOptions },
-    {
-      key: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { label: "Active", value: "active" },
-        { label: "Inactive", value: "inactive" },
-      ],
-    },
-  ], [professorOptions, departmentOptions, yearOptions]);
+  const filterConfigs: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: "search",
+        label: "Search",
+        type: "text",
+        placeholder: "Search by subject...",
+      },
+      {
+        key: "professor",
+        label: "Professor",
+        type: "select",
+        options: professorOptions,
+      },
+      {
+        key: "department",
+        label: "Department",
+        type: "select",
+        options: departmentOptions,
+      },
+      {
+        key: "academicYear",
+        label: "Academic Year",
+        type: "select",
+        options: yearOptions,
+      },
+      {
+        key: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { label: "Active", value: "active" },
+          { label: "Inactive", value: "inactive" },
+        ],
+      },
+    ],
+    [professorOptions, departmentOptions, yearOptions],
+  );
 
   const filteredOfferings = useMemo(() => {
     return offerings.filter((offering) => {
@@ -144,12 +177,28 @@ export function SubjectOfferingsTable({
       if (search) {
         const subjectName = offering.subjectId?.name?.toLowerCase() || "";
         const subjectCode = offering.subjectId?.code?.toLowerCase() || "";
-        if (!subjectName.includes(search) && !subjectCode.includes(search)) return false;
+        if (!subjectName.includes(search) && !subjectCode.includes(search))
+          return false;
       }
 
-      if (professor && professor !== "all" && offering.professorId?._id !== professor) return false;
-      if (department && department !== "all" && offering.semesterId?.courseId?.departmentId?.code !== department) return false;
-      if (academicYear && academicYear !== "all" && offering.academicYear !== academicYear) return false;
+      if (
+        professor &&
+        professor !== "all" &&
+        offering.professorId?._id !== professor
+      )
+        return false;
+      if (
+        department &&
+        department !== "all" &&
+        offering.semesterId?.courseId?.departmentId?.code !== department
+      )
+        return false;
+      if (
+        academicYear &&
+        academicYear !== "all" &&
+        offering.academicYear !== academicYear
+      )
+        return false;
 
       if (status && status !== "all") {
         if (status === "active" && !offering.isActive) return false;
@@ -247,7 +296,9 @@ export function SubjectOfferingsTable({
                   </TableCell>
                   <TableCell>{offering.academicYear}</TableCell>
                   <TableCell>
-                    <Badge variant={offering.isActive ? "default" : "secondary"}>
+                    <Badge
+                      variant={offering.isActive ? "default" : "secondary"}
+                    >
                       {offering.isActive ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>

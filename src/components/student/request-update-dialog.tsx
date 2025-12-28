@@ -90,7 +90,7 @@ export function RequestUpdateDialog({
 
     // Validate that at least one value is different
     const hasChanges = requestedChanges.some(
-      (change) => change.currentValue !== change.requestedValue
+      (change) => change.currentValue !== change.requestedValue,
     );
 
     if (!hasChanges) {
@@ -123,7 +123,7 @@ export function RequestUpdateDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Request Profile Update</DialogTitle>
           <DialogDescription>
@@ -163,7 +163,7 @@ export function RequestUpdateDialog({
                     />
                     <Label
                       htmlFor={`check-${field.key}`}
-                      className="text-sm font-medium cursor-pointer"
+                      className="cursor-pointer text-sm font-medium"
                     >
                       {field.label}
                     </Label>
@@ -171,7 +171,7 @@ export function RequestUpdateDialog({
 
                   {selectedFields.has(field.key) && (
                     <div className="ml-6 space-y-1">
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         Current:{" "}
                         {currentProfile[field.key as keyof CurrentProfile] ||
                           "(empty)"}
@@ -204,7 +204,10 @@ export function RequestUpdateDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading || selectedFields.size === 0}>
+            <Button
+              type="submit"
+              disabled={isLoading || selectedFields.size === 0}
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

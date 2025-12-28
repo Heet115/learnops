@@ -60,11 +60,17 @@ export default async function AdminSettingsPage() {
   ];
 
   return (
-    <DashboardLayout role="admin" user={user} breadcrumbs={[{ label: "Admin" }, { label: "Settings" }]}>
+    <DashboardLayout
+      role="admin"
+      user={user}
+      breadcrumbs={[{ label: "Admin" }, { label: "Settings" }]}
+    >
       <div className="space-y-6 pt-4">
         <div>
           <h2 className="text-2xl font-bold">Settings</h2>
-          <p className="text-muted-foreground">System configuration and information</p>
+          <p className="text-muted-foreground">
+            System configuration and information
+          </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -72,7 +78,7 @@ export default async function AdminSettingsPage() {
             <Card key={info.title}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                  <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-lg">
                     <info.icon className="h-5 w-5" />
                   </div>
                   <div>
@@ -81,8 +87,12 @@ export default async function AdminSettingsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`h-2 w-2 rounded-full ${info.statusColor}`} />
-                  <span className="text-sm text-muted-foreground">{info.status}</span>
+                  <span
+                    className={`h-2 w-2 rounded-full ${info.statusColor}`}
+                  />
+                  <span className="text-muted-foreground text-sm">
+                    {info.status}
+                  </span>
                 </div>
               </CardHeader>
             </Card>
@@ -99,35 +109,39 @@ export default async function AdminSettingsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between py-2 border-b">
+              <div className="flex items-center justify-between border-b py-2">
                 <span className="text-muted-foreground">Platform</span>
                 <span className="font-medium">LearnOps</span>
               </div>
-              <div className="flex items-center justify-between py-2 border-b">
+              <div className="flex items-center justify-between border-b py-2">
                 <span className="text-muted-foreground">Version</span>
                 <Badge variant="secondary">1.0.0</Badge>
               </div>
-              <div className="flex items-center justify-between py-2 border-b">
+              <div className="flex items-center justify-between border-b py-2">
                 <span className="text-muted-foreground">Framework</span>
                 <span className="font-medium">Next.js 16</span>
               </div>
-              <div className="flex items-center justify-between py-2 border-b">
+              <div className="flex items-center justify-between border-b py-2">
                 <span className="text-muted-foreground">UI Library</span>
                 <span className="font-medium">React 19</span>
               </div>
-              <div className="flex items-center justify-between py-2 border-b">
+              <div className="flex items-center justify-between border-b py-2">
                 <span className="text-muted-foreground">Styling</span>
                 <span className="font-medium">Tailwind CSS 4</span>
               </div>
-              <div className="flex items-center justify-between py-2 border-b">
+              <div className="flex items-center justify-between border-b py-2">
                 <span className="text-muted-foreground">File Size Limit</span>
                 <span className="font-medium">30 MB</span>
               </div>
               <div className="flex items-center justify-between py-2">
-                <span className="text-muted-foreground">Allowed File Types</span>
+                <span className="text-muted-foreground">
+                  Allowed File Types
+                </span>
                 <div className="flex gap-1">
                   {["PDF", "DOCX", "PPT", "ZIP"].map((type) => (
-                    <Badge key={type} variant="outline">{type}</Badge>
+                    <Badge key={type} variant="outline">
+                      {type}
+                    </Badge>
                   ))}
                 </div>
               </div>
@@ -143,15 +157,15 @@ export default async function AdminSettingsPage() {
           <CardContent>
             <div className="grid gap-3 md:grid-cols-2">
               <div className="rounded-lg border p-4">
-                <h4 className="font-medium mb-1">Deadline Reminders</h4>
-                <p className="text-sm text-muted-foreground mb-3">
+                <h4 className="mb-1 font-medium">Deadline Reminders</h4>
+                <p className="text-muted-foreground mb-3 text-sm">
                   Send deadline reminders to students with upcoming ALAs
                 </p>
                 <Badge variant="secondary">Automated (24hr before)</Badge>
               </div>
               <div className="rounded-lg border p-4">
-                <h4 className="font-medium mb-1">Auto-Lock Submissions</h4>
-                <p className="text-sm text-muted-foreground mb-3">
+                <h4 className="mb-1 font-medium">Auto-Lock Submissions</h4>
+                <p className="text-muted-foreground mb-3 text-sm">
                   Submissions are automatically locked after deadline
                 </p>
                 <Badge variant="secondary">Enabled</Badge>

@@ -40,7 +40,13 @@ import {
   reactivateUser,
   deleteUser,
 } from "@/lib/actions/admin.actions";
-import { MoreHorizontal, UserX, UserCheck, Trash2, UserCog } from "lucide-react";
+import {
+  MoreHorizontal,
+  UserX,
+  UserCheck,
+  Trash2,
+  UserCog,
+} from "lucide-react";
 import { IUser, ICourse } from "@/lib/db";
 import { toast } from "sonner";
 import { StudentProfileDialog } from "./student-profile-dialog";
@@ -58,7 +64,12 @@ const roleBadgeVariant = {
 } as const;
 
 const filterConfigs: FilterConfig[] = [
-  { key: "search", label: "Search", type: "text", placeholder: "Search by name or email..." },
+  {
+    key: "search",
+    label: "Search",
+    type: "text",
+    placeholder: "Search by name or email...",
+  },
   {
     key: "role",
     label: "Role",
@@ -93,7 +104,9 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
     role: "",
     status: "",
   });
-  const [profileDialogUser, setProfileDialogUser] = useState<IUser | null>(null);
+  const [profileDialogUser, setProfileDialogUser] = useState<IUser | null>(
+    null,
+  );
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
@@ -192,7 +205,9 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
             <TableBody>
               {filteredUsers.map((user) => (
                 <TableRow
-                  key={(user._id as unknown as { toString(): string }).toString()}
+                  key={(
+                    user._id as unknown as { toString(): string }
+                  ).toString()}
                 >
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -320,7 +335,9 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
         <StudentProfileDialog
           open={!!profileDialogUser}
           onOpenChange={(open) => !open && setProfileDialogUser(null)}
-          userId={(profileDialogUser._id as unknown as { toString(): string }).toString()}
+          userId={(
+            profileDialogUser._id as unknown as { toString(): string }
+          ).toString()}
           userName={`${profileDialogUser.firstName} ${profileDialogUser.lastName}`}
           courses={courses.map((c) => ({
             _id: (c._id as unknown as { toString(): string }).toString(),

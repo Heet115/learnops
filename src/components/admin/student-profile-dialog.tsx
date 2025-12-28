@@ -105,7 +105,7 @@ export function StudentProfileDialog({
   const fetchProfile = async () => {
     setIsFetching(true);
     const profile = await getStudentProfile(userId);
-    
+
     if (profile) {
       setIsEdit(true);
       setFormData({
@@ -154,12 +154,29 @@ export function StudentProfileDialog({
 
     const submitData = {
       ...formData,
-      gender: (formData.gender || undefined) as "male" | "female" | "other" | undefined,
-      bloodGroup: (formData.bloodGroup || undefined) as "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | undefined,
+      gender: (formData.gender || undefined) as
+        | "male"
+        | "female"
+        | "other"
+        | undefined,
+      bloodGroup: (formData.bloodGroup || undefined) as
+        | "A+"
+        | "A-"
+        | "B+"
+        | "B-"
+        | "AB+"
+        | "AB-"
+        | "O+"
+        | "O-"
+        | undefined,
       courseId: formData.courseId || undefined,
       dateOfBirth: formData.dateOfBirth || undefined,
       admissionDate: formData.admissionDate || undefined,
-      studentStatus: formData.studentStatus as "active" | "regular" | "detained" | "alumni",
+      studentStatus: formData.studentStatus as
+        | "active"
+        | "regular"
+        | "detained"
+        | "alumni",
     };
 
     let result;
@@ -188,7 +205,7 @@ export function StudentProfileDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
             {isEdit ? "Edit" : "Create"} Student Profile
@@ -216,7 +233,7 @@ export function StudentProfileDialog({
                 <TabsTrigger value="address">Address</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="identity" className="space-y-4 mt-4">
+              <TabsContent value="identity" className="mt-4 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="studentId">Student ID *</Label>
@@ -236,7 +253,10 @@ export function StudentProfileDialog({
                       id="enrollmentNumber"
                       value={formData.enrollmentNumber}
                       onChange={(e) =>
-                        setFormData({ ...formData, enrollmentNumber: e.target.value })
+                        setFormData({
+                          ...formData,
+                          enrollmentNumber: e.target.value,
+                        })
                       }
                       disabled={isLoading}
                     />
@@ -309,7 +329,10 @@ export function StudentProfileDialog({
                       type="date"
                       value={formData.dateOfBirth}
                       onChange={(e) =>
-                        setFormData({ ...formData, dateOfBirth: e.target.value })
+                        setFormData({
+                          ...formData,
+                          dateOfBirth: e.target.value,
+                        })
                       }
                       disabled={isLoading}
                     />
@@ -338,7 +361,7 @@ export function StudentProfileDialog({
                 </div>
               </TabsContent>
 
-              <TabsContent value="academic" className="space-y-4 mt-4">
+              <TabsContent value="academic" className="mt-4 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="courseId">Course</Label>
@@ -404,7 +427,10 @@ export function StudentProfileDialog({
                       placeholder="e.g., 2024-25"
                       value={formData.academicSession}
                       onChange={(e) =>
-                        setFormData({ ...formData, academicSession: e.target.value })
+                        setFormData({
+                          ...formData,
+                          academicSession: e.target.value,
+                        })
                       }
                       disabled={isLoading}
                     />
@@ -430,7 +456,10 @@ export function StudentProfileDialog({
                       type="date"
                       value={formData.admissionDate}
                       onChange={(e) =>
-                        setFormData({ ...formData, admissionDate: e.target.value })
+                        setFormData({
+                          ...formData,
+                          admissionDate: e.target.value,
+                        })
                       }
                       disabled={isLoading}
                     />
@@ -438,7 +467,7 @@ export function StudentProfileDialog({
                 </div>
               </TabsContent>
 
-              <TabsContent value="contact" className="space-y-4 mt-4">
+              <TabsContent value="contact" className="mt-4 space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="alternateEmail">Alternate Email</Label>
                   <Input
@@ -446,21 +475,27 @@ export function StudentProfileDialog({
                     type="email"
                     value={formData.alternateEmail}
                     onChange={(e) =>
-                      setFormData({ ...formData, alternateEmail: e.target.value })
+                      setFormData({
+                        ...formData,
+                        alternateEmail: e.target.value,
+                      })
                     }
                     disabled={isLoading}
                   />
                 </div>
               </TabsContent>
 
-              <TabsContent value="address" className="space-y-4 mt-4">
+              <TabsContent value="address" className="mt-4 space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="presentAddressLine1">Address Line 1</Label>
                   <Input
                     id="presentAddressLine1"
                     value={formData.presentAddressLine1}
                     onChange={(e) =>
-                      setFormData({ ...formData, presentAddressLine1: e.target.value })
+                      setFormData({
+                        ...formData,
+                        presentAddressLine1: e.target.value,
+                      })
                     }
                     disabled={isLoading}
                   />
@@ -471,7 +506,10 @@ export function StudentProfileDialog({
                     id="presentAddressLine2"
                     value={formData.presentAddressLine2}
                     onChange={(e) =>
-                      setFormData({ ...formData, presentAddressLine2: e.target.value })
+                      setFormData({
+                        ...formData,
+                        presentAddressLine2: e.target.value,
+                      })
                     }
                     disabled={isLoading}
                   />
@@ -483,7 +521,10 @@ export function StudentProfileDialog({
                       id="presentCity"
                       value={formData.presentCity}
                       onChange={(e) =>
-                        setFormData({ ...formData, presentCity: e.target.value })
+                        setFormData({
+                          ...formData,
+                          presentCity: e.target.value,
+                        })
                       }
                       disabled={isLoading}
                     />
@@ -494,7 +535,10 @@ export function StudentProfileDialog({
                       id="presentState"
                       value={formData.presentState}
                       onChange={(e) =>
-                        setFormData({ ...formData, presentState: e.target.value })
+                        setFormData({
+                          ...formData,
+                          presentState: e.target.value,
+                        })
                       }
                       disabled={isLoading}
                     />
@@ -507,7 +551,10 @@ export function StudentProfileDialog({
                       id="presentCountry"
                       value={formData.presentCountry}
                       onChange={(e) =>
-                        setFormData({ ...formData, presentCountry: e.target.value })
+                        setFormData({
+                          ...formData,
+                          presentCountry: e.target.value,
+                        })
                       }
                       disabled={isLoading}
                     />
@@ -518,7 +565,10 @@ export function StudentProfileDialog({
                       id="presentPostalCode"
                       value={formData.presentPostalCode}
                       onChange={(e) =>
-                        setFormData({ ...formData, presentPostalCode: e.target.value })
+                        setFormData({
+                          ...formData,
+                          presentPostalCode: e.target.value,
+                        })
                       }
                       disabled={isLoading}
                     />

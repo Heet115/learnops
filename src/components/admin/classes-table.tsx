@@ -100,29 +100,62 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
     classes.forEach((cls) => {
       const dept = cls.semesterId?.courseId?.departmentId;
       if (dept) {
-        deptMap.set(dept.code, { label: `${dept.code} - ${dept.name}`, value: dept.code });
+        deptMap.set(dept.code, {
+          label: `${dept.code} - ${dept.name}`,
+          value: dept.code,
+        });
       }
       if (cls.academicYear) yearSet.add(cls.academicYear);
     });
-    const yearOpts = Array.from(yearSet).sort().reverse().map((y) => ({ label: y, value: y }));
-    return { semesterOptions: semOpts, departmentOptions: Array.from(deptMap.values()), yearOptions: yearOpts };
+    const yearOpts = Array.from(yearSet)
+      .sort()
+      .reverse()
+      .map((y) => ({ label: y, value: y }));
+    return {
+      semesterOptions: semOpts,
+      departmentOptions: Array.from(deptMap.values()),
+      yearOptions: yearOpts,
+    };
   }, [semesters, classes]);
 
-  const filterConfigs: FilterConfig[] = useMemo(() => [
-    { key: "search", label: "Search", type: "text", placeholder: "Search by name..." },
-    { key: "semester", label: "Semester", type: "select", options: semesterOptions },
-    { key: "department", label: "Department", type: "select", options: departmentOptions },
-    { key: "academicYear", label: "Academic Year", type: "select", options: yearOptions },
-    {
-      key: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { label: "Active", value: "active" },
-        { label: "Inactive", value: "inactive" },
-      ],
-    },
-  ], [semesterOptions, departmentOptions, yearOptions]);
+  const filterConfigs: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: "search",
+        label: "Search",
+        type: "text",
+        placeholder: "Search by name...",
+      },
+      {
+        key: "semester",
+        label: "Semester",
+        type: "select",
+        options: semesterOptions,
+      },
+      {
+        key: "department",
+        label: "Department",
+        type: "select",
+        options: departmentOptions,
+      },
+      {
+        key: "academicYear",
+        label: "Academic Year",
+        type: "select",
+        options: yearOptions,
+      },
+      {
+        key: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { label: "Active", value: "active" },
+          { label: "Inactive", value: "inactive" },
+        ],
+      },
+    ],
+    [semesterOptions, departmentOptions, yearOptions],
+  );
 
   const filteredClasses = useMemo(() => {
     return classes.filter((classItem) => {
@@ -132,10 +165,26 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
       const academicYear = filters.academicYear as string;
       const status = filters.status as string;
 
-      if (search && !classItem.name.toLowerCase().includes(search)) return false;
-      if (semester && semester !== "all" && classItem.semesterId?._id !== semester) return false;
-      if (department && department !== "all" && classItem.semesterId?.courseId?.departmentId?.code !== department) return false;
-      if (academicYear && academicYear !== "all" && classItem.academicYear !== academicYear) return false;
+      if (search && !classItem.name.toLowerCase().includes(search))
+        return false;
+      if (
+        semester &&
+        semester !== "all" &&
+        classItem.semesterId?._id !== semester
+      )
+        return false;
+      if (
+        department &&
+        department !== "all" &&
+        classItem.semesterId?.courseId?.departmentId?.code !== department
+      )
+        return false;
+      if (
+        academicYear &&
+        academicYear !== "all" &&
+        classItem.academicYear !== academicYear
+      )
+        return false;
 
       if (status && status !== "all") {
         if (status === "active" && !classItem.isActive) return false;
@@ -200,18 +249,23 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
             <TableBody>
               {filteredClasses.map((classItem) => (
                 <TableRow key={classItem._id}>
-                  <TableCell className="font-medium">{classItem.name}</TableCell>
+                  <TableCell className="font-medium">
+                    {classItem.name}
+                  </TableCell>
                   <TableCell>{classItem.semesterId?.name || "N/A"}</TableCell>
                   <TableCell>
                     {classItem.semesterId?.courseId?.name || "N/A"} (
                     {classItem.semesterId?.courseId?.code || ""})
                   </TableCell>
                   <TableCell>
-                    {classItem.semesterId?.courseId?.departmentId?.code || "N/A"}
+                    {classItem.semesterId?.courseId?.departmentId?.code ||
+                      "N/A"}
                   </TableCell>
                   <TableCell>{classItem.academicYear}</TableCell>
                   <TableCell>
-                    <Badge variant={classItem.isActive ? "default" : "secondary"}>
+                    <Badge
+                      variant={classItem.isActive ? "default" : "secondary"}
+                    >
                       {classItem.isActive ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>

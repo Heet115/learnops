@@ -61,37 +61,45 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
     status: "",
   });
 
-  const filterConfigs: FilterConfig[] = useMemo(() => [
-    { key: "search", label: "Search", type: "text", placeholder: "Search by name or code..." },
-    {
-      key: "department",
-      label: "Department",
-      type: "select",
-      options: departments.map((d) => ({
-        label: `${d.code} - ${d.name}`,
-        value: (d._id as unknown as { toString(): string }).toString(),
-      })),
-    },
-    {
-      key: "courseType",
-      label: "Type",
-      type: "select",
-      options: [
-        { label: "Diploma", value: "diploma" },
-        { label: "Undergraduate", value: "ug" },
-        { label: "Postgraduate", value: "pg" },
-      ],
-    },
-    {
-      key: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { label: "Active", value: "active" },
-        { label: "Inactive", value: "inactive" },
-      ],
-    },
-  ], [departments]);
+  const filterConfigs: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: "search",
+        label: "Search",
+        type: "text",
+        placeholder: "Search by name or code...",
+      },
+      {
+        key: "department",
+        label: "Department",
+        type: "select",
+        options: departments.map((d) => ({
+          label: `${d.code} - ${d.name}`,
+          value: (d._id as unknown as { toString(): string }).toString(),
+        })),
+      },
+      {
+        key: "courseType",
+        label: "Type",
+        type: "select",
+        options: [
+          { label: "Diploma", value: "diploma" },
+          { label: "Undergraduate", value: "ug" },
+          { label: "Postgraduate", value: "pg" },
+        ],
+      },
+      {
+        key: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { label: "Active", value: "active" },
+          { label: "Inactive", value: "inactive" },
+        ],
+      },
+    ],
+    [departments],
+  );
 
   const filteredCourses = useMemo(() => {
     return courses.filter((course) => {
@@ -102,18 +110,27 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
       const dept = course.departmentId as unknown as IDepartment | undefined;
 
       if (search) {
-        if (!course.name.toLowerCase().includes(search) && !course.code.toLowerCase().includes(search)) {
+        if (
+          !course.name.toLowerCase().includes(search) &&
+          !course.code.toLowerCase().includes(search)
+        ) {
           return false;
         }
       }
 
       if (department && department !== "all") {
-        const deptId = dept ? (dept._id as unknown as { toString(): string }).toString() : "";
+        const deptId = dept
+          ? (dept._id as unknown as { toString(): string }).toString()
+          : "";
         if (deptId !== department) return false;
       }
 
       if (courseType && courseType !== "all") {
-        if ((course as unknown as { courseType?: string }).courseType !== courseType) return false;
+        if (
+          (course as unknown as { courseType?: string }).courseType !==
+          courseType
+        )
+          return false;
       }
 
       if (status && status !== "all") {
@@ -207,20 +224,22 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
                     <TableCell>
                       {courseData.courseType ? (
                         <Badge variant="secondary">
-                          {courseTypeLabels[courseData.courseType] || courseData.courseType}
+                          {courseTypeLabels[courseData.courseType] ||
+                            courseData.courseType}
                         </Badge>
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell>
-                      {course.duration} {course.duration === 1 ? "Year" : "Years"}
+                      {course.duration}{" "}
+                      {course.duration === 1 ? "Year" : "Years"}
                     </TableCell>
+                    <TableCell>{courseData.totalSemesters || "-"}</TableCell>
                     <TableCell>
-                      {courseData.totalSemesters || "-"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={course.isActive ? "default" : "secondary"}>
+                      <Badge
+                        variant={course.isActive ? "default" : "secondary"}
+                      >
                         {course.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
