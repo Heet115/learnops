@@ -82,6 +82,8 @@ export function StudentProfileDialog({
     dateOfBirth: "",
     bloodGroup: "",
     alternateEmail: "",
+    primaryMobile: "",
+    alternateMobile: "",
     courseId: "",
     batch: "",
     academicSession: "",
@@ -120,6 +122,8 @@ export function StudentProfileDialog({
           : "",
         bloodGroup: profile.bloodGroup || "",
         alternateEmail: profile.alternateEmail || "",
+        primaryMobile: profile.primaryMobile || "",
+        alternateMobile: profile.alternateMobile || "",
         courseId: profile.courseId?._id || profile.courseId || "",
         batch: profile.batch || "",
         academicSession: profile.academicSession || "",
@@ -482,6 +486,40 @@ export function StudentProfileDialog({
                     }
                     disabled={isLoading}
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="primaryMobile">Primary Mobile</Label>
+                    <Input
+                      id="primaryMobile"
+                      type="tel"
+                      placeholder="e.g., +91 9876543210"
+                      value={formData.primaryMobile}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          primaryMobile: e.target.value,
+                        })
+                      }
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="alternateMobile">Alternate Mobile</Label>
+                    <Input
+                      id="alternateMobile"
+                      type="tel"
+                      placeholder="e.g., +91 9876543210"
+                      value={formData.alternateMobile}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          alternateMobile: e.target.value,
+                        })
+                      }
+                      disabled={isLoading}
+                    />
+                  </div>
                 </div>
               </TabsContent>
 

@@ -311,22 +311,37 @@ export async function reviewProfileUpdateRequest(
 
   try {
     if (validated.action === "approve") {
-      // Apply the changes to student profile
-      const updateData: Record<string, string> = {};
+      // Separate fields by model
+      const userFields = ["firstName", "middleName", "lastName", "email"];
+      const userUpdateData: Record<string, string> = {};
+      const profileUpdateData: Record<string, string> = {};
+
       for (const change of request.requestedChanges) {
         if (
           allowedUpdateFields.includes(
             change.fieldKey as (typeof allowedUpdateFields)[number],
           )
         ) {
-          updateData[change.fieldKey] = change.requestedValue;
+          if (userFields.includes(change.fieldKey)) {
+            userUpdateData[change.fieldKey] = change.requestedValue;
+          } else {
+            profileUpdateData[change.fieldKey] = change.requestedValue;
+          }
         }
       }
 
-      await StudentProfile.findOneAndUpdate(
-        { userId: request.requestedBy },
-        updateData,
-      );
+      // Update User model fields
+      if (Object.keys(userUpdateData).length > 0) {
+        await User.findByIdAndUpdate(request.requestedBy, userUpdateData);
+      }
+
+      // Update StudentProfile model fields
+      if (Object.keys(profileUpdateData).length > 0) {
+        await StudentProfile.findOneAndUpdate(
+          { userId: request.requestedBy },
+          profileUpdateData,
+        );
+      }
     }
 
     // Update request status

@@ -46,6 +46,8 @@ interface ProfileData {
     dateOfBirth?: string;
     bloodGroup?: string;
     alternateEmail?: string;
+    primaryMobile?: string;
+    alternateMobile?: string;
     courseId?: {
       _id: string;
       name: string;
@@ -192,10 +194,10 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <ProfileField label="Primary Email" value={user.email} />
-            <ProfileField
-              label="Alternate Email"
-              value={profile?.alternateEmail}
-            />
+            <ProfileField label="Alternate Email" value={profile?.alternateEmail} />
+            <Separator />
+            <ProfileField label="Primary Mobile" value={profile?.primaryMobile} />
+            <ProfileField label="Alternate Mobile" value={profile?.alternateMobile} />
           </CardContent>
         </Card>
 
@@ -320,7 +322,20 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
         open={showRequestDialog}
         onOpenChange={setShowRequestDialog}
         currentProfile={{
+          firstName: user.firstName || "",
+          middleName: profile?.middleName || "",
+          lastName: user.lastName || "",
+          fatherName: profile?.fatherName || "",
+          motherName: profile?.motherName || "",
+          gender: profile?.gender || "",
+          dateOfBirth: profile?.dateOfBirth
+            ? new Date(profile.dateOfBirth).toISOString().split("T")[0]
+            : "",
+          bloodGroup: profile?.bloodGroup || "",
+          email: user.email || "",
           alternateEmail: profile?.alternateEmail || "",
+          primaryMobile: profile?.primaryMobile || "",
+          alternateMobile: profile?.alternateMobile || "",
           presentAddressLine1: profile?.presentAddressLine1 || "",
           presentAddressLine2: profile?.presentAddressLine2 || "",
           presentCity: profile?.presentCity || "",

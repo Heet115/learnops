@@ -27,6 +27,8 @@ export interface IStudentProfile extends Document {
 
   // Contact
   alternateEmail?: string;
+  primaryMobile?: string;
+  alternateMobile?: string;
 
   // Academic
   courseId?: mongoose.Types.ObjectId;
@@ -80,6 +82,8 @@ const StudentProfileSchema = new Schema<IStudentProfile>(
 
     // Contact
     alternateEmail: { type: String, trim: true, lowercase: true },
+    primaryMobile: { type: String, trim: true },
+    alternateMobile: { type: String, trim: true },
 
     // Academic
     courseId: {

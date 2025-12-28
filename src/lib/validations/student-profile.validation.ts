@@ -30,6 +30,8 @@ export const createStudentProfileSchema = z.object({
   dateOfBirth: z.string().optional(),
   bloodGroup: bloodGroupEnum.optional(),
   alternateEmail: z.string().email().optional().or(z.literal("")),
+  primaryMobile: z.string().max(20).optional(),
+  alternateMobile: z.string().max(20).optional(),
   courseId: z.string().optional(),
   batch: z.string().max(20).optional(),
   academicSession: z.string().max(20).optional(),
@@ -71,7 +73,21 @@ export const reviewProfileUpdateRequestSchema = z.object({
 
 // Allowed fields for student update requests
 export const allowedUpdateFields = [
+  // Identity
+  "firstName",
+  "middleName",
+  "lastName",
+  "fatherName",
+  "motherName",
+  "gender",
+  "dateOfBirth",
+  "bloodGroup",
+  // Contact
+  "email",
   "alternateEmail",
+  "primaryMobile",
+  "alternateMobile",
+  // Address
   "presentAddressLine1",
   "presentAddressLine2",
   "presentCity",
