@@ -3,9 +3,11 @@ import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getAllUsers, getUserStats } from "@/lib/actions/admin.actions";
 import { getAllCourses } from "@/lib/actions/academic.actions";
+import { getClassesForBulkImport } from "@/lib/actions/bulk-import.actions";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
 import { UsersTable } from "@/components/admin/users-table";
 import { CreateUserDialog } from "@/components/admin/create-user-dialog";
+import { BulkImportStudentsDialog } from "@/components/admin/bulk-import-students-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, UserCheck, UserX, GraduationCap } from "lucide-react";
 
@@ -17,11 +19,12 @@ export default async function UsersPage() {
     redirect("/unauthorized");
   }
 
-  const [users, stats, dbUser, courses] = await Promise.all([
+  const [users, stats, dbUser, courses, classesForImport] = await Promise.all([
     getAllUsers(),
     getUserStats(),
     getCurrentUserFromDB(),
     getAllCourses(),
+    getClassesForBulkImport(),
   ]);
 
   const user = {
@@ -49,7 +52,10 @@ export default async function UsersPage() {
             <h2 className="text-2xl font-bold">Users</h2>
             <p className="text-muted-foreground">Manage all system users</p>
           </div>
-          <CreateUserDialog />
+          <div className="flex gap-2">
+            <BulkImportStudentsDialog classes={classesForImport} />
+            <CreateUserDialog />
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-4">

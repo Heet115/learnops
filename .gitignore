@@ -43,3 +43,5 @@ next-env.d.ts
 .kiro/
 .vscode/
 Untitled-1.txt
+.idea/
+*.log
