@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -74,14 +73,8 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
   const [assignedIds, setAssignedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
-  const [editGroup, setEditGroup] = useState<Group | null>(null);
-  const router = useRouter();
 
-  useEffect(() => {
-    loadData();
-  }, [alaId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     const result = await getStudentsForGroupAssignment(alaId);
     if (result.success) {
@@ -92,7 +85,27 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
       toast.error(result.error || "Failed to load data");
     }
     setLoading(false);
-  };
+  }, [alaId]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getStudentsForGroupAssignment(alaId).then((result) => {
+      if (!isMounted) return;
+      if (result.success) {
+        setStudents(result.students || []);
+        setGroups(result.groups || []);
+        setAssignedIds(result.assignedStudentIds || []);
+      } else {
+        toast.error(result.error || "Failed to load data");
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [alaId]);
 
   const unassignedStudents = students.filter(
     (s) => !assignedIds.includes(s._id),
@@ -135,7 +148,8 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
       <CardContent className="space-y-4">
         {groups.length === 0 ? (
           <p className="text-muted-foreground py-4 text-center">
-            No groups created yet. Click "Create Group" to get started.
+            No groups created yet. Click &quot;Create Group&quot; to get
+            started.
           </p>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
@@ -240,7 +254,7 @@ function CreateGroupDialog({
           <DialogHeader>
             <DialogTitle>Create Group</DialogTitle>
             <DialogDescription>
-              Select students to form a group
+              Select students to form a group.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">

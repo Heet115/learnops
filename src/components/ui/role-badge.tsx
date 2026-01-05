@@ -7,7 +7,6 @@ import {
   Shield,
   GraduationCap,
   BookOpen,
-  User,
   Crown,
   type LucideIcon,
 } from "lucide-react";
@@ -19,8 +18,10 @@ const roleBadgeVariants = cva(
       role: {
         admin: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
         hod: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-        professor: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-        student: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+        professor:
+          "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+        student:
+          "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
       },
       size: {
         xs: "px-1.5 py-0.5 text-[10px]",
@@ -33,7 +34,7 @@ const roleBadgeVariants = cva(
       role: "student",
       size: "sm",
     },
-  }
+  },
 );
 
 type RoleType = "admin" | "hod" | "professor" | "student";
@@ -53,7 +54,8 @@ const roleLabels: Record<RoleType, string> = {
 };
 
 export interface RoleBadgeProps
-  extends Omit<React.HTMLAttributes<HTMLSpanElement>, "role">,
+  extends
+    Omit<React.HTMLAttributes<HTMLSpanElement>, "role">,
     VariantProps<typeof roleBadgeVariants> {
   role: RoleType;
   showIcon?: boolean;
@@ -146,13 +148,13 @@ export function UserCard({
       className={cn(
         "flex items-center",
         config.gap,
-        onClick && "cursor-pointer hover:opacity-80 transition-opacity",
-        className
+        onClick && "cursor-pointer transition-opacity hover:opacity-80",
+        className,
       )}
       onClick={onClick}
     >
       <UserAvatar name={name} image={image} size={config.avatar} />
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className={cn("truncate", config.name)}>{name}</span>
           {showRoleBadge && (
@@ -181,12 +183,12 @@ export function UserPill({ name, image, role, className }: UserPillProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full bg-muted px-2 py-1",
-        className
+        "bg-muted inline-flex items-center gap-1.5 rounded-full px-2 py-1",
+        className,
       )}
     >
       <UserAvatar name={name} image={image} size="xs" />
-      <span className="text-xs font-medium truncate max-w-[100px]">{name}</span>
+      <span className="max-w-[100px] truncate text-xs font-medium">{name}</span>
       {role && <RoleBadge role={role} size="xs" showLabel={false} />}
     </span>
   );

@@ -1,8 +1,9 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { connectDB, User, ALA, Submission, SubjectOffering } from "@/lib/db";
+import { connectDB, User, ALA, Submission } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { logActivity } from "./activity.actions";
 
 async function requireProfessor() {
   const { sessionClaims, userId } = await auth();
@@ -203,6 +204,20 @@ export async function gradeSubmission(
   revalidatePath(`/professor/submissions/${submissionId}`);
   revalidatePath(`/professor/alas/${ala._id}`);
 
+  // Log activity
+  await logActivity({
+    action: "submission_graded",
+    entityType: "submission",
+    entityId: submissionId,
+    details: {
+      alaId: ala._id,
+      alaTitle: ala.title,
+      studentId: submission.studentId.toString(),
+      marks: data.marks,
+      maxMarks: ala.maxMarks,
+    },
+  });
+
   return { success: true, submission: JSON.parse(JSON.stringify(updated)) };
 }
 
@@ -271,6 +286,19 @@ export async function rejectSubmission(submissionId: string, reason: string) {
   revalidatePath("/professor/submissions");
   revalidatePath(`/professor/submissions/${submissionId}`);
   revalidatePath(`/professor/alas/${ala._id}`);
+
+  // Log activity
+  await logActivity({
+    action: "submission_rejected",
+    entityType: "submission",
+    entityId: submissionId,
+    details: {
+      alaId: ala._id,
+      alaTitle: ala.title,
+      studentId: submission.studentId.toString(),
+      rejectionReason: reason,
+    },
+  });
 
   return { success: true, submission: JSON.parse(JSON.stringify(updated)) };
 }

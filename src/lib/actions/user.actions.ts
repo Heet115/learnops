@@ -188,7 +188,7 @@ export async function bulkRemoveStudentsFromClass(studentIds: string[]) {
   try {
     const result = await User.updateMany(
       { _id: { $in: studentIds }, role: "student" },
-      { $unset: { classId: 1 } }
+      { $unset: { classId: 1 } },
     );
 
     revalidatePath("/admin/student-assignments");

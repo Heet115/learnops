@@ -45,8 +45,6 @@ import {
   SimpleSortableHeader,
   PaginationControls,
 } from "@/components/ui/enhanced-data-table";
-import { DataExportButton, type ExportColumn } from "@/components/ui/data-export";
-import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
 import {
   deleteCourse,
   bulkDeleteCourses,
@@ -179,10 +177,20 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
   }, [filteredCourses]);
 
   // Sorting
-  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(coursesWithId, "code" as keyof CourseWithId);
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
+    coursesWithId,
+    "code" as keyof CourseWithId,
+  );
 
   // Pagination
-  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+  } = useTablePagination(sortedData);
 
   const {
     selectedItems,
@@ -244,7 +252,7 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
         },
       },
     ],
-    [clearSelection, router]
+    [clearSelection, router],
   );
 
   const handleDelete = async () => {
@@ -297,131 +305,139 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
           </div>
         ) : (
           <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">
-                  <SelectAllCheckbox
-                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
-                    onCheckedChange={toggleAll}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">
+                    <SelectAllCheckbox
+                      checked={
+                        isAllSelected
+                          ? true
+                          : isIndeterminate
+                            ? "indeterminate"
+                            : false
+                      }
+                      onCheckedChange={toggleAll}
+                    />
+                  </TableHead>
+                  <SimpleSortableHeader<CourseWithId>
+                    label="Code"
+                    sortKey="code"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
                   />
-                </TableHead>
-                <SimpleSortableHeader<CourseWithId>
-                  label="Code"
-                  sortKey="code"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader<CourseWithId>
-                  label="Name"
-                  sortKey="name"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <TableHead>Department</TableHead>
-                <TableHead>Type</TableHead>
-                <SimpleSortableHeader<CourseWithId>
-                  label="Duration"
-                  sortKey="duration"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <TableHead>Semesters</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedData.map((course) => {
-                const id = course._id;
-                const dept = course.departmentId as unknown as
-                  | IDepartment
-                  | undefined;
-                const courseData = course as unknown as {
-                  courseType?: string;
-                  totalSemesters?: number;
-                };
-                return (
-                  <TableRow
-                    key={id}
-                    data-state={isSelected(id) ? "selected" : undefined}
-                  >
-                    <TableCell>
-                      <SelectRowCheckbox
-                        checked={isSelected(id)}
-                        onCheckedChange={(checked) => toggleRow(id, checked)}
-                      />
-                    </TableCell>
-                    <TableCell className="font-mono font-medium">
-                      {course.code}
-                    </TableCell>
-                    <TableCell>{course.name}</TableCell>
-                    <TableCell>
-                      {dept ? (
-                        <Badge variant="outline">{dept.code}</Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {courseData.courseType ? (
-                        <Badge variant="secondary">
-                          {courseTypeLabels[courseData.courseType] ||
-                            courseData.courseType}
+                  <SimpleSortableHeader<CourseWithId>
+                    label="Name"
+                    sortKey="name"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHead>Department</TableHead>
+                  <TableHead>Type</TableHead>
+                  <SimpleSortableHeader<CourseWithId>
+                    label="Duration"
+                    sortKey="duration"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHead>Semesters</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((course) => {
+                  const id = course._id;
+                  const dept = course.departmentId as unknown as
+                    | IDepartment
+                    | undefined;
+                  const courseData = course as unknown as {
+                    courseType?: string;
+                    totalSemesters?: number;
+                  };
+                  return (
+                    <TableRow
+                      key={id}
+                      data-state={isSelected(id) ? "selected" : undefined}
+                    >
+                      <TableCell>
+                        <SelectRowCheckbox
+                          checked={isSelected(id)}
+                          onCheckedChange={(checked) => toggleRow(id, checked)}
+                        />
+                      </TableCell>
+                      <TableCell className="font-mono font-medium">
+                        {course.code}
+                      </TableCell>
+                      <TableCell>{course.name}</TableCell>
+                      <TableCell>
+                        {dept ? (
+                          <Badge variant="outline">{dept.code}</Badge>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {courseData.courseType ? (
+                          <Badge variant="secondary">
+                            {courseTypeLabels[courseData.courseType] ||
+                              courseData.courseType}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {course.duration}{" "}
+                        {course.duration === 1 ? "Year" : "Years"}
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {courseData.totalSemesters || "-"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={course.isActive ? "default" : "secondary"}
+                        >
+                          {course.isActive ? "Active" : "Inactive"}
                         </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="tabular-nums">
-                      {course.duration}{" "}
-                      {course.duration === 1 ? "Year" : "Years"}
-                    </TableCell>
-                    <TableCell className="tabular-nums">{courseData.totalSemesters || "-"}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={course.isActive ? "default" : "secondary"}
-                      >
-                        {course.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => setDeleteId(id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-          <PaginationControls
-            pageIndex={currentPage}
-            pageSize={pageSize}
-            pageCount={totalPages}
-            totalItems={coursesWithId.length}
-            canPreviousPage={currentPage > 0}
-            canNextPage={currentPage < totalPages - 1}
-            onPageChange={setCurrentPage}
-            onPageSizeChange={setPageSize}
-          />
-        </>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => setDeleteId(id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            <PaginationControls
+              pageIndex={currentPage}
+              pageSize={pageSize}
+              pageCount={totalPages}
+              totalItems={coursesWithId.length}
+              canPreviousPage={currentPage > 0}
+              canNextPage={currentPage < totalPages - 1}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
         )}
       </div>
 

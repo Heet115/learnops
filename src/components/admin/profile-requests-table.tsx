@@ -29,7 +29,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
+import {
+  useSimpleSort,
+  useTablePagination,
+  SimpleSortableHeader,
+  PaginationControls,
+} from "@/components/ui/enhanced-data-table";
 import { reviewProfileUpdateRequest } from "@/lib/actions/student-profile.actions";
 import { Check, X, Eye, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -95,9 +100,20 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
   }, [requests, statusFilter]);
 
   // Sorting
-  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredRequests, "requestedAt" as keyof UpdateRequest, "desc");
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
+    filteredRequests,
+    "requestedAt" as keyof UpdateRequest,
+    "desc",
+  );
 
-  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+  } = useTablePagination(sortedData);
 
   const pendingCount = requests.filter(
     (r) => r.requestStatus === "pending",
@@ -196,7 +212,11 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {request.requestedChanges.map((change, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs">
+                          <Badge
+                            key={idx}
+                            variant="outline"
+                            className="text-xs"
+                          >
                             {change.fieldLabel}
                           </Badge>
                         ))}

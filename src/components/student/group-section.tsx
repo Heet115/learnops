@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -34,7 +33,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Users, Plus, LogOut, Loader2, Clock, Check, X } from "lucide-react";
+import { Users, Plus, LogOut, Loader2, Clock, Check } from "lucide-react";
 import {
   getStudentGroup,
   getClassmatesForInvite,
@@ -82,18 +81,27 @@ export function GroupSection({
 }: GroupSectionProps) {
   const [group, setGroup] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
-  useEffect(() => {
-    loadGroup();
-  }, [alaId]);
-
-  const loadGroup = async () => {
+  const loadGroup = useCallback(async () => {
     setLoading(true);
     const result = await getStudentGroup(alaId);
     setGroup(result);
     setLoading(false);
-  };
+  }, [alaId]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getStudentGroup(alaId).then((result) => {
+      if (!isMounted) return;
+      setGroup(result);
+      setLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [alaId]);
 
   if (loading) {
     return (
@@ -108,9 +116,6 @@ export function GroupSection({
   // Student has a group
   if (group) {
     const isCreator = group.createdBy._id === studentId;
-    const myMembership = group.members.find(
-      (m) => m.studentId._id === studentId,
-    );
     const acceptedMembers = group.members.filter(
       (m) => m.status === "accepted",
     );
@@ -244,23 +249,37 @@ function CreateGroupDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loadingClassmates, setLoadingClassmates] = useState(false);
+  const [loadingClassmates, setLoadingClassmates] = useState(true);
   const [classmates, setClassmates] = useState<Student[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (open) {
-      setLoadingClassmates(true);
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      // Reset state when dialog closes
       setSelectedIds([]);
-      getClassmatesForInvite(alaId).then((result) => {
-        if (result.success) {
-          setClassmates(result.classmates || []);
-        } else {
-          toast.error(result.error || "Failed to load classmates");
-        }
-        setLoadingClassmates(false);
-      });
+      setLoadingClassmates(true);
     }
+  };
+
+  useEffect(() => {
+    if (!open) return;
+
+    let isMounted = true;
+
+    getClassmatesForInvite(alaId).then((result) => {
+      if (!isMounted) return;
+      if (result.success) {
+        setClassmates(result.classmates || []);
+      } else {
+        toast.error(result.error || "Failed to load classmates");
+      }
+      setLoadingClassmates(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [open, alaId]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -301,7 +320,7 @@ function CreateGroupDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />

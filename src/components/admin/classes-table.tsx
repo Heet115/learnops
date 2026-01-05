@@ -36,8 +36,6 @@ import {
   SimpleSortableHeader,
   PaginationControls,
 } from "@/components/ui/enhanced-data-table";
-import { DataExportButton, type ExportColumn } from "@/components/ui/data-export";
-import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
 import { MoreHorizontal, Pencil, Trash2, Power, PowerOff } from "lucide-react";
 import {
   deleteClass,
@@ -214,10 +212,20 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
   }, [classes, filters]);
 
   // Sorting
-  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredClasses, "name" as keyof ClassItem);
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
+    filteredClasses,
+    "name" as keyof ClassItem,
+  );
 
   // Pagination
-  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+  } = useTablePagination(sortedData);
 
   const {
     selectedItems,
@@ -279,7 +287,7 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
         },
       },
     ],
-    [clearSelection, router]
+    [clearSelection, router],
   );
 
   const handleDeleteClick = (id: string, name: string) => {
@@ -330,108 +338,118 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
           </div>
         ) : (
           <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">
-                  <SelectAllCheckbox
-                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
-                    onCheckedChange={toggleAll}
-                  />
-                </TableHead>
-                <SimpleSortableHeader<ClassItem>
-                  label="Name"
-                  sortKey="name"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <TableHead>Semester</TableHead>
-                <TableHead>Course</TableHead>
-                <TableHead>Department</TableHead>
-                <SimpleSortableHeader<ClassItem>
-                  label="Academic Year"
-                  sortKey="academicYear"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[70px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedData.map((classItem) => (
-                <TableRow
-                  key={classItem._id}
-                  data-state={isSelected(classItem._id) ? "selected" : undefined}
-                >
-                  <TableCell>
-                    <SelectRowCheckbox
-                      checked={isSelected(classItem._id)}
-                      onCheckedChange={(checked) => toggleRow(classItem._id, checked)}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">
+                    <SelectAllCheckbox
+                      checked={
+                        isAllSelected
+                          ? true
+                          : isIndeterminate
+                            ? "indeterminate"
+                            : false
+                      }
+                      onCheckedChange={toggleAll}
                     />
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {classItem.name}
-                  </TableCell>
-                  <TableCell>{classItem.semesterId?.name || "N/A"}</TableCell>
-                  <TableCell>
-                    {classItem.semesterId?.courseId?.name || "N/A"} (
-                    {classItem.semesterId?.courseId?.code || ""})
-                  </TableCell>
-                  <TableCell>
-                    {classItem.semesterId?.courseId?.departmentId?.code ||
-                      "N/A"}
-                  </TableCell>
-                  <TableCell>{classItem.academicYear}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={classItem.isActive ? "default" : "secondary"}
-                    >
-                      {classItem.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => setEditingClass(classItem)}
-                        >
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() =>
-                            handleDeleteClick(classItem._id, classItem.name)
-                          }
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+                  </TableHead>
+                  <SimpleSortableHeader<ClassItem>
+                    label="Name"
+                    sortKey="name"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHead>Semester</TableHead>
+                  <TableHead>Course</TableHead>
+                  <TableHead>Department</TableHead>
+                  <SimpleSortableHeader<ClassItem>
+                    label="Academic Year"
+                    sortKey="academicYear"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[70px]"></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <PaginationControls
-            pageIndex={currentPage}
-            pageSize={pageSize}
-            pageCount={totalPages}
-            totalItems={filteredClasses.length}
-            canPreviousPage={currentPage > 0}
-            canNextPage={currentPage < totalPages - 1}
-            onPageChange={setCurrentPage}
-            onPageSizeChange={setPageSize}
-          />
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((classItem) => (
+                  <TableRow
+                    key={classItem._id}
+                    data-state={
+                      isSelected(classItem._id) ? "selected" : undefined
+                    }
+                  >
+                    <TableCell>
+                      <SelectRowCheckbox
+                        checked={isSelected(classItem._id)}
+                        onCheckedChange={(checked) =>
+                          toggleRow(classItem._id, checked)
+                        }
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {classItem.name}
+                    </TableCell>
+                    <TableCell>{classItem.semesterId?.name || "N/A"}</TableCell>
+                    <TableCell>
+                      {classItem.semesterId?.courseId?.name || "N/A"} (
+                      {classItem.semesterId?.courseId?.code || ""})
+                    </TableCell>
+                    <TableCell>
+                      {classItem.semesterId?.courseId?.departmentId?.code ||
+                        "N/A"}
+                    </TableCell>
+                    <TableCell>{classItem.academicYear}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={classItem.isActive ? "default" : "secondary"}
+                      >
+                        {classItem.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => setEditingClass(classItem)}
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() =>
+                              handleDeleteClick(classItem._id, classItem.name)
+                            }
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <PaginationControls
+              pageIndex={currentPage}
+              pageSize={pageSize}
+              pageCount={totalPages}
+              totalItems={filteredClasses.length}
+              canPreviousPage={currentPage > 0}
+              canNextPage={currentPage < totalPages - 1}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
           </>
         )}
       </div>

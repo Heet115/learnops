@@ -62,7 +62,7 @@ export function StaggeredContent({
     <div className={className}>
       {React.Children.map(children, (child, index) => {
         if (!React.isValidElement(child)) return child;
-        
+
         return (
           <div
             className="opacity-0"

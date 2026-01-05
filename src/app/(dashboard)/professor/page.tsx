@@ -106,7 +106,9 @@ export default async function ProfessorDashboard() {
             <h2 className="text-2xl font-bold">
               Welcome back, Prof. {dbUser?.lastName || dbUser?.firstName || ""}
             </h2>
-            <p className="text-muted-foreground">Manage your classes and ALAs</p>
+            <p className="text-muted-foreground">
+              Manage your classes and ALAs
+            </p>
           </div>
         </FadeIn>
 
@@ -118,10 +120,14 @@ export default async function ProfessorDashboard() {
                   <CardTitle className="text-sm font-medium">
                     {stat.title}
                   </CardTitle>
-                  <stat.icon className={`h-4 w-4 ${stat.color} transition-transform duration-200 group-hover:scale-110`} />
+                  <stat.icon
+                    className={`h-4 w-4 ${stat.color} transition-transform duration-200 group-hover:scale-110`}
+                  />
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-2xl font-bold tabular-nums ${stat.color}`}>
+                  <div
+                    className={`text-2xl font-bold tabular-nums ${stat.color}`}
+                  >
                     {stat.value}
                   </div>
                   <CardDescription>{stat.description}</CardDescription>
@@ -164,7 +170,7 @@ export default async function ProfessorDashboard() {
                       }) => (
                         <div
                           key={offering._id}
-                          className="flex items-center justify-between rounded-lg border p-3 transition-all hover:bg-muted/50 hover:border-muted-foreground/20"
+                          className="hover:bg-muted/50 hover:border-muted-foreground/20 flex items-center justify-between rounded-lg border p-3 transition-all"
                         >
                           <div className="flex items-center gap-3">
                             <BookOpen className="text-muted-foreground h-4 w-4" />
@@ -221,7 +227,7 @@ export default async function ProfessorDashboard() {
                         <Link
                           key={sub._id}
                           href={`/professor/submissions/${sub._id}`}
-                          className="hover:bg-muted flex items-center justify-between rounded-lg border p-3 transition-all hover:border-muted-foreground/20"
+                          className="hover:bg-muted hover:border-muted-foreground/20 flex items-center justify-between rounded-lg border p-3 transition-all"
                         >
                           <div className="flex items-center gap-3">
                             <UserAvatar
@@ -230,7 +236,8 @@ export default async function ProfessorDashboard() {
                             />
                             <div>
                               <p className="text-sm font-medium">
-                                {sub.studentId.firstName} {sub.studentId.lastName}
+                                {sub.studentId.firstName}{" "}
+                                {sub.studentId.lastName}
                               </p>
                               <p className="text-muted-foreground text-xs">
                                 {sub.alaId.title}

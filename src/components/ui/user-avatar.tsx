@@ -21,7 +21,7 @@ const userAvatarVariants = cva(
     defaultVariants: {
       size: "md",
     },
-  }
+  },
 );
 
 // Generate consistent color based on name
@@ -65,7 +65,8 @@ function getInitials(name: string): string {
 }
 
 export interface UserAvatarProps
-  extends React.ComponentProps<typeof Avatar>,
+  extends
+    React.ComponentProps<typeof Avatar>,
     VariantProps<typeof userAvatarVariants> {
   name: string;
   image?: string | null;
@@ -94,18 +95,17 @@ export function UserAvatar({
 
   return (
     <div className="relative inline-block">
-      <Avatar className={cn(userAvatarVariants({ size }), className)} {...props}>
+      <Avatar
+        className={cn(userAvatarVariants({ size }), className)}
+        {...props}
+      >
         {image && (
-          <AvatarImage
-            src={image}
-            alt={name}
-            className="object-cover"
-          />
+          <AvatarImage src={image} alt={name} className="object-cover" />
         )}
         <AvatarFallback
           className={cn(
             bgColor,
-            "text-white font-medium flex items-center justify-center"
+            "flex items-center justify-center font-medium text-white",
           )}
           delayMs={image ? 600 : 0}
         >
@@ -115,14 +115,14 @@ export function UserAvatar({
       {showStatus && (
         <span
           className={cn(
-            "absolute bottom-0 right-0 block rounded-full ring-2 ring-background",
+            "ring-background absolute right-0 bottom-0 block rounded-full ring-2",
             statusColors[status],
             size === "xs" && "h-1.5 w-1.5",
             size === "sm" && "h-2 w-2",
             size === "md" && "h-2.5 w-2.5",
             size === "lg" && "h-3 w-3",
             size === "xl" && "h-3.5 w-3.5",
-            size === "2xl" && "h-4 w-4"
+            size === "2xl" && "h-4 w-4",
           )}
         />
       )}
@@ -155,14 +155,14 @@ export function AvatarGroup({
           name={user.name}
           image={user.image}
           size={size}
-          className="ring-2 ring-background"
+          className="ring-background ring-2"
         />
       ))}
       {remainingCount > 0 && (
         <div
           className={cn(
             userAvatarVariants({ size }),
-            "bg-muted text-muted-foreground flex items-center justify-center font-medium ring-2 ring-background"
+            "bg-muted text-muted-foreground ring-background flex items-center justify-center font-medium ring-2",
           )}
         >
           +{remainingCount}

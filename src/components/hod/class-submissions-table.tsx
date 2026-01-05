@@ -29,7 +29,10 @@ import {
   SimpleSortableHeader,
   PaginationControls,
 } from "@/components/ui/enhanced-data-table";
-import { DataExportButton, type ExportColumn } from "@/components/ui/data-export";
+import {
+  DataExportButton,
+  type ExportColumn,
+} from "@/components/ui/data-export";
 import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
 
 interface ClassSubmission {
@@ -88,17 +91,32 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
   }, [data, filters]);
 
   // Sorting
-  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredData, "name" as keyof ClassSubmission, "asc");
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
+    filteredData,
+    "name" as keyof ClassSubmission,
+    "asc",
+  );
 
   // Pagination
-  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+  } = useTablePagination(sortedData);
 
   // Export columns
   const exportColumns: ExportColumn<ClassSubmission>[] = [
     { key: "name", header: "Class Name", accessor: (row) => row.name },
     { key: "course", header: "Course", accessor: (row) => row.course },
     { key: "semester", header: "Semester", accessor: (row) => row.semester },
-    { key: "students", header: "Total Students", accessor: (row) => row.students },
+    {
+      key: "students",
+      header: "Total Students",
+      accessor: (row) => row.students,
+    },
     { key: "submitted", header: "Submitted", accessor: (row) => row.submitted },
     { key: "graded", header: "Graded", accessor: (row) => row.graded },
     { key: "pending", header: "Pending", accessor: (row) => row.pending },
@@ -208,7 +226,10 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
                       ? Math.round((cls.graded / cls.submitted) * 100)
                       : 0;
                   return (
-                    <TableRow key={index} className="transition-colors hover:bg-muted/50">
+                    <TableRow
+                      key={index}
+                      className="hover:bg-muted/50 transition-colors"
+                    >
                       <TableCell className="font-medium">{cls.name}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{cls.course}</Badge>
@@ -223,7 +244,9 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
                         {cls.submitted}
                       </TableCell>
                       <TableCell className="text-center">
-                        <span className="text-green-600 tabular-nums">{cls.graded}</span>
+                        <span className="text-green-600 tabular-nums">
+                          {cls.graded}
+                        </span>
                         {cls.pending > 0 && (
                           <span className="text-muted-foreground ml-1 text-xs">
                             ({cls.pending} pending)

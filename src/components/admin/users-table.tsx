@@ -41,7 +41,10 @@ import {
 } from "@/components/ui/bulk-actions";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { RoleBadge } from "@/components/ui/role-badge";
-import { DataExportButton, type ExportColumn } from "@/components/ui/data-export";
+import {
+  DataExportButton,
+  type ExportColumn,
+} from "@/components/ui/data-export";
 import { FilterPresetsDropdown } from "@/components/ui/filter-presets";
 import {
   useTableSort,
@@ -110,20 +113,57 @@ const filterConfigs: FilterConfig[] = [
 
 // Export columns configuration
 const exportColumns: ExportColumn<UserWithStringId>[] = [
-  { key: "name", header: "Name", accessor: (row) => `${row.firstName} ${row.lastName}` },
+  {
+    key: "name",
+    header: "Name",
+    accessor: (row) => `${row.firstName} ${row.lastName}`,
+  },
   { key: "email", header: "Email", accessor: (row) => row.email },
   { key: "role", header: "Role", accessor: (row) => row.role.toUpperCase() },
-  { key: "status", header: "Status", accessor: (row) => row.isActive ? "Active" : "Inactive" },
-  { key: "createdAt", header: "Created", accessor: (row) => new Date(row.createdAt).toLocaleDateString() },
+  {
+    key: "status",
+    header: "Status",
+    accessor: (row) => (row.isActive ? "Active" : "Inactive"),
+  },
+  {
+    key: "createdAt",
+    header: "Created",
+    accessor: (row) => new Date(row.createdAt).toLocaleDateString(),
+  },
 ];
 
 // Table columns for sorting
 const tableColumns: ColumnDef<UserWithStringId>[] = [
-  { id: "name", header: "User", sortable: true, accessorFn: (row) => `${row.firstName} ${row.lastName}` },
-  { id: "email", header: "Email", sortable: true, accessorKey: "email" as keyof UserWithStringId },
-  { id: "role", header: "Role", sortable: true, accessorKey: "role" as keyof UserWithStringId },
-  { id: "status", header: "Status", sortable: true, accessorFn: (row) => row.isActive ? "Active" : "Inactive" },
-  { id: "createdAt", header: "Created", sortable: true, accessorKey: "createdAt" as keyof UserWithStringId },
+  {
+    id: "name",
+    header: "User",
+    sortable: true,
+    accessorFn: (row) => `${row.firstName} ${row.lastName}`,
+  },
+  {
+    id: "email",
+    header: "Email",
+    sortable: true,
+    accessorKey: "email" as keyof UserWithStringId,
+  },
+  {
+    id: "role",
+    header: "Role",
+    sortable: true,
+    accessorKey: "role" as keyof UserWithStringId,
+  },
+  {
+    id: "status",
+    header: "Status",
+    sortable: true,
+    accessorFn: (row) => (row.isActive ? "Active" : "Inactive"),
+  },
+  {
+    id: "createdAt",
+    header: "Created",
+    sortable: true,
+    accessorKey: "createdAt" as keyof UserWithStringId,
+  },
 ];
 
 export function UsersTable({ users, courses = [] }: UsersTableProps) {
@@ -138,11 +178,15 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
     role: "",
     status: "",
   });
-  const [profileDialogUser, setProfileDialogUser] = useState<IUser | null>(null);
+  const [profileDialogUser, setProfileDialogUser] = useState<IUser | null>(
+    null,
+  );
 
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
-    return Object.entries(filters).some(([, v]) => v && v !== "" && v !== "all");
+    return Object.entries(filters).some(
+      ([, v]) => v && v !== "" && v !== "all",
+    );
   }, [filters]);
 
   // Filter users
@@ -175,11 +219,14 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
         ...u,
         _id: (u._id as unknown as { toString(): string }).toString(),
       })) as UserWithStringId[],
-    [filteredUsers]
+    [filteredUsers],
   );
 
   // Sorting
-  const { sortedData, sortState, toggleSort } = useTableSort(usersWithStringId, tableColumns);
+  const { sortedData, sortState, toggleSort } = useTableSort(
+    usersWithStringId,
+    tableColumns,
+  );
 
   // Pagination
   const {
@@ -253,7 +300,7 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
         },
       },
     ],
-    [clearSelection, router]
+    [clearSelection, router],
   );
 
   const handleAction = async () => {
@@ -371,15 +418,31 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                   <TableRow>
                     <TableHead className="w-[50px]">
                       <SelectAllCheckbox
-                        checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                        checked={
+                          isAllSelected
+                            ? true
+                            : isIndeterminate
+                              ? "indeterminate"
+                              : false
+                        }
                         onCheckedChange={toggleAll}
                       />
                     </TableHead>
-                    <TableHead>{renderSortableHeader("name", "User")}</TableHead>
-                    <TableHead>{renderSortableHeader("email", "Email")}</TableHead>
-                    <TableHead>{renderSortableHeader("role", "Role")}</TableHead>
-                    <TableHead>{renderSortableHeader("status", "Status")}</TableHead>
-                    <TableHead>{renderSortableHeader("createdAt", "Created")}</TableHead>
+                    <TableHead>
+                      {renderSortableHeader("name", "User")}
+                    </TableHead>
+                    <TableHead>
+                      {renderSortableHeader("email", "Email")}
+                    </TableHead>
+                    <TableHead>
+                      {renderSortableHeader("role", "Role")}
+                    </TableHead>
+                    <TableHead>
+                      {renderSortableHeader("status", "Status")}
+                    </TableHead>
+                    <TableHead>
+                      {renderSortableHeader("createdAt", "Created")}
+                    </TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -393,7 +456,9 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                       <TableCell>
                         <SelectRowCheckbox
                           checked={isSelected(user._id)}
-                          onCheckedChange={(checked) => toggleRow(user._id, checked)}
+                          onCheckedChange={(checked) =>
+                            toggleRow(user._id, checked)
+                          }
                         />
                       </TableCell>
                       <TableCell>
@@ -411,12 +476,20 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
                         <RoleBadge
-                          role={user.role as "admin" | "hod" | "professor" | "student"}
+                          role={
+                            user.role as
+                              | "admin"
+                              | "hod"
+                              | "professor"
+                              | "student"
+                          }
                           size="sm"
                         />
                       </TableCell>
                       <TableCell>
-                        <Badge variant={user.isActive ? "default" : "destructive"}>
+                        <Badge
+                          variant={user.isActive ? "default" : "destructive"}
+                        >
                           {user.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
@@ -434,7 +507,11 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                             {user.role === "student" && (
                               <>
                                 <DropdownMenuItem
-                                  onClick={() => setProfileDialogUser(user as unknown as IUser)}
+                                  onClick={() =>
+                                    setProfileDialogUser(
+                                      user as unknown as IUser,
+                                    )
+                                  }
                                 >
                                   <UserCog className="mr-2 h-4 w-4" />
                                   Manage Profile

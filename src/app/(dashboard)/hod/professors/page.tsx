@@ -2,15 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
-import {
-  connectDB,
-  User,
-  SubjectOffering,
-  ALA,
-  Submission,
-  Course,
-  Semester,
-} from "@/lib/db";
+import { connectDB, User, SubjectOffering, ALA, Submission } from "@/lib/db";
 import {
   Card,
   CardContent,
@@ -53,7 +45,6 @@ async function getHodProfessors() {
         professorId: prof._id,
         isActive: true,
       });
-      const offeringIds = offerings.map((o) => o._id);
 
       const alas = await ALA.find({ professorId: prof._id, isActive: true });
       const alaIds = alas.map((a) => a._id);

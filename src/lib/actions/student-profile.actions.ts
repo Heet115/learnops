@@ -6,10 +6,7 @@ import {
   User,
   StudentProfile,
   ProfileUpdateRequest,
-  Course,
   Semester,
-  Class,
-  Department,
 } from "@/lib/db";
 import {
   createStudentProfileSchema,

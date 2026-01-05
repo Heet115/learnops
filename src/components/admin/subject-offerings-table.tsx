@@ -30,7 +30,12 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
-import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
+import {
+  useSimpleSort,
+  useTablePagination,
+  SimpleSortableHeader,
+  PaginationControls,
+} from "@/components/ui/enhanced-data-table";
 import { MoreHorizontal, Pencil, Trash2, Power, PowerOff } from "lucide-react";
 import {
   deleteSubjectOffering,
@@ -221,9 +226,19 @@ export function SubjectOfferingsTable({
   }, [offerings, filters]);
 
   // Sorting
-  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredOfferings, "academicYear" as keyof SubjectOffering);
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
+    filteredOfferings,
+    "academicYear" as keyof SubjectOffering,
+  );
 
-  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+  } = useTablePagination(sortedData);
 
   const {
     selectedItems,
@@ -285,7 +300,7 @@ export function SubjectOfferingsTable({
         },
       },
     ],
-    [clearSelection, router]
+    [clearSelection, router],
   );
 
   const handleDeleteClick = (id: string) => {
@@ -341,7 +356,13 @@ export function SubjectOfferingsTable({
                 <TableRow>
                   <TableHead className="w-[50px]">
                     <SelectAllCheckbox
-                      checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                      checked={
+                        isAllSelected
+                          ? true
+                          : isIndeterminate
+                            ? "indeterminate"
+                            : false
+                      }
                       onCheckedChange={toggleAll}
                     />
                   </TableHead>
@@ -364,12 +385,16 @@ export function SubjectOfferingsTable({
                 {paginatedData.map((offering) => (
                   <TableRow
                     key={offering._id}
-                    data-state={isSelected(offering._id) ? "selected" : undefined}
+                    data-state={
+                      isSelected(offering._id) ? "selected" : undefined
+                    }
                   >
                     <TableCell>
                       <SelectRowCheckbox
                         checked={isSelected(offering._id)}
-                        onCheckedChange={(checked) => toggleRow(offering._id, checked)}
+                        onCheckedChange={(checked) =>
+                          toggleRow(offering._id, checked)
+                        }
                       />
                     </TableCell>
                     <TableCell>

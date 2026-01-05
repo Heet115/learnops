@@ -12,7 +12,8 @@ const animatedCardVariants = cva(
         none: "",
         lift: "transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-md active:translate-y-0 active:shadow-sm",
         glow: "transition-all duration-200 ease-out hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20",
-        scale: "transition-transform duration-200 ease-out hover:scale-[1.02] active:scale-[0.98]",
+        scale:
+          "transition-transform duration-200 ease-out hover:scale-[1.02] active:scale-[0.98]",
         subtle: "transition-colors duration-150 ease-out hover:bg-accent/50",
       },
       clickable: {
@@ -24,11 +25,12 @@ const animatedCardVariants = cva(
       hover: "lift",
       clickable: false,
     },
-  }
+  },
 );
 
 export interface AnimatedCardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof animatedCardVariants> {
   asChild?: boolean;
 }
@@ -44,7 +46,7 @@ const AnimatedCard = React.forwardRef<HTMLDivElement, AnimatedCardProps>(
         {children}
       </div>
     );
-  }
+  },
 );
 AnimatedCard.displayName = "AnimatedCard";
 
@@ -81,16 +83,21 @@ export function StatCard({
       className={cn("group", className)}
     >
       <div className="flex flex-row items-center justify-between px-6 pb-2">
-        <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+        <span className="text-muted-foreground group-hover:text-foreground text-sm font-medium transition-colors">
           {title}
         </span>
         {icon && (
-          <div className={cn("transition-transform duration-200 group-hover:scale-110", iconColor)}>
+          <div
+            className={cn(
+              "transition-transform duration-200 group-hover:scale-110",
+              iconColor,
+            )}
+          >
             {icon}
           </div>
         )}
       </div>
-      <div className="px-6 space-y-1">
+      <div className="space-y-1 px-6">
         <div className="flex items-baseline gap-2">
           <span className={cn("text-2xl font-bold tabular-nums", iconColor)}>
             {value}
@@ -99,7 +106,7 @@ export function StatCard({
             <span
               className={cn(
                 "text-xs font-medium",
-                trend.isPositive ? "text-green-600" : "text-red-600"
+                trend.isPositive ? "text-green-600" : "text-red-600",
               )}
             >
               {trend.isPositive ? "↑" : "↓"} {Math.abs(trend.value)}%
@@ -107,7 +114,7 @@ export function StatCard({
           )}
         </div>
         {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="text-muted-foreground text-sm">{description}</p>
         )}
       </div>
     </AnimatedCard>
@@ -131,7 +138,7 @@ export function AnimatedListItem({
         "transition-all duration-150 ease-out",
         "hover:bg-accent/50 hover:border-accent",
         "active:bg-accent",
-        className
+        className,
       )}
       {...props}
     >
@@ -153,10 +160,7 @@ export function StaggerContainer({
   ...props
 }: StaggerContainerProps) {
   return (
-    <div
-      className={cn(stagger && "stagger-children", className)}
-      {...props}
-    >
+    <div className={cn(stagger && "stagger-children", className)} {...props}>
       {children}
     </div>
   );

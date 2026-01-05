@@ -30,12 +30,16 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
-import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
-import { MoreHorizontal, Pencil, UserMinus, Users } from "lucide-react";
+import {
+  useSimpleSort,
+  useTablePagination,
+  SimpleSortableHeader,
+  PaginationControls,
+} from "@/components/ui/enhanced-data-table";
+import { MoreHorizontal, Pencil, UserMinus } from "lucide-react";
 import {
   removeStudentFromClass,
   bulkRemoveStudentsFromClass,
-  bulkAssignStudentsToClass,
 } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 import { ChangeClassDialog } from "./change-class-dialog";
@@ -198,9 +202,19 @@ export function StudentAssignmentsTable({
   }, [students, filters]);
 
   // Sorting
-  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredStudents, "firstName" as keyof Student);
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
+    filteredStudents,
+    "firstName" as keyof Student,
+  );
 
-  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+  } = useTablePagination(sortedData);
 
   const {
     selectedItems,
@@ -237,7 +251,7 @@ export function StudentAssignmentsTable({
         },
       },
     ],
-    [clearSelection, router]
+    [clearSelection, router],
   );
 
   const handleRemoveClick = (studentId: string, studentName: string) => {
@@ -293,7 +307,13 @@ export function StudentAssignmentsTable({
                 <TableRow>
                   <TableHead className="w-[50px]">
                     <SelectAllCheckbox
-                      checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                      checked={
+                        isAllSelected
+                          ? true
+                          : isIndeterminate
+                            ? "indeterminate"
+                            : false
+                      }
                       onCheckedChange={toggleAll}
                     />
                   </TableHead>
@@ -323,12 +343,16 @@ export function StudentAssignmentsTable({
                 {paginatedData.map((student) => (
                   <TableRow
                     key={student._id}
-                    data-state={isSelected(student._id) ? "selected" : undefined}
+                    data-state={
+                      isSelected(student._id) ? "selected" : undefined
+                    }
                   >
                     <TableCell>
                       <SelectRowCheckbox
                         checked={isSelected(student._id)}
-                        onCheckedChange={(checked) => toggleRow(student._id, checked)}
+                        onCheckedChange={(checked) =>
+                          toggleRow(student._id, checked)
+                        }
                       />
                     </TableCell>
                     <TableCell className="font-medium">
@@ -338,7 +362,8 @@ export function StudentAssignmentsTable({
                     <TableCell>
                       {student.classId ? (
                         <span>
-                          {student.classId.name} ({student.classId.academicYear})
+                          {student.classId.name} ({student.classId.academicYear}
+                          )
                         </span>
                       ) : (
                         <span className="text-muted-foreground">-</span>

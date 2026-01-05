@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import mongoose from "mongoose";
-import { connectDB, Notification, User, ALA, SubjectOffering } from "@/lib/db";
+import { connectDB, Notification, User, ALA } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 // Get current user's notifications

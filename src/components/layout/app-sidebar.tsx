@@ -21,6 +21,8 @@ import {
   Crown,
   User,
   FileCheck,
+  History,
+  Activity,
 } from "lucide-react";
 
 import { NavMain } from "@/components/layout/nav-main";
@@ -105,6 +107,11 @@ const getNavItems = (role: UserRole) => {
         title: "Profile Requests",
         url: "/admin/profile-requests",
         icon: FileCheck,
+      },
+      {
+        title: "Audit Trail",
+        url: "/admin/audit-trail",
+        icon: History,
       },
       {
         title: "Settings",
@@ -209,6 +216,11 @@ const getNavItems = (role: UserRole) => {
         title: "Notifications",
         url: "/student/notifications",
         icon: Bell,
+      },
+      {
+        title: "Timeline",
+        url: "/student/timeline",
+        icon: Activity,
       },
     ],
   };

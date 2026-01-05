@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import mongoose from "mongoose";
-import { connectDB, User, ALA, Group, SubjectOffering } from "@/lib/db";
+import { connectDB, User, ALA, Group } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 // ============ HELPER FUNCTIONS ============

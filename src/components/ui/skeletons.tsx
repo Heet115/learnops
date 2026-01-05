@@ -12,14 +12,14 @@ export function StatCardSkeleton({ className }: { className?: string }) {
     <div
       className={cn(
         "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
-        className
+        className,
       )}
     >
       <div className="flex flex-row items-center justify-between px-6 pb-2">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-4 w-4 rounded" />
       </div>
-      <div className="px-6 space-y-2">
+      <div className="space-y-2 px-6">
         <Skeleton className="h-8 w-16" />
         <Skeleton className="h-3 w-32" />
       </div>
@@ -42,14 +42,11 @@ export function StatCardGridSkeleton({ count = 4 }: { count?: number }) {
 // ============================================
 export function TableRowSkeleton({ columns = 5 }: { columns?: number }) {
   return (
-    <div className="flex items-center gap-4 p-4 border-b">
+    <div className="flex items-center gap-4 border-b p-4">
       {Array.from({ length: columns }).map((_, i) => (
         <Skeleton
           key={i}
-          className={cn(
-            "h-4",
-            i === 0 ? "w-8" : i === 1 ? "w-40" : "w-24"
-          )}
+          className={cn("h-4", i === 0 ? "w-8" : i === 1 ? "w-40" : "w-24")}
         />
       ))}
     </div>
@@ -68,14 +65,11 @@ export function TableSkeleton({
   return (
     <div className="rounded-lg border">
       {showHeader && (
-        <div className="flex items-center gap-4 p-4 border-b bg-muted/50">
+        <div className="bg-muted/50 flex items-center gap-4 border-b p-4">
           {Array.from({ length: columns }).map((_, i) => (
             <Skeleton
               key={i}
-              className={cn(
-                "h-4",
-                i === 0 ? "w-8" : i === 1 ? "w-32" : "w-20"
-              )}
+              className={cn("h-4", i === 0 ? "w-8" : i === 1 ? "w-32" : "w-20")}
             />
           ))}
         </div>
@@ -90,7 +84,11 @@ export function TableSkeleton({
 // ============================================
 // LIST ITEM SKELETON
 // ============================================
-export function ListItemSkeleton({ showAvatar = true }: { showAvatar?: boolean }) {
+export function ListItemSkeleton({
+  showAvatar = true,
+}: {
+  showAvatar?: boolean;
+}) {
   return (
     <div className="flex items-center justify-between rounded-lg border p-3">
       <div className="flex items-center gap-3">
@@ -145,7 +143,7 @@ export function CardSkeleton({
   return (
     <div className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
       {hasHeader && (
-        <div className="px-6 space-y-2">
+        <div className="space-y-2 px-6">
           <Skeleton className="h-5 w-40" />
           <Skeleton className="h-3 w-56" />
         </div>
@@ -153,7 +151,7 @@ export function CardSkeleton({
       {children ? (
         children
       ) : (
-        <div className="px-6 space-y-3">
+        <div className="space-y-3 px-6">
           {Array.from({ length: contentLines }).map((_, i) => (
             <Skeleton
               key={i}
@@ -163,7 +161,7 @@ export function CardSkeleton({
         </div>
       )}
       {hasFooter && (
-        <div className="px-6 flex gap-2">
+        <div className="flex gap-2 px-6">
           <Skeleton className="h-9 w-24" />
           <Skeleton className="h-9 w-24" />
         </div>
@@ -186,7 +184,7 @@ export function DashboardHeaderSkeleton() {
 
 export function DashboardSkeleton() {
   return (
-    <div className="space-y-6 pt-4 animate-in fade-in duration-500">
+    <div className="animate-in fade-in space-y-6 pt-4 duration-500">
       <DashboardHeaderSkeleton />
       <StatCardGridSkeleton count={4} />
       <div className="grid gap-4 md:grid-cols-2">
@@ -217,7 +215,7 @@ export function FormSkeleton({ fields = 4 }: { fields?: number }) {
       {Array.from({ length: fields }).map((_, i) => (
         <FormFieldSkeleton key={i} />
       ))}
-      <Skeleton className="h-10 w-full mt-6" />
+      <Skeleton className="mt-6 h-10 w-full" />
     </div>
   );
 }
@@ -243,8 +241,8 @@ export function ProfileSkeleton() {
 // ============================================
 export function NotificationItemSkeleton() {
   return (
-    <div className="flex gap-3 p-3 rounded-lg">
-      <Skeleton className="h-8 w-8 rounded-full shrink-0" />
+    <div className="flex gap-3 rounded-lg p-3">
+      <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
       <div className="flex-1 space-y-2">
         <Skeleton className="h-4 w-3/4" />
         <Skeleton className="h-3 w-full" />

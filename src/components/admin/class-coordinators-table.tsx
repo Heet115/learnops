@@ -29,7 +29,12 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
-import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
+import {
+  useSimpleSort,
+  useTablePagination,
+  SimpleSortableHeader,
+  PaginationControls,
+} from "@/components/ui/enhanced-data-table";
 import { MoreHorizontal, Pencil, Trash2, Crown } from "lucide-react";
 import {
   deleteClassCoordinator,
@@ -67,23 +72,6 @@ interface ClassCoordinator {
   };
 }
 
-interface ClassItem {
-  _id: string;
-  name: string;
-  academicYear: string;
-  semesterId: {
-    _id: string;
-    name: string;
-    courseId: {
-      name: string;
-      code: string;
-      departmentId: {
-        code: string;
-      };
-    };
-  };
-}
-
 interface Professor {
   _id: string;
   firstName: string;
@@ -93,13 +81,11 @@ interface Professor {
 
 interface ClassCoordinatorsTableProps {
   coordinators: ClassCoordinator[];
-  classes: ClassItem[];
   professors: Professor[];
 }
 
 export function ClassCoordinatorsTable({
   coordinators,
-  classes,
   professors,
 }: ClassCoordinatorsTableProps) {
   const [editingCoordinator, setEditingCoordinator] =
@@ -200,9 +186,20 @@ export function ClassCoordinatorsTable({
   }, [coordinators, filters]);
 
   // Sorting
-  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredCoordinators, "academicYear" as keyof ClassCoordinator, "desc");
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
+    filteredCoordinators,
+    "academicYear" as keyof ClassCoordinator,
+    "desc",
+  );
 
-  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+  } = useTablePagination(sortedData);
 
   const {
     selectedItems,
@@ -234,7 +231,7 @@ export function ClassCoordinatorsTable({
         },
       },
     ],
-    [clearSelection, router]
+    [clearSelection, router],
   );
 
   const handleDeleteClick = (id: string, className: string) => {
@@ -291,7 +288,13 @@ export function ClassCoordinatorsTable({
                 <TableRow>
                   <TableHead className="w-[50px]">
                     <SelectAllCheckbox
-                      checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                      checked={
+                        isAllSelected
+                          ? true
+                          : isIndeterminate
+                            ? "indeterminate"
+                            : false
+                      }
                       onCheckedChange={toggleAll}
                     />
                   </TableHead>
@@ -314,12 +317,16 @@ export function ClassCoordinatorsTable({
                 {paginatedData.map((coordinator) => (
                   <TableRow
                     key={coordinator._id}
-                    data-state={isSelected(coordinator._id) ? "selected" : undefined}
+                    data-state={
+                      isSelected(coordinator._id) ? "selected" : undefined
+                    }
                   >
                     <TableCell>
                       <SelectRowCheckbox
                         checked={isSelected(coordinator._id)}
-                        onCheckedChange={(checked) => toggleRow(coordinator._id, checked)}
+                        onCheckedChange={(checked) =>
+                          toggleRow(coordinator._id, checked)
+                        }
                       />
                     </TableCell>
                     <TableCell>
@@ -334,8 +341,8 @@ export function ClassCoordinatorsTable({
                       {coordinator.classId?.semesterId?.name || "N/A"}
                     </TableCell>
                     <TableCell>
-                      {coordinator.classId?.semesterId?.courseId?.name || "N/A"} (
-                      {coordinator.classId?.semesterId?.courseId?.code || ""})
+                      {coordinator.classId?.semesterId?.courseId?.name || "N/A"}{" "}
+                      ({coordinator.classId?.semesterId?.courseId?.code || ""})
                     </TableCell>
                     <TableCell>
                       {coordinator.classId?.semesterId?.courseId?.departmentId

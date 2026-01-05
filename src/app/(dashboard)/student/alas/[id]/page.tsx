@@ -63,7 +63,6 @@ export default async function StudentALAPage({ params }: PageProps) {
   const isPastDeadline = deadline < new Date();
   const canModify =
     !ala.isLocked && !isPastDeadline && submission?.status !== "graded";
-  const canSubmit = canModify && submission?.status !== "submitted";
 
   const getStatusBadge = () => {
     if (submission?.status === "graded") {

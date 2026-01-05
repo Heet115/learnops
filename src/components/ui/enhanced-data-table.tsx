@@ -64,10 +64,10 @@ export interface PaginationState {
 export function useTableSort<T>(
   data: T[],
   columns: ColumnDef<T>[],
-  initialSort?: SortState
+  initialSort?: SortState,
 ) {
   const [sortState, setSortState] = React.useState<SortState>(
-    initialSort || { column: null, direction: null }
+    initialSort || { column: null, direction: null },
   );
 
   const sortedData = React.useMemo(() => {
@@ -144,10 +144,13 @@ export function useTableSort<T>(
 export function useSimpleSort<T>(
   data: T[],
   defaultKey?: keyof T,
-  defaultDirection: SortDirection = "asc"
+  defaultDirection: SortDirection = "asc",
 ) {
-  const [sortKey, setSortKey] = React.useState<keyof T | null>(defaultKey || null);
-  const [sortDirection, setSortDirection] = React.useState<SortDirection>(defaultDirection);
+  const [sortKey, setSortKey] = React.useState<keyof T | null>(
+    defaultKey || null,
+  );
+  const [sortDirection, setSortDirection] =
+    React.useState<SortDirection>(defaultDirection);
 
   const sortedData = React.useMemo(() => {
     if (!sortKey || !sortDirection) return data;
@@ -195,10 +198,7 @@ export function useSimpleSort<T>(
 // PAGINATION HOOK
 // ============================================
 
-export function useTablePagination<T>(
-  data: T[],
-  initialPageSize = 10
-) {
+export function useTablePagination<T>(data: T[], initialPageSize = 10) {
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
     pageSize: initialPageSize,
@@ -266,7 +266,7 @@ export function useTablePagination<T>(
 // ============================================
 
 export function useTableSelection<T extends { _id?: string; id?: string }>(
-  data: T[]
+  data: T[],
 ) {
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
 
@@ -343,7 +343,7 @@ export function SortableHeader({
     <Button
       variant="ghost"
       size="sm"
-      className="-ml-3 h-8 data-[state=open]:bg-accent"
+      className="data-[state=open]:bg-accent -ml-3 h-8"
       onClick={() => onSort(column.id)}
     >
       {column.header}
@@ -435,14 +435,14 @@ export function PaginationControls({
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="text-sm text-muted-foreground">
+      <div className="text-muted-foreground text-sm">
         Showing {startItem} to {endItem} of {totalItems} results
       </div>
 
       <div className="flex items-center gap-4">
         {/* Page Size Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Rows per page</span>
+          <span className="text-muted-foreground text-sm">Rows per page</span>
           <Select
             value={String(pageSize)}
             onValueChange={(value) => onPageSizeChange(Number(value))}
@@ -576,17 +576,20 @@ export function EnhancedDataTable<T extends { _id?: string; id?: string }>({
               {selectable && (
                 <TableHead className="w-[40px]">
                   <Checkbox
-                    checked={isAllSelected ? true : isSomeSelected ? "indeterminate" : false}
+                    checked={
+                      isAllSelected
+                        ? true
+                        : isSomeSelected
+                          ? "indeterminate"
+                          : false
+                    }
                     onCheckedChange={toggleAll}
                     aria-label="Select all"
                   />
                 </TableHead>
               )}
               {columns.map((column) => (
-                <TableHead
-                  key={column.id}
-                  className={column.headerClassName}
-                >
+                <TableHead key={column.id} className={column.headerClassName}>
                   <SortableHeader
                     column={column as ColumnDef<unknown>}
                     sortState={sortState}
@@ -601,7 +604,7 @@ export function EnhancedDataTable<T extends { _id?: string; id?: string }>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length + (selectable ? 1 : 0)}
-                  className="h-24 text-center text-muted-foreground"
+                  className="text-muted-foreground h-24 text-center"
                 >
                   {emptyMessage}
                 </TableCell>

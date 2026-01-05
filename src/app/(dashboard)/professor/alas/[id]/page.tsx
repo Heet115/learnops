@@ -4,19 +4,12 @@ import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
 import { getALAById } from "@/lib/actions/ala.actions";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Calendar,
-  Clock,
   FileText,
   Users,
   Lock,

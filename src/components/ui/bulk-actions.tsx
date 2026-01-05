@@ -57,7 +57,7 @@ export function BulkActionsBar<T>({
     <div
       className={cn(
         "bg-muted/50 flex items-center justify-between rounded-lg border px-4 py-2",
-        className
+        className,
       )}
     >
       <div className="flex items-center gap-3">
@@ -80,7 +80,9 @@ export function BulkActionsBar<T>({
           actions.map((action, index) => (
             <Button
               key={index}
-              variant={action.variant === "destructive" ? "destructive" : "outline"}
+              variant={
+                action.variant === "destructive" ? "destructive" : "outline"
+              }
               size="sm"
               onClick={() => handleAction(action)}
               disabled={isLoading || action.disabled}
@@ -107,7 +109,9 @@ export function BulkActionsBar<T>({
                   <DropdownMenuItem
                     onClick={() => handleAction(action)}
                     disabled={action.disabled}
-                    className={action.variant === "destructive" ? "text-destructive" : ""}
+                    className={
+                      action.variant === "destructive" ? "text-destructive" : ""
+                    }
                   >
                     {action.icon}
                     <span className="ml-2">{action.label}</span>
@@ -121,7 +125,6 @@ export function BulkActionsBar<T>({
     </div>
   );
 }
-
 
 interface SelectAllCheckboxProps {
   checked: boolean | "indeterminate";
@@ -171,11 +174,12 @@ export function useRowSelection<T extends { _id: string }>(items: T[]) {
 
   const selectedItems = React.useMemo(
     () => items.filter((item) => selectedIds.has(item._id)),
-    [items, selectedIds]
+    [items, selectedIds],
   );
 
   const isAllSelected = items.length > 0 && selectedIds.size === items.length;
-  const isIndeterminate = selectedIds.size > 0 && selectedIds.size < items.length;
+  const isIndeterminate =
+    selectedIds.size > 0 && selectedIds.size < items.length;
 
   const toggleAll = React.useCallback(
     (checked: boolean) => {
@@ -185,7 +189,7 @@ export function useRowSelection<T extends { _id: string }>(items: T[]) {
         setSelectedIds(new Set());
       }
     },
-    [items]
+    [items],
   );
 
   const toggleRow = React.useCallback((id: string, checked: boolean) => {
@@ -206,7 +210,7 @@ export function useRowSelection<T extends { _id: string }>(items: T[]) {
 
   const isSelected = React.useCallback(
     (id: string) => selectedIds.has(id),
-    [selectedIds]
+    [selectedIds],
   );
 
   return {

@@ -34,21 +34,25 @@ export interface ExportOptions {
 
 function escapeCSVValue(value: unknown): string {
   if (value === null || value === undefined) return "";
-  
+
   const stringValue = String(value);
-  
+
   // Escape quotes and wrap in quotes if contains comma, quote, or newline
-  if (stringValue.includes(",") || stringValue.includes('"') || stringValue.includes("\n")) {
+  if (
+    stringValue.includes(",") ||
+    stringValue.includes('"') ||
+    stringValue.includes("\n")
+  ) {
     return `"${stringValue.replace(/"/g, '""')}"`;
   }
-  
+
   return stringValue;
 }
 
 export function exportToCSV<T>(
   data: T[],
   columns: ExportColumn<T>[],
-  options: ExportOptions = {}
+  options: ExportOptions = {},
 ): void {
   const { filename = "export", includeHeaders = true } = options;
 
@@ -70,8 +74,10 @@ export function exportToCSV<T>(
   });
 
   const csvContent = rows.join("\n");
-  const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
-  
+  const blob = new Blob(["\ufeff" + csvContent], {
+    type: "text/csv;charset=utf-8;",
+  });
+
   downloadBlob(blob, `${filename}.csv`);
 }
 
@@ -92,9 +98,13 @@ function escapeXML(value: unknown): string {
 export function exportToExcel<T>(
   data: T[],
   columns: ExportColumn<T>[],
-  options: ExportOptions = {}
+  options: ExportOptions = {},
 ): void {
-  const { filename = "export", sheetName = "Sheet1", includeHeaders = true } = options;
+  const {
+    filename = "export",
+    sheetName = "Sheet1",
+    includeHeaders = true,
+  } = options;
 
   // Build XML spreadsheet
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -140,7 +150,7 @@ export function exportToExcel<T>(
 export function exportToJSON<T>(
   data: T[],
   columns: ExportColumn<T>[],
-  options: ExportOptions = {}
+  options: ExportOptions = {},
 ): void {
   const { filename = "export" } = options;
 
@@ -155,7 +165,7 @@ export function exportToJSON<T>(
 
   const jsonContent = JSON.stringify(exportData, null, 2);
   const blob = new Blob([jsonContent], { type: "application/json" });
-  
+
   downloadBlob(blob, `${filename}.json`);
 }
 
@@ -240,7 +250,7 @@ export function DataExportButton<T>({
   if (formats.length === 1) {
     const format = formats[0];
     const { label, icon: Icon } = formatLabels[format];
-    
+
     return (
       <Button
         variant="outline"
@@ -280,10 +290,7 @@ export function DataExportButton<T>({
         {formats.map((format) => {
           const { label, icon: Icon } = formatLabels[format];
           return (
-            <DropdownMenuItem
-              key={format}
-              onClick={() => handleExport(format)}
-            >
+            <DropdownMenuItem key={format} onClick={() => handleExport(format)}>
               <Icon className="mr-2 h-4 w-4" />
               Export as {label}
             </DropdownMenuItem>
@@ -304,7 +311,7 @@ export function createExportColumns<T>(
     header: string;
     accessorKey?: keyof T;
     accessorFn?: (row: T) => unknown;
-  }>
+  }>,
 ): ExportColumn<T>[] {
   return columns
     .filter((col) => col.accessorKey || col.accessorFn)
@@ -317,7 +324,12 @@ export function createExportColumns<T>(
           return value as string | number | boolean | null | undefined;
         }
         if (col.accessorKey) {
-          return row[col.accessorKey] as string | number | boolean | null | undefined;
+          return row[col.accessorKey] as
+            | string
+            | number
+            | boolean
+            | null
+            | undefined;
         }
         return null;
       },

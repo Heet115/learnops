@@ -18,11 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
@@ -66,7 +61,7 @@ function loadPresets(tableId: string): FilterPresetsStorage {
   if (typeof window === "undefined") {
     return { presets: [] };
   }
-  
+
   try {
     const stored = localStorage.getItem(getStorageKey(tableId));
     if (stored) {
@@ -75,13 +70,13 @@ function loadPresets(tableId: string): FilterPresetsStorage {
   } catch (error) {
     console.error("Failed to load filter presets:", error);
   }
-  
+
   return { presets: [] };
 }
 
 function savePresets(tableId: string, storage: FilterPresetsStorage): void {
   if (typeof window === "undefined") return;
-  
+
   try {
     localStorage.setItem(getStorageKey(tableId), JSON.stringify(storage));
   } catch (error) {
@@ -94,7 +89,9 @@ function savePresets(tableId: string, storage: FilterPresetsStorage): void {
 // ============================================
 
 export function useFilterPresets(tableId: string) {
-  const [storage, setStorage] = React.useState<FilterPresetsStorage>({ presets: [] });
+  const [storage, setStorage] = React.useState<FilterPresetsStorage>({
+    presets: [],
+  });
   const [isLoaded, setIsLoaded] = React.useState(false);
 
   // Load presets on mount
@@ -134,7 +131,7 @@ export function useFilterPresets(tableId: string) {
     setStorage((prev) => ({
       ...prev,
       presets: prev.presets.map((p) =>
-        p.id === id ? { ...p, ...updates } : p
+        p.id === id ? { ...p, ...updates } : p,
       ),
     }));
   };
@@ -143,7 +140,8 @@ export function useFilterPresets(tableId: string) {
     setStorage((prev) => ({
       ...prev,
       presets: prev.presets.filter((p) => p.id !== id),
-      defaultPresetId: prev.defaultPresetId === id ? undefined : prev.defaultPresetId,
+      defaultPresetId:
+        prev.defaultPresetId === id ? undefined : prev.defaultPresetId,
     }));
   };
 
@@ -192,12 +190,12 @@ function SavePresetDialog({
 
   const handleSave = () => {
     const trimmedName = name.trim();
-    
+
     if (!trimmedName) {
       setError("Please enter a name");
       return;
     }
-    
+
     if (existingNames.includes(trimmedName.toLowerCase())) {
       setError("A preset with this name already exists");
       return;
@@ -234,9 +232,7 @@ function SavePresetDialog({
               }}
               autoFocus
             />
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
+            {error && <p className="text-destructive text-sm">{error}</p>}
           </div>
         </div>
         <DialogFooter>
@@ -269,16 +265,13 @@ export function FilterPresetsDropdown({
   hasActiveFilters = false,
   className,
 }: FilterPresetsDropdownProps) {
-  const {
-    presets,
-    defaultPreset,
-    addPreset,
-    deletePreset,
-    setDefaultPreset,
-  } = useFilterPresets(tableId);
+  const { presets, defaultPreset, addPreset, deletePreset, setDefaultPreset } =
+    useFilterPresets(tableId);
 
   const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
-  const [activePresetId, setActivePresetId] = React.useState<string | null>(null);
+  const [activePresetId, setActivePresetId] = React.useState<string | null>(
+    null,
+  );
 
   // Apply default preset on mount
   React.useEffect(() => {
@@ -316,7 +309,7 @@ export function FilterPresetsDropdown({
     toast.success(
       isCurrentDefault
         ? `Removed "${preset.name}" as default`
-        : `Set "${preset.name}" as default`
+        : `Set "${preset.name}" as default`,
     );
   };
 
@@ -326,7 +319,11 @@ export function FilterPresetsDropdown({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className={cn("gap-2", className)}>
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn("gap-2", className)}
+          >
             <Bookmark className="h-4 w-4" />
             Presets
             {presets.length > 0 && (
@@ -350,7 +347,7 @@ export function FilterPresetsDropdown({
           {presets.length > 0 && (
             <>
               <DropdownMenuSeparator />
-              
+
               {/* Preset list */}
               {presets.map((preset) => {
                 const isActive = activePresetId === preset.id;
@@ -359,21 +356,26 @@ export function FilterPresetsDropdown({
                 return (
                   <DropdownMenuItem
                     key={preset.id}
-                    className="flex items-center justify-between group"
+                    className="group flex items-center justify-between"
                     onClick={() => handleApplyPreset(preset)}
                   >
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      {isActive && <Check className="h-4 w-4 text-primary shrink-0" />}
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
+                      {isActive && (
+                        <Check className="text-primary h-4 w-4 shrink-0" />
+                      )}
                       <span className={cn("truncate", !isActive && "ml-6")}>
                         {preset.name}
                       </span>
                       {isDefault && (
-                        <Badge variant="outline" className="text-[10px] px-1 py-0">
+                        <Badge
+                          variant="outline"
+                          className="px-1 py-0 text-[10px]"
+                        >
                           Default
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -389,7 +391,7 @@ export function FilterPresetsDropdown({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive h-6 w-6"
                         onClick={(e) => handleDeletePreset(preset, e)}
                       >
                         <Trash2 className="h-3 w-3" />
@@ -402,7 +404,7 @@ export function FilterPresetsDropdown({
           )}
 
           {presets.length === 0 && (
-            <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground px-2 py-4 text-center text-sm">
               No saved presets yet.
               <br />
               Apply filters and save them for quick access.

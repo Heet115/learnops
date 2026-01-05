@@ -11,6 +11,7 @@ import {
 } from "@/lib/validations/ala.validation";
 import { revalidatePath } from "next/cache";
 import { v2 as cloudinary } from "cloudinary";
+import { logActivity } from "./activity.actions";
 
 // Configure Cloudinary
 cloudinary.config({
@@ -118,6 +119,19 @@ export async function createALA(input: CreateALAInput) {
     const { notifyNewALA } = await import("@/lib/actions/notification.actions");
     await notifyNewALA(ala._id.toString());
 
+    // Log activity
+    await logActivity({
+      action: "ala_created",
+      entityType: "ala",
+      entityId: ala._id.toString(),
+      details: {
+        title: validated.title,
+        subjectOfferingId: validated.subjectOfferingId,
+        deadline: validated.deadline,
+        isGroupSubmission: validated.isGroupSubmission,
+      },
+    });
+
     revalidatePath("/professor/alas");
     return { success: true, ala: JSON.parse(JSON.stringify(ala)) };
   } catch (error) {
@@ -188,6 +202,18 @@ export async function updateALA(id: string, input: UpdateALAInput) {
     }
 
     const ala = await ALA.findByIdAndUpdate(id, updateData, { new: true });
+
+    // Log activity
+    await logActivity({
+      action: "ala_updated",
+      entityType: "ala",
+      entityId: id,
+      details: {
+        title: ala?.title,
+        changes: Object.keys(validated),
+      },
+    });
+
     revalidatePath("/professor/alas");
     revalidatePath(`/professor/alas/${id}`);
     return { success: true, ala: JSON.parse(JSON.stringify(ala)) };
@@ -218,6 +244,17 @@ export async function deleteALA(id: string) {
   }
 
   await ALA.findByIdAndUpdate(id, { isActive: false });
+
+  // Log activity
+  await logActivity({
+    action: "ala_deleted",
+    entityType: "ala",
+    entityId: id,
+    details: {
+      title: ala.title,
+    },
+  });
+
   revalidatePath("/professor/alas");
   return { success: true };
 }
@@ -283,7 +320,7 @@ export async function removeResource(alaId: string, resourceUrl: string) {
 
   // Delete from Cloudinary if it's an uploaded document
   if (resource?.type === "document" && resourceUrl.includes("cloudinary")) {
-    const deleted = await deleteFromCloudinary(resourceUrl);
+    await deleteFromCloudinary(resourceUrl);
   }
 
   const updated = await ALA.findByIdAndUpdate(
@@ -318,7 +355,7 @@ export async function bulkLockALAs(ids: string[]) {
   try {
     const result = await ALA.updateMany(
       { _id: { $in: ids }, professorId },
-      { isLocked: true }
+      { isLocked: true },
     );
     revalidatePath("/professor/alas");
     return { success: true, count: result.modifiedCount };
@@ -336,7 +373,7 @@ export async function bulkUnlockALAs(ids: string[]) {
   try {
     const result = await ALA.updateMany(
       { _id: { $in: ids }, professorId },
-      { isLocked: false }
+      { isLocked: false },
     );
     revalidatePath("/professor/alas");
     return { success: true, count: result.modifiedCount };
@@ -355,7 +392,7 @@ export async function bulkDeleteALAs(ids: string[]) {
     // Soft delete - set isActive to false
     const result = await ALA.updateMany(
       { _id: { $in: ids }, professorId },
-      { isActive: false }
+      { isActive: false },
     );
     revalidatePath("/professor/alas");
     return { success: true, count: result.modifiedCount };

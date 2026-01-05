@@ -118,10 +118,14 @@ export default async function StudentDashboard() {
                   <CardTitle className="text-sm font-medium">
                     {stat.title}
                   </CardTitle>
-                  <stat.icon className={`h-4 w-4 ${stat.color} transition-transform duration-200 group-hover:scale-110`} />
+                  <stat.icon
+                    className={`h-4 w-4 ${stat.color} transition-transform duration-200 group-hover:scale-110`}
+                  />
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-2xl font-bold tabular-nums ${stat.color}`}>
+                  <div
+                    className={`text-2xl font-bold tabular-nums ${stat.color}`}
+                  >
                     {stat.value}
                   </div>
                   <CardDescription>{stat.description}</CardDescription>
@@ -148,10 +152,7 @@ export default async function StudentDashboard() {
               </CardHeader>
               <CardContent>
                 {upcomingDeadlines.length === 0 ? (
-                  <IllustratedEmpty
-                    preset="noDeadlines"
-                    size="sm"
-                  />
+                  <IllustratedEmpty preset="noDeadlines" size="sm" />
                 ) : (
                   <div className="space-y-3">
                     {upcomingDeadlines.map(
@@ -172,18 +173,22 @@ export default async function StudentDashboard() {
                           <Link
                             key={ala._id}
                             href={`/student/alas/${ala._id}`}
-                            className="flex items-center justify-between rounded-lg border p-3 transition-all hover:bg-muted/50 hover:border-muted-foreground/20"
+                            className="hover:bg-muted/50 hover:border-muted-foreground/20 flex items-center justify-between rounded-lg border p-3 transition-all"
                           >
                             <div className="flex items-center gap-3">
                               <FileText className="text-muted-foreground h-4 w-4" />
                               <div>
-                                <p className="text-sm font-medium">{ala.title}</p>
+                                <p className="text-sm font-medium">
+                                  {ala.title}
+                                </p>
                                 <p className="text-muted-foreground text-xs">
                                   {ala.subjectOfferingId?.subjectId?.code || ""}
                                 </p>
                               </div>
                             </div>
-                            <Badge variant={isUrgent ? "destructive" : "outline"}>
+                            <Badge
+                              variant={isUrgent ? "destructive" : "outline"}
+                            >
                               <Calendar className="mr-1 h-3 w-3" />
                               {deadline}
                             </Badge>
@@ -213,10 +218,7 @@ export default async function StudentDashboard() {
               </CardHeader>
               <CardContent>
                 {recentGrades.length === 0 ? (
-                  <IllustratedEmpty
-                    preset="noGrades"
-                    size="sm"
-                  />
+                  <IllustratedEmpty preset="noGrades" size="sm" />
                 ) : (
                   <div className="space-y-3">
                     {recentGrades.map(
@@ -239,7 +241,7 @@ export default async function StudentDashboard() {
                           <Link
                             key={sub._id}
                             href={`/student/alas/${sub.alaId._id}`}
-                            className="flex items-center justify-between rounded-lg border p-3 transition-all hover:bg-muted/50 hover:border-muted-foreground/20"
+                            className="hover:bg-muted/50 hover:border-muted-foreground/20 flex items-center justify-between rounded-lg border p-3 transition-all"
                           >
                             <div className="flex items-center gap-3">
                               <CheckCircle className="h-4 w-4 text-green-500" />
@@ -248,13 +250,13 @@ export default async function StudentDashboard() {
                                   {sub.alaId.title}
                                 </p>
                                 <p className="text-muted-foreground text-xs">
-                                  {sub.alaId.subjectOfferingId?.subjectId?.code ||
-                                    ""}
+                                  {sub.alaId.subjectOfferingId?.subjectId
+                                    ?.code || ""}
                                 </p>
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="text-sm font-bold tabular-nums text-green-600">
+                              <p className="text-sm font-bold text-green-600 tabular-nums">
                                 {sub.marks}/{sub.alaId.maxMarks}
                               </p>
                               <p className="text-muted-foreground text-xs tabular-nums">

@@ -101,10 +101,14 @@ export default async function HodDashboard() {
                   <CardTitle className="text-sm font-medium">
                     {stat.title}
                   </CardTitle>
-                  <stat.icon className={`h-4 w-4 ${stat.color} transition-transform duration-200 group-hover:scale-110`} />
+                  <stat.icon
+                    className={`h-4 w-4 ${stat.color} transition-transform duration-200 group-hover:scale-110`}
+                  />
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-2xl font-bold tabular-nums ${stat.color}`}>
+                  <div
+                    className={`text-2xl font-bold tabular-nums ${stat.color}`}
+                  >
                     {stat.value}
                   </div>
                   <CardDescription>{stat.description}</CardDescription>
@@ -135,12 +139,14 @@ export default async function HodDashboard() {
                       (course: { _id: string; name: string; code: string }) => (
                         <div
                           key={course._id}
-                          className="flex items-center justify-between rounded-lg border p-3 transition-all hover:bg-muted/50 hover:border-muted-foreground/20"
+                          className="hover:bg-muted/50 hover:border-muted-foreground/20 flex items-center justify-between rounded-lg border p-3 transition-all"
                         >
                           <div className="flex items-center gap-3">
                             <GraduationCap className="text-muted-foreground h-4 w-4" />
                             <div>
-                              <p className="text-sm font-medium">{course.name}</p>
+                              <p className="text-sm font-medium">
+                                {course.name}
+                              </p>
                               <p className="text-muted-foreground text-xs">
                                 {course.code}
                               </p>
@@ -183,7 +189,7 @@ export default async function HodDashboard() {
                       }) => (
                         <div
                           key={cls._id}
-                          className="flex items-center justify-between rounded-lg border p-3 transition-all hover:bg-muted/50 hover:border-muted-foreground/20"
+                          className="hover:bg-muted/50 hover:border-muted-foreground/20 flex items-center justify-between rounded-lg border p-3 transition-all"
                         >
                           <div className="flex items-center gap-3">
                             <Users className="text-muted-foreground h-4 w-4" />

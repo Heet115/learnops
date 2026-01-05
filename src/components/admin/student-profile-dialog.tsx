@@ -99,51 +99,54 @@ export function StudentProfileDialog({
   });
 
   useEffect(() => {
-    if (open && userId) {
-      fetchProfile();
-    }
+    if (!open || !userId) return;
+
+    let isMounted = true;
+
+    getStudentProfile(userId).then((profile) => {
+      if (!isMounted) return;
+
+      if (profile) {
+        setIsEdit(true);
+        setFormData({
+          studentId: profile.studentId || "",
+          enrollmentNumber: profile.enrollmentNumber || "",
+          middleName: profile.middleName || "",
+          fatherName: profile.fatherName || "",
+          motherName: profile.motherName || "",
+          gender: profile.gender || "",
+          dateOfBirth: profile.dateOfBirth
+            ? new Date(profile.dateOfBirth).toISOString().split("T")[0]
+            : "",
+          bloodGroup: profile.bloodGroup || "",
+          alternateEmail: profile.alternateEmail || "",
+          primaryMobile: profile.primaryMobile || "",
+          alternateMobile: profile.alternateMobile || "",
+          courseId: profile.courseId?._id || profile.courseId || "",
+          batch: profile.batch || "",
+          academicSession: profile.academicSession || "",
+          rollNumber: profile.rollNumber || "",
+          admissionDate: profile.admissionDate
+            ? new Date(profile.admissionDate).toISOString().split("T")[0]
+            : "",
+          studentStatus: profile.studentStatus || "active",
+          presentAddressLine1: profile.presentAddressLine1 || "",
+          presentAddressLine2: profile.presentAddressLine2 || "",
+          presentCity: profile.presentCity || "",
+          presentState: profile.presentState || "",
+          presentCountry: profile.presentCountry || "",
+          presentPostalCode: profile.presentPostalCode || "",
+        });
+      } else {
+        setIsEdit(false);
+      }
+      setIsFetching(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [open, userId]);
-
-  const fetchProfile = async () => {
-    setIsFetching(true);
-    const profile = await getStudentProfile(userId);
-
-    if (profile) {
-      setIsEdit(true);
-      setFormData({
-        studentId: profile.studentId || "",
-        enrollmentNumber: profile.enrollmentNumber || "",
-        middleName: profile.middleName || "",
-        fatherName: profile.fatherName || "",
-        motherName: profile.motherName || "",
-        gender: profile.gender || "",
-        dateOfBirth: profile.dateOfBirth
-          ? new Date(profile.dateOfBirth).toISOString().split("T")[0]
-          : "",
-        bloodGroup: profile.bloodGroup || "",
-        alternateEmail: profile.alternateEmail || "",
-        primaryMobile: profile.primaryMobile || "",
-        alternateMobile: profile.alternateMobile || "",
-        courseId: profile.courseId?._id || profile.courseId || "",
-        batch: profile.batch || "",
-        academicSession: profile.academicSession || "",
-        rollNumber: profile.rollNumber || "",
-        admissionDate: profile.admissionDate
-          ? new Date(profile.admissionDate).toISOString().split("T")[0]
-          : "",
-        studentStatus: profile.studentStatus || "active",
-        presentAddressLine1: profile.presentAddressLine1 || "",
-        presentAddressLine2: profile.presentAddressLine2 || "",
-        presentCity: profile.presentCity || "",
-        presentState: profile.presentState || "",
-        presentCountry: profile.presentCountry || "",
-        presentPostalCode: profile.presentPostalCode || "",
-      });
-    } else {
-      setIsEdit(false);
-    }
-    setIsFetching(false);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -281,7 +284,7 @@ export function StudentProfileDialog({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="fatherName">Father's Name</Label>
+                    <Label htmlFor="fatherName">Father&apos;s Name</Label>
                     <Input
                       id="fatherName"
                       value={formData.fatherName}
@@ -292,7 +295,7 @@ export function StudentProfileDialog({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="motherName">Mother's Name</Label>
+                    <Label htmlFor="motherName">Mother&apos;s Name</Label>
                     <Input
                       id="motherName"
                       value={formData.motherName}

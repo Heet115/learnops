@@ -70,8 +70,8 @@ export function ProfileUpdateRequests({
       <Card>
         <CardContent className="py-8 text-center">
           <p className="text-muted-foreground">
-            No update requests yet. Click "Request Update" on your profile to
-            submit a change request.
+            No update requests yet. Click &quot;Request Update&quot; on your
+            profile to submit a change request.
           </p>
         </CardContent>
       </Card>

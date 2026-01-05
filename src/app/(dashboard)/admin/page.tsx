@@ -7,6 +7,7 @@ import {
   getAdminDashboardStats,
   getAdminRecentUsers,
 } from "@/lib/actions/dashboard.actions";
+import { getRecentActivities } from "@/lib/actions/activity.actions";
 import {
   Card,
   CardContent,
@@ -18,13 +19,13 @@ import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { RoleBadge } from "@/components/ui/role-badge";
 import { FadeIn, SlideUp } from "@/components/ui/page-transition";
+import { DashboardActivity } from "@/components/activity";
 import {
   Users,
   Building2,
   BookOpen,
   GraduationCap,
   ArrowRight,
-  FileText,
 } from "lucide-react";
 
 export default async function AdminDashboard() {
@@ -35,10 +36,11 @@ export default async function AdminDashboard() {
     redirect("/unauthorized");
   }
 
-  const [dbUser, stats, recentUsers] = await Promise.all([
+  const [dbUser, stats, recentUsers, recentActivities] = await Promise.all([
     getCurrentUserFromDB(),
     getAdminDashboardStats(),
     getAdminRecentUsers(),
+    getRecentActivities(5),
   ]);
 
   const user = {
@@ -116,10 +118,14 @@ export default async function AdminDashboard() {
                   <CardTitle className="text-sm font-medium">
                     {stat.title}
                   </CardTitle>
-                  <stat.icon className={`h-4 w-4 ${stat.color} transition-transform duration-200 group-hover:scale-110`} />
+                  <stat.icon
+                    className={`h-4 w-4 ${stat.color} transition-transform duration-200 group-hover:scale-110`}
+                  />
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-2xl font-bold tabular-nums ${stat.color}`}>
+                  <div
+                    className={`text-2xl font-bold tabular-nums ${stat.color}`}
+                  >
                     {stat.value}
                   </div>
                   <CardDescription>{stat.description}</CardDescription>
@@ -161,7 +167,7 @@ export default async function AdminDashboard() {
                       }) => (
                         <div
                           key={u._id}
-                          className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
+                          className="hover:bg-muted/50 flex items-center justify-between rounded-lg border p-3 transition-colors"
                         >
                           <div className="flex items-center gap-3">
                             <UserAvatar
@@ -180,7 +186,13 @@ export default async function AdminDashboard() {
                           </div>
                           <div className="flex items-center gap-2">
                             <RoleBadge
-                              role={u.role as "admin" | "hod" | "professor" | "student"}
+                              role={
+                                u.role as
+                                  | "admin"
+                                  | "hod"
+                                  | "professor"
+                                  | "student"
+                              }
                               size="xs"
                               showIcon={false}
                             />
@@ -198,43 +210,13 @@ export default async function AdminDashboard() {
           </FadeIn>
 
           <FadeIn delay={375}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Activity Overview</CardTitle>
-                <CardDescription>System activity summary</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50">
-                  <div className="flex items-center gap-3">
-                    <FileText className="text-muted-foreground h-4 w-4" />
-                    <span className="text-sm">Active ALAs</span>
-                  </div>
-                  <span className="text-sm font-bold tabular-nums">{stats.activity.alas}</span>
-                </div>
-                <div className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50">
-                  <div className="flex items-center gap-3">
-                    <GraduationCap className="text-muted-foreground h-4 w-4" />
-                    <span className="text-sm">Total Submissions</span>
-                  </div>
-                  <span className="text-sm font-bold tabular-nums">
-                    {stats.activity.submissions}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50">
-                  <div className="flex items-center gap-3">
-                    <Users className="text-muted-foreground h-4 w-4" />
-                    <span className="text-sm">HODs</span>
-                  </div>
-                  <span className="text-sm font-bold tabular-nums">{stats.users.hods}</span>
-                </div>
-                <div className="mt-4 flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-muted-foreground text-sm">
-                    All systems operational
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+            <DashboardActivity
+              activities={recentActivities}
+              title="Recent Activity"
+              description="Latest system actions"
+              viewAllHref="/admin/audit-trail"
+              maxItems={5}
+            />
           </FadeIn>
         </div>
       </div>

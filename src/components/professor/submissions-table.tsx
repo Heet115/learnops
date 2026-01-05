@@ -24,7 +24,10 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
-import { DataExportButton, type ExportColumn } from "@/components/ui/data-export";
+import {
+  DataExportButton,
+  type ExportColumn,
+} from "@/components/ui/data-export";
 import { FilterPresetsDropdown } from "@/components/ui/filter-presets";
 import {
   useTableSort,
@@ -80,23 +83,75 @@ interface SubmissionsTableProps {
 
 // Export columns
 const exportColumns: ExportColumn<Submission>[] = [
-  { key: "student", header: "Student", accessor: (row) => `${row.studentId?.firstName} ${row.studentId?.lastName}` },
-  { key: "email", header: "Email", accessor: (row) => row.studentId?.email || "" },
+  {
+    key: "student",
+    header: "Student",
+    accessor: (row) => `${row.studentId?.firstName} ${row.studentId?.lastName}`,
+  },
+  {
+    key: "email",
+    header: "Email",
+    accessor: (row) => row.studentId?.email || "",
+  },
   { key: "ala", header: "ALA", accessor: (row) => row.alaId?.title || "" },
-  { key: "subject", header: "Subject", accessor: (row) => row.alaId?.subjectOfferingId?.subjectId?.code || "" },
-  { key: "class", header: "Class", accessor: (row) => row.alaId?.subjectOfferingId?.classId?.name || "" },
+  {
+    key: "subject",
+    header: "Subject",
+    accessor: (row) => row.alaId?.subjectOfferingId?.subjectId?.code || "",
+  },
+  {
+    key: "class",
+    header: "Class",
+    accessor: (row) => row.alaId?.subjectOfferingId?.classId?.name || "",
+  },
   { key: "status", header: "Status", accessor: (row) => row.status },
-  { key: "marks", header: "Marks", accessor: (row) => row.marks !== undefined ? `${row.marks}/${row.alaId?.maxMarks}` : "-" },
-  { key: "submittedAt", header: "Submitted At", accessor: (row) => row.submittedAt ? new Date(row.submittedAt).toLocaleString() : "-" },
+  {
+    key: "marks",
+    header: "Marks",
+    accessor: (row) =>
+      row.marks !== undefined ? `${row.marks}/${row.alaId?.maxMarks}` : "-",
+  },
+  {
+    key: "submittedAt",
+    header: "Submitted At",
+    accessor: (row) =>
+      row.submittedAt ? new Date(row.submittedAt).toLocaleString() : "-",
+  },
 ];
 
 // Table columns for sorting
 const tableColumns: ColumnDef<Submission>[] = [
-  { id: "student", header: "Student", sortable: true, accessorFn: (row) => `${row.studentId?.firstName} ${row.studentId?.lastName}` },
-  { id: "ala", header: "ALA", sortable: true, accessorFn: (row) => row.alaId?.title || "" },
-  { id: "subject", header: "Subject", sortable: true, accessorFn: (row) => row.alaId?.subjectOfferingId?.subjectId?.code || "" },
-  { id: "class", header: "Class", sortable: true, accessorFn: (row) => row.alaId?.subjectOfferingId?.classId?.name || "" },
-  { id: "submittedAt", header: "Submitted", sortable: true, accessorKey: "submittedAt" },
+  {
+    id: "student",
+    header: "Student",
+    sortable: true,
+    accessorFn: (row) =>
+      `${row.studentId?.firstName} ${row.studentId?.lastName}`,
+  },
+  {
+    id: "ala",
+    header: "ALA",
+    sortable: true,
+    accessorFn: (row) => row.alaId?.title || "",
+  },
+  {
+    id: "subject",
+    header: "Subject",
+    sortable: true,
+    accessorFn: (row) => row.alaId?.subjectOfferingId?.subjectId?.code || "",
+  },
+  {
+    id: "class",
+    header: "Class",
+    sortable: true,
+    accessorFn: (row) => row.alaId?.subjectOfferingId?.classId?.name || "",
+  },
+  {
+    id: "submittedAt",
+    header: "Submitted",
+    sortable: true,
+    accessorKey: "submittedAt",
+  },
   { id: "status", header: "Status", sortable: true, accessorKey: "status" },
 ];
 
@@ -161,7 +216,9 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
 
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
-    return Object.entries(filters).some(([, v]) => v && v !== "" && v !== "all");
+    return Object.entries(filters).some(
+      ([, v]) => v && v !== "" && v !== "all",
+    );
   }, [filters]);
 
   const filteredSubmissions = useMemo(() => {
@@ -198,7 +255,10 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
   }, [submissions, filters]);
 
   // Sorting
-  const { sortedData, sortState, toggleSort } = useTableSort(filteredSubmissions, tableColumns);
+  const { sortedData, sortState, toggleSort } = useTableSort(
+    filteredSubmissions,
+    tableColumns,
+  );
 
   // Pagination
   const {
@@ -234,7 +294,7 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
         },
       },
     ],
-    [clearSelection]
+    [clearSelection],
   );
 
   const getStatusBadge = (
@@ -300,10 +360,7 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
     return (
       <Card>
         <CardContent className="py-8">
-          <IllustratedEmpty
-            preset="noSubmissions"
-            size="md"
-          />
+          <IllustratedEmpty preset="noSubmissions" size="md" />
         </CardContent>
       </Card>
     );
@@ -349,7 +406,13 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
               size="sm"
               action={{
                 label: "Clear filters",
-                onClick: () => setFilters({ search: "", subject: "", class: "", status: "" }),
+                onClick: () =>
+                  setFilters({
+                    search: "",
+                    subject: "",
+                    class: "",
+                    status: "",
+                  }),
                 variant: "outline",
               }}
             />
@@ -361,16 +424,34 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
                     <TableRow>
                       <TableHead className="w-[50px]">
                         <SelectAllCheckbox
-                          checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                          checked={
+                            isAllSelected
+                              ? true
+                              : isIndeterminate
+                                ? "indeterminate"
+                                : false
+                          }
                           onCheckedChange={toggleAll}
                         />
                       </TableHead>
-                      <TableHead>{renderSortableHeader("student", "Student")}</TableHead>
-                      <TableHead>{renderSortableHeader("ala", "ALA")}</TableHead>
-                      <TableHead>{renderSortableHeader("subject", "Subject")}</TableHead>
-                      <TableHead>{renderSortableHeader("class", "Class")}</TableHead>
-                      <TableHead>{renderSortableHeader("submittedAt", "Submitted")}</TableHead>
-                      <TableHead>{renderSortableHeader("status", "Status")}</TableHead>
+                      <TableHead>
+                        {renderSortableHeader("student", "Student")}
+                      </TableHead>
+                      <TableHead>
+                        {renderSortableHeader("ala", "ALA")}
+                      </TableHead>
+                      <TableHead>
+                        {renderSortableHeader("subject", "Subject")}
+                      </TableHead>
+                      <TableHead>
+                        {renderSortableHeader("class", "Class")}
+                      </TableHead>
+                      <TableHead>
+                        {renderSortableHeader("submittedAt", "Submitted")}
+                      </TableHead>
+                      <TableHead>
+                        {renderSortableHeader("status", "Status")}
+                      </TableHead>
                       <TableHead className="w-[80px]"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -387,13 +468,17 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
                       return (
                         <TableRow
                           key={sub._id}
-                          data-state={isSelected(sub._id) ? "selected" : undefined}
+                          data-state={
+                            isSelected(sub._id) ? "selected" : undefined
+                          }
                           className="transition-colors"
                         >
                           <TableCell>
                             <SelectRowCheckbox
                               checked={isSelected(sub._id)}
-                              onCheckedChange={(checked) => toggleRow(sub._id, checked)}
+                              onCheckedChange={(checked) =>
+                                toggleRow(sub._id, checked)
+                              }
                             />
                           </TableCell>
                           <TableCell>
@@ -412,13 +497,15 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
                                       </span>
                                     </div>
                                     <p className="text-sm font-medium">
-                                      {sub.studentId?.firstName} {sub.studentId?.lastName}
+                                      {sub.studentId?.firstName}{" "}
+                                      {sub.studentId?.lastName}
                                     </p>
                                   </>
                                 ) : (
                                   <>
                                     <p className="font-medium">
-                                      {sub.studentId?.firstName} {sub.studentId?.lastName}
+                                      {sub.studentId?.firstName}{" "}
+                                      {sub.studentId?.lastName}
                                     </p>
                                     <p className="text-muted-foreground text-xs">
                                       {sub.studentId?.email}
@@ -432,7 +519,8 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
                             {sub.alaId?.title || "Unknown"}
                           </TableCell>
                           <TableCell>
-                            {sub.alaId?.subjectOfferingId?.subjectId?.code || "-"}
+                            {sub.alaId?.subjectOfferingId?.subjectId?.code ||
+                              "-"}
                           </TableCell>
                           <TableCell>
                             {sub.alaId?.subjectOfferingId?.classId?.name || "-"}

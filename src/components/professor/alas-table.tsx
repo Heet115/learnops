@@ -32,7 +32,12 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
-import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
+import {
+  useSimpleSort,
+  useTablePagination,
+  SimpleSortableHeader,
+  PaginationControls,
+} from "@/components/ui/enhanced-data-table";
 import {
   MoreHorizontal,
   Pencil,
@@ -70,20 +75,11 @@ interface ALA {
   };
 }
 
-interface SubjectOffering {
-  _id: string;
-  academicYear: string;
-  subjectId: { _id: string; name: string; code: string };
-  classId: { _id: string; name: string };
-  semesterId: { _id: string; name: string; number: number };
-}
-
 interface ALAsTableProps {
   alas: ALA[];
-  offerings: SubjectOffering[];
 }
 
-export function ALAsTable({ alas, offerings }: ALAsTableProps) {
+export function ALAsTable({ alas }: ALAsTableProps) {
   const [editingALA, setEditingALA] = useState<ALA | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{
     open: boolean;
@@ -163,6 +159,7 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
     [subjectOptions, classOptions],
   );
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const filteredALAs = useMemo(() => {
     return alas.filter((ala) => {
       const search = (filters.search as string)?.toLowerCase() || "";
@@ -202,9 +199,20 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
   }, [alas, filters]);
 
   // Sorting
-  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredALAs, "deadline" as keyof ALA, "desc");
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
+    filteredALAs,
+    "deadline" as keyof ALA,
+    "desc",
+  );
 
-  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+  } = useTablePagination(sortedData);
 
   const {
     selectedItems,
@@ -266,7 +274,7 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
         },
       },
     ],
-    [clearSelection, router]
+    [clearSelection, router],
   );
 
   const handleDeleteClick = (id: string, title: string) => {
@@ -286,7 +294,7 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
     }
   };
 
-  const handleToggleLock = async (id: string, currentlyLocked: boolean) => {
+  const handleToggleLock = async (id: string) => {
     const result = await toggleALALock(id);
     if (result.success) {
       toast.success(result.isLocked ? "ALA locked" : "ALA unlocked");
@@ -352,7 +360,13 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
                 <TableRow>
                   <TableHead className="w-[50px]">
                     <SelectAllCheckbox
-                      checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                      checked={
+                        isAllSelected
+                          ? true
+                          : isIndeterminate
+                            ? "indeterminate"
+                            : false
+                      }
                       onCheckedChange={toggleAll}
                     />
                   </TableHead>
@@ -395,7 +409,9 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
                       <TableCell>
                         <SelectRowCheckbox
                           checked={isSelected(ala._id)}
-                          onCheckedChange={(checked) => toggleRow(ala._id, checked)}
+                          onCheckedChange={(checked) =>
+                            toggleRow(ala._id, checked)
+                          }
                         />
                       </TableCell>
                       <TableCell className="max-w-[200px] truncate font-medium">
@@ -436,14 +452,14 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
                                 View Details
                               </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEditingALA(ala)}>
+                            <DropdownMenuItem
+                              onClick={() => setEditingALA(ala)}
+                            >
                               <Pencil className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() =>
-                                handleToggleLock(ala._id, ala.isLocked)
-                              }
+                              onClick={() => handleToggleLock(ala._id)}
                             >
                               {ala.isLocked ? (
                                 <>

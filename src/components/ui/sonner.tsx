@@ -1,14 +1,12 @@
 "use client";
 
-import {
-  CircleCheckIcon,
-  InfoIcon,
-  Loader2Icon,
-  OctagonXIcon,
-  TriangleAlertIcon,
-} from "lucide-react";
+import { InfoIcon, Loader2Icon, TriangleAlertIcon } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Toaster as Sonner, toast as sonnerToast, type ToasterProps } from "sonner";
+import {
+  Toaster as Sonner,
+  toast as sonnerToast,
+  type ToasterProps,
+} from "sonner";
 
 // Custom animated icons
 const AnimatedSuccessIcon = () => (
@@ -80,7 +78,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
         info: <InfoIcon className="size-4 text-blue-500" />,
         warning: <AnimatedWarningIcon />,
         error: <AnimatedErrorIcon />,
-        loading: <Loader2Icon className="size-4 animate-spin text-muted-foreground" />,
+        loading: (
+          <Loader2Icon className="text-muted-foreground size-4 animate-spin" />
+        ),
       }}
       toastOptions={{
         classNames: {
@@ -92,8 +92,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
             "group-[.toaster]:border-red-200 group-[.toaster]:dark:border-red-800/50",
           warning:
             "group-[.toaster]:border-yellow-200 group-[.toaster]:dark:border-yellow-800/50",
-          info:
-            "group-[.toaster]:border-blue-200 group-[.toaster]:dark:border-blue-800/50",
+          info: "group-[.toaster]:border-blue-200 group-[.toaster]:dark:border-blue-800/50",
           description: "group-[.toast]:text-muted-foreground",
           actionButton:
             "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
@@ -116,25 +115,37 @@ const Toaster = ({ ...props }: ToasterProps) => {
 
 // Enhanced toast functions with animations
 const toast = {
-  success: (message: string, options?: Parameters<typeof sonnerToast.success>[1]) => {
+  success: (
+    message: string,
+    options?: Parameters<typeof sonnerToast.success>[1],
+  ) => {
     return sonnerToast.success(message, {
       ...options,
       className: "animate-slide-in-right",
     });
   },
-  error: (message: string, options?: Parameters<typeof sonnerToast.error>[1]) => {
+  error: (
+    message: string,
+    options?: Parameters<typeof sonnerToast.error>[1],
+  ) => {
     return sonnerToast.error(message, {
       ...options,
       className: "animate-shake",
     });
   },
-  warning: (message: string, options?: Parameters<typeof sonnerToast.warning>[1]) => {
+  warning: (
+    message: string,
+    options?: Parameters<typeof sonnerToast.warning>[1],
+  ) => {
     return sonnerToast.warning(message, options);
   },
   info: (message: string, options?: Parameters<typeof sonnerToast.info>[1]) => {
     return sonnerToast.info(message, options);
   },
-  loading: (message: string, options?: Parameters<typeof sonnerToast.loading>[1]) => {
+  loading: (
+    message: string,
+    options?: Parameters<typeof sonnerToast.loading>[1],
+  ) => {
     return sonnerToast.loading(message, options);
   },
   promise: sonnerToast.promise,

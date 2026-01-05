@@ -12,6 +12,7 @@ import {
 } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { v2 as cloudinary } from "cloudinary";
+import { logActivity } from "./activity.actions";
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -269,6 +270,21 @@ export async function createSubmission(
   revalidatePath("/student/alas");
   revalidatePath("/student/submissions");
 
+  // Log activity
+  await logActivity({
+    userId: student._id.toString(),
+    action: "submission_created",
+    entityType: "submission",
+    entityId: submission._id.toString(),
+    details: {
+      alaId,
+      alaTitle: ala.title,
+      filesCount: data.files.length,
+      linksCount: data.links.length,
+      isGroupSubmission: ala.isGroupSubmission,
+    },
+  });
+
   return { success: true, submission: JSON.parse(JSON.stringify(submission)) };
 }
 
@@ -346,6 +362,20 @@ export async function updateSubmission(
   revalidatePath(`/student/alas/${submission.alaId}`);
   revalidatePath("/student/alas");
   revalidatePath("/student/submissions");
+
+  // Log activity
+  await logActivity({
+    userId: student._id.toString(),
+    action: "submission_updated",
+    entityType: "submission",
+    entityId: submissionId,
+    details: {
+      alaId: submission.alaId.toString(),
+      alaTitle: ala.title,
+      filesCount: data.files.length,
+      linksCount: data.links.length,
+    },
+  });
 
   return { success: true, submission: JSON.parse(JSON.stringify(updated)) };
 }

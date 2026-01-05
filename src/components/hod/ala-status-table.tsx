@@ -28,7 +28,10 @@ import {
   SimpleSortableHeader,
   PaginationControls,
 } from "@/components/ui/enhanced-data-table";
-import { DataExportButton, type ExportColumn } from "@/components/ui/data-export";
+import {
+  DataExportButton,
+  type ExportColumn,
+} from "@/components/ui/data-export";
 import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
 import { Clock, CheckCircle, Lock, AlertCircle } from "lucide-react";
 
@@ -119,17 +122,33 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
   }, [data, filters]);
 
   // Sorting
-  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredData, "deadline" as keyof ALAStatus, "desc");
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
+    filteredData,
+    "deadline" as keyof ALAStatus,
+    "desc",
+  );
 
   // Pagination
-  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+  } = useTablePagination(sortedData);
 
   // Export columns
   const exportColumns: ExportColumn<ALAStatus>[] = [
     { key: "title", header: "Title", accessor: (row) => row.title },
     { key: "subject", header: "Subject", accessor: (row) => row.subject },
     { key: "class", header: "Class", accessor: (row) => row.class },
-    { key: "deadline", header: "Deadline", accessor: (row) => row.deadline, format: (v) => new Date(v as string).toLocaleDateString() },
+    {
+      key: "deadline",
+      header: "Deadline",
+      accessor: (row) => row.deadline,
+      format: (v) => new Date(v as string).toLocaleDateString(),
+    },
     { key: "graded", header: "Graded", accessor: (row) => row.graded },
     { key: "pending", header: "Pending", accessor: (row) => row.pending },
     { key: "total", header: "Total Students", accessor: (row) => row.total },
@@ -242,7 +261,10 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
               </TableHeader>
               <TableBody>
                 {paginatedData.map((ala) => (
-                  <TableRow key={ala._id} className="transition-colors hover:bg-muted/50">
+                  <TableRow
+                    key={ala._id}
+                    className="hover:bg-muted/50 transition-colors"
+                  >
                     <TableCell className="max-w-[200px] truncate font-medium">
                       {ala.title}
                     </TableCell>
@@ -273,7 +295,9 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <span className="text-green-600 tabular-nums">{ala.graded}</span>
+                        <span className="text-green-600 tabular-nums">
+                          {ala.graded}
+                        </span>
                         <span className="text-muted-foreground">/</span>
                         <span className="tabular-nums">{ala.total}</span>
                         {ala.pending > 0 && (

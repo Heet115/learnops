@@ -9,6 +9,7 @@ import {
   UpdateUserInput,
 } from "@/lib/validations/user.validation";
 import { revalidatePath } from "next/cache";
+import { logActivity } from "./activity.actions";
 
 // Check if current user is admin
 async function requireAdmin() {
@@ -55,6 +56,18 @@ export async function createUser(input: CreateUserInput) {
     });
 
     revalidatePath("/admin/users");
+
+    // Log activity
+    await logActivity({
+      action: "user_created",
+      entityType: "user",
+      entityId: user._id.toString(),
+      details: {
+        email: validated.email,
+        role: validated.role,
+        name: `${validated.firstName} ${validated.lastName}`,
+      },
+    });
 
     return { success: true, user: JSON.parse(JSON.stringify(user)) };
   } catch (error: unknown) {
@@ -117,6 +130,17 @@ export async function updateUser(userId: string, input: UpdateUserInput) {
 
     revalidatePath("/admin/users");
 
+    // Log activity
+    await logActivity({
+      action: "user_updated",
+      entityType: "user",
+      entityId: userId,
+      details: {
+        changes: validated,
+        previousRole: user.role,
+      },
+    });
+
     return { success: true, user: JSON.parse(JSON.stringify(updatedUser)) };
   } catch (error) {
     console.error("Error updating user:", error);
@@ -143,6 +167,17 @@ export async function deactivateUser(userId: string) {
     await User.findByIdAndUpdate(userId, { isActive: false });
 
     revalidatePath("/admin/users");
+
+    // Log activity
+    await logActivity({
+      action: "user_deactivated",
+      entityType: "user",
+      entityId: userId,
+      details: {
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`,
+      },
+    });
 
     return { success: true };
   } catch (error) {
@@ -171,6 +206,17 @@ export async function reactivateUser(userId: string) {
 
     revalidatePath("/admin/users");
 
+    // Log activity
+    await logActivity({
+      action: "user_reactivated",
+      entityType: "user",
+      entityId: userId,
+      details: {
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`,
+      },
+    });
+
     return { success: true };
   } catch (error) {
     console.error("Error reactivating user:", error);
@@ -198,6 +244,18 @@ export async function deleteUser(userId: string) {
 
     revalidatePath("/admin/users");
 
+    // Log activity
+    await logActivity({
+      action: "user_deleted",
+      entityType: "user",
+      entityId: userId,
+      details: {
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`,
+        role: user.role,
+      },
+    });
+
     return { success: true };
   } catch (error) {
     console.error("Error deleting user:", error);
@@ -222,7 +280,6 @@ export async function getUserStats() {
 
   return { total, admins, hods, professors, students, inactive };
 }
-
 
 // Bulk deactivate users
 export async function bulkDeactivateUsers(userIds: string[]) {

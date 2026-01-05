@@ -16,11 +16,13 @@ import {
   FilterConfig,
   FilterValue,
 } from "@/components/ui/data-table-filter";
-import { useTablePagination, PaginationControls } from "@/components/ui/enhanced-data-table";
+import {
+  useTablePagination,
+  PaginationControls,
+} from "@/components/ui/enhanced-data-table";
 import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
 import {
   Calendar,
-  Clock,
   FileText,
   ArrowRight,
   CheckCircle,
@@ -175,7 +177,14 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
   }, [alas, filters]);
 
   // Pagination
-  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(filteredALAs, 6);
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+  } = useTablePagination(filteredALAs, 6);
 
   const formatDeadline = (deadline: string) => {
     const date = new Date(deadline);
@@ -237,94 +246,94 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
       ) : (
         <>
           {paginatedData.map((ala) => {
-          const status = getStatus(ala);
-          const deadline = formatDeadline(ala.deadline);
-          const canSubmit =
-            !ala.isLocked &&
-            new Date(ala.deadline) > new Date() &&
-            ala.submission?.status !== "submitted" &&
-            ala.submission?.status !== "graded";
+            const status = getStatus(ala);
+            const deadline = formatDeadline(ala.deadline);
+            const canSubmit =
+              !ala.isLocked &&
+              new Date(ala.deadline) > new Date() &&
+              ala.submission?.status !== "submitted" &&
+              ala.submission?.status !== "graded";
 
-          return (
-            <Card key={ala._id} className="transition-shadow hover:shadow-md">
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">{ala.title}</CardTitle>
-                    <CardDescription>
-                      {ala.subjectOfferingId?.subjectId?.code} -{" "}
-                      {ala.subjectOfferingId?.subjectId?.name}
-                    </CardDescription>
-                  </div>
-                  <Badge variant={status.variant} className={status.color}>
-                    {status.label}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
-                  {ala.description}
-                </p>
-
-                <div className="text-muted-foreground mb-4 flex flex-wrap items-center gap-4 text-sm">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    <span
-                      className={
-                        deadline.urgent ? "font-medium text-red-600" : ""
-                      }
-                    >
-                      {deadline.text}
-                    </span>
-                    {deadline.urgent && (
-                      <span className="font-medium text-red-600">
-                        ({deadline.label})
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <FileText className="h-4 w-4" />
-                    <span>{ala.maxMarks} marks</span>
-                  </div>
-                  {ala.isGroupSubmission && (
-                    <Badge variant="outline" className="text-xs">
-                      Group
+            return (
+              <Card key={ala._id} className="transition-shadow hover:shadow-md">
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <CardTitle className="text-lg">{ala.title}</CardTitle>
+                      <CardDescription>
+                        {ala.subjectOfferingId?.subjectId?.code} -{" "}
+                        {ala.subjectOfferingId?.subjectId?.name}
+                      </CardDescription>
+                    </div>
+                    <Badge variant={status.variant} className={status.color}>
+                      {status.label}
                     </Badge>
-                  )}
-                </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
+                    {ala.description}
+                  </p>
 
-                <div className="flex items-center justify-between">
-                  <div className="text-sm">
-                    {ala.submission?.status === "graded" && (
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="font-medium">
-                          Score: {ala.submission.marks}/{ala.maxMarks}
+                  <div className="text-muted-foreground mb-4 flex flex-wrap items-center gap-4 text-sm">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      <span
+                        className={
+                          deadline.urgent ? "font-medium text-red-600" : ""
+                        }
+                      >
+                        {deadline.text}
+                      </span>
+                      {deadline.urgent && (
+                        <span className="font-medium text-red-600">
+                          ({deadline.label})
                         </span>
-                      </div>
-                    )}
-                    {ala.submission?.status === "rejected" && (
-                      <div className="flex items-center gap-2 text-red-600">
-                        <XCircle className="h-4 w-4" />
-                        <span>Resubmission required</span>
-                      </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FileText className="h-4 w-4" />
+                      <span>{ala.maxMarks} marks</span>
+                    </div>
+                    {ala.isGroupSubmission && (
+                      <Badge variant="outline" className="text-xs">
+                        Group
+                      </Badge>
                     )}
                   </div>
-                  <Button
-                    asChild
-                    variant={canSubmit ? "default" : "outline"}
-                    size="sm"
-                  >
-                    <Link href={`/student/alas/${ala._id}`}>
-                      {canSubmit ? "Submit" : "View"}
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm">
+                      {ala.submission?.status === "graded" && (
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span className="font-medium">
+                            Score: {ala.submission.marks}/{ala.maxMarks}
+                          </span>
+                        </div>
+                      )}
+                      {ala.submission?.status === "rejected" && (
+                        <div className="flex items-center gap-2 text-red-600">
+                          <XCircle className="h-4 w-4" />
+                          <span>Resubmission required</span>
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      asChild
+                      variant={canSubmit ? "default" : "outline"}
+                      size="sm"
+                    >
+                      <Link href={`/student/alas/${ala._id}`}>
+                        {canSubmit ? "Submit" : "View"}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
           <PaginationControls
             pageIndex={currentPage}
             pageSize={pageSize}

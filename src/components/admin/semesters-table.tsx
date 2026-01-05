@@ -39,7 +39,12 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
-import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
+import {
+  useSimpleSort,
+  useTablePagination,
+  SimpleSortableHeader,
+  PaginationControls,
+} from "@/components/ui/enhanced-data-table";
 import {
   deleteSemester,
   bulkDeleteSemesters,
@@ -156,9 +161,19 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
   }, [filteredSemesters]);
 
   // Sorting
-  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(semestersWithId, "name" as keyof SemesterWithId);
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
+    semestersWithId,
+    "name" as keyof SemesterWithId,
+  );
 
-  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+  } = useTablePagination(sortedData);
 
   const {
     selectedItems,
@@ -220,7 +235,7 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
         },
       },
     ],
-    [clearSelection, router]
+    [clearSelection, router],
   );
 
   const handleDelete = async () => {
@@ -276,7 +291,13 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
                 <TableRow>
                   <TableHead className="w-[50px]">
                     <SelectAllCheckbox
-                      checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                      checked={
+                        isAllSelected
+                          ? true
+                          : isIndeterminate
+                            ? "indeterminate"
+                            : false
+                      }
                       onCheckedChange={toggleAll}
                     />
                   </TableHead>
@@ -333,8 +354,8 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
                       <TableCell className="text-muted-foreground">
                         {semester.startDate && semester.endDate ? (
                           <>
-                            {new Date(semester.startDate).toLocaleDateString()} -{" "}
-                            {new Date(semester.endDate).toLocaleDateString()}
+                            {new Date(semester.startDate).toLocaleDateString()}{" "}
+                            - {new Date(semester.endDate).toLocaleDateString()}
                           </>
                         ) : (
                           "Not set"

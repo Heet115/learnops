@@ -31,7 +31,6 @@ export async function getProfessorDashboardStats() {
     isActive: true,
   }).select("_id classId");
 
-  const offeringIds = offerings.map((o) => o._id);
   const classIds = [...new Set(offerings.map((o) => o.classId.toString()))];
 
   // Get ALAs
@@ -142,7 +141,6 @@ export async function getStudentDashboardStats() {
     isActive: true,
   }).select("_id deadline isLocked");
 
-  const alaIds = alas.map((a) => a._id);
   const now = new Date();
   const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 

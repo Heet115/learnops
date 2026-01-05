@@ -51,7 +51,9 @@ export const bulkStudentRowSchema = z.object({
 });
 
 export const bulkStudentImportSchema = z.object({
-  students: z.array(bulkStudentRowSchema).min(1, "At least one student required"),
+  students: z
+    .array(bulkStudentRowSchema)
+    .min(1, "At least one student required"),
   generatePasswords: z.boolean().default(true),
 });
 

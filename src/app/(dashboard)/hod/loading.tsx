@@ -1,14 +1,11 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  StatCardGridSkeleton,
-  ListSkeleton,
-} from "@/components/ui/skeletons";
+import { StatCardGridSkeleton, ListSkeleton } from "@/components/ui/skeletons";
 
 export default function HODDashboardLoading() {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar Skeleton */}
-      <div className="hidden md:flex w-64 flex-col border-r bg-sidebar p-4 space-y-4">
+      <div className="bg-sidebar hidden w-64 flex-col space-y-4 border-r p-4 md:flex">
         <div className="flex items-center gap-2 px-2 py-4">
           <Skeleton className="h-8 w-8 rounded" />
           <Skeleton className="h-5 w-24" />
@@ -22,7 +19,7 @@ export default function HODDashboardLoading() {
 
       {/* Main Content */}
       <div className="flex-1 p-6">
-        <div className="space-y-6 animate-in fade-in duration-300">
+        <div className="animate-in fade-in space-y-6 duration-300">
           {/* Header */}
           <div className="space-y-2">
             <Skeleton className="h-8 w-80" />
@@ -36,7 +33,7 @@ export default function HODDashboardLoading() {
           <div className="grid gap-4 md:grid-cols-2">
             {/* Courses */}
             <div className="bg-card rounded-xl border py-6 shadow-sm">
-              <div className="px-6 pb-4 flex items-center justify-between">
+              <div className="flex items-center justify-between px-6 pb-4">
                 <div className="space-y-2">
                   <Skeleton className="h-5 w-28" />
                   <Skeleton className="h-3 w-44" />
@@ -50,7 +47,7 @@ export default function HODDashboardLoading() {
 
             {/* Classes */}
             <div className="bg-card rounded-xl border py-6 shadow-sm">
-              <div className="px-6 pb-4 flex items-center justify-between">
+              <div className="flex items-center justify-between px-6 pb-4">
                 <div className="space-y-2">
                   <Skeleton className="h-5 w-24" />
                   <Skeleton className="h-3 w-36" />

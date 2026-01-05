@@ -63,9 +63,19 @@ const editableFieldGroups = [
       { key: "lastName", label: "Last Name", type: "text" },
       { key: "fatherName", label: "Father's Name", type: "text" },
       { key: "motherName", label: "Mother's Name", type: "text" },
-      { key: "gender", label: "Gender", type: "select", options: ["male", "female", "other"] },
+      {
+        key: "gender",
+        label: "Gender",
+        type: "select",
+        options: ["male", "female", "other"],
+      },
       { key: "dateOfBirth", label: "Date of Birth", type: "date" },
-      { key: "bloodGroup", label: "Blood Group", type: "select", options: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] },
+      {
+        key: "bloodGroup",
+        label: "Blood Group",
+        type: "select",
+        options: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+      },
     ],
   },
   {
@@ -174,7 +184,10 @@ export function RequestUpdateDialog({
     onOpenChange(false);
   };
 
-  const formatDisplayValue = (field: typeof allEditableFields[0], value: string) => {
+  const formatDisplayValue = (
+    field: (typeof allEditableFields)[0],
+    value: string,
+  ) => {
     if (!value) return "(empty)";
     if (field.key === "gender") return genderLabels[value] || value;
     if (field.key === "dateOfBirth") {
@@ -210,7 +223,7 @@ export function RequestUpdateDialog({
             {editableFieldGroups.map((group, groupIdx) => (
               <div key={group.title} className="space-y-3">
                 {groupIdx > 0 && <Separator />}
-                <h4 className="text-sm font-semibold text-muted-foreground">
+                <h4 className="text-muted-foreground text-sm font-semibold">
                   {group.title}
                 </h4>
                 <div className="space-y-3">
@@ -244,19 +257,25 @@ export function RequestUpdateDialog({
                           </p>
                           {field.type === "select" ? (
                             <Select
-                              value={formData[field.key as keyof CurrentProfile]}
+                              value={
+                                formData[field.key as keyof CurrentProfile]
+                              }
                               onValueChange={(value) =>
                                 setFormData({ ...formData, [field.key]: value })
                               }
                               disabled={isLoading}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+                                <SelectValue
+                                  placeholder={`Select ${field.label.toLowerCase()}`}
+                                />
                               </SelectTrigger>
                               <SelectContent>
                                 {field.options?.map((opt) => (
                                   <SelectItem key={opt} value={opt}>
-                                    {field.key === "gender" ? genderLabels[opt] || opt : opt}
+                                    {field.key === "gender"
+                                      ? genderLabels[opt] || opt
+                                      : opt}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -265,7 +284,9 @@ export function RequestUpdateDialog({
                             <Input
                               type={field.type}
                               placeholder={`New ${field.label.toLowerCase()}`}
-                              value={formData[field.key as keyof CurrentProfile]}
+                              value={
+                                formData[field.key as keyof CurrentProfile]
+                              }
                               onChange={(e) =>
                                 setFormData({
                                   ...formData,

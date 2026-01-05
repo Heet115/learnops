@@ -11,6 +11,7 @@ export { ALA } from "./models/ala.model";
 export { Submission } from "./models/submission.model";
 export { Group } from "./models/group.model";
 export { Notification } from "./models/notification.model";
+export { Activity } from "./models/activity.model";
 export { StudentProfile } from "./models/student-profile.model";
 export { ProfileUpdateRequest } from "./models/profile-update-request.model";
 export type { IUser, UserRole } from "./models/user.model";
@@ -29,6 +30,11 @@ export type {
 } from "./models/submission.model";
 export type { IGroup, IGroupMember } from "./models/group.model";
 export type { INotification } from "./models/notification.model";
+export type {
+  IActivity,
+  ActivityAction,
+  EntityType,
+} from "./models/activity.model";
 export type {
   IStudentProfile,
   Gender,

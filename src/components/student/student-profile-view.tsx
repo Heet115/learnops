@@ -194,10 +194,19 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <ProfileField label="Primary Email" value={user.email} />
-            <ProfileField label="Alternate Email" value={profile?.alternateEmail} />
+            <ProfileField
+              label="Alternate Email"
+              value={profile?.alternateEmail}
+            />
             <Separator />
-            <ProfileField label="Primary Mobile" value={profile?.primaryMobile} />
-            <ProfileField label="Alternate Mobile" value={profile?.alternateMobile} />
+            <ProfileField
+              label="Primary Mobile"
+              value={profile?.primaryMobile}
+            />
+            <ProfileField
+              label="Alternate Mobile"
+              value={profile?.alternateMobile}
+            />
           </CardContent>
         </Card>
 

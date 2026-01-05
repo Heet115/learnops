@@ -34,8 +34,8 @@ function parseDate(dateStr?: string): Date | undefined {
   // Try common formats: DD/MM/YYYY, DD-MM-YYYY, YYYY-MM-DD
   const formats = [
     /^(\d{2})\/(\d{2})\/(\d{4})$/, // DD/MM/YYYY
-    /^(\d{2})-(\d{2})-(\d{4})$/,   // DD-MM-YYYY
-    /^(\d{4})-(\d{2})-(\d{2})$/,   // YYYY-MM-DD
+    /^(\d{2})-(\d{2})-(\d{4})$/, // DD-MM-YYYY
+    /^(\d{4})-(\d{2})-(\d{2})$/, // YYYY-MM-DD
   ];
 
   for (const format of formats) {
@@ -43,10 +43,18 @@ function parseDate(dateStr?: string): Date | undefined {
     if (match) {
       if (format === formats[2]) {
         // YYYY-MM-DD
-        return new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
+        return new Date(
+          parseInt(match[1]),
+          parseInt(match[2]) - 1,
+          parseInt(match[3]),
+        );
       } else {
         // DD/MM/YYYY or DD-MM-YYYY
-        return new Date(parseInt(match[3]), parseInt(match[2]) - 1, parseInt(match[1]));
+        return new Date(
+          parseInt(match[3]),
+          parseInt(match[2]) - 1,
+          parseInt(match[1]),
+        );
       }
     }
   }
@@ -56,7 +64,9 @@ function parseDate(dateStr?: string): Date | undefined {
 }
 
 // Normalize gender value
-function normalizeGender(gender?: string): "male" | "female" | "other" | undefined {
+function normalizeGender(
+  gender?: string,
+): "male" | "female" | "other" | undefined {
   if (!gender) return undefined;
   const g = gender.toLowerCase().trim();
   if (g === "m" || g === "male") return "male";
@@ -70,8 +80,19 @@ type BloodGroupType = "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
 function normalizeBloodGroup(bg?: string): BloodGroupType | undefined {
   if (!bg) return undefined;
   const normalized = bg.toUpperCase().trim().replace(/\s/g, "");
-  const valid: BloodGroupType[] = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-  return valid.includes(normalized as BloodGroupType) ? (normalized as BloodGroupType) : undefined;
+  const valid: BloodGroupType[] = [
+    "A+",
+    "A-",
+    "B+",
+    "B-",
+    "AB+",
+    "AB-",
+    "O+",
+    "O-",
+  ];
+  return valid.includes(normalized as BloodGroupType)
+    ? (normalized as BloodGroupType)
+    : undefined;
 }
 
 async function requireAdmin() {
@@ -84,7 +105,7 @@ async function requireAdmin() {
 
 // Validate parsed rows against existing data
 export async function validateBulkStudentData(
-  rows: ParsedStudentRow[]
+  rows: ParsedStudentRow[],
 ): Promise<ParsedStudentRow[]> {
   await requireAdmin();
   await connectDB();
@@ -93,7 +114,9 @@ export async function validateBulkStudentData(
   const existingUsers = await User.find({
     email: { $in: rows.map((r) => r.email.toLowerCase()) },
   }).select("email");
-  const existingEmails = new Set(existingUsers.map((u) => u.email.toLowerCase()));
+  const existingEmails = new Set(
+    existingUsers.map((u) => u.email.toLowerCase()),
+  );
 
   // Get all valid class IDs
   const classes = await Class.find({ isActive: true }).select("_id name");
@@ -139,7 +162,10 @@ export async function validateBulkStudentData(
     }
 
     // Validate optional fields
-    if (row.alternateEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.alternateEmail)) {
+    if (
+      row.alternateEmail &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.alternateEmail)
+    ) {
       errors.push("Invalid alternate email format");
     }
 
@@ -162,7 +188,7 @@ export async function validateBulkStudentData(
 
 // Bulk create students
 export async function bulkCreateStudents(
-  input: BulkStudentImportInput
+  input: BulkStudentImportInput,
 ): Promise<BulkImportResult> {
   await requireAdmin();
 
@@ -213,7 +239,9 @@ export async function bulkCreateStudents(
         },
       });
 
-      const semesterData = classDoc?.semesterId as { courseId?: { departmentId?: string; _id?: string } };
+      const semesterData = classDoc?.semesterId as {
+        courseId?: { departmentId?: string; _id?: string };
+      };
       const departmentId = semesterData?.courseId?.departmentId;
       const courseId = semesterData?.courseId?._id;
 

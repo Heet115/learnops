@@ -30,7 +30,12 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
-import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
+import {
+  useSimpleSort,
+  useTablePagination,
+  SimpleSortableHeader,
+  PaginationControls,
+} from "@/components/ui/enhanced-data-table";
 import { MoreHorizontal, Pencil, Trash2, Power, PowerOff } from "lucide-react";
 import {
   deleteSubject,
@@ -194,9 +199,19 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
   }, [subjects, filters]);
 
   // Sorting
-  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredSubjects, "code" as keyof Subject);
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
+    filteredSubjects,
+    "code" as keyof Subject,
+  );
 
-  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+  } = useTablePagination(sortedData);
 
   const {
     selectedItems,
@@ -258,7 +273,7 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
         },
       },
     ],
-    [clearSelection, router]
+    [clearSelection, router],
   );
 
   const handleDeleteClick = (id: string, name: string) => {
@@ -310,11 +325,17 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
         ) : (
           <>
             <Table>
-                <TableHeader>
+              <TableHeader>
                 <TableRow>
                   <TableHead className="w-[50px]">
                     <SelectAllCheckbox
-                      checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                      checked={
+                        isAllSelected
+                          ? true
+                          : isIndeterminate
+                            ? "indeterminate"
+                            : false
+                      }
                       onCheckedChange={toggleAll}
                     />
                   </TableHead>
@@ -350,15 +371,21 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
                 {paginatedData.map((subject) => (
                   <TableRow
                     key={subject._id}
-                    data-state={isSelected(subject._id) ? "selected" : undefined}
+                    data-state={
+                      isSelected(subject._id) ? "selected" : undefined
+                    }
                   >
                     <TableCell>
                       <SelectRowCheckbox
                         checked={isSelected(subject._id)}
-                        onCheckedChange={(checked) => toggleRow(subject._id, checked)}
+                        onCheckedChange={(checked) =>
+                          toggleRow(subject._id, checked)
+                        }
                       />
                     </TableCell>
-                    <TableCell className="font-medium">{subject.code}</TableCell>
+                    <TableCell className="font-medium">
+                      {subject.code}
+                    </TableCell>
                     <TableCell>{subject.name}</TableCell>
                     <TableCell>{subject.semesterId?.name || "N/A"}</TableCell>
                     <TableCell>
@@ -366,11 +393,14 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
                       {subject.semesterId?.courseId?.code || ""})
                     </TableCell>
                     <TableCell>
-                      {subject.semesterId?.courseId?.departmentId?.code || "N/A"}
+                      {subject.semesterId?.courseId?.departmentId?.code ||
+                        "N/A"}
                     </TableCell>
                     <TableCell>{subject.credits}</TableCell>
                     <TableCell>
-                      <Badge variant={subject.isActive ? "default" : "secondary"}>
+                      <Badge
+                        variant={subject.isActive ? "default" : "secondary"}
+                      >
                         {subject.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>

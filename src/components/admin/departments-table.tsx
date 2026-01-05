@@ -45,8 +45,6 @@ import {
   SimpleSortableHeader,
   PaginationControls,
 } from "@/components/ui/enhanced-data-table";
-import { DataExportButton, type ExportColumn } from "@/components/ui/data-export";
-import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
 import {
   deleteDepartment,
   bulkDeleteDepartments,
@@ -92,7 +90,9 @@ const filterConfigs: FilterConfig[] = [
 export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(null);
+  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [filters, setFilters] = useState<FilterValue>({
@@ -138,14 +138,24 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
         ...d,
         _id: (d._id as unknown as { toString(): string }).toString(),
       })),
-    [filteredDepartments]
+    [filteredDepartments],
   );
 
   // Sorting
-  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(departmentsWithStringId, "code" as keyof typeof departmentsWithStringId[0]);
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
+    departmentsWithStringId,
+    "code" as keyof (typeof departmentsWithStringId)[0],
+  );
 
   // Pagination
-  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    setCurrentPage,
+    setPageSize,
+  } = useTablePagination(sortedData);
 
   const {
     selectedItems,
@@ -207,7 +217,7 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
         },
       },
     ],
-    [clearSelection, router]
+    [clearSelection, router],
   );
 
   const handleDelete = async () => {
@@ -260,121 +270,135 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
           </div>
         ) : (
           <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">
-                  <SelectAllCheckbox
-                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
-                    onCheckedChange={toggleAll}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">
+                    <SelectAllCheckbox
+                      checked={
+                        isAllSelected
+                          ? true
+                          : isIndeterminate
+                            ? "indeterminate"
+                            : false
+                      }
+                      onCheckedChange={toggleAll}
+                    />
+                  </TableHead>
+                  <SimpleSortableHeader<(typeof departmentsWithStringId)[0]>
+                    label="Code"
+                    sortKey="code"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
                   />
-                </TableHead>
-                <SimpleSortableHeader<typeof departmentsWithStringId[0]>
-                  label="Code"
-                  sortKey="code"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader<typeof departmentsWithStringId[0]>
-                  label="Name"
-                  sortKey="name"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <TableHead>HOD</TableHead>
-                <SimpleSortableHeader<typeof departmentsWithStringId[0]>
-                  label="Status"
-                  sortKey="isActive"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader<typeof departmentsWithStringId[0]>
-                  label="Created"
-                  sortKey="createdAt"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedData.map((dept) => {
-                const hod = dept.hodId as unknown as IUser | undefined;
-                return (
-                  <TableRow
-                    key={dept._id}
-                    data-state={isSelected(dept._id) ? "selected" : undefined}
-                  >
-                    <TableCell>
-                      <SelectRowCheckbox
-                        checked={isSelected(dept._id)}
-                        onCheckedChange={(checked) => toggleRow(dept._id, checked)}
-                      />
-                    </TableCell>
-                    <TableCell className="font-mono font-medium">
-                      {dept.code}
-                    </TableCell>
-                    <TableCell>{dept.name}</TableCell>
-                    <TableCell>
-                      {hod ? (
-                        `${hod.firstName} ${hod.lastName}`
-                      ) : (
-                        <span className="text-muted-foreground">
-                          Not assigned
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={dept.isActive ? "default" : "secondary"}>
-                        {dept.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground tabular-nums">
-                      {new Date(dept.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => setEditDepartment(dept as unknown as IDepartment)}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => setDeleteId(dept._id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-          <PaginationControls
-            pageIndex={currentPage}
-            pageSize={pageSize}
-            pageCount={totalPages}
-            totalItems={departmentsWithStringId.length}
-            canPreviousPage={currentPage > 0}
-            canNextPage={currentPage < totalPages - 1}
-            onPageChange={setCurrentPage}
-            onPageSizeChange={setPageSize}
-          />
+                  <SimpleSortableHeader<(typeof departmentsWithStringId)[0]>
+                    label="Name"
+                    sortKey="name"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHead>HOD</TableHead>
+                  <SimpleSortableHeader<(typeof departmentsWithStringId)[0]>
+                    label="Status"
+                    sortKey="isActive"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <SimpleSortableHeader<(typeof departmentsWithStringId)[0]>
+                    label="Created"
+                    sortKey="createdAt"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHead className="w-[50px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((dept) => {
+                  const hod = dept.hodId as unknown as IUser | undefined;
+                  return (
+                    <TableRow
+                      key={dept._id}
+                      data-state={isSelected(dept._id) ? "selected" : undefined}
+                    >
+                      <TableCell>
+                        <SelectRowCheckbox
+                          checked={isSelected(dept._id)}
+                          onCheckedChange={(checked) =>
+                            toggleRow(dept._id, checked)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell className="font-mono font-medium">
+                        {dept.code}
+                      </TableCell>
+                      <TableCell>{dept.name}</TableCell>
+                      <TableCell>
+                        {hod ? (
+                          `${hod.firstName} ${hod.lastName}`
+                        ) : (
+                          <span className="text-muted-foreground">
+                            Not assigned
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={dept.isActive ? "default" : "secondary"}
+                        >
+                          {dept.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground tabular-nums">
+                        {new Date(dept.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() =>
+                                setEditDepartment(
+                                  dept as unknown as IDepartment,
+                                )
+                              }
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => setDeleteId(dept._id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            <PaginationControls
+              pageIndex={currentPage}
+              pageSize={pageSize}
+              pageCount={totalPages}
+              totalItems={departmentsWithStringId.length}
+              canPreviousPage={currentPage > 0}
+              canNextPage={currentPage < totalPages - 1}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
           </>
         )}
       </div>

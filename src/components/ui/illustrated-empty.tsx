@@ -11,7 +11,6 @@ import {
   Bell,
   Search,
   FolderOpen,
-  Inbox,
   ClipboardList,
   GraduationCap,
   Upload,
@@ -28,12 +27,37 @@ const illustrations = {
       viewBox="0 0 200 150"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full"
+      className="h-full w-full"
     >
-      <rect x="40" y="50" width="120" height="80" rx="8" className="fill-muted stroke-border" strokeWidth="2" />
-      <path d="M40 58C40 53.5817 43.5817 50 48 50H80L90 60H152C156.418 60 160 63.5817 160 68V130C160 134.418 156.418 138 152 138H48C43.5817 138 40 134.418 40 130V58Z" className="fill-muted/50 stroke-border" strokeWidth="2" />
-      <circle cx="100" cy="100" r="20" className="fill-background stroke-muted-foreground/30" strokeWidth="2" strokeDasharray="4 4" />
-      <path d="M95 100L99 104L105 96" className="stroke-muted-foreground/50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <rect
+        x="40"
+        y="50"
+        width="120"
+        height="80"
+        rx="8"
+        className="fill-muted stroke-border"
+        strokeWidth="2"
+      />
+      <path
+        d="M40 58C40 53.5817 43.5817 50 48 50H80L90 60H152C156.418 60 160 63.5817 160 68V130C160 134.418 156.418 138 152 138H48C43.5817 138 40 134.418 40 130V58Z"
+        className="fill-muted/50 stroke-border"
+        strokeWidth="2"
+      />
+      <circle
+        cx="100"
+        cy="100"
+        r="20"
+        className="fill-background stroke-muted-foreground/30"
+        strokeWidth="2"
+        strokeDasharray="4 4"
+      />
+      <path
+        d="M95 100L99 104L105 96"
+        className="stroke-muted-foreground/50"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   ),
 
@@ -43,12 +67,39 @@ const illustrations = {
       viewBox="0 0 200 150"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full"
+      className="h-full w-full"
     >
-      <circle cx="85" cy="70" r="35" className="fill-muted stroke-border" strokeWidth="2" />
-      <circle cx="85" cy="70" r="25" className="fill-background stroke-muted-foreground/30" strokeWidth="2" />
-      <line x1="105" y1="90" x2="140" y2="125" className="stroke-muted-foreground" strokeWidth="8" strokeLinecap="round" />
-      <path d="M75 65L80 70L90 60" className="stroke-muted-foreground/40" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
+      <circle
+        cx="85"
+        cy="70"
+        r="35"
+        className="fill-muted stroke-border"
+        strokeWidth="2"
+      />
+      <circle
+        cx="85"
+        cy="70"
+        r="25"
+        className="fill-background stroke-muted-foreground/30"
+        strokeWidth="2"
+      />
+      <line
+        x1="105"
+        y1="90"
+        x2="140"
+        y2="125"
+        className="stroke-muted-foreground"
+        strokeWidth="8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M75 65L80 70L90 60"
+        className="stroke-muted-foreground/40"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.5"
+      />
       <circle cx="150" cy="40" r="4" className="fill-muted-foreground/20" />
       <circle cx="45" cy="110" r="3" className="fill-muted-foreground/20" />
       <circle cx="165" cy="100" r="5" className="fill-muted-foreground/20" />
@@ -61,13 +112,40 @@ const illustrations = {
       viewBox="0 0 200 150"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full"
+      className="h-full w-full"
     >
-      <path d="M100 30C80 30 65 45 65 65V90L55 105H145L135 90V65C135 45 120 30 100 30Z" className="fill-muted stroke-border" strokeWidth="2" />
-      <circle cx="100" cy="120" r="10" className="fill-muted stroke-border" strokeWidth="2" />
-      <path d="M85 65C85 56.7157 91.7157 50 100 50" className="stroke-muted-foreground/30" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="130" cy="45" r="12" className="fill-background stroke-green-500" strokeWidth="2" />
-      <path d="M125 45L128 48L135 41" className="stroke-green-500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M100 30C80 30 65 45 65 65V90L55 105H145L135 90V65C135 45 120 30 100 30Z"
+        className="fill-muted stroke-border"
+        strokeWidth="2"
+      />
+      <circle
+        cx="100"
+        cy="120"
+        r="10"
+        className="fill-muted stroke-border"
+        strokeWidth="2"
+      />
+      <path
+        d="M85 65C85 56.7157 91.7157 50 100 50"
+        className="stroke-muted-foreground/30"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <circle
+        cx="130"
+        cy="45"
+        r="12"
+        className="fill-background stroke-green-500"
+        strokeWidth="2"
+      />
+      <path
+        d="M125 45L128 48L135 41"
+        className="stroke-green-500"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   ),
 
@@ -77,15 +155,63 @@ const illustrations = {
       viewBox="0 0 200 150"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full"
+      className="h-full w-full"
     >
-      <rect x="50" y="30" width="100" height="100" rx="8" className="fill-muted stroke-border" strokeWidth="2" />
-      <rect x="60" y="45" width="60" height="6" rx="3" className="fill-muted-foreground/20" />
-      <rect x="60" y="58" width="80" height="4" rx="2" className="fill-muted-foreground/10" />
-      <rect x="60" y="68" width="70" height="4" rx="2" className="fill-muted-foreground/10" />
-      <rect x="60" y="78" width="75" height="4" rx="2" className="fill-muted-foreground/10" />
-      <circle cx="140" cy="110" r="20" className="fill-background stroke-primary" strokeWidth="2" />
-      <path d="M140 100V115M140 115L135 110M140 115L145 110" className="stroke-primary" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <rect
+        x="50"
+        y="30"
+        width="100"
+        height="100"
+        rx="8"
+        className="fill-muted stroke-border"
+        strokeWidth="2"
+      />
+      <rect
+        x="60"
+        y="45"
+        width="60"
+        height="6"
+        rx="3"
+        className="fill-muted-foreground/20"
+      />
+      <rect
+        x="60"
+        y="58"
+        width="80"
+        height="4"
+        rx="2"
+        className="fill-muted-foreground/10"
+      />
+      <rect
+        x="60"
+        y="68"
+        width="70"
+        height="4"
+        rx="2"
+        className="fill-muted-foreground/10"
+      />
+      <rect
+        x="60"
+        y="78"
+        width="75"
+        height="4"
+        rx="2"
+        className="fill-muted-foreground/10"
+      />
+      <circle
+        cx="140"
+        cy="110"
+        r="20"
+        className="fill-background stroke-primary"
+        strokeWidth="2"
+      />
+      <path
+        d="M140 100V115M140 115L135 110M140 115L145 110"
+        className="stroke-primary"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   ),
 
@@ -95,14 +221,44 @@ const illustrations = {
       viewBox="0 0 200 150"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full"
+      className="h-full w-full"
     >
-      <circle cx="100" cy="55" r="25" className="fill-muted stroke-border" strokeWidth="2" />
-      <path d="M60 130C60 105 77 90 100 90C123 90 140 105 140 130" className="fill-muted stroke-border" strokeWidth="2" />
-      <circle cx="60" cy="60" r="15" className="fill-muted/50 stroke-border" strokeWidth="2" opacity="0.5" />
-      <circle cx="140" cy="60" r="15" className="fill-muted/50 stroke-border" strokeWidth="2" opacity="0.5" />
+      <circle
+        cx="100"
+        cy="55"
+        r="25"
+        className="fill-muted stroke-border"
+        strokeWidth="2"
+      />
+      <path
+        d="M60 130C60 105 77 90 100 90C123 90 140 105 140 130"
+        className="fill-muted stroke-border"
+        strokeWidth="2"
+      />
+      <circle
+        cx="60"
+        cy="60"
+        r="15"
+        className="fill-muted/50 stroke-border"
+        strokeWidth="2"
+        opacity="0.5"
+      />
+      <circle
+        cx="140"
+        cy="60"
+        r="15"
+        className="fill-muted/50 stroke-border"
+        strokeWidth="2"
+        opacity="0.5"
+      />
       <circle cx="100" cy="55" r="8" className="fill-background" />
-      <path d="M96 53L100 57L108 49" className="stroke-muted-foreground/30" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M96 53L100 57L108 49"
+        className="stroke-muted-foreground/30"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   ),
 
@@ -112,14 +268,46 @@ const illustrations = {
       viewBox="0 0 200 150"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full"
+      className="h-full w-full"
     >
-      <circle cx="100" cy="75" r="45" className="fill-green-100 dark:fill-green-900/30 stroke-green-500" strokeWidth="3" />
-      <path d="M75 75L90 90L125 55" className="stroke-green-500" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="45" cy="45" r="8" className="fill-green-200 dark:fill-green-800/50" />
-      <circle cx="160" cy="55" r="6" className="fill-green-200 dark:fill-green-800/50" />
-      <circle cx="155" cy="115" r="10" className="fill-green-200 dark:fill-green-800/50" />
-      <circle cx="50" cy="110" r="5" className="fill-green-200 dark:fill-green-800/50" />
+      <circle
+        cx="100"
+        cy="75"
+        r="45"
+        className="fill-green-100 stroke-green-500 dark:fill-green-900/30"
+        strokeWidth="3"
+      />
+      <path
+        d="M75 75L90 90L125 55"
+        className="stroke-green-500"
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle
+        cx="45"
+        cy="45"
+        r="8"
+        className="fill-green-200 dark:fill-green-800/50"
+      />
+      <circle
+        cx="160"
+        cy="55"
+        r="6"
+        className="fill-green-200 dark:fill-green-800/50"
+      />
+      <circle
+        cx="155"
+        cy="115"
+        r="10"
+        className="fill-green-200 dark:fill-green-800/50"
+      />
+      <circle
+        cx="50"
+        cy="110"
+        r="5"
+        className="fill-green-200 dark:fill-green-800/50"
+      />
     </svg>
   ),
 
@@ -129,13 +317,39 @@ const illustrations = {
       viewBox="0 0 200 150"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full"
+      className="h-full w-full"
     >
-      <circle cx="100" cy="75" r="45" className="fill-red-100 dark:fill-red-900/30 stroke-red-500" strokeWidth="3" />
-      <path d="M80 55L120 95M120 55L80 95" className="stroke-red-500" strokeWidth="6" strokeLinecap="round" />
-      <circle cx="45" cy="45" r="8" className="fill-red-200 dark:fill-red-800/50" />
-      <circle cx="160" cy="55" r="6" className="fill-red-200 dark:fill-red-800/50" />
-      <circle cx="155" cy="115" r="10" className="fill-red-200 dark:fill-red-800/50" />
+      <circle
+        cx="100"
+        cy="75"
+        r="45"
+        className="fill-red-100 stroke-red-500 dark:fill-red-900/30"
+        strokeWidth="3"
+      />
+      <path
+        d="M80 55L120 95M120 55L80 95"
+        className="stroke-red-500"
+        strokeWidth="6"
+        strokeLinecap="round"
+      />
+      <circle
+        cx="45"
+        cy="45"
+        r="8"
+        className="fill-red-200 dark:fill-red-800/50"
+      />
+      <circle
+        cx="160"
+        cy="55"
+        r="6"
+        className="fill-red-200 dark:fill-red-800/50"
+      />
+      <circle
+        cx="155"
+        cy="115"
+        r="10"
+        className="fill-red-200 dark:fill-red-800/50"
+      />
     </svg>
   ),
 };
@@ -262,7 +476,8 @@ export function IllustratedEmpty({
   const illustration = customIllustration || config?.illustration || "noData";
   const Icon = CustomIcon || config?.icon || FolderOpen;
   const title = customTitle || config?.title || "No data";
-  const description = customDescription || config?.description || "Nothing to show here yet.";
+  const description =
+    customDescription || config?.description || "Nothing to show here yet.";
   const tip = customTip ?? config?.tip;
 
   const sizeClasses = {
@@ -296,7 +511,7 @@ export function IllustratedEmpty({
       className={cn(
         "flex flex-col items-center justify-center text-center",
         sizes.container,
-        className
+        className,
       )}
       style={{ animation: "fadeIn 0.3s ease-out forwards" }}
     >
@@ -306,23 +521,30 @@ export function IllustratedEmpty({
       </div>
 
       {/* Icon badge */}
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+      <div className="bg-muted mb-3 flex h-10 w-10 items-center justify-center rounded-full">
         <Icon className={cn("text-muted-foreground", sizes.icon)} />
       </div>
 
       {/* Title */}
-      <h3 className={cn("font-semibold text-foreground mb-1", sizes.title)}>
+      <h3 className={cn("text-foreground mb-1 font-semibold", sizes.title)}>
         {title}
       </h3>
 
       {/* Description */}
-      <p className={cn("text-muted-foreground max-w-sm mb-2", sizes.description)}>
+      <p
+        className={cn("text-muted-foreground mb-2 max-w-sm", sizes.description)}
+      >
         {description}
       </p>
 
       {/* Tip */}
       {tip && (
-        <p className={cn("text-muted-foreground/70 max-w-xs italic", sizes.description)}>
+        <p
+          className={cn(
+            "text-muted-foreground/70 max-w-xs italic",
+            sizes.description,
+          )}
+        >
           💡 {tip}
         </p>
       )}

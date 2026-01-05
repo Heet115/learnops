@@ -800,9 +800,14 @@ export async function bulkDeleteDepartments(ids: string[]) {
 
   try {
     // Check if any department has courses
-    const coursesCount = await Course.countDocuments({ departmentId: { $in: ids } });
+    const coursesCount = await Course.countDocuments({
+      departmentId: { $in: ids },
+    });
     if (coursesCount > 0) {
-      return { success: false, error: "Some departments have existing courses" };
+      return {
+        success: false,
+        error: "Some departments have existing courses",
+      };
     }
 
     const result = await Department.deleteMany({ _id: { $in: ids } });
@@ -815,14 +820,17 @@ export async function bulkDeleteDepartments(ids: string[]) {
 }
 
 // Bulk toggle department status
-export async function bulkToggleDepartmentStatus(ids: string[], isActive: boolean) {
+export async function bulkToggleDepartmentStatus(
+  ids: string[],
+  isActive: boolean,
+) {
   await requireAdmin();
   await connectDB();
 
   try {
     const result = await Department.updateMany(
       { _id: { $in: ids } },
-      { isActive }
+      { isActive },
     );
     revalidatePath("/admin/departments");
     return { success: true, count: result.modifiedCount };
@@ -839,20 +847,27 @@ export async function bulkDeleteCourses(ids: string[]) {
 
   try {
     // Check for semesters with subjects
-    const semesters = await Semester.find({ courseId: { $in: ids } }).select("_id");
+    const semesters = await Semester.find({ courseId: { $in: ids } }).select(
+      "_id",
+    );
     const semesterIds = semesters.map((s) => s._id);
-    
+
     if (semesterIds.length > 0) {
-      const subjectsCount = await Subject.countDocuments({ semesterId: { $in: semesterIds } });
+      const subjectsCount = await Subject.countDocuments({
+        semesterId: { $in: semesterIds },
+      });
       if (subjectsCount > 0) {
-        return { success: false, error: "Some courses have subjects in their semesters" };
+        return {
+          success: false,
+          error: "Some courses have subjects in their semesters",
+        };
       }
     }
 
     // Delete semesters first
     await Semester.deleteMany({ courseId: { $in: ids } });
     const result = await Course.deleteMany({ _id: { $in: ids } });
-    
+
     revalidatePath("/admin/courses");
     revalidatePath("/admin/semesters");
     return { success: true, count: result.deletedCount };
@@ -884,7 +899,9 @@ export async function bulkDeleteSubjects(ids: string[]) {
 
   try {
     // Check for subject offerings
-    const offeringsCount = await SubjectOffering.countDocuments({ subjectId: { $in: ids } });
+    const offeringsCount = await SubjectOffering.countDocuments({
+      subjectId: { $in: ids },
+    });
     if (offeringsCount > 0) {
       return { success: false, error: "Some subjects have existing offerings" };
     }
@@ -899,12 +916,18 @@ export async function bulkDeleteSubjects(ids: string[]) {
 }
 
 // Bulk toggle subject status
-export async function bulkToggleSubjectStatus(ids: string[], isActive: boolean) {
+export async function bulkToggleSubjectStatus(
+  ids: string[],
+  isActive: boolean,
+) {
   await requireAdmin();
   await connectDB();
 
   try {
-    const result = await Subject.updateMany({ _id: { $in: ids } }, { isActive });
+    const result = await Subject.updateMany(
+      { _id: { $in: ids } },
+      { isActive },
+    );
     revalidatePath("/admin/subjects");
     return { success: true, count: result.modifiedCount };
   } catch (error) {
@@ -920,9 +943,14 @@ export async function bulkDeleteClasses(ids: string[]) {
 
   try {
     // Check for subject offerings
-    const offeringsCount = await SubjectOffering.countDocuments({ classId: { $in: ids } });
+    const offeringsCount = await SubjectOffering.countDocuments({
+      classId: { $in: ids },
+    });
     if (offeringsCount > 0) {
-      return { success: false, error: "Some classes have existing subject offerings" };
+      return {
+        success: false,
+        error: "Some classes have existing subject offerings",
+      };
     }
 
     const result = await Class.deleteMany({ _id: { $in: ids } });
@@ -965,12 +993,18 @@ export async function bulkDeleteSubjectOfferings(ids: string[]) {
 }
 
 // Bulk toggle subject offering status
-export async function bulkToggleSubjectOfferingStatus(ids: string[], isActive: boolean) {
+export async function bulkToggleSubjectOfferingStatus(
+  ids: string[],
+  isActive: boolean,
+) {
   await requireAdmin();
   await connectDB();
 
   try {
-    const result = await SubjectOffering.updateMany({ _id: { $in: ids } }, { isActive });
+    const result = await SubjectOffering.updateMany(
+      { _id: { $in: ids } },
+      { isActive },
+    );
     revalidatePath("/admin/subject-offerings");
     return { success: true, count: result.modifiedCount };
   } catch (error) {
@@ -1001,7 +1035,9 @@ export async function bulkDeleteSemesters(ids: string[]) {
 
   try {
     // Check for subjects
-    const subjectsCount = await Subject.countDocuments({ semesterId: { $in: ids } });
+    const subjectsCount = await Subject.countDocuments({
+      semesterId: { $in: ids },
+    });
     if (subjectsCount > 0) {
       return { success: false, error: "Some semesters have existing subjects" };
     }
@@ -1016,12 +1052,18 @@ export async function bulkDeleteSemesters(ids: string[]) {
 }
 
 // Bulk toggle semester status
-export async function bulkToggleSemesterStatus(ids: string[], isActive: boolean) {
+export async function bulkToggleSemesterStatus(
+  ids: string[],
+  isActive: boolean,
+) {
   await requireAdmin();
   await connectDB();
 
   try {
-    const result = await Semester.updateMany({ _id: { $in: ids } }, { isActive });
+    const result = await Semester.updateMany(
+      { _id: { $in: ids } },
+      { isActive },
+    );
     revalidatePath("/admin/semesters");
     return { success: true, count: result.modifiedCount };
   } catch (error) {

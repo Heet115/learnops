@@ -55,20 +55,27 @@ export function NotificationBell({ role }: NotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const fetchNotifications = async () => {
-    const [notifs, count] = await Promise.all([
-      getNotifications(20),
-      getUnreadCount(),
-    ]);
-    setNotifications(notifs);
-    setUnreadCount(count);
-  };
-
   useEffect(() => {
-    fetchNotifications();
+    let isMounted = true;
+
+    const loadNotifications = async () => {
+      const [notifs, count] = await Promise.all([
+        getNotifications(20),
+        getUnreadCount(),
+      ]);
+      if (isMounted) {
+        setNotifications(notifs);
+        setUnreadCount(count);
+      }
+    };
+
+    loadNotifications();
     // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
+    const interval = setInterval(loadNotifications, 30000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const handleMarkAsRead = (id: string) => {
