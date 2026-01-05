@@ -33,8 +33,18 @@ import {
   FilterConfig,
   FilterValue,
 } from "@/components/ui/data-table-filter";
-import { deleteDepartment } from "@/lib/actions/academic.actions";
-import { MoreHorizontal, Trash2, Pencil } from "lucide-react";
+import {
+  BulkActionsBar,
+  SelectAllCheckbox,
+  SelectRowCheckbox,
+  useRowSelection,
+} from "@/components/ui/bulk-actions";
+import {
+  deleteDepartment,
+  bulkDeleteDepartments,
+  bulkToggleDepartmentStatus,
+} from "@/lib/actions/academic.actions";
+import { MoreHorizontal, Trash2, Pencil, Power, PowerOff } from "lucide-react";
 import { IDepartment, IUser } from "@/lib/db";
 import { EditDepartmentDialog } from "./edit-department-dialog";
 import { toast } from "sonner";
@@ -74,9 +84,7 @@ const filterConfigs: FilterConfig[] = [
 export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(
-    null,
-  );
+  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [filters, setFilters] = useState<FilterValue>({
@@ -115,6 +123,79 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
     });
   }, [departments, filters]);
 
+  // Transform for selection
+  const departmentsWithStringId = useMemo(
+    () =>
+      filteredDepartments.map((d) => ({
+        ...d,
+        _id: (d._id as unknown as { toString(): string }).toString(),
+      })),
+    [filteredDepartments]
+  );
+
+  const {
+    selectedItems,
+    selectedCount,
+    isAllSelected,
+    isIndeterminate,
+    toggleAll,
+    toggleRow,
+    clearSelection,
+    isSelected,
+  } = useRowSelection(departmentsWithStringId);
+
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: "Activate",
+        icon: <Power className="h-4 w-4" />,
+        onClick: async (items: typeof departmentsWithStringId) => {
+          const ids = items.map((d) => d._id);
+          const result = await bulkToggleDepartmentStatus(ids, true);
+          if (result.success) {
+            toast.success(`${result.count} departments activated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to activate departments");
+          }
+        },
+      },
+      {
+        label: "Deactivate",
+        icon: <PowerOff className="h-4 w-4" />,
+        onClick: async (items: typeof departmentsWithStringId) => {
+          const ids = items.map((d) => d._id);
+          const result = await bulkToggleDepartmentStatus(ids, false);
+          if (result.success) {
+            toast.success(`${result.count} departments deactivated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to deactivate departments");
+          }
+        },
+      },
+      {
+        label: "Delete",
+        icon: <Trash2 className="h-4 w-4" />,
+        variant: "destructive" as const,
+        onClick: async (items: typeof departmentsWithStringId) => {
+          const ids = items.map((d) => d._id);
+          const result = await bulkDeleteDepartments(ids);
+          if (result.success) {
+            toast.success(`${result.count} departments deleted`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to delete departments");
+          }
+        },
+      },
+    ],
+    [clearSelection, router]
+  );
+
   const handleDelete = async () => {
     if (!deleteId) return;
     setIsLoading(true);
@@ -151,6 +232,14 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
           onChange={setFilters}
         />
 
+        <BulkActionsBar
+          selectedCount={selectedCount}
+          totalCount={departmentsWithStringId.length}
+          actions={bulkActions}
+          selectedItems={selectedItems}
+          onClearSelection={clearSelection}
+        />
+
         {filteredDepartments.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center">
             No departments match your filters.
@@ -159,6 +248,12 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">
+                  <SelectAllCheckbox
+                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                    onCheckedChange={toggleAll}
+                  />
+                </TableHead>
                 <TableHead>Code</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>HOD</TableHead>
@@ -168,13 +263,19 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredDepartments.map((dept) => {
-                const id = (
-                  dept._id as unknown as { toString(): string }
-                ).toString();
+              {departmentsWithStringId.map((dept) => {
                 const hod = dept.hodId as unknown as IUser | undefined;
                 return (
-                  <TableRow key={id}>
+                  <TableRow
+                    key={dept._id}
+                    data-state={isSelected(dept._id) ? "selected" : undefined}
+                  >
+                    <TableCell>
+                      <SelectRowCheckbox
+                        checked={isSelected(dept._id)}
+                        onCheckedChange={(checked) => toggleRow(dept._id, checked)}
+                      />
+                    </TableCell>
                     <TableCell className="font-mono font-medium">
                       {dept.code}
                     </TableCell>
@@ -205,14 +306,14 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => setEditDepartment(dept)}
+                            onClick={() => setEditDepartment(dept as unknown as IDepartment)}
                           >
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive"
-                            onClick={() => setDeleteId(id)}
+                            onClick={() => setDeleteId(dept._id)}
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete

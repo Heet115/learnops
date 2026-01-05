@@ -18,7 +18,14 @@ import {
   FilterConfig,
   FilterValue,
 } from "@/components/ui/data-table-filter";
-import { Eye, Clock, CheckCircle, XCircle, Users } from "lucide-react";
+import {
+  BulkActionsBar,
+  SelectAllCheckbox,
+  SelectRowCheckbox,
+  useRowSelection,
+} from "@/components/ui/bulk-actions";
+import { Eye, Clock, CheckCircle, XCircle, Users, Download } from "lucide-react";
+import { toast } from "sonner";
 
 interface Submission {
   _id: string;
@@ -144,6 +151,52 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
     });
   }, [submissions, filters]);
 
+  const {
+    selectedItems,
+    selectedCount,
+    isAllSelected,
+    isIndeterminate,
+    toggleAll,
+    toggleRow,
+    clearSelection,
+    isSelected,
+  } = useRowSelection(filteredSubmissions);
+
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: "Export List",
+        icon: <Download className="h-4 w-4" />,
+        onClick: async (items: Submission[]) => {
+          // Generate CSV of selected submissions
+          const headers = ["Student", "Email", "ALA", "Subject", "Status", "Marks", "Submitted At"];
+          const rows = items.map((sub) => [
+            `${sub.studentId?.firstName} ${sub.studentId?.lastName}`,
+            sub.studentId?.email || "",
+            sub.alaId?.title || "",
+            sub.alaId?.subjectOfferingId?.subjectId?.code || "",
+            sub.status,
+            sub.marks !== undefined ? `${sub.marks}/${sub.alaId?.maxMarks}` : "-",
+            sub.submittedAt ? new Date(sub.submittedAt).toLocaleString() : "-",
+          ]);
+          
+          const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
+          const blob = new Blob([csv], { type: "text/csv" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `submissions-${new Date().toISOString().split("T")[0]}.csv`;
+          a.click();
+          URL.revokeObjectURL(url);
+          
+          toast.success(`Exported ${items.length} submissions`);
+          clearSelection();
+        },
+      },
+    ],
+    [clearSelection]
+  );
+
   const getStatusBadge = (
     status: string,
     marks?: number,
@@ -196,6 +249,14 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
             onChange={setFilters}
           />
 
+          <BulkActionsBar
+            selectedCount={selectedCount}
+            totalCount={filteredSubmissions.length}
+            actions={bulkActions}
+            selectedItems={selectedItems}
+            onClearSelection={clearSelection}
+          />
+
           {filteredSubmissions.length === 0 ? (
             <div className="text-muted-foreground py-8 text-center">
               No submissions match your filters.
@@ -204,6 +265,12 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[50px]">
+                    <SelectAllCheckbox
+                      checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                      onCheckedChange={toggleAll}
+                    />
+                  </TableHead>
                   <TableHead>Student</TableHead>
                   <TableHead>ALA</TableHead>
                   <TableHead>Subject</TableHead>
@@ -224,7 +291,16 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
                     : [sub.studentId];
 
                   return (
-                    <TableRow key={sub._id}>
+                    <TableRow
+                      key={sub._id}
+                      data-state={isSelected(sub._id) ? "selected" : undefined}
+                    >
+                      <TableCell>
+                        <SelectRowCheckbox
+                          checked={isSelected(sub._id)}
+                          onCheckedChange={(checked) => toggleRow(sub._id, checked)}
+                        />
+                      </TableCell>
                       <TableCell>
                         <div>
                           {isGroup ? (

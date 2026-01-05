@@ -36,9 +36,18 @@ import {
   FilterValue,
 } from "@/components/ui/data-table-filter";
 import {
+  BulkActionsBar,
+  SelectAllCheckbox,
+  SelectRowCheckbox,
+  useRowSelection,
+} from "@/components/ui/bulk-actions";
+import {
   deactivateUser,
   reactivateUser,
   deleteUser,
+  bulkDeactivateUsers,
+  bulkReactivateUsers,
+  bulkDeleteUsers,
 } from "@/lib/actions/admin.actions";
 import {
   MoreHorizontal,
@@ -130,6 +139,79 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
     });
   }, [users, filters]);
 
+  // Transform users to have string _id for selection
+  const usersWithStringId = useMemo(
+    () =>
+      filteredUsers.map((u) => ({
+        ...u,
+        _id: (u._id as unknown as { toString(): string }).toString(),
+      })),
+    [filteredUsers]
+  );
+
+  const {
+    selectedItems,
+    selectedCount,
+    isAllSelected,
+    isIndeterminate,
+    toggleAll,
+    toggleRow,
+    clearSelection,
+    isSelected,
+  } = useRowSelection(usersWithStringId);
+
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: "Deactivate",
+        icon: <UserX className="h-4 w-4" />,
+        onClick: async (items: typeof usersWithStringId) => {
+          const ids = items.map((u) => u._id);
+          const result = await bulkDeactivateUsers(ids);
+          if (result.success) {
+            toast.success(`${result.count} users deactivated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to deactivate users");
+          }
+        },
+      },
+      {
+        label: "Reactivate",
+        icon: <UserCheck className="h-4 w-4" />,
+        onClick: async (items: typeof usersWithStringId) => {
+          const ids = items.map((u) => u._id);
+          const result = await bulkReactivateUsers(ids);
+          if (result.success) {
+            toast.success(`${result.count} users reactivated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to reactivate users");
+          }
+        },
+      },
+      {
+        label: "Delete",
+        icon: <Trash2 className="h-4 w-4" />,
+        variant: "destructive" as const,
+        onClick: async (items: typeof usersWithStringId) => {
+          const ids = items.map((u) => u._id);
+          const result = await bulkDeleteUsers(ids);
+          if (result.success) {
+            toast.success(`${result.count} users deleted`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to delete users");
+          }
+        },
+      },
+    ],
+    [clearSelection, router]
+  );
+
   const handleAction = async () => {
     if (!selectedUser || !actionType) return;
 
@@ -186,6 +268,14 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
           onChange={setFilters}
         />
 
+        <BulkActionsBar
+          selectedCount={selectedCount}
+          totalCount={usersWithStringId.length}
+          actions={bulkActions}
+          selectedItems={selectedItems}
+          onClearSelection={clearSelection}
+        />
+
         {filteredUsers.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center">
             No users match your filters.
@@ -194,6 +284,12 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">
+                  <SelectAllCheckbox
+                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                    onCheckedChange={toggleAll}
+                  />
+                </TableHead>
                 <TableHead>User</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
@@ -203,12 +299,17 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.map((user) => (
+              {usersWithStringId.map((user) => (
                 <TableRow
-                  key={(
-                    user._id as unknown as { toString(): string }
-                  ).toString()}
+                  key={user._id}
+                  data-state={isSelected(user._id) ? "selected" : undefined}
                 >
+                  <TableCell>
+                    <SelectRowCheckbox
+                      checked={isSelected(user._id)}
+                      onCheckedChange={(checked) => toggleRow(user._id, checked)}
+                    />
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
@@ -247,7 +348,7 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                         {user.role === "student" && (
                           <>
                             <DropdownMenuItem
-                              onClick={() => setProfileDialogUser(user)}
+                              onClick={() => setProfileDialogUser(user as unknown as IUser)}
                             >
                               <UserCog className="mr-2 h-4 w-4" />
                               Manage Profile
@@ -258,7 +359,7 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                         {user.isActive ? (
                           <DropdownMenuItem
                             onClick={() => {
-                              setSelectedUser(user);
+                              setSelectedUser(user as unknown as IUser);
                               setActionType("deactivate");
                             }}
                           >
@@ -268,7 +369,7 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                         ) : (
                           <DropdownMenuItem
                             onClick={() => {
-                              setSelectedUser(user);
+                              setSelectedUser(user as unknown as IUser);
                               setActionType("reactivate");
                             }}
                           >
@@ -279,7 +380,7 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                         <DropdownMenuItem
                           className="text-destructive"
                           onClick={() => {
-                            setSelectedUser(user);
+                            setSelectedUser(user as unknown as IUser);
                             setActionType("delete");
                           }}
                         >

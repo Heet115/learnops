@@ -24,8 +24,18 @@ import {
   FilterConfig,
   FilterValue,
 } from "@/components/ui/data-table-filter";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { deleteClass } from "@/lib/actions/academic.actions";
+import {
+  BulkActionsBar,
+  SelectAllCheckbox,
+  SelectRowCheckbox,
+  useRowSelection,
+} from "@/components/ui/bulk-actions";
+import { MoreHorizontal, Pencil, Trash2, Power, PowerOff } from "lucide-react";
+import {
+  deleteClass,
+  bulkDeleteClasses,
+  bulkToggleClassStatus,
+} from "@/lib/actions/academic.actions";
 import { toast } from "sonner";
 import { EditClassDialog } from "./edit-class-dialog";
 
@@ -195,6 +205,69 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
     });
   }, [classes, filters]);
 
+  const {
+    selectedItems,
+    selectedCount,
+    isAllSelected,
+    isIndeterminate,
+    toggleAll,
+    toggleRow,
+    clearSelection,
+    isSelected,
+  } = useRowSelection(filteredClasses);
+
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: "Activate",
+        icon: <Power className="h-4 w-4" />,
+        onClick: async (items: ClassItem[]) => {
+          const ids = items.map((c) => c._id);
+          const result = await bulkToggleClassStatus(ids, true);
+          if (result.success) {
+            toast.success(`${result.count} classes activated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to activate classes");
+          }
+        },
+      },
+      {
+        label: "Deactivate",
+        icon: <PowerOff className="h-4 w-4" />,
+        onClick: async (items: ClassItem[]) => {
+          const ids = items.map((c) => c._id);
+          const result = await bulkToggleClassStatus(ids, false);
+          if (result.success) {
+            toast.success(`${result.count} classes deactivated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to deactivate classes");
+          }
+        },
+      },
+      {
+        label: "Delete",
+        icon: <Trash2 className="h-4 w-4" />,
+        variant: "destructive" as const,
+        onClick: async (items: ClassItem[]) => {
+          const ids = items.map((c) => c._id);
+          const result = await bulkDeleteClasses(ids);
+          if (result.success) {
+            toast.success(`${result.count} classes deleted`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to delete classes");
+          }
+        },
+      },
+    ],
+    [clearSelection, router]
+  );
+
   const handleDeleteClick = (id: string, name: string) => {
     setDeleteConfirm({ open: true, id, name });
   };
@@ -229,6 +302,14 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
           onChange={setFilters}
         />
 
+        <BulkActionsBar
+          selectedCount={selectedCount}
+          totalCount={filteredClasses.length}
+          actions={bulkActions}
+          selectedItems={selectedItems}
+          onClearSelection={clearSelection}
+        />
+
         {filteredClasses.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center">
             No classes match your filters.
@@ -237,6 +318,12 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">
+                  <SelectAllCheckbox
+                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                    onCheckedChange={toggleAll}
+                  />
+                </TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Semester</TableHead>
                 <TableHead>Course</TableHead>
@@ -248,7 +335,16 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
             </TableHeader>
             <TableBody>
               {filteredClasses.map((classItem) => (
-                <TableRow key={classItem._id}>
+                <TableRow
+                  key={classItem._id}
+                  data-state={isSelected(classItem._id) ? "selected" : undefined}
+                >
+                  <TableCell>
+                    <SelectRowCheckbox
+                      checked={isSelected(classItem._id)}
+                      onCheckedChange={(checked) => toggleRow(classItem._id, checked)}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">
                     {classItem.name}
                   </TableCell>

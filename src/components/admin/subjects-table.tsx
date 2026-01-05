@@ -24,8 +24,18 @@ import {
   FilterConfig,
   FilterValue,
 } from "@/components/ui/data-table-filter";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { deleteSubject } from "@/lib/actions/academic.actions";
+import {
+  BulkActionsBar,
+  SelectAllCheckbox,
+  SelectRowCheckbox,
+  useRowSelection,
+} from "@/components/ui/bulk-actions";
+import { MoreHorizontal, Pencil, Trash2, Power, PowerOff } from "lucide-react";
+import {
+  deleteSubject,
+  bulkDeleteSubjects,
+  bulkToggleSubjectStatus,
+} from "@/lib/actions/academic.actions";
 import { toast } from "sonner";
 import { EditSubjectDialog } from "./edit-subject-dialog";
 
@@ -182,6 +192,69 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
     });
   }, [subjects, filters]);
 
+  const {
+    selectedItems,
+    selectedCount,
+    isAllSelected,
+    isIndeterminate,
+    toggleAll,
+    toggleRow,
+    clearSelection,
+    isSelected,
+  } = useRowSelection(filteredSubjects);
+
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: "Activate",
+        icon: <Power className="h-4 w-4" />,
+        onClick: async (items: Subject[]) => {
+          const ids = items.map((s) => s._id);
+          const result = await bulkToggleSubjectStatus(ids, true);
+          if (result.success) {
+            toast.success(`${result.count} subjects activated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to activate subjects");
+          }
+        },
+      },
+      {
+        label: "Deactivate",
+        icon: <PowerOff className="h-4 w-4" />,
+        onClick: async (items: Subject[]) => {
+          const ids = items.map((s) => s._id);
+          const result = await bulkToggleSubjectStatus(ids, false);
+          if (result.success) {
+            toast.success(`${result.count} subjects deactivated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to deactivate subjects");
+          }
+        },
+      },
+      {
+        label: "Delete",
+        icon: <Trash2 className="h-4 w-4" />,
+        variant: "destructive" as const,
+        onClick: async (items: Subject[]) => {
+          const ids = items.map((s) => s._id);
+          const result = await bulkDeleteSubjects(ids);
+          if (result.success) {
+            toast.success(`${result.count} subjects deleted`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to delete subjects");
+          }
+        },
+      },
+    ],
+    [clearSelection, router]
+  );
+
   const handleDeleteClick = (id: string, name: string) => {
     setDeleteConfirm({ open: true, id, name });
   };
@@ -216,6 +289,14 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
           onChange={setFilters}
         />
 
+        <BulkActionsBar
+          selectedCount={selectedCount}
+          totalCount={filteredSubjects.length}
+          actions={bulkActions}
+          selectedItems={selectedItems}
+          onClearSelection={clearSelection}
+        />
+
         {filteredSubjects.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center">
             No subjects match your filters.
@@ -224,6 +305,12 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">
+                  <SelectAllCheckbox
+                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                    onCheckedChange={toggleAll}
+                  />
+                </TableHead>
                 <TableHead>Code</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Semester</TableHead>
@@ -236,7 +323,16 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
             </TableHeader>
             <TableBody>
               {filteredSubjects.map((subject) => (
-                <TableRow key={subject._id}>
+                <TableRow
+                  key={subject._id}
+                  data-state={isSelected(subject._id) ? "selected" : undefined}
+                >
+                  <TableCell>
+                    <SelectRowCheckbox
+                      checked={isSelected(subject._id)}
+                      onCheckedChange={(checked) => toggleRow(subject._id, checked)}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">{subject.code}</TableCell>
                   <TableCell>{subject.name}</TableCell>
                   <TableCell>{subject.semesterId?.name || "N/A"}</TableCell>

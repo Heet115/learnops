@@ -790,3 +790,242 @@ export async function getAcademicStats() {
     coordinators,
   };
 }
+
+// ==================== BULK ACTIONS ====================
+
+// Bulk delete departments
+export async function bulkDeleteDepartments(ids: string[]) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    // Check if any department has courses
+    const coursesCount = await Course.countDocuments({ departmentId: { $in: ids } });
+    if (coursesCount > 0) {
+      return { success: false, error: "Some departments have existing courses" };
+    }
+
+    const result = await Department.deleteMany({ _id: { $in: ids } });
+    revalidatePath("/admin/departments");
+    return { success: true, count: result.deletedCount };
+  } catch (error) {
+    console.error("Error bulk deleting departments:", error);
+    return { success: false, error: "Failed to delete departments" };
+  }
+}
+
+// Bulk toggle department status
+export async function bulkToggleDepartmentStatus(ids: string[], isActive: boolean) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    const result = await Department.updateMany(
+      { _id: { $in: ids } },
+      { isActive }
+    );
+    revalidatePath("/admin/departments");
+    return { success: true, count: result.modifiedCount };
+  } catch (error) {
+    console.error("Error bulk updating departments:", error);
+    return { success: false, error: "Failed to update departments" };
+  }
+}
+
+// Bulk delete courses
+export async function bulkDeleteCourses(ids: string[]) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    // Check for semesters with subjects
+    const semesters = await Semester.find({ courseId: { $in: ids } }).select("_id");
+    const semesterIds = semesters.map((s) => s._id);
+    
+    if (semesterIds.length > 0) {
+      const subjectsCount = await Subject.countDocuments({ semesterId: { $in: semesterIds } });
+      if (subjectsCount > 0) {
+        return { success: false, error: "Some courses have subjects in their semesters" };
+      }
+    }
+
+    // Delete semesters first
+    await Semester.deleteMany({ courseId: { $in: ids } });
+    const result = await Course.deleteMany({ _id: { $in: ids } });
+    
+    revalidatePath("/admin/courses");
+    revalidatePath("/admin/semesters");
+    return { success: true, count: result.deletedCount };
+  } catch (error) {
+    console.error("Error bulk deleting courses:", error);
+    return { success: false, error: "Failed to delete courses" };
+  }
+}
+
+// Bulk toggle course status
+export async function bulkToggleCourseStatus(ids: string[], isActive: boolean) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    const result = await Course.updateMany({ _id: { $in: ids } }, { isActive });
+    revalidatePath("/admin/courses");
+    return { success: true, count: result.modifiedCount };
+  } catch (error) {
+    console.error("Error bulk updating courses:", error);
+    return { success: false, error: "Failed to update courses" };
+  }
+}
+
+// Bulk delete subjects
+export async function bulkDeleteSubjects(ids: string[]) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    // Check for subject offerings
+    const offeringsCount = await SubjectOffering.countDocuments({ subjectId: { $in: ids } });
+    if (offeringsCount > 0) {
+      return { success: false, error: "Some subjects have existing offerings" };
+    }
+
+    const result = await Subject.deleteMany({ _id: { $in: ids } });
+    revalidatePath("/admin/subjects");
+    return { success: true, count: result.deletedCount };
+  } catch (error) {
+    console.error("Error bulk deleting subjects:", error);
+    return { success: false, error: "Failed to delete subjects" };
+  }
+}
+
+// Bulk toggle subject status
+export async function bulkToggleSubjectStatus(ids: string[], isActive: boolean) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    const result = await Subject.updateMany({ _id: { $in: ids } }, { isActive });
+    revalidatePath("/admin/subjects");
+    return { success: true, count: result.modifiedCount };
+  } catch (error) {
+    console.error("Error bulk updating subjects:", error);
+    return { success: false, error: "Failed to update subjects" };
+  }
+}
+
+// Bulk delete classes
+export async function bulkDeleteClasses(ids: string[]) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    // Check for subject offerings
+    const offeringsCount = await SubjectOffering.countDocuments({ classId: { $in: ids } });
+    if (offeringsCount > 0) {
+      return { success: false, error: "Some classes have existing subject offerings" };
+    }
+
+    const result = await Class.deleteMany({ _id: { $in: ids } });
+    revalidatePath("/admin/classes");
+    return { success: true, count: result.deletedCount };
+  } catch (error) {
+    console.error("Error bulk deleting classes:", error);
+    return { success: false, error: "Failed to delete classes" };
+  }
+}
+
+// Bulk toggle class status
+export async function bulkToggleClassStatus(ids: string[], isActive: boolean) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    const result = await Class.updateMany({ _id: { $in: ids } }, { isActive });
+    revalidatePath("/admin/classes");
+    return { success: true, count: result.modifiedCount };
+  } catch (error) {
+    console.error("Error bulk updating classes:", error);
+    return { success: false, error: "Failed to update classes" };
+  }
+}
+
+// Bulk delete subject offerings
+export async function bulkDeleteSubjectOfferings(ids: string[]) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    const result = await SubjectOffering.deleteMany({ _id: { $in: ids } });
+    revalidatePath("/admin/subject-offerings");
+    return { success: true, count: result.deletedCount };
+  } catch (error) {
+    console.error("Error bulk deleting subject offerings:", error);
+    return { success: false, error: "Failed to delete subject offerings" };
+  }
+}
+
+// Bulk toggle subject offering status
+export async function bulkToggleSubjectOfferingStatus(ids: string[], isActive: boolean) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    const result = await SubjectOffering.updateMany({ _id: { $in: ids } }, { isActive });
+    revalidatePath("/admin/subject-offerings");
+    return { success: true, count: result.modifiedCount };
+  } catch (error) {
+    console.error("Error bulk updating subject offerings:", error);
+    return { success: false, error: "Failed to update subject offerings" };
+  }
+}
+
+// Bulk delete class coordinators
+export async function bulkDeleteClassCoordinators(ids: string[]) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    const result = await ClassCoordinator.deleteMany({ _id: { $in: ids } });
+    revalidatePath("/admin/class-coordinators");
+    return { success: true, count: result.deletedCount };
+  } catch (error) {
+    console.error("Error bulk deleting class coordinators:", error);
+    return { success: false, error: "Failed to delete class coordinators" };
+  }
+}
+
+// Bulk delete semesters
+export async function bulkDeleteSemesters(ids: string[]) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    // Check for subjects
+    const subjectsCount = await Subject.countDocuments({ semesterId: { $in: ids } });
+    if (subjectsCount > 0) {
+      return { success: false, error: "Some semesters have existing subjects" };
+    }
+
+    const result = await Semester.deleteMany({ _id: { $in: ids } });
+    revalidatePath("/admin/semesters");
+    return { success: true, count: result.deletedCount };
+  } catch (error) {
+    console.error("Error bulk deleting semesters:", error);
+    return { success: false, error: "Failed to delete semesters" };
+  }
+}
+
+// Bulk toggle semester status
+export async function bulkToggleSemesterStatus(ids: string[], isActive: boolean) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    const result = await Semester.updateMany({ _id: { $in: ids } }, { isActive });
+    revalidatePath("/admin/semesters");
+    return { success: true, count: result.modifiedCount };
+  } catch (error) {
+    console.error("Error bulk updating semesters:", error);
+    return { success: false, error: "Failed to update semesters" };
+  }
+}

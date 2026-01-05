@@ -309,3 +309,58 @@ export async function getProfessorSubjectOfferings() {
 
   return JSON.parse(JSON.stringify(offerings));
 }
+
+// Bulk lock ALAs
+export async function bulkLockALAs(ids: string[]) {
+  const clerkId = await requireProfessor();
+  const professorId = await getProfessorDbId(clerkId!);
+
+  try {
+    const result = await ALA.updateMany(
+      { _id: { $in: ids }, professorId },
+      { isLocked: true }
+    );
+    revalidatePath("/professor/alas");
+    return { success: true, count: result.modifiedCount };
+  } catch (error) {
+    console.error("Error bulk locking ALAs:", error);
+    return { success: false, error: "Failed to lock ALAs" };
+  }
+}
+
+// Bulk unlock ALAs
+export async function bulkUnlockALAs(ids: string[]) {
+  const clerkId = await requireProfessor();
+  const professorId = await getProfessorDbId(clerkId!);
+
+  try {
+    const result = await ALA.updateMany(
+      { _id: { $in: ids }, professorId },
+      { isLocked: false }
+    );
+    revalidatePath("/professor/alas");
+    return { success: true, count: result.modifiedCount };
+  } catch (error) {
+    console.error("Error bulk unlocking ALAs:", error);
+    return { success: false, error: "Failed to unlock ALAs" };
+  }
+}
+
+// Bulk delete ALAs
+export async function bulkDeleteALAs(ids: string[]) {
+  const clerkId = await requireProfessor();
+  const professorId = await getProfessorDbId(clerkId!);
+
+  try {
+    // Soft delete - set isActive to false
+    const result = await ALA.updateMany(
+      { _id: { $in: ids }, professorId },
+      { isActive: false }
+    );
+    revalidatePath("/professor/alas");
+    return { success: true, count: result.modifiedCount };
+  } catch (error) {
+    console.error("Error bulk deleting ALAs:", error);
+    return { success: false, error: "Failed to delete ALAs" };
+  }
+}

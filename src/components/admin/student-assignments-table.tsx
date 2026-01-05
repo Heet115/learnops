@@ -24,8 +24,18 @@ import {
   FilterConfig,
   FilterValue,
 } from "@/components/ui/data-table-filter";
-import { MoreHorizontal, Pencil, UserMinus } from "lucide-react";
-import { removeStudentFromClass } from "@/lib/actions/user.actions";
+import {
+  BulkActionsBar,
+  SelectAllCheckbox,
+  SelectRowCheckbox,
+  useRowSelection,
+} from "@/components/ui/bulk-actions";
+import { MoreHorizontal, Pencil, UserMinus, Users } from "lucide-react";
+import {
+  removeStudentFromClass,
+  bulkRemoveStudentsFromClass,
+  bulkAssignStudentsToClass,
+} from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 import { ChangeClassDialog } from "./change-class-dialog";
 
@@ -186,6 +196,44 @@ export function StudentAssignmentsTable({
     });
   }, [students, filters]);
 
+  const {
+    selectedItems,
+    selectedCount,
+    isAllSelected,
+    isIndeterminate,
+    toggleAll,
+    toggleRow,
+    clearSelection,
+    isSelected,
+  } = useRowSelection(filteredStudents);
+
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: "Remove from Class",
+        icon: <UserMinus className="h-4 w-4" />,
+        variant: "destructive" as const,
+        onClick: async (items: Student[]) => {
+          const assignedStudents = items.filter((s) => s.classId);
+          if (assignedStudents.length === 0) {
+            toast.error("No assigned students selected");
+            return;
+          }
+          const ids = assignedStudents.map((s) => s._id);
+          const result = await bulkRemoveStudentsFromClass(ids);
+          if (result.success) {
+            toast.success(`${result.count} students removed from class`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to remove students");
+          }
+        },
+      },
+    ],
+    [clearSelection, router]
+  );
+
   const handleRemoveClick = (studentId: string, studentName: string) => {
     setRemoveConfirm({ open: true, id: studentId, name: studentName });
   };
@@ -220,6 +268,14 @@ export function StudentAssignmentsTable({
           onChange={setFilters}
         />
 
+        <BulkActionsBar
+          selectedCount={selectedCount}
+          totalCount={filteredStudents.length}
+          actions={bulkActions}
+          selectedItems={selectedItems}
+          onClearSelection={clearSelection}
+        />
+
         {filteredStudents.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center">
             No students match your filters.
@@ -228,6 +284,12 @@ export function StudentAssignmentsTable({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">
+                  <SelectAllCheckbox
+                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                    onCheckedChange={toggleAll}
+                  />
+                </TableHead>
                 <TableHead>Student</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Class</TableHead>
@@ -240,7 +302,16 @@ export function StudentAssignmentsTable({
             </TableHeader>
             <TableBody>
               {filteredStudents.map((student) => (
-                <TableRow key={student._id}>
+                <TableRow
+                  key={student._id}
+                  data-state={isSelected(student._id) ? "selected" : undefined}
+                >
+                  <TableCell>
+                    <SelectRowCheckbox
+                      checked={isSelected(student._id)}
+                      onCheckedChange={(checked) => toggleRow(student._id, checked)}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">
                     {student.firstName} {student.lastName}
                   </TableCell>

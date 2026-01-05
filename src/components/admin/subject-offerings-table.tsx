@@ -24,8 +24,18 @@ import {
   FilterConfig,
   FilterValue,
 } from "@/components/ui/data-table-filter";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { deleteSubjectOffering } from "@/lib/actions/academic.actions";
+import {
+  BulkActionsBar,
+  SelectAllCheckbox,
+  SelectRowCheckbox,
+  useRowSelection,
+} from "@/components/ui/bulk-actions";
+import { MoreHorizontal, Pencil, Trash2, Power, PowerOff } from "lucide-react";
+import {
+  deleteSubjectOffering,
+  bulkDeleteSubjectOfferings,
+  bulkToggleSubjectOfferingStatus,
+} from "@/lib/actions/academic.actions";
 import { toast } from "sonner";
 import { EditSubjectOfferingDialog } from "./edit-subject-offering-dialog";
 
@@ -209,6 +219,69 @@ export function SubjectOfferingsTable({
     });
   }, [offerings, filters]);
 
+  const {
+    selectedItems,
+    selectedCount,
+    isAllSelected,
+    isIndeterminate,
+    toggleAll,
+    toggleRow,
+    clearSelection,
+    isSelected,
+  } = useRowSelection(filteredOfferings);
+
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: "Activate",
+        icon: <Power className="h-4 w-4" />,
+        onClick: async (items: SubjectOffering[]) => {
+          const ids = items.map((o) => o._id);
+          const result = await bulkToggleSubjectOfferingStatus(ids, true);
+          if (result.success) {
+            toast.success(`${result.count} offerings activated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to activate offerings");
+          }
+        },
+      },
+      {
+        label: "Deactivate",
+        icon: <PowerOff className="h-4 w-4" />,
+        onClick: async (items: SubjectOffering[]) => {
+          const ids = items.map((o) => o._id);
+          const result = await bulkToggleSubjectOfferingStatus(ids, false);
+          if (result.success) {
+            toast.success(`${result.count} offerings deactivated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to deactivate offerings");
+          }
+        },
+      },
+      {
+        label: "Delete",
+        icon: <Trash2 className="h-4 w-4" />,
+        variant: "destructive" as const,
+        onClick: async (items: SubjectOffering[]) => {
+          const ids = items.map((o) => o._id);
+          const result = await bulkDeleteSubjectOfferings(ids);
+          if (result.success) {
+            toast.success(`${result.count} offerings deleted`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to delete offerings");
+          }
+        },
+      },
+    ],
+    [clearSelection, router]
+  );
+
   const handleDeleteClick = (id: string) => {
     setDeleteConfirm({ open: true, id });
   };
@@ -243,6 +316,14 @@ export function SubjectOfferingsTable({
           onChange={setFilters}
         />
 
+        <BulkActionsBar
+          selectedCount={selectedCount}
+          totalCount={filteredOfferings.length}
+          actions={bulkActions}
+          selectedItems={selectedItems}
+          onClearSelection={clearSelection}
+        />
+
         {filteredOfferings.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center">
             No subject offerings match your filters.
@@ -251,6 +332,12 @@ export function SubjectOfferingsTable({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">
+                  <SelectAllCheckbox
+                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                    onCheckedChange={toggleAll}
+                  />
+                </TableHead>
                 <TableHead>Subject</TableHead>
                 <TableHead>Class</TableHead>
                 <TableHead>Professor</TableHead>
@@ -262,7 +349,16 @@ export function SubjectOfferingsTable({
             </TableHeader>
             <TableBody>
               {filteredOfferings.map((offering) => (
-                <TableRow key={offering._id}>
+                <TableRow
+                  key={offering._id}
+                  data-state={isSelected(offering._id) ? "selected" : undefined}
+                >
+                  <TableCell>
+                    <SelectRowCheckbox
+                      checked={isSelected(offering._id)}
+                      onCheckedChange={(checked) => toggleRow(offering._id, checked)}
+                    />
+                  </TableCell>
                   <TableCell>
                     <div>
                       <span className="font-medium">

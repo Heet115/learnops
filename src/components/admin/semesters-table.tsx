@@ -33,8 +33,18 @@ import {
   FilterConfig,
   FilterValue,
 } from "@/components/ui/data-table-filter";
-import { deleteSemester } from "@/lib/actions/academic.actions";
-import { MoreHorizontal, Trash2 } from "lucide-react";
+import {
+  BulkActionsBar,
+  SelectAllCheckbox,
+  SelectRowCheckbox,
+  useRowSelection,
+} from "@/components/ui/bulk-actions";
+import {
+  deleteSemester,
+  bulkDeleteSemesters,
+  bulkToggleSemesterStatus,
+} from "@/lib/actions/academic.actions";
+import { MoreHorizontal, Trash2, Power, PowerOff } from "lucide-react";
 import { ISemester, ICourse, IDepartment } from "@/lib/db";
 import { toast } from "sonner";
 
@@ -42,6 +52,16 @@ interface SemestersTableProps {
   semesters: (ISemester & {
     courseId?: ICourse & { departmentId?: IDepartment };
   })[];
+}
+
+interface SemesterWithId {
+  _id: string;
+  name: string;
+  number: number;
+  isActive: boolean;
+  startDate?: Date;
+  endDate?: Date;
+  courseId?: ICourse & { departmentId?: IDepartment };
 }
 
 export function SemestersTable({ semesters }: SemestersTableProps) {
@@ -127,6 +147,76 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
     });
   }, [semesters, filters]);
 
+  const semestersWithId = useMemo(() => {
+    return filteredSemesters.map((semester) => ({
+      ...semester,
+      _id: (semester._id as unknown as { toString(): string }).toString(),
+    })) as SemesterWithId[];
+  }, [filteredSemesters]);
+
+  const {
+    selectedItems,
+    selectedCount,
+    isAllSelected,
+    isIndeterminate,
+    toggleAll,
+    toggleRow,
+    clearSelection,
+    isSelected,
+  } = useRowSelection(semestersWithId);
+
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: "Activate",
+        icon: <Power className="h-4 w-4" />,
+        onClick: async (items: SemesterWithId[]) => {
+          const ids = items.map((s) => s._id);
+          const result = await bulkToggleSemesterStatus(ids, true);
+          if (result.success) {
+            toast.success(`${result.count} semesters activated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to activate semesters");
+          }
+        },
+      },
+      {
+        label: "Deactivate",
+        icon: <PowerOff className="h-4 w-4" />,
+        onClick: async (items: SemesterWithId[]) => {
+          const ids = items.map((s) => s._id);
+          const result = await bulkToggleSemesterStatus(ids, false);
+          if (result.success) {
+            toast.success(`${result.count} semesters deactivated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to deactivate semesters");
+          }
+        },
+      },
+      {
+        label: "Delete",
+        icon: <Trash2 className="h-4 w-4" />,
+        variant: "destructive" as const,
+        onClick: async (items: SemesterWithId[]) => {
+          const ids = items.map((s) => s._id);
+          const result = await bulkDeleteSemesters(ids);
+          if (result.success) {
+            toast.success(`${result.count} semesters deleted`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to delete semesters");
+          }
+        },
+      },
+    ],
+    [clearSelection, router]
+  );
+
   const handleDelete = async () => {
     if (!deleteId) return;
     setIsLoading(true);
@@ -161,6 +251,14 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
           onChange={setFilters}
         />
 
+        <BulkActionsBar
+          selectedCount={selectedCount}
+          totalCount={semestersWithId.length}
+          actions={bulkActions}
+          selectedItems={selectedItems}
+          onClearSelection={clearSelection}
+        />
+
         {filteredSemesters.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center">
             No semesters match your filters.
@@ -169,6 +267,12 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">
+                  <SelectAllCheckbox
+                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                    onCheckedChange={toggleAll}
+                  />
+                </TableHead>
                 <TableHead>Semester</TableHead>
                 <TableHead>Course</TableHead>
                 <TableHead>Department</TableHead>
@@ -189,7 +293,16 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
                   | IDepartment
                   | undefined;
                 return (
-                  <TableRow key={id}>
+                  <TableRow
+                    key={id}
+                    data-state={isSelected(id) ? "selected" : undefined}
+                  >
+                    <TableCell>
+                      <SelectRowCheckbox
+                        checked={isSelected(id)}
+                        onCheckedChange={(checked) => toggleRow(id, checked)}
+                      />
+                    </TableCell>
                     <TableCell>
                       <div>
                         <span className="font-medium">{semester.name}</span>

@@ -23,8 +23,17 @@ import {
   FilterConfig,
   FilterValue,
 } from "@/components/ui/data-table-filter";
+import {
+  BulkActionsBar,
+  SelectAllCheckbox,
+  SelectRowCheckbox,
+  useRowSelection,
+} from "@/components/ui/bulk-actions";
 import { MoreHorizontal, Pencil, Trash2, Crown } from "lucide-react";
-import { deleteClassCoordinator } from "@/lib/actions/academic.actions";
+import {
+  deleteClassCoordinator,
+  bulkDeleteClassCoordinators,
+} from "@/lib/actions/academic.actions";
 import { toast } from "sonner";
 import { EditCoordinatorDialog } from "./edit-coordinator-dialog";
 
@@ -189,6 +198,39 @@ export function ClassCoordinatorsTable({
     });
   }, [coordinators, filters]);
 
+  const {
+    selectedItems,
+    selectedCount,
+    isAllSelected,
+    isIndeterminate,
+    toggleAll,
+    toggleRow,
+    clearSelection,
+    isSelected,
+  } = useRowSelection(filteredCoordinators);
+
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: "Remove",
+        icon: <Trash2 className="h-4 w-4" />,
+        variant: "destructive" as const,
+        onClick: async (items: ClassCoordinator[]) => {
+          const ids = items.map((c) => c._id);
+          const result = await bulkDeleteClassCoordinators(ids);
+          if (result.success) {
+            toast.success(`${result.count} coordinators removed`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to remove coordinators");
+          }
+        },
+      },
+    ],
+    [clearSelection, router]
+  );
+
   const handleDeleteClick = (id: string, className: string) => {
     setDeleteConfirm({ open: true, id, className });
   };
@@ -224,6 +266,14 @@ export function ClassCoordinatorsTable({
           onChange={setFilters}
         />
 
+        <BulkActionsBar
+          selectedCount={selectedCount}
+          totalCount={filteredCoordinators.length}
+          actions={bulkActions}
+          selectedItems={selectedItems}
+          onClearSelection={clearSelection}
+        />
+
         {filteredCoordinators.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center">
             No coordinators match your filters.
@@ -232,6 +282,12 @@ export function ClassCoordinatorsTable({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">
+                  <SelectAllCheckbox
+                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                    onCheckedChange={toggleAll}
+                  />
+                </TableHead>
                 <TableHead>Class</TableHead>
                 <TableHead>Semester</TableHead>
                 <TableHead>Course</TableHead>
@@ -243,7 +299,16 @@ export function ClassCoordinatorsTable({
             </TableHeader>
             <TableBody>
               {filteredCoordinators.map((coordinator) => (
-                <TableRow key={coordinator._id}>
+                <TableRow
+                  key={coordinator._id}
+                  data-state={isSelected(coordinator._id) ? "selected" : undefined}
+                >
+                  <TableCell>
+                    <SelectRowCheckbox
+                      checked={isSelected(coordinator._id)}
+                      onCheckedChange={(checked) => toggleRow(coordinator._id, checked)}
+                    />
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Crown className="h-4 w-4 text-yellow-500" />

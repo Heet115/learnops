@@ -33,14 +33,35 @@ import {
   FilterConfig,
   FilterValue,
 } from "@/components/ui/data-table-filter";
-import { deleteCourse } from "@/lib/actions/academic.actions";
-import { MoreHorizontal, Trash2 } from "lucide-react";
+import {
+  BulkActionsBar,
+  SelectAllCheckbox,
+  SelectRowCheckbox,
+  useRowSelection,
+} from "@/components/ui/bulk-actions";
+import {
+  deleteCourse,
+  bulkDeleteCourses,
+  bulkToggleCourseStatus,
+} from "@/lib/actions/academic.actions";
+import { MoreHorizontal, Trash2, Power, PowerOff } from "lucide-react";
 import { ICourse, IDepartment } from "@/lib/db";
 import { toast } from "sonner";
 
 interface CoursesTableProps {
   courses: (ICourse & { departmentId?: IDepartment })[];
   departments: IDepartment[];
+}
+
+interface CourseWithId {
+  _id: string;
+  name: string;
+  code: string;
+  duration: number;
+  isActive: boolean;
+  departmentId?: IDepartment;
+  courseType?: string;
+  totalSemesters?: number;
 }
 
 const courseTypeLabels: Record<string, string> = {
@@ -142,6 +163,76 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
     });
   }, [courses, filters]);
 
+  const coursesWithId = useMemo(() => {
+    return filteredCourses.map((course) => ({
+      ...course,
+      _id: (course._id as unknown as { toString(): string }).toString(),
+    })) as CourseWithId[];
+  }, [filteredCourses]);
+
+  const {
+    selectedItems,
+    selectedCount,
+    isAllSelected,
+    isIndeterminate,
+    toggleAll,
+    toggleRow,
+    clearSelection,
+    isSelected,
+  } = useRowSelection(coursesWithId);
+
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: "Activate",
+        icon: <Power className="h-4 w-4" />,
+        onClick: async (items: CourseWithId[]) => {
+          const ids = items.map((c) => c._id);
+          const result = await bulkToggleCourseStatus(ids, true);
+          if (result.success) {
+            toast.success(`${result.count} courses activated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to activate courses");
+          }
+        },
+      },
+      {
+        label: "Deactivate",
+        icon: <PowerOff className="h-4 w-4" />,
+        onClick: async (items: CourseWithId[]) => {
+          const ids = items.map((c) => c._id);
+          const result = await bulkToggleCourseStatus(ids, false);
+          if (result.success) {
+            toast.success(`${result.count} courses deactivated`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to deactivate courses");
+          }
+        },
+      },
+      {
+        label: "Delete",
+        icon: <Trash2 className="h-4 w-4" />,
+        variant: "destructive" as const,
+        onClick: async (items: CourseWithId[]) => {
+          const ids = items.map((c) => c._id);
+          const result = await bulkDeleteCourses(ids);
+          if (result.success) {
+            toast.success(`${result.count} courses deleted`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to delete courses");
+          }
+        },
+      },
+    ],
+    [clearSelection, router]
+  );
+
   const handleDelete = async () => {
     if (!deleteId) return;
     setIsLoading(true);
@@ -178,6 +269,14 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
           onChange={setFilters}
         />
 
+        <BulkActionsBar
+          selectedCount={selectedCount}
+          totalCount={coursesWithId.length}
+          actions={bulkActions}
+          selectedItems={selectedItems}
+          onClearSelection={clearSelection}
+        />
+
         {filteredCourses.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center">
             No courses match your filters.
@@ -186,6 +285,12 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">
+                  <SelectAllCheckbox
+                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                    onCheckedChange={toggleAll}
+                  />
+                </TableHead>
                 <TableHead>Code</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Department</TableHead>
@@ -209,7 +314,16 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
                   totalSemesters?: number;
                 };
                 return (
-                  <TableRow key={id}>
+                  <TableRow
+                    key={id}
+                    data-state={isSelected(id) ? "selected" : undefined}
+                  >
+                    <TableCell>
+                      <SelectRowCheckbox
+                        checked={isSelected(id)}
+                        onCheckedChange={(checked) => toggleRow(id, checked)}
+                      />
+                    </TableCell>
                     <TableCell className="font-mono font-medium">
                       {course.code}
                     </TableCell>

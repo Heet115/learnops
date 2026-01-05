@@ -27,6 +27,12 @@ import {
   FilterValue,
 } from "@/components/ui/data-table-filter";
 import {
+  BulkActionsBar,
+  SelectAllCheckbox,
+  SelectRowCheckbox,
+  useRowSelection,
+} from "@/components/ui/bulk-actions";
+import {
   MoreHorizontal,
   Pencil,
   Trash2,
@@ -35,7 +41,13 @@ import {
   Eye,
   Users,
 } from "lucide-react";
-import { deleteALA, toggleALALock } from "@/lib/actions/ala.actions";
+import {
+  deleteALA,
+  toggleALALock,
+  bulkLockALAs,
+  bulkUnlockALAs,
+  bulkDeleteALAs,
+} from "@/lib/actions/ala.actions";
 import { toast } from "sonner";
 import { EditALADialog } from "./edit-ala-dialog";
 
@@ -188,6 +200,69 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
     });
   }, [alas, filters]);
 
+  const {
+    selectedItems,
+    selectedCount,
+    isAllSelected,
+    isIndeterminate,
+    toggleAll,
+    toggleRow,
+    clearSelection,
+    isSelected,
+  } = useRowSelection(filteredALAs);
+
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: "Lock",
+        icon: <Lock className="h-4 w-4" />,
+        onClick: async (items: ALA[]) => {
+          const ids = items.map((a) => a._id);
+          const result = await bulkLockALAs(ids);
+          if (result.success) {
+            toast.success(`${result.count} ALAs locked`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to lock ALAs");
+          }
+        },
+      },
+      {
+        label: "Unlock",
+        icon: <Unlock className="h-4 w-4" />,
+        onClick: async (items: ALA[]) => {
+          const ids = items.map((a) => a._id);
+          const result = await bulkUnlockALAs(ids);
+          if (result.success) {
+            toast.success(`${result.count} ALAs unlocked`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to unlock ALAs");
+          }
+        },
+      },
+      {
+        label: "Delete",
+        icon: <Trash2 className="h-4 w-4" />,
+        variant: "destructive" as const,
+        onClick: async (items: ALA[]) => {
+          const ids = items.map((a) => a._id);
+          const result = await bulkDeleteALAs(ids);
+          if (result.success) {
+            toast.success(`${result.count} ALAs deleted`);
+            clearSelection();
+            router.refresh();
+          } else {
+            toast.error(result.error || "Failed to delete ALAs");
+          }
+        },
+      },
+    ],
+    [clearSelection, router]
+  );
+
   const handleDeleteClick = (id: string, title: string) => {
     setDeleteConfirm({ open: true, id, title });
   };
@@ -252,6 +327,14 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
           onChange={setFilters}
         />
 
+        <BulkActionsBar
+          selectedCount={selectedCount}
+          totalCount={filteredALAs.length}
+          actions={bulkActions}
+          selectedItems={selectedItems}
+          onClearSelection={clearSelection}
+        />
+
         {filteredALAs.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center">
             No ALAs match your filters.
@@ -260,6 +343,12 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px]">
+                  <SelectAllCheckbox
+                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                    onCheckedChange={toggleAll}
+                  />
+                </TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Subject</TableHead>
                 <TableHead>Class</TableHead>
@@ -274,7 +363,16 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
               {filteredALAs.map((ala) => {
                 const status = getStatus(ala);
                 return (
-                  <TableRow key={ala._id}>
+                  <TableRow
+                    key={ala._id}
+                    data-state={isSelected(ala._id) ? "selected" : undefined}
+                  >
+                    <TableCell>
+                      <SelectRowCheckbox
+                        checked={isSelected(ala._id)}
+                        onCheckedChange={(checked) => toggleRow(ala._id, checked)}
+                      />
+                    </TableCell>
                     <TableCell className="max-w-[200px] truncate font-medium">
                       {ala.title}
                     </TableCell>

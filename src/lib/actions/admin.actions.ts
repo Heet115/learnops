@@ -222,3 +222,100 @@ export async function getUserStats() {
 
   return { total, admins, hods, professors, students, inactive };
 }
+
+
+// Bulk deactivate users
+export async function bulkDeactivateUsers(userIds: string[]) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    const users = await User.find({ _id: { $in: userIds } });
+    if (users.length === 0) {
+      return { success: false, error: "No users found" };
+    }
+
+    const clerk = await clerkClient();
+    let successCount = 0;
+
+    for (const user of users) {
+      try {
+        await clerk.users.banUser(user.clerkId);
+        await User.findByIdAndUpdate(user._id, { isActive: false });
+        successCount++;
+      } catch (error) {
+        console.error(`Failed to deactivate user ${user._id}:`, error);
+      }
+    }
+
+    revalidatePath("/admin/users");
+    return { success: true, count: successCount };
+  } catch (error) {
+    console.error("Error bulk deactivating users:", error);
+    return { success: false, error: "Failed to deactivate users" };
+  }
+}
+
+// Bulk reactivate users
+export async function bulkReactivateUsers(userIds: string[]) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    const users = await User.find({ _id: { $in: userIds } });
+    if (users.length === 0) {
+      return { success: false, error: "No users found" };
+    }
+
+    const clerk = await clerkClient();
+    let successCount = 0;
+
+    for (const user of users) {
+      try {
+        await clerk.users.unbanUser(user.clerkId);
+        await User.findByIdAndUpdate(user._id, { isActive: true });
+        successCount++;
+      } catch (error) {
+        console.error(`Failed to reactivate user ${user._id}:`, error);
+      }
+    }
+
+    revalidatePath("/admin/users");
+    return { success: true, count: successCount };
+  } catch (error) {
+    console.error("Error bulk reactivating users:", error);
+    return { success: false, error: "Failed to reactivate users" };
+  }
+}
+
+// Bulk delete users
+export async function bulkDeleteUsers(userIds: string[]) {
+  await requireAdmin();
+  await connectDB();
+
+  try {
+    const users = await User.find({ _id: { $in: userIds } });
+    if (users.length === 0) {
+      return { success: false, error: "No users found" };
+    }
+
+    const clerk = await clerkClient();
+    let successCount = 0;
+
+    for (const user of users) {
+      try {
+        await clerk.users.deleteUser(user.clerkId);
+        await User.findByIdAndDelete(user._id);
+        successCount++;
+      } catch (error) {
+        console.error(`Failed to delete user ${user._id}:`, error);
+      }
+    }
+
+    revalidatePath("/admin/users");
+    return { success: true, count: successCount };
+  } catch (error) {
+    console.error("Error bulk deleting users:", error);
+    return { success: false, error: "Failed to delete users" };
+  }
+}

@@ -180,3 +180,21 @@ export async function activateUser(userId: string): Promise<IUser | null> {
   revalidatePath("/admin/users");
   return user;
 }
+
+// Bulk remove students from class
+export async function bulkRemoveStudentsFromClass(studentIds: string[]) {
+  await connectDB();
+
+  try {
+    const result = await User.updateMany(
+      { _id: { $in: studentIds }, role: "student" },
+      { $unset: { classId: 1 } }
+    );
+
+    revalidatePath("/admin/student-assignments");
+    return { success: true, count: result.modifiedCount };
+  } catch (error) {
+    console.error("Error bulk removing students from class:", error);
+    return { success: false, error: "Failed to remove students from class" };
+  }
+}
