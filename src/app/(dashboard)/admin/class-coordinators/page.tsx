@@ -74,7 +74,6 @@ export default async function ClassCoordinatorsPage() {
           <CardContent>
             <ClassCoordinatorsTable
               coordinators={coordinators}
-              classes={classes}
               professors={professors}
             />
           </CardContent>

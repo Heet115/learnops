@@ -115,7 +115,7 @@ export default async function ProfessorALAsPage() {
             <CardTitle>All ALAs</CardTitle>
           </CardHeader>
           <CardContent>
-            <ALAsTable alas={alas} offerings={offerings} />
+            <ALAsTable alas={alas} />
           </CardContent>
         </Card>
       </div>
