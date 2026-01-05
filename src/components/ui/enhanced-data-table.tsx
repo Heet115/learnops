@@ -138,6 +138,60 @@ export function useTableSort<T>(
 }
 
 // ============================================
+// SIMPLE SORTING HOOK (for existing tables)
+// ============================================
+
+export function useSimpleSort<T>(
+  data: T[],
+  defaultKey?: keyof T,
+  defaultDirection: SortDirection = "asc"
+) {
+  const [sortKey, setSortKey] = React.useState<keyof T | null>(defaultKey || null);
+  const [sortDirection, setSortDirection] = React.useState<SortDirection>(defaultDirection);
+
+  const sortedData = React.useMemo(() => {
+    if (!sortKey || !sortDirection) return data;
+
+    return [...data].sort((a, b) => {
+      const aVal = a[sortKey];
+      const bVal = b[sortKey];
+
+      if (aVal === null || aVal === undefined) return 1;
+      if (bVal === null || bVal === undefined) return -1;
+
+      let result = 0;
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        result = aVal.localeCompare(bVal);
+      } else if (typeof aVal === "number" && typeof bVal === "number") {
+        result = aVal - bVal;
+      } else if (aVal instanceof Date && bVal instanceof Date) {
+        result = aVal.getTime() - bVal.getTime();
+      } else {
+        result = String(aVal).localeCompare(String(bVal));
+      }
+
+      return sortDirection === "asc" ? result : -result;
+    });
+  }, [data, sortKey, sortDirection]);
+
+  const handleSort = (key: keyof T) => {
+    if (sortKey === key) {
+      if (sortDirection === "asc") {
+        setSortDirection("desc");
+      } else if (sortDirection === "desc") {
+        setSortKey(null);
+        setSortDirection(null);
+      }
+    } else {
+      setSortKey(key);
+      setSortDirection("asc");
+    }
+  };
+
+  return { sortedData, sortKey, sortDirection, handleSort };
+}
+
+// ============================================
 // PAGINATION HOOK
 // ============================================
 
@@ -199,6 +253,11 @@ export function useTablePagination<T>(
     nextPage,
     previousPage,
     setPageSize,
+    // Simplified aliases for easier use
+    currentPage: pagination.pageIndex,
+    pageSize: pagination.pageSize,
+    totalPages: pageCount,
+    setCurrentPage: goToPage,
   };
 }
 
@@ -296,6 +355,51 @@ export function SortableHeader({
         <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
       )}
     </Button>
+  );
+}
+
+// ============================================
+// SIMPLE SORTABLE HEADER (for existing tables)
+// ============================================
+
+interface SimpleSortableHeaderProps<T> {
+  label: string;
+  sortKey: keyof T;
+  currentSortKey: keyof T | null;
+  sortDirection: SortDirection;
+  onSort: (key: keyof T) => void;
+  className?: string;
+}
+
+export function SimpleSortableHeader<T>({
+  label,
+  sortKey,
+  currentSortKey,
+  sortDirection,
+  onSort,
+  className,
+}: SimpleSortableHeaderProps<T>) {
+  const isSorted = currentSortKey === sortKey;
+  const direction = isSorted ? sortDirection : null;
+
+  return (
+    <TableHead className={className}>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="-ml-3 h-8"
+        onClick={() => onSort(sortKey)}
+      >
+        {label}
+        {direction === "asc" ? (
+          <ArrowUp className="ml-2 h-4 w-4" />
+        ) : direction === "desc" ? (
+          <ArrowDown className="ml-2 h-4 w-4" />
+        ) : (
+          <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+        )}
+      </Button>
+    </TableHead>
   );
 }
 

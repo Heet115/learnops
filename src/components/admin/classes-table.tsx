@@ -30,6 +30,14 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
+import {
+  useSimpleSort,
+  useTablePagination,
+  SimpleSortableHeader,
+  PaginationControls,
+} from "@/components/ui/enhanced-data-table";
+import { DataExportButton, type ExportColumn } from "@/components/ui/data-export";
+import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
 import { MoreHorizontal, Pencil, Trash2, Power, PowerOff } from "lucide-react";
 import {
   deleteClass,
@@ -205,6 +213,12 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
     });
   }, [classes, filters]);
 
+  // Sorting
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredClasses, "name" as keyof ClassItem);
+
+  // Pagination
+  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+
   const {
     selectedItems,
     selectedCount,
@@ -315,6 +329,7 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
             No classes match your filters.
           </div>
         ) : (
+          <>
           <Table>
             <TableHeader>
               <TableRow>
@@ -324,17 +339,29 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
                     onCheckedChange={toggleAll}
                   />
                 </TableHead>
-                <TableHead>Name</TableHead>
+                <SimpleSortableHeader<ClassItem>
+                  label="Name"
+                  sortKey="name"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
                 <TableHead>Semester</TableHead>
                 <TableHead>Course</TableHead>
                 <TableHead>Department</TableHead>
-                <TableHead>Academic Year</TableHead>
+                <SimpleSortableHeader<ClassItem>
+                  label="Academic Year"
+                  sortKey="academicYear"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
                 <TableHead>Status</TableHead>
                 <TableHead className="w-[70px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredClasses.map((classItem) => (
+              {paginatedData.map((classItem) => (
                 <TableRow
                   key={classItem._id}
                   data-state={isSelected(classItem._id) ? "selected" : undefined}
@@ -395,6 +422,17 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
               ))}
             </TableBody>
           </Table>
+          <PaginationControls
+            pageIndex={currentPage}
+            pageSize={pageSize}
+            pageCount={totalPages}
+            totalItems={filteredClasses.length}
+            canPreviousPage={currentPage > 0}
+            canNextPage={currentPage < totalPages - 1}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
+          </>
         )}
       </div>
 

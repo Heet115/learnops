@@ -30,6 +30,7 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
+import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
 import { MoreHorizontal, Pencil, UserMinus, Users } from "lucide-react";
 import {
   removeStudentFromClass,
@@ -196,6 +197,11 @@ export function StudentAssignmentsTable({
     });
   }, [students, filters]);
 
+  // Sorting
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredStudents, "firstName" as keyof Student);
+
+  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+
   const {
     selectedItems,
     selectedCount,
@@ -281,115 +287,139 @@ export function StudentAssignmentsTable({
             No students match your filters.
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">
-                  <SelectAllCheckbox
-                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
-                    onCheckedChange={toggleAll}
-                  />
-                </TableHead>
-                <TableHead>Student</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Class</TableHead>
-                <TableHead>Semester</TableHead>
-                <TableHead>Course</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[70px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredStudents.map((student) => (
-                <TableRow
-                  key={student._id}
-                  data-state={isSelected(student._id) ? "selected" : undefined}
-                >
-                  <TableCell>
-                    <SelectRowCheckbox
-                      checked={isSelected(student._id)}
-                      onCheckedChange={(checked) => toggleRow(student._id, checked)}
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">
+                    <SelectAllCheckbox
+                      checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                      onCheckedChange={toggleAll}
                     />
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {student.firstName} {student.lastName}
-                  </TableCell>
-                  <TableCell>{student.email}</TableCell>
-                  <TableCell>
-                    {student.classId ? (
-                      <span>
-                        {student.classId.name} ({student.classId.academicYear})
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {student.classId?.semesterId?.name || (
-                      <span className="text-muted-foreground">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {student.classId?.semesterId?.courseId ? (
-                      <span>{student.classId.semesterId.courseId.code}</span>
-                    ) : (
-                      <span className="text-muted-foreground">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {student.classId?.semesterId?.courseId?.departmentId
-                      ?.code || (
-                      <span className="text-muted-foreground">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {student.classId ? (
-                      <Badge variant="default">Assigned</Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="border-orange-300 text-orange-600"
-                      >
-                        Unassigned
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => setEditingStudent(student)}
-                        >
-                          <Pencil className="mr-2 h-4 w-4" />
-                          {student.classId ? "Change Class" : "Assign Class"}
-                        </DropdownMenuItem>
-                        {student.classId && (
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() =>
-                              handleRemoveClick(
-                                student._id,
-                                `${student.firstName} ${student.lastName}`,
-                              )
-                            }
-                          >
-                            <UserMinus className="mr-2 h-4 w-4" />
-                            Remove from Class
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+                  </TableHead>
+                  <SimpleSortableHeader<Student>
+                    label="Student"
+                    sortKey="firstName"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <SimpleSortableHeader<Student>
+                    label="Email"
+                    sortKey="email"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHead>Class</TableHead>
+                  <TableHead>Semester</TableHead>
+                  <TableHead>Course</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[70px]"></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((student) => (
+                  <TableRow
+                    key={student._id}
+                    data-state={isSelected(student._id) ? "selected" : undefined}
+                  >
+                    <TableCell>
+                      <SelectRowCheckbox
+                        checked={isSelected(student._id)}
+                        onCheckedChange={(checked) => toggleRow(student._id, checked)}
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {student.firstName} {student.lastName}
+                    </TableCell>
+                    <TableCell>{student.email}</TableCell>
+                    <TableCell>
+                      {student.classId ? (
+                        <span>
+                          {student.classId.name} ({student.classId.academicYear})
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {student.classId?.semesterId?.name || (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {student.classId?.semesterId?.courseId ? (
+                        <span>{student.classId.semesterId.courseId.code}</span>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {student.classId?.semesterId?.courseId?.departmentId
+                        ?.code || (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {student.classId ? (
+                        <Badge variant="default">Assigned</Badge>
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className="border-orange-300 text-orange-600"
+                        >
+                          Unassigned
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => setEditingStudent(student)}
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            {student.classId ? "Change Class" : "Assign Class"}
+                          </DropdownMenuItem>
+                          {student.classId && (
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() =>
+                                handleRemoveClick(
+                                  student._id,
+                                  `${student.firstName} ${student.lastName}`,
+                                )
+                              }
+                            >
+                              <UserMinus className="mr-2 h-4 w-4" />
+                              Remove from Class
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <PaginationControls
+              pageIndex={currentPage}
+              pageSize={pageSize}
+              pageCount={totalPages}
+              totalItems={filteredStudents.length}
+              canPreviousPage={currentPage > 0}
+              canNextPage={currentPage < totalPages - 1}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
         )}
       </div>
 

@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
 import { reviewProfileUpdateRequest } from "@/lib/actions/student-profile.actions";
 import { Check, X, Eye, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -93,6 +94,11 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
     return requests.filter((r) => r.requestStatus === statusFilter);
   }, [requests, statusFilter]);
 
+  // Sorting
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredRequests, "requestedAt" as keyof UpdateRequest, "desc");
+
+  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+
   const pendingCount = requests.filter(
     (r) => r.requestStatus === "pending",
   ).length;
@@ -156,63 +162,81 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
         </div>
 
         <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Student</TableHead>
-                <TableHead>Fields</TableHead>
-                <TableHead>Requested</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredRequests.map((request) => (
-                <TableRow key={request._id}>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium">
-                        {request.requestedBy.firstName}{" "}
-                        {request.requestedBy.lastName}
-                      </p>
-                      <p className="text-muted-foreground text-sm">
-                        {request.requestedBy.email}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {request.requestedChanges.map((change, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
-                          {change.fieldLabel}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {formatDate(request.requestedAt)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={statusConfig[request.requestStatus].variant}
-                    >
-                      {statusConfig[request.requestStatus].label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSelectedRequest(request)}
-                    >
-                      <Eye className="mr-1 h-4 w-4" />
-                      View
-                    </Button>
-                  </TableCell>
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Student</TableHead>
+                  <TableHead>Fields</TableHead>
+                  <SimpleSortableHeader<UpdateRequest>
+                    label="Requested"
+                    sortKey="requestedAt"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((request) => (
+                  <TableRow key={request._id}>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">
+                          {request.requestedBy.firstName}{" "}
+                          {request.requestedBy.lastName}
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                          {request.requestedBy.email}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {request.requestedChanges.map((change, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {change.fieldLabel}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {formatDate(request.requestedAt)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={statusConfig[request.requestStatus].variant}
+                      >
+                        {statusConfig[request.requestStatus].label}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedRequest(request)}
+                      >
+                        <Eye className="mr-1 h-4 w-4" />
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <PaginationControls
+              pageIndex={currentPage}
+              pageSize={pageSize}
+              pageCount={totalPages}
+              totalItems={filteredRequests.length}
+              canPreviousPage={currentPage > 0}
+              canNextPage={currentPage < totalPages - 1}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
         </div>
       </div>
 

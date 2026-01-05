@@ -16,6 +16,8 @@ import {
   FilterConfig,
   FilterValue,
 } from "@/components/ui/data-table-filter";
+import { useTablePagination, PaginationControls } from "@/components/ui/enhanced-data-table";
+import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
 import {
   Calendar,
   Clock,
@@ -172,6 +174,9 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
     });
   }, [alas, filters]);
 
+  // Pagination
+  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(filteredALAs, 6);
+
   const formatDeadline = (deadline: string) => {
     const date = new Date(deadline);
     const now = new Date();
@@ -198,8 +203,13 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
   if (alas.length === 0) {
     return (
       <Card>
-        <CardContent className="text-muted-foreground py-8 text-center">
-          No ALAs assigned yet. Check back later or contact your professor.
+        <CardContent className="py-8">
+          <IllustratedEmpty
+            preset="noAlas"
+            title="No ALAs assigned yet"
+            description="Check back later or contact your professor."
+            size="sm"
+          />
         </CardContent>
       </Card>
     );
@@ -215,12 +225,18 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
 
       {filteredALAs.length === 0 ? (
         <Card>
-          <CardContent className="text-muted-foreground py-8 text-center">
-            No ALAs match your filters.
+          <CardContent className="py-8">
+            <IllustratedEmpty
+              preset="noResults"
+              title="No ALAs match your filters"
+              description="Try adjusting your search or filter criteria."
+              size="sm"
+            />
           </CardContent>
         </Card>
       ) : (
-        filteredALAs.map((ala) => {
+        <>
+          {paginatedData.map((ala) => {
           const status = getStatus(ala);
           const deadline = formatDeadline(ala.deadline);
           const canSubmit =
@@ -308,7 +324,18 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
               </CardContent>
             </Card>
           );
-        })
+        })}
+          <PaginationControls
+            pageIndex={currentPage}
+            pageSize={pageSize}
+            pageCount={totalPages}
+            totalItems={filteredALAs.length}
+            canPreviousPage={currentPage > 0}
+            canNextPage={currentPage < totalPages - 1}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
+        </>
       )}
     </div>
   );

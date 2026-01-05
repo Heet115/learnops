@@ -14,6 +14,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { FadeIn, SlideUp } from "@/components/ui/page-transition";
+import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
 import {
   Users,
   BookOpen,
@@ -80,119 +82,133 @@ export default async function HodDashboard() {
       breadcrumbs={[{ label: "HOD" }, { label: "Dashboard" }]}
     >
       <div className="space-y-6 pt-4">
-        <div>
-          <h2 className="text-2xl font-bold">
-            Welcome back, {dbUser?.firstName || "Head of Department"}
-          </h2>
-          <p className="text-muted-foreground">
-            Monitor your department&apos;s performance
-          </p>
-        </div>
+        <FadeIn>
+          <div>
+            <h2 className="text-2xl font-bold">
+              Welcome back, {dbUser?.firstName || "Head of Department"}
+            </h2>
+            <p className="text-muted-foreground">
+              Monitor your department&apos;s performance
+            </p>
+          </div>
+        </FadeIn>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {statCards.map((stat) => (
-            <Card key={stat.title}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.title}
-                </CardTitle>
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
-              </CardHeader>
-              <CardContent>
-                <div className={`text-2xl font-bold ${stat.color}`}>
-                  {stat.value}
-                </div>
-                <CardDescription>{stat.description}</CardDescription>
-              </CardContent>
-            </Card>
+          {statCards.map((stat, index) => (
+            <SlideUp key={stat.title} delay={index * 75}>
+              <Card className="card-hover group">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {stat.title}
+                  </CardTitle>
+                  <stat.icon className={`h-4 w-4 ${stat.color} transition-transform duration-200 group-hover:scale-110`} />
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold tabular-nums ${stat.color}`}>
+                    {stat.value}
+                  </div>
+                  <CardDescription>{stat.description}</CardDescription>
+                </CardContent>
+              </Card>
+            </SlideUp>
           ))}
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Courses</CardTitle>
-              <CardDescription>Courses in your department</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {overview.courses.length === 0 ? (
-                <p className="text-muted-foreground text-sm">
-                  No courses found
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {overview.courses.map(
-                    (course: { _id: string; name: string; code: string }) => (
-                      <div
-                        key={course._id}
-                        className="flex items-center justify-between rounded-lg border p-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <GraduationCap className="text-muted-foreground h-4 w-4" />
-                          <div>
-                            <p className="text-sm font-medium">{course.name}</p>
-                            <p className="text-muted-foreground text-xs">
-                              {course.code}
-                            </p>
+          <FadeIn delay={300}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Courses</CardTitle>
+                <CardDescription>Courses in your department</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {overview.courses.length === 0 ? (
+                  <IllustratedEmpty
+                    preset="noSubjects"
+                    title="No courses found"
+                    description="Courses will appear here once created."
+                    size="sm"
+                  />
+                ) : (
+                  <div className="space-y-3">
+                    {overview.courses.map(
+                      (course: { _id: string; name: string; code: string }) => (
+                        <div
+                          key={course._id}
+                          className="flex items-center justify-between rounded-lg border p-3 transition-all hover:bg-muted/50 hover:border-muted-foreground/20"
+                        >
+                          <div className="flex items-center gap-3">
+                            <GraduationCap className="text-muted-foreground h-4 w-4" />
+                            <div>
+                              <p className="text-sm font-medium">{course.name}</p>
+                              <p className="text-muted-foreground text-xs">
+                                {course.code}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ),
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                      ),
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </FadeIn>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Classes</CardTitle>
-              <CardDescription>Active classes in department</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {overview.classes.length === 0 ? (
-                <p className="text-muted-foreground text-sm">
-                  No classes found
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {overview.classes.slice(0, 5).map(
-                    (cls: {
-                      _id: string;
-                      name: string;
-                      academicYear: string;
-                      semesterId?: {
+          <FadeIn delay={375}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Classes</CardTitle>
+                <CardDescription>Active classes in department</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {overview.classes.length === 0 ? (
+                  <IllustratedEmpty
+                    preset="noClasses"
+                    title="No classes found"
+                    description="Classes will appear here once created."
+                    size="sm"
+                  />
+                ) : (
+                  <div className="space-y-3">
+                    {overview.classes.slice(0, 5).map(
+                      (cls: {
+                        _id: string;
                         name: string;
-                        courseId?: { code: string };
-                      };
-                    }) => (
-                      <div
-                        key={cls._id}
-                        className="flex items-center justify-between rounded-lg border p-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Users className="text-muted-foreground h-4 w-4" />
-                          <div>
-                            <p className="text-sm font-medium">{cls.name}</p>
-                            <p className="text-muted-foreground text-xs">
-                              {cls.semesterId?.courseId?.code} -{" "}
-                              {cls.semesterId?.name}
-                            </p>
+                        academicYear: string;
+                        semesterId?: {
+                          name: string;
+                          courseId?: { code: string };
+                        };
+                      }) => (
+                        <div
+                          key={cls._id}
+                          className="flex items-center justify-between rounded-lg border p-3 transition-all hover:bg-muted/50 hover:border-muted-foreground/20"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Users className="text-muted-foreground h-4 w-4" />
+                            <div>
+                              <p className="text-sm font-medium">{cls.name}</p>
+                              <p className="text-muted-foreground text-xs">
+                                {cls.semesterId?.courseId?.code} -{" "}
+                                {cls.semesterId?.name}
+                              </p>
+                            </div>
                           </div>
+                          <Badge variant="outline">{cls.academicYear}</Badge>
                         </div>
-                        <Badge variant="outline">{cls.academicYear}</Badge>
-                      </div>
-                    ),
-                  )}
-                  {overview.classes.length > 5 && (
-                    <p className="text-muted-foreground text-center text-xs">
-                      +{overview.classes.length - 5} more classes
-                    </p>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                      ),
+                    )}
+                    {overview.classes.length > 5 && (
+                      <p className="text-muted-foreground text-center text-xs">
+                        +{overview.classes.length - 5} more classes
+                      </p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </FadeIn>
         </div>
       </div>
     </DashboardLayout>

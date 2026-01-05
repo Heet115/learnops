@@ -40,6 +40,14 @@ import {
   useRowSelection,
 } from "@/components/ui/bulk-actions";
 import {
+  useSimpleSort,
+  useTablePagination,
+  SimpleSortableHeader,
+  PaginationControls,
+} from "@/components/ui/enhanced-data-table";
+import { DataExportButton, type ExportColumn } from "@/components/ui/data-export";
+import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
+import {
   deleteDepartment,
   bulkDeleteDepartments,
   bulkToggleDepartmentStatus,
@@ -132,6 +140,12 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
       })),
     [filteredDepartments]
   );
+
+  // Sorting
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(departmentsWithStringId, "code" as keyof typeof departmentsWithStringId[0]);
+
+  // Pagination
+  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
 
   const {
     selectedItems,
@@ -245,6 +259,7 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
             No departments match your filters.
           </div>
         ) : (
+          <>
           <Table>
             <TableHeader>
               <TableRow>
@@ -254,16 +269,40 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
                     onCheckedChange={toggleAll}
                   />
                 </TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Name</TableHead>
+                <SimpleSortableHeader<typeof departmentsWithStringId[0]>
+                  label="Code"
+                  sortKey="code"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <SimpleSortableHeader<typeof departmentsWithStringId[0]>
+                  label="Name"
+                  sortKey="name"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
                 <TableHead>HOD</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
+                <SimpleSortableHeader<typeof departmentsWithStringId[0]>
+                  label="Status"
+                  sortKey="isActive"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <SimpleSortableHeader<typeof departmentsWithStringId[0]>
+                  label="Created"
+                  sortKey="createdAt"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {departmentsWithStringId.map((dept) => {
+              {paginatedData.map((dept) => {
                 const hod = dept.hodId as unknown as IUser | undefined;
                 return (
                   <TableRow
@@ -294,7 +333,7 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
                         {dept.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="text-muted-foreground tabular-nums">
                       {new Date(dept.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
@@ -326,6 +365,17 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
               })}
             </TableBody>
           </Table>
+          <PaginationControls
+            pageIndex={currentPage}
+            pageSize={pageSize}
+            pageCount={totalPages}
+            totalItems={departmentsWithStringId.length}
+            canPreviousPage={currentPage > 0}
+            canNextPage={currentPage < totalPages - 1}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
+          </>
         )}
       </div>
 

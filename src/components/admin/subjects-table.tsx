@@ -30,6 +30,7 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
+import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
 import { MoreHorizontal, Pencil, Trash2, Power, PowerOff } from "lucide-react";
 import {
   deleteSubject,
@@ -192,6 +193,11 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
     });
   }, [subjects, filters]);
 
+  // Sorting
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredSubjects, "code" as keyof Subject);
+
+  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+
   const {
     selectedItems,
     selectedCount,
@@ -302,83 +308,113 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
             No subjects match your filters.
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">
-                  <SelectAllCheckbox
-                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
-                    onCheckedChange={toggleAll}
-                  />
-                </TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Semester</TableHead>
-                <TableHead>Course</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Credits</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[70px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredSubjects.map((subject) => (
-                <TableRow
-                  key={subject._id}
-                  data-state={isSelected(subject._id) ? "selected" : undefined}
-                >
-                  <TableCell>
-                    <SelectRowCheckbox
-                      checked={isSelected(subject._id)}
-                      onCheckedChange={(checked) => toggleRow(subject._id, checked)}
+          <>
+            <Table>
+                <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">
+                    <SelectAllCheckbox
+                      checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                      onCheckedChange={toggleAll}
                     />
-                  </TableCell>
-                  <TableCell className="font-medium">{subject.code}</TableCell>
-                  <TableCell>{subject.name}</TableCell>
-                  <TableCell>{subject.semesterId?.name || "N/A"}</TableCell>
-                  <TableCell>
-                    {subject.semesterId?.courseId?.name || "N/A"} (
-                    {subject.semesterId?.courseId?.code || ""})
-                  </TableCell>
-                  <TableCell>
-                    {subject.semesterId?.courseId?.departmentId?.code || "N/A"}
-                  </TableCell>
-                  <TableCell>{subject.credits}</TableCell>
-                  <TableCell>
-                    <Badge variant={subject.isActive ? "default" : "secondary"}>
-                      {subject.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => setEditingSubject(subject)}
-                        >
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() =>
-                            handleDeleteClick(subject._id, subject.name)
-                          }
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+                  </TableHead>
+                  <SimpleSortableHeader<Subject>
+                    label="Code"
+                    sortKey="code"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <SimpleSortableHeader<Subject>
+                    label="Name"
+                    sortKey="name"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHead>Semester</TableHead>
+                  <TableHead>Course</TableHead>
+                  <TableHead>Department</TableHead>
+                  <SimpleSortableHeader<Subject>
+                    label="Credits"
+                    sortKey="credits"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[70px]"></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((subject) => (
+                  <TableRow
+                    key={subject._id}
+                    data-state={isSelected(subject._id) ? "selected" : undefined}
+                  >
+                    <TableCell>
+                      <SelectRowCheckbox
+                        checked={isSelected(subject._id)}
+                        onCheckedChange={(checked) => toggleRow(subject._id, checked)}
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">{subject.code}</TableCell>
+                    <TableCell>{subject.name}</TableCell>
+                    <TableCell>{subject.semesterId?.name || "N/A"}</TableCell>
+                    <TableCell>
+                      {subject.semesterId?.courseId?.name || "N/A"} (
+                      {subject.semesterId?.courseId?.code || ""})
+                    </TableCell>
+                    <TableCell>
+                      {subject.semesterId?.courseId?.departmentId?.code || "N/A"}
+                    </TableCell>
+                    <TableCell>{subject.credits}</TableCell>
+                    <TableCell>
+                      <Badge variant={subject.isActive ? "default" : "secondary"}>
+                        {subject.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => setEditingSubject(subject)}
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() =>
+                              handleDeleteClick(subject._id, subject.name)
+                            }
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <PaginationControls
+              pageIndex={currentPage}
+              pageSize={pageSize}
+              pageCount={totalPages}
+              totalItems={filteredSubjects.length}
+              canPreviousPage={currentPage > 0}
+              canNextPage={currentPage < totalPages - 1}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
         )}
       </div>
 

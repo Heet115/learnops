@@ -32,6 +32,7 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
+import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
 import {
   MoreHorizontal,
   Pencil,
@@ -200,6 +201,11 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
     });
   }, [alas, filters]);
 
+  // Sorting
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredALAs, "deadline" as keyof ALA, "desc");
+
+  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+
   const {
     selectedItems,
     selectedCount,
@@ -340,116 +346,146 @@ export function ALAsTable({ alas, offerings }: ALAsTableProps) {
             No ALAs match your filters.
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">
-                  <SelectAllCheckbox
-                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
-                    onCheckedChange={toggleAll}
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">
+                    <SelectAllCheckbox
+                      checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                      onCheckedChange={toggleAll}
+                    />
+                  </TableHead>
+                  <SimpleSortableHeader<ALA>
+                    label="Title"
+                    sortKey="title"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
                   />
-                </TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead>Class</TableHead>
-                <TableHead>Deadline</TableHead>
-                <TableHead>Marks</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[70px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredALAs.map((ala) => {
-                const status = getStatus(ala);
-                return (
-                  <TableRow
-                    key={ala._id}
-                    data-state={isSelected(ala._id) ? "selected" : undefined}
-                  >
-                    <TableCell>
-                      <SelectRowCheckbox
-                        checked={isSelected(ala._id)}
-                        onCheckedChange={(checked) => toggleRow(ala._id, checked)}
-                      />
-                    </TableCell>
-                    <TableCell className="max-w-[200px] truncate font-medium">
-                      {ala.title}
-                    </TableCell>
-                    <TableCell>
-                      {ala.subjectOfferingId?.subjectId?.code || "-"}
-                    </TableCell>
-                    <TableCell>
-                      {ala.subjectOfferingId?.classId?.name || "-"}
-                    </TableCell>
-                    <TableCell>{formatDeadline(ala.deadline)}</TableCell>
-                    <TableCell>{ala.maxMarks}</TableCell>
-                    <TableCell>
-                      {ala.isGroupSubmission ? (
-                        <Badge variant="outline" className="gap-1">
-                          <Users className="h-3 w-3" />
-                          Group ({ala.maxGroupSize})
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">Individual</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={status.variant}>{status.label}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/professor/alas/${ala._id}`}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Details
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setEditingALA(ala)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              handleToggleLock(ala._id, ala.isLocked)
-                            }
-                          >
-                            {ala.isLocked ? (
-                              <>
-                                <Unlock className="mr-2 h-4 w-4" />
-                                Unlock
-                              </>
-                            ) : (
-                              <>
-                                <Lock className="mr-2 h-4 w-4" />
-                                Lock
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() =>
-                              handleDeleteClick(ala._id, ala.title)
-                            }
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Class</TableHead>
+                  <SimpleSortableHeader<ALA>
+                    label="Deadline"
+                    sortKey="deadline"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <SimpleSortableHeader<ALA>
+                    label="Marks"
+                    sortKey="maxMarks"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHead>Type</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[70px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((ala) => {
+                  const status = getStatus(ala);
+                  return (
+                    <TableRow
+                      key={ala._id}
+                      data-state={isSelected(ala._id) ? "selected" : undefined}
+                    >
+                      <TableCell>
+                        <SelectRowCheckbox
+                          checked={isSelected(ala._id)}
+                          onCheckedChange={(checked) => toggleRow(ala._id, checked)}
+                        />
+                      </TableCell>
+                      <TableCell className="max-w-[200px] truncate font-medium">
+                        {ala.title}
+                      </TableCell>
+                      <TableCell>
+                        {ala.subjectOfferingId?.subjectId?.code || "-"}
+                      </TableCell>
+                      <TableCell>
+                        {ala.subjectOfferingId?.classId?.name || "-"}
+                      </TableCell>
+                      <TableCell>{formatDeadline(ala.deadline)}</TableCell>
+                      <TableCell>{ala.maxMarks}</TableCell>
+                      <TableCell>
+                        {ala.isGroupSubmission ? (
+                          <Badge variant="outline" className="gap-1">
+                            <Users className="h-3 w-3" />
+                            Group ({ala.maxGroupSize})
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">Individual</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={status.variant}>{status.label}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <Link href={`/professor/alas/${ala._id}`}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Details
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEditingALA(ala)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleToggleLock(ala._id, ala.isLocked)
+                              }
+                            >
+                              {ala.isLocked ? (
+                                <>
+                                  <Unlock className="mr-2 h-4 w-4" />
+                                  Unlock
+                                </>
+                              ) : (
+                                <>
+                                  <Lock className="mr-2 h-4 w-4" />
+                                  Lock
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() =>
+                                handleDeleteClick(ala._id, ala.title)
+                              }
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            <PaginationControls
+              pageIndex={currentPage}
+              pageSize={pageSize}
+              pageCount={totalPages}
+              totalItems={filteredALAs.length}
+              canPreviousPage={currentPage > 0}
+              canNextPage={currentPage < totalPages - 1}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
         )}
       </div>
 

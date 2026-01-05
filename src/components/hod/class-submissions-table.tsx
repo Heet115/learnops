@@ -23,6 +23,14 @@ import {
   FilterConfig,
   FilterValue,
 } from "@/components/ui/data-table-filter";
+import {
+  useSimpleSort,
+  useTablePagination,
+  SimpleSortableHeader,
+  PaginationControls,
+} from "@/components/ui/enhanced-data-table";
+import { DataExportButton, type ExportColumn } from "@/components/ui/data-export";
+import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
 
 interface ClassSubmission {
   name: string;
@@ -79,6 +87,23 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
     });
   }, [data, filters]);
 
+  // Sorting
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredData, "name" as keyof ClassSubmission, "asc");
+
+  // Pagination
+  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+
+  // Export columns
+  const exportColumns: ExportColumn<ClassSubmission>[] = [
+    { key: "name", header: "Class Name", accessor: (row) => row.name },
+    { key: "course", header: "Course", accessor: (row) => row.course },
+    { key: "semester", header: "Semester", accessor: (row) => row.semester },
+    { key: "students", header: "Total Students", accessor: (row) => row.students },
+    { key: "submitted", header: "Submitted", accessor: (row) => row.submitted },
+    { key: "graded", header: "Graded", accessor: (row) => row.graded },
+    { key: "pending", header: "Pending", accessor: (row) => row.pending },
+  ];
+
   if (data.length === 0) {
     return (
       <Card>
@@ -88,10 +113,13 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
             Track submission progress across classes
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex h-[200px] items-center justify-center">
-          <p className="text-muted-foreground text-sm">
-            No class data available
-          </p>
+        <CardContent>
+          <IllustratedEmpty
+            preset="noClasses"
+            title="No class data available"
+            description="Class submission data will appear here."
+            size="sm"
+          />
         </CardContent>
       </Card>
     );
@@ -99,11 +127,19 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Submissions by Class</CardTitle>
-        <CardDescription>
-          Track submission progress across classes
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Submissions by Class</CardTitle>
+          <CardDescription>
+            Track submission progress across classes
+          </CardDescription>
+        </div>
+        <DataExportButton
+          data={filteredData}
+          columns={exportColumns}
+          filename="class-submissions"
+          formats={["csv", "excel"]}
+        />
       </CardHeader>
       <CardContent className="space-y-4">
         <DataTableFilter
@@ -113,66 +149,114 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
         />
 
         {filteredData.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center">
-            No classes match your filters.
-          </div>
+          <IllustratedEmpty
+            preset="noResults"
+            title="No classes match your filters"
+            description="Try adjusting your search or filter criteria."
+            size="sm"
+          />
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Class</TableHead>
-                <TableHead>Course</TableHead>
-                <TableHead className="text-center">Students</TableHead>
-                <TableHead className="text-center">Submitted</TableHead>
-                <TableHead className="text-center">Graded</TableHead>
-                <TableHead>Progress</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredData.map((cls, index) => {
-                const progressPercent =
-                  cls.submitted > 0
-                    ? Math.round((cls.graded / cls.submitted) * 100)
-                    : 0;
-                return (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{cls.name}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{cls.course}</Badge>
-                      <span className="text-muted-foreground ml-2 text-xs">
-                        {cls.semester}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {cls.students}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {cls.submitted}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span className="text-green-600">{cls.graded}</span>
-                      {cls.pending > 0 && (
-                        <span className="text-muted-foreground ml-1 text-xs">
-                          ({cls.pending} pending)
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <SimpleSortableHeader<ClassSubmission>
+                    label="Class"
+                    sortKey="name"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <SimpleSortableHeader<ClassSubmission>
+                    label="Course"
+                    sortKey="course"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <SimpleSortableHeader<ClassSubmission>
+                    label="Students"
+                    sortKey="students"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-center"
+                  />
+                  <SimpleSortableHeader<ClassSubmission>
+                    label="Submitted"
+                    sortKey="submitted"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-center"
+                  />
+                  <SimpleSortableHeader<ClassSubmission>
+                    label="Graded"
+                    sortKey="graded"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="text-center"
+                  />
+                  <TableHead>Progress</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((cls, index) => {
+                  const progressPercent =
+                    cls.submitted > 0
+                      ? Math.round((cls.graded / cls.submitted) * 100)
+                      : 0;
+                  return (
+                    <TableRow key={index} className="transition-colors hover:bg-muted/50">
+                      <TableCell className="font-medium">{cls.name}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{cls.course}</Badge>
+                        <span className="text-muted-foreground ml-2 text-xs">
+                          {cls.semester}
                         </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Progress
-                          value={progressPercent}
-                          className="h-2 w-20"
-                        />
-                        <span className="text-muted-foreground w-10 text-xs">
-                          {progressPercent}%
-                        </span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                      </TableCell>
+                      <TableCell className="text-center tabular-nums">
+                        {cls.students}
+                      </TableCell>
+                      <TableCell className="text-center tabular-nums">
+                        {cls.submitted}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="text-green-600 tabular-nums">{cls.graded}</span>
+                        {cls.pending > 0 && (
+                          <span className="text-muted-foreground ml-1 text-xs">
+                            ({cls.pending} pending)
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Progress
+                            value={progressPercent}
+                            className="h-2 w-20"
+                          />
+                          <span className="text-muted-foreground w-10 text-xs tabular-nums">
+                            {progressPercent}%
+                          </span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            <PaginationControls
+              pageIndex={currentPage}
+              pageSize={pageSize}
+              pageCount={totalPages}
+              totalItems={filteredData.length}
+              canPreviousPage={currentPage > 0}
+              canNextPage={currentPage < totalPages - 1}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
         )}
       </CardContent>
     </Card>

@@ -29,6 +29,7 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
+import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
 import { MoreHorizontal, Pencil, Trash2, Crown } from "lucide-react";
 import {
   deleteClassCoordinator,
@@ -198,6 +199,11 @@ export function ClassCoordinatorsTable({
     });
   }, [coordinators, filters]);
 
+  // Sorting
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredCoordinators, "academicYear" as keyof ClassCoordinator, "desc");
+
+  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+
   const {
     selectedItems,
     selectedCount,
@@ -279,100 +285,118 @@ export function ClassCoordinatorsTable({
             No coordinators match your filters.
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">
-                  <SelectAllCheckbox
-                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
-                    onCheckedChange={toggleAll}
-                  />
-                </TableHead>
-                <TableHead>Class</TableHead>
-                <TableHead>Semester</TableHead>
-                <TableHead>Course</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Coordinator</TableHead>
-                <TableHead>Academic Year</TableHead>
-                <TableHead className="w-[70px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCoordinators.map((coordinator) => (
-                <TableRow
-                  key={coordinator._id}
-                  data-state={isSelected(coordinator._id) ? "selected" : undefined}
-                >
-                  <TableCell>
-                    <SelectRowCheckbox
-                      checked={isSelected(coordinator._id)}
-                      onCheckedChange={(checked) => toggleRow(coordinator._id, checked)}
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">
+                    <SelectAllCheckbox
+                      checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                      onCheckedChange={toggleAll}
                     />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Crown className="h-4 w-4 text-yellow-500" />
-                      <span className="font-medium">
-                        {coordinator.classId?.name || "N/A"}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {coordinator.classId?.semesterId?.name || "N/A"}
-                  </TableCell>
-                  <TableCell>
-                    {coordinator.classId?.semesterId?.courseId?.name || "N/A"} (
-                    {coordinator.classId?.semesterId?.courseId?.code || ""})
-                  </TableCell>
-                  <TableCell>
-                    {coordinator.classId?.semesterId?.courseId?.departmentId
-                      ?.code || "N/A"}
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <span>
-                        {coordinator.professorId?.firstName}{" "}
-                        {coordinator.professorId?.lastName}
-                      </span>
-                      <p className="text-muted-foreground text-sm">
-                        {coordinator.professorId?.email}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell>{coordinator.academicYear}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => setEditingCoordinator(coordinator)}
-                        >
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Change Coordinator
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() =>
-                            handleDeleteClick(
-                              coordinator._id,
-                              coordinator.classId?.name || "",
-                            )
-                          }
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Remove
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+                  </TableHead>
+                  <TableHead>Class</TableHead>
+                  <TableHead>Semester</TableHead>
+                  <TableHead>Course</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Coordinator</TableHead>
+                  <SimpleSortableHeader<ClassCoordinator>
+                    label="Academic Year"
+                    sortKey="academicYear"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHead className="w-[70px]"></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((coordinator) => (
+                  <TableRow
+                    key={coordinator._id}
+                    data-state={isSelected(coordinator._id) ? "selected" : undefined}
+                  >
+                    <TableCell>
+                      <SelectRowCheckbox
+                        checked={isSelected(coordinator._id)}
+                        onCheckedChange={(checked) => toggleRow(coordinator._id, checked)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Crown className="h-4 w-4 text-yellow-500" />
+                        <span className="font-medium">
+                          {coordinator.classId?.name || "N/A"}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {coordinator.classId?.semesterId?.name || "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      {coordinator.classId?.semesterId?.courseId?.name || "N/A"} (
+                      {coordinator.classId?.semesterId?.courseId?.code || ""})
+                    </TableCell>
+                    <TableCell>
+                      {coordinator.classId?.semesterId?.courseId?.departmentId
+                        ?.code || "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <span>
+                          {coordinator.professorId?.firstName}{" "}
+                          {coordinator.professorId?.lastName}
+                        </span>
+                        <p className="text-muted-foreground text-sm">
+                          {coordinator.professorId?.email}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell>{coordinator.academicYear}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => setEditingCoordinator(coordinator)}
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Change Coordinator
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() =>
+                              handleDeleteClick(
+                                coordinator._id,
+                                coordinator.classId?.name || "",
+                              )
+                            }
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Remove
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <PaginationControls
+              pageIndex={currentPage}
+              pageSize={pageSize}
+              pageCount={totalPages}
+              totalItems={filteredCoordinators.length}
+              canPreviousPage={currentPage > 0}
+              canNextPage={currentPage < totalPages - 1}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
         )}
       </div>
 

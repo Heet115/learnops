@@ -30,6 +30,7 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
+import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
 import { MoreHorizontal, Pencil, Trash2, Power, PowerOff } from "lucide-react";
 import {
   deleteSubjectOffering,
@@ -219,6 +220,11 @@ export function SubjectOfferingsTable({
     });
   }, [offerings, filters]);
 
+  // Sorting
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(filteredOfferings, "academicYear" as keyof SubjectOffering);
+
+  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+
   const {
     selectedItems,
     selectedCount,
@@ -329,103 +335,121 @@ export function SubjectOfferingsTable({
             No subject offerings match your filters.
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">
-                  <SelectAllCheckbox
-                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
-                    onCheckedChange={toggleAll}
-                  />
-                </TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead>Class</TableHead>
-                <TableHead>Professor</TableHead>
-                <TableHead>Semester</TableHead>
-                <TableHead>Academic Year</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[70px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredOfferings.map((offering) => (
-                <TableRow
-                  key={offering._id}
-                  data-state={isSelected(offering._id) ? "selected" : undefined}
-                >
-                  <TableCell>
-                    <SelectRowCheckbox
-                      checked={isSelected(offering._id)}
-                      onCheckedChange={(checked) => toggleRow(offering._id, checked)}
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">
+                    <SelectAllCheckbox
+                      checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                      onCheckedChange={toggleAll}
                     />
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <span className="font-medium">
-                        {offering.subjectId?.code}
-                      </span>
-                      <p className="text-muted-foreground text-sm">
-                        {offering.subjectId?.name}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell>{offering.classId?.name || "N/A"}</TableCell>
-                  <TableCell>
-                    <div>
-                      <span>
-                        {offering.professorId?.firstName}{" "}
-                        {offering.professorId?.lastName}
-                      </span>
-                      <p className="text-muted-foreground text-sm">
-                        {offering.professorId?.email}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <span>{offering.semesterId?.name}</span>
-                      <p className="text-muted-foreground text-sm">
-                        {offering.semesterId?.courseId?.departmentId?.code} -{" "}
-                        {offering.semesterId?.courseId?.code}
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell>{offering.academicYear}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={offering.isActive ? "default" : "secondary"}
-                    >
-                      {offering.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => setEditingOffering(offering)}
-                        >
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => handleDeleteClick(offering._id)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+                  </TableHead>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Class</TableHead>
+                  <TableHead>Professor</TableHead>
+                  <TableHead>Semester</TableHead>
+                  <SimpleSortableHeader<SubjectOffering>
+                    label="Academic Year"
+                    sortKey="academicYear"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[70px]"></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((offering) => (
+                  <TableRow
+                    key={offering._id}
+                    data-state={isSelected(offering._id) ? "selected" : undefined}
+                  >
+                    <TableCell>
+                      <SelectRowCheckbox
+                        checked={isSelected(offering._id)}
+                        onCheckedChange={(checked) => toggleRow(offering._id, checked)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <span className="font-medium">
+                          {offering.subjectId?.code}
+                        </span>
+                        <p className="text-muted-foreground text-sm">
+                          {offering.subjectId?.name}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell>{offering.classId?.name || "N/A"}</TableCell>
+                    <TableCell>
+                      <div>
+                        <span>
+                          {offering.professorId?.firstName}{" "}
+                          {offering.professorId?.lastName}
+                        </span>
+                        <p className="text-muted-foreground text-sm">
+                          {offering.professorId?.email}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <span>{offering.semesterId?.name}</span>
+                        <p className="text-muted-foreground text-sm">
+                          {offering.semesterId?.courseId?.departmentId?.code} -{" "}
+                          {offering.semesterId?.courseId?.code}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell>{offering.academicYear}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={offering.isActive ? "default" : "secondary"}
+                      >
+                        {offering.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => setEditingOffering(offering)}
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDeleteClick(offering._id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <PaginationControls
+              pageIndex={currentPage}
+              pageSize={pageSize}
+              pageCount={totalPages}
+              totalItems={filteredOfferings.length}
+              canPreviousPage={currentPage > 0}
+              canNextPage={currentPage < totalPages - 1}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
         )}
       </div>
 

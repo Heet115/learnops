@@ -39,6 +39,7 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
+import { useSimpleSort, useTablePagination, SimpleSortableHeader, PaginationControls } from "@/components/ui/enhanced-data-table";
 import {
   deleteSemester,
   bulkDeleteSemesters,
@@ -154,6 +155,11 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
     })) as SemesterWithId[];
   }, [filteredSemesters]);
 
+  // Sorting
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(semestersWithId, "name" as keyof SemesterWithId);
+
+  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+
   const {
     selectedItems,
     selectedCount,
@@ -264,101 +270,117 @@ export function SemestersTable({ semesters }: SemestersTableProps) {
             No semesters match your filters.
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">
-                  <SelectAllCheckbox
-                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
-                    onCheckedChange={toggleAll}
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">
+                    <SelectAllCheckbox
+                      checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                      onCheckedChange={toggleAll}
+                    />
+                  </TableHead>
+                  <SimpleSortableHeader<SemesterWithId>
+                    label="Semester"
+                    sortKey="name"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
                   />
-                </TableHead>
-                <TableHead>Semester</TableHead>
-                <TableHead>Course</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredSemesters.map((semester) => {
-                const id = (
-                  semester._id as unknown as { toString(): string }
-                ).toString();
-                const course = semester.courseId as unknown as
-                  | (ICourse & { departmentId?: IDepartment })
-                  | undefined;
-                const dept = course?.departmentId as unknown as
-                  | IDepartment
-                  | undefined;
-                return (
-                  <TableRow
-                    key={id}
-                    data-state={isSelected(id) ? "selected" : undefined}
-                  >
-                    <TableCell>
-                      <SelectRowCheckbox
-                        checked={isSelected(id)}
-                        onCheckedChange={(checked) => toggleRow(id, checked)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <span className="font-medium">{semester.name}</span>
-                        <span className="text-muted-foreground ml-2">
-                          (#{semester.number})
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {course ? (
-                        <Badge variant="outline">{course.code}</Badge>
-                      ) : (
-                        "-"
-                      )}
-                    </TableCell>
-                    <TableCell>{dept ? dept.code : "-"}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {semester.startDate && semester.endDate ? (
-                        <>
-                          {new Date(semester.startDate).toLocaleDateString()} -{" "}
-                          {new Date(semester.endDate).toLocaleDateString()}
-                        </>
-                      ) : (
-                        "Not set"
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={semester.isActive ? "default" : "secondary"}
-                      >
-                        {semester.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => setDeleteId(id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                  <TableHead>Course</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((semester) => {
+                  const id = semester._id;
+                  const course = semester.courseId as unknown as
+                    | (ICourse & { departmentId?: IDepartment })
+                    | undefined;
+                  const dept = course?.departmentId as unknown as
+                    | IDepartment
+                    | undefined;
+                  return (
+                    <TableRow
+                      key={id}
+                      data-state={isSelected(id) ? "selected" : undefined}
+                    >
+                      <TableCell>
+                        <SelectRowCheckbox
+                          checked={isSelected(id)}
+                          onCheckedChange={(checked) => toggleRow(id, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <span className="font-medium">{semester.name}</span>
+                          <span className="text-muted-foreground ml-2">
+                            (#{semester.number})
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {course ? (
+                          <Badge variant="outline">{course.code}</Badge>
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      <TableCell>{dept ? dept.code : "-"}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {semester.startDate && semester.endDate ? (
+                          <>
+                            {new Date(semester.startDate).toLocaleDateString()} -{" "}
+                            {new Date(semester.endDate).toLocaleDateString()}
+                          </>
+                        ) : (
+                          "Not set"
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={semester.isActive ? "default" : "secondary"}
+                        >
+                          {semester.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => setDeleteId(id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            <PaginationControls
+              pageIndex={currentPage}
+              pageSize={pageSize}
+              pageCount={totalPages}
+              totalItems={filteredSemesters.length}
+              canPreviousPage={currentPage > 0}
+              canNextPage={currentPage < totalPages - 1}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
         )}
       </div>
 

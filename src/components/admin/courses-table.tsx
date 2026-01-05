@@ -40,6 +40,14 @@ import {
   useRowSelection,
 } from "@/components/ui/bulk-actions";
 import {
+  useSimpleSort,
+  useTablePagination,
+  SimpleSortableHeader,
+  PaginationControls,
+} from "@/components/ui/enhanced-data-table";
+import { DataExportButton, type ExportColumn } from "@/components/ui/data-export";
+import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
+import {
   deleteCourse,
   bulkDeleteCourses,
   bulkToggleCourseStatus,
@@ -170,6 +178,12 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
     })) as CourseWithId[];
   }, [filteredCourses]);
 
+  // Sorting
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(coursesWithId, "code" as keyof CourseWithId);
+
+  // Pagination
+  const { paginatedData, currentPage, pageSize, totalPages, setCurrentPage, setPageSize } = useTablePagination(sortedData);
+
   const {
     selectedItems,
     selectedCount,
@@ -282,6 +296,7 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
             No courses match your filters.
           </div>
         ) : (
+          <>
           <Table>
             <TableHeader>
               <TableRow>
@@ -291,21 +306,37 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
                     onCheckedChange={toggleAll}
                   />
                 </TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Name</TableHead>
+                <SimpleSortableHeader<CourseWithId>
+                  label="Code"
+                  sortKey="code"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <SimpleSortableHeader<CourseWithId>
+                  label="Name"
+                  sortKey="name"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
                 <TableHead>Department</TableHead>
                 <TableHead>Type</TableHead>
-                <TableHead>Duration</TableHead>
+                <SimpleSortableHeader<CourseWithId>
+                  label="Duration"
+                  sortKey="duration"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
                 <TableHead>Semesters</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCourses.map((course) => {
-                const id = (
-                  course._id as unknown as { toString(): string }
-                ).toString();
+              {paginatedData.map((course) => {
+                const id = course._id;
                 const dept = course.departmentId as unknown as
                   | IDepartment
                   | undefined;
@@ -345,11 +376,11 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="tabular-nums">
                       {course.duration}{" "}
                       {course.duration === 1 ? "Year" : "Years"}
                     </TableCell>
-                    <TableCell>{courseData.totalSemesters || "-"}</TableCell>
+                    <TableCell className="tabular-nums">{courseData.totalSemesters || "-"}</TableCell>
                     <TableCell>
                       <Badge
                         variant={course.isActive ? "default" : "secondary"}
@@ -380,6 +411,17 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
               })}
             </TableBody>
           </Table>
+          <PaginationControls
+            pageIndex={currentPage}
+            pageSize={pageSize}
+            pageCount={totalPages}
+            totalItems={coursesWithId.length}
+            canPreviousPage={currentPage > 0}
+            canNextPage={currentPage < totalPages - 1}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+          />
+        </>
         )}
       </div>
 
