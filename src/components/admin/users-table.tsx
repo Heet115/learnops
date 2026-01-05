@@ -10,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -29,7 +28,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DataTableFilter,
   FilterConfig,
@@ -41,6 +39,17 @@ import {
   SelectRowCheckbox,
   useRowSelection,
 } from "@/components/ui/bulk-actions";
+import { UserAvatar } from "@/components/ui/user-avatar";
+import { RoleBadge } from "@/components/ui/role-badge";
+import { DataExportButton, type ExportColumn } from "@/components/ui/data-export";
+import { FilterPresetsDropdown } from "@/components/ui/filter-presets";
+import {
+  useTableSort,
+  useTablePagination,
+  PaginationControls,
+  type ColumnDef,
+} from "@/components/ui/enhanced-data-table";
+import { Badge } from "@/components/ui/badge";
 import {
   deactivateUser,
   reactivateUser,
@@ -55,6 +64,9 @@ import {
   UserCheck,
   Trash2,
   UserCog,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { IUser, ICourse } from "@/lib/db";
 import { toast } from "sonner";
@@ -65,12 +77,7 @@ interface UsersTableProps {
   courses?: ICourse[];
 }
 
-const roleBadgeVariant = {
-  admin: "default",
-  hod: "secondary",
-  professor: "outline",
-  student: "outline",
-} as const;
+type UserWithStringId = IUser & { _id: string };
 
 const filterConfigs: FilterConfig[] = [
   {
@@ -101,6 +108,24 @@ const filterConfigs: FilterConfig[] = [
   },
 ];
 
+// Export columns configuration
+const exportColumns: ExportColumn<UserWithStringId>[] = [
+  { key: "name", header: "Name", accessor: (row) => `${row.firstName} ${row.lastName}` },
+  { key: "email", header: "Email", accessor: (row) => row.email },
+  { key: "role", header: "Role", accessor: (row) => row.role.toUpperCase() },
+  { key: "status", header: "Status", accessor: (row) => row.isActive ? "Active" : "Inactive" },
+  { key: "createdAt", header: "Created", accessor: (row) => new Date(row.createdAt).toLocaleDateString() },
+];
+
+// Table columns for sorting
+const tableColumns: ColumnDef<UserWithStringId>[] = [
+  { id: "name", header: "User", sortable: true, accessorFn: (row) => `${row.firstName} ${row.lastName}` },
+  { id: "email", header: "Email", sortable: true, accessorKey: "email" as keyof UserWithStringId },
+  { id: "role", header: "Role", sortable: true, accessorKey: "role" as keyof UserWithStringId },
+  { id: "status", header: "Status", sortable: true, accessorFn: (row) => row.isActive ? "Active" : "Inactive" },
+  { id: "createdAt", header: "Created", sortable: true, accessorKey: "createdAt" as keyof UserWithStringId },
+];
+
 export function UsersTable({ users, courses = [] }: UsersTableProps) {
   const router = useRouter();
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
@@ -113,10 +138,14 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
     role: "",
     status: "",
   });
-  const [profileDialogUser, setProfileDialogUser] = useState<IUser | null>(
-    null,
-  );
+  const [profileDialogUser, setProfileDialogUser] = useState<IUser | null>(null);
 
+  // Check if any filters are active
+  const hasActiveFilters = useMemo(() => {
+    return Object.entries(filters).some(([, v]) => v && v !== "" && v !== "all");
+  }, [filters]);
+
+  // Filter users
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const search = (filters.search as string)?.toLowerCase() || "";
@@ -139,16 +168,31 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
     });
   }, [users, filters]);
 
-  // Transform users to have string _id for selection
+  // Transform users to have string _id
   const usersWithStringId = useMemo(
     () =>
       filteredUsers.map((u) => ({
         ...u,
         _id: (u._id as unknown as { toString(): string }).toString(),
-      })),
+      })) as UserWithStringId[],
     [filteredUsers]
   );
 
+  // Sorting
+  const { sortedData, sortState, toggleSort } = useTableSort(usersWithStringId, tableColumns);
+
+  // Pagination
+  const {
+    paginatedData,
+    pagination,
+    pageCount,
+    canPreviousPage,
+    canNextPage,
+    goToPage,
+    setPageSize,
+  } = useTablePagination(sortedData, 10);
+
+  // Selection
   const {
     selectedItems,
     selectedCount,
@@ -158,14 +202,14 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
     toggleRow,
     clearSelection,
     isSelected,
-  } = useRowSelection(usersWithStringId);
+  } = useRowSelection(paginatedData);
 
   const bulkActions = useMemo(
     () => [
       {
         label: "Deactivate",
         icon: <UserX className="h-4 w-4" />,
-        onClick: async (items: typeof usersWithStringId) => {
+        onClick: async (items: UserWithStringId[]) => {
           const ids = items.map((u) => u._id);
           const result = await bulkDeactivateUsers(ids);
           if (result.success) {
@@ -180,7 +224,7 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
       {
         label: "Reactivate",
         icon: <UserCheck className="h-4 w-4" />,
-        onClick: async (items: typeof usersWithStringId) => {
+        onClick: async (items: UserWithStringId[]) => {
           const ids = items.map((u) => u._id);
           const result = await bulkReactivateUsers(ids);
           if (result.success) {
@@ -196,7 +240,7 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
         label: "Delete",
         icon: <Trash2 className="h-4 w-4" />,
         variant: "destructive" as const,
-        onClick: async (items: typeof usersWithStringId) => {
+        onClick: async (items: UserWithStringId[]) => {
           const ids = items.map((u) => u._id);
           const result = await bulkDeleteUsers(ids);
           if (result.success) {
@@ -247,8 +291,31 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
     setActionType(null);
   };
 
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase();
+  // Sortable header renderer
+  const renderSortableHeader = (columnId: string, label: string) => {
+    const column = tableColumns.find((c) => c.id === columnId);
+    if (!column?.sortable) return label;
+
+    const isSorted = sortState.column === columnId;
+    const direction = isSorted ? sortState.direction : null;
+
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="-ml-3 h-8"
+        onClick={() => toggleSort(columnId)}
+      >
+        {label}
+        {direction === "asc" ? (
+          <ArrowUp className="ml-2 h-4 w-4" />
+        ) : direction === "desc" ? (
+          <ArrowDown className="ml-2 h-4 w-4" />
+        ) : (
+          <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+        )}
+      </Button>
+    );
   };
 
   if (users.length === 0) {
@@ -262,138 +329,170 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
   return (
     <>
       <div className="space-y-4">
-        <DataTableFilter
-          filters={filterConfigs}
-          values={filters}
-          onChange={setFilters}
-        />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <DataTableFilter
+            filters={filterConfigs}
+            values={filters}
+            onChange={setFilters}
+          />
+          <div className="flex items-center gap-2">
+            <FilterPresetsDropdown
+              tableId="admin-users"
+              currentFilters={filters}
+              onApplyPreset={setFilters}
+              hasActiveFilters={hasActiveFilters}
+            />
+            <DataExportButton
+              data={sortedData}
+              columns={exportColumns}
+              filename="users"
+              formats={["csv", "excel"]}
+            />
+          </div>
+        </div>
 
         <BulkActionsBar
           selectedCount={selectedCount}
-          totalCount={usersWithStringId.length}
+          totalCount={paginatedData.length}
           actions={bulkActions}
           selectedItems={selectedItems}
           onClearSelection={clearSelection}
         />
 
-        {filteredUsers.length === 0 ? (
+        {sortedData.length === 0 ? (
           <div className="text-muted-foreground py-8 text-center">
             No users match your filters.
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">
-                  <SelectAllCheckbox
-                    checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
-                    onCheckedChange={toggleAll}
-                  />
-                </TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {usersWithStringId.map((user) => (
-                <TableRow
-                  key={user._id}
-                  data-state={isSelected(user._id) ? "selected" : undefined}
-                >
-                  <TableCell>
-                    <SelectRowCheckbox
-                      checked={isSelected(user._id)}
-                      onCheckedChange={(checked) => toggleRow(user._id, checked)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.profileImage} />
-                        <AvatarFallback>
-                          {getInitials(user.firstName, user.lastName)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium">
-                        {user.firstName} {user.lastName}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant={roleBadgeVariant[user.role]}>
-                      {user.role.toUpperCase()}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={user.isActive ? "default" : "destructive"}>
-                      {user.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {new Date(user.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {user.role === "student" && (
-                          <>
+          <>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[50px]">
+                      <SelectAllCheckbox
+                        checked={isAllSelected ? true : isIndeterminate ? "indeterminate" : false}
+                        onCheckedChange={toggleAll}
+                      />
+                    </TableHead>
+                    <TableHead>{renderSortableHeader("name", "User")}</TableHead>
+                    <TableHead>{renderSortableHeader("email", "Email")}</TableHead>
+                    <TableHead>{renderSortableHeader("role", "Role")}</TableHead>
+                    <TableHead>{renderSortableHeader("status", "Status")}</TableHead>
+                    <TableHead>{renderSortableHeader("createdAt", "Created")}</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.map((user) => (
+                    <TableRow
+                      key={user._id}
+                      data-state={isSelected(user._id) ? "selected" : undefined}
+                      className="transition-colors"
+                    >
+                      <TableCell>
+                        <SelectRowCheckbox
+                          checked={isSelected(user._id)}
+                          onCheckedChange={(checked) => toggleRow(user._id, checked)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <UserAvatar
+                            name={`${user.firstName} ${user.lastName}`}
+                            image={user.profileImage}
+                            size="sm"
+                          />
+                          <span className="font-medium">
+                            {user.firstName} {user.lastName}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <RoleBadge
+                          role={user.role as "admin" | "hod" | "professor" | "student"}
+                          size="sm"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={user.isActive ? "default" : "destructive"}>
+                          {user.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground tabular-nums">
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {user.role === "student" && (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => setProfileDialogUser(user as unknown as IUser)}
+                                >
+                                  <UserCog className="mr-2 h-4 w-4" />
+                                  Manage Profile
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                              </>
+                            )}
+                            {user.isActive ? (
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedUser(user as unknown as IUser);
+                                  setActionType("deactivate");
+                                }}
+                              >
+                                <UserX className="mr-2 h-4 w-4" />
+                                Deactivate
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedUser(user as unknown as IUser);
+                                  setActionType("reactivate");
+                                }}
+                              >
+                                <UserCheck className="mr-2 h-4 w-4" />
+                                Reactivate
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem
-                              onClick={() => setProfileDialogUser(user as unknown as IUser)}
+                              className="text-destructive"
+                              onClick={() => {
+                                setSelectedUser(user as unknown as IUser);
+                                setActionType("delete");
+                              }}
                             >
-                              <UserCog className="mr-2 h-4 w-4" />
-                              Manage Profile
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                          </>
-                        )}
-                        {user.isActive ? (
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedUser(user as unknown as IUser);
-                              setActionType("deactivate");
-                            }}
-                          >
-                            <UserX className="mr-2 h-4 w-4" />
-                            Deactivate
-                          </DropdownMenuItem>
-                        ) : (
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedUser(user as unknown as IUser);
-                              setActionType("reactivate");
-                            }}
-                          >
-                            <UserCheck className="mr-2 h-4 w-4" />
-                            Reactivate
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => {
-                            setSelectedUser(user as unknown as IUser);
-                            setActionType("delete");
-                          }}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            <PaginationControls
+              pageIndex={pagination.pageIndex}
+              pageSize={pagination.pageSize}
+              pageCount={pageCount}
+              totalItems={sortedData.length}
+              canPreviousPage={canPreviousPage}
+              canNextPage={canNextPage}
+              onPageChange={goToPage}
+              onPageSizeChange={setPageSize}
+            />
+          </>
         )}
       </div>
 
