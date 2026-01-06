@@ -34,9 +34,6 @@ export async function getProfessorSubmissions(status?: string) {
   const query: Record<string, unknown> = { alaId: { $in: alaIds } };
   if (status && status !== "all") {
     query.status = status;
-  } else {
-    // Exclude drafts by default
-    query.status = { $ne: "draft" };
   }
 
   const submissions = await Submission.find(query)
@@ -71,10 +68,7 @@ export async function getALASubmissions(alaId: string) {
     return { success: false, error: "ALA not found or unauthorized" };
   }
 
-  const submissions = await Submission.find({
-    alaId,
-    status: { $ne: "draft" },
-  })
+  const submissions = await Submission.find({ alaId })
     .populate("studentId", "firstName lastName email")
     .populate("groupMembers", "firstName lastName")
     .sort({ submittedAt: -1 })
@@ -315,10 +309,7 @@ export async function getProfessorGradingStats() {
     Submission.countDocuments({ alaId: { $in: alaIds }, status: "submitted" }),
     Submission.countDocuments({ alaId: { $in: alaIds }, status: "graded" }),
     Submission.countDocuments({ alaId: { $in: alaIds }, status: "rejected" }),
-    Submission.countDocuments({
-      alaId: { $in: alaIds },
-      status: { $ne: "draft" },
-    }),
+    Submission.countDocuments({ alaId: { $in: alaIds } }),
   ]);
 
   return { pending, graded, rejected, total };

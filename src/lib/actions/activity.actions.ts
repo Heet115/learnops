@@ -106,11 +106,34 @@ export async function getActivities(input: GetActivitiesInput = {}) {
   };
 }
 
-// Get recent activities for dashboard
+// Get recent activities for dashboard (admin actions only)
 export async function getRecentActivities(limit = 10) {
   await connectDB();
 
-  const activities = await Activity.find()
+  // Only show administrative actions
+  const adminActions = [
+    "user_created",
+    "user_updated",
+    "user_deactivated",
+    "user_reactivated",
+    "user_deleted",
+    "department_created",
+    "department_updated",
+    "course_created",
+    "course_updated",
+    "semester_created",
+    "semester_updated",
+    "subject_created",
+    "subject_updated",
+    "class_created",
+    "class_updated",
+    "subject_offering_created",
+    "subject_offering_updated",
+    "student_assigned",
+    "professor_assigned",
+  ];
+
+  const activities = await Activity.find({ action: { $in: adminActions } })
     .populate("userId", "firstName lastName email role profileImage")
     .sort({ createdAt: -1 })
     .limit(limit)
@@ -178,7 +201,7 @@ export async function getAdminAuditTrail(input: GetActivitiesInput = {}) {
     throw new Error("Unauthorized: Admin access required");
   }
 
-  // Admin actions to track
+  // Admin actions to track (administrative actions only)
   const adminActions: ActivityAction[] = [
     "user_created",
     "user_updated",
