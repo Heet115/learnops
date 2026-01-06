@@ -4,6 +4,8 @@ import { auth } from "@clerk/nextjs/server";
 import mongoose from "mongoose";
 import { connectDB, Notification, User, ALA } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { pushNotificationToUser } from "@/lib/sse";
+import { shouldNotify } from "./notification-preferences.actions";
 
 // Get current user's notifications
 export async function getNotifications(limit = 20) {
@@ -107,10 +109,15 @@ export async function createNotification(data: {
   title: string;
   message: string;
   relatedId?: string;
+  relatedType?: "ala" | "submission";
 }) {
   await connectDB();
 
-  await Notification.create({
+  // Check user preferences
+  const shouldSend = await shouldNotify(data.userId, data.type);
+  if (!shouldSend) return null;
+
+  const notification = await Notification.create({
     userId: new mongoose.Types.ObjectId(data.userId),
     type: data.type,
     title: data.title,
@@ -118,7 +125,22 @@ export async function createNotification(data: {
     relatedId: data.relatedId
       ? new mongoose.Types.ObjectId(data.relatedId)
       : undefined,
+    relatedType: data.relatedType,
   });
+
+  // Push real-time notification
+  await pushNotificationToUser(data.userId, {
+    _id: notification._id.toString(),
+    type: notification.type,
+    title: notification.title,
+    message: notification.message,
+    relatedId: notification.relatedId?.toString(),
+    relatedType: notification.relatedType,
+    createdAt: notification.createdAt,
+    isRead: false,
+  });
+
+  return notification;
 }
 
 // Create notification for new ALA (notify all students in the class)
@@ -145,23 +167,43 @@ export async function notifyNewALA(alaId: string) {
     isActive: true,
   }).select("_id");
 
-  const notifications = students.map((student) => ({
-    userId: student._id,
-    type: "new_ala" as const,
-    title: "New ALA Posted",
-    message: `${offering.subjectId?.code || "Subject"}: ${ala.title}`,
-    relatedId: ala._id,
-    relatedType: "ala" as const,
-  }));
+  // Create notifications respecting preferences
+  for (const student of students) {
+    const studentId = student._id.toString();
+    const shouldSend = await shouldNotify(studentId, "new_ala");
 
-  if (notifications.length > 0) {
-    await Notification.insertMany(notifications);
+    if (shouldSend) {
+      const notification = await Notification.create({
+        userId: student._id,
+        type: "new_ala",
+        title: "New ALA Posted",
+        message: `${offering.subjectId?.code || "Subject"}: ${ala.title}`,
+        relatedId: ala._id,
+        relatedType: "ala",
+      });
+
+      // Push real-time
+      await pushNotificationToUser(studentId, {
+        _id: notification._id.toString(),
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        relatedId: notification.relatedId?.toString(),
+        relatedType: notification.relatedType,
+        createdAt: notification.createdAt,
+        isRead: false,
+      });
+    }
   }
 }
 
 // Create notification for deadline reminder (24 hours before)
 export async function notifyDeadlineReminder(alaId: string, studentId: string) {
   await connectDB();
+
+  // Check preferences
+  const shouldSend = await shouldNotify(studentId, "deadline_reminder");
+  if (!shouldSend) return;
 
   const ala = await ALA.findById(alaId).populate({
     path: "subjectOfferingId",
@@ -175,13 +217,25 @@ export async function notifyDeadlineReminder(alaId: string, studentId: string) {
     subjectId?: { code: string };
   };
 
-  await Notification.create({
+  const notification = await Notification.create({
     userId: new mongoose.Types.ObjectId(studentId),
     type: "deadline_reminder",
     title: "Deadline Approaching",
     message: `${offering.subjectId?.code || "ALA"}: "${ala.title}" is due in 24 hours`,
     relatedId: ala._id,
     relatedType: "ala",
+  });
+
+  // Push real-time
+  await pushNotificationToUser(studentId, {
+    _id: notification._id.toString(),
+    type: notification.type,
+    title: notification.title,
+    message: notification.message,
+    relatedId: notification.relatedId?.toString(),
+    relatedType: notification.relatedType,
+    createdAt: notification.createdAt,
+    isRead: false,
   });
 }
 
@@ -195,13 +249,29 @@ export async function notifySubmissionGraded(
 ) {
   await connectDB();
 
-  await Notification.create({
+  // Check preferences
+  const shouldSend = await shouldNotify(studentId, "submission_graded");
+  if (!shouldSend) return;
+
+  const notification = await Notification.create({
     userId: new mongoose.Types.ObjectId(studentId),
     type: "submission_graded",
     title: "Submission Graded",
     message: `Your submission for "${alaTitle}" has been graded: ${marks}/${maxMarks}`,
     relatedId: new mongoose.Types.ObjectId(submissionId),
     relatedType: "submission",
+  });
+
+  // Push real-time
+  await pushNotificationToUser(studentId, {
+    _id: notification._id.toString(),
+    type: notification.type,
+    title: notification.title,
+    message: notification.message,
+    relatedId: notification.relatedId?.toString(),
+    relatedType: notification.relatedType,
+    createdAt: notification.createdAt,
+    isRead: false,
   });
 }
 
@@ -214,13 +284,29 @@ export async function notifySubmissionRejected(
 ) {
   await connectDB();
 
-  await Notification.create({
+  // Check preferences
+  const shouldSend = await shouldNotify(studentId, "submission_rejected");
+  if (!shouldSend) return;
+
+  const notification = await Notification.create({
     userId: new mongoose.Types.ObjectId(studentId),
     type: "submission_rejected",
     title: "Submission Rejected",
     message: `Your submission for "${alaTitle}" was rejected: ${reason}`,
     relatedId: new mongoose.Types.ObjectId(submissionId),
     relatedType: "submission",
+  });
+
+  // Push real-time
+  await pushNotificationToUser(studentId, {
+    _id: notification._id.toString(),
+    type: notification.type,
+    title: notification.title,
+    message: notification.message,
+    relatedId: notification.relatedId?.toString(),
+    relatedType: notification.relatedType,
+    createdAt: notification.createdAt,
+    isRead: false,
   });
 }
 
@@ -229,11 +315,14 @@ export async function createDeadlineReminders() {
   await connectDB();
 
   const now = new Date();
-  const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-  // Find ALAs with deadline in next 24 hours that aren't locked
+  // Find ALAs with deadline in next 72 hours that aren't locked
+  // We check 72 hours to accommodate different user preferences (6-72 hours)
+  const maxHours = 72;
+  const futureLimit = new Date(now.getTime() + maxHours * 60 * 60 * 1000);
+
   const alas = await ALA.find({
-    deadline: { $gte: now, $lte: tomorrow },
+    deadline: { $gte: now, $lte: futureLimit },
     isLocked: false,
     isActive: true,
   }).populate({
@@ -241,6 +330,8 @@ export async function createDeadlineReminders() {
     select: "classId subjectId",
     populate: { path: "subjectId", select: "code" },
   });
+
+  const { NotificationPreferences } = await import("@/lib/db");
 
   for (const ala of alas) {
     const offering = ala.subjectOfferingId as unknown as {
@@ -271,19 +362,59 @@ export async function createDeadlineReminders() {
 
     const existingSet = new Set(existingReminders.map((id) => id.toString()));
 
-    const notifications = students
-      .filter((s) => !existingSet.has(s._id.toString()))
-      .map((student) => ({
-        userId: student._id,
-        type: "deadline_reminder" as const,
-        title: "Deadline Approaching",
-        message: `${offering.subjectId?.code || "ALA"}: "${ala.title}" is due in less than 24 hours`,
-        relatedId: ala._id,
-        relatedType: "ala" as const,
-      }));
+    for (const student of students) {
+      const studentId = student._id.toString();
 
-    if (notifications.length > 0) {
-      await Notification.insertMany(notifications);
+      // Skip if already reminded today
+      if (existingSet.has(studentId)) continue;
+
+      // Get user's preferred reminder hours
+      const prefs = await NotificationPreferences.findOne({
+        userId: student._id,
+      });
+      const reminderHours = prefs?.deadlineReminderHours || 24;
+
+      // Check if deadline is within user's preferred reminder window
+      const deadlineTime = new Date(ala.deadline).getTime();
+      const reminderThreshold = now.getTime() + reminderHours * 60 * 60 * 1000;
+
+      if (deadlineTime <= reminderThreshold) {
+        // Check if user wants deadline reminders
+        const shouldSend = await shouldNotify(studentId, "deadline_reminder");
+
+        if (shouldSend) {
+          const hoursLeft = Math.round(
+            (deadlineTime - now.getTime()) / (60 * 60 * 1000),
+          );
+          const timeMessage =
+            hoursLeft <= 1
+              ? "less than an hour"
+              : hoursLeft < 24
+                ? `${hoursLeft} hours`
+                : `${Math.round(hoursLeft / 24)} day(s)`;
+
+          const notification = await Notification.create({
+            userId: student._id,
+            type: "deadline_reminder",
+            title: "Deadline Approaching",
+            message: `${offering.subjectId?.code || "ALA"}: "${ala.title}" is due in ${timeMessage}`,
+            relatedId: ala._id,
+            relatedType: "ala",
+          });
+
+          // Push real-time
+          await pushNotificationToUser(studentId, {
+            _id: notification._id.toString(),
+            type: notification.type,
+            title: notification.title,
+            message: notification.message,
+            relatedId: notification.relatedId?.toString(),
+            relatedType: notification.relatedType,
+            createdAt: notification.createdAt,
+            isRead: false,
+          });
+        }
+      }
     }
   }
 

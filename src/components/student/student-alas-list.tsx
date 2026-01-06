@@ -97,7 +97,7 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
       return {
         label: "Overdue",
         variant: "destructive" as const,
-        color: "text-red-600",
+        color: "text-black",
         key: "overdue",
       };
     }

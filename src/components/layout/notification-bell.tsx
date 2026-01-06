@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useCallback } from "react";
 import {
   Bell,
   Check,
@@ -10,33 +10,45 @@ import {
   Clock,
   Award,
   XCircle,
+  Settings,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
   getNotifications,
-  getUnreadCount,
   markAsRead,
   markAllAsRead,
   deleteNotification,
 } from "@/lib/actions/notification.actions";
+import { useNotifications } from "@/hooks/use-notifications";
 import Link from "next/link";
+import { toast } from "sonner";
+
+type NotificationType =
+  | "new_ala"
+  | "deadline_reminder"
+  | "submission_graded"
+  | "submission_rejected"
+  | "system";
 
 interface Notification {
   _id: string;
-  type:
-    | "new_ala"
-    | "deadline_reminder"
-    | "submission_graded"
-    | "submission_rejected"
-    | "system";
+  type: NotificationType;
   title: string;
   message: string;
   relatedId?: string;
@@ -50,60 +62,79 @@ interface NotificationBellProps {
 }
 
 export function NotificationBell({ role }: NotificationBellProps) {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [initialLoaded, setInitialLoaded] = useState(false);
 
+  // Real-time notifications hook
+  const {
+    unreadCount,
+    isConnected,
+    notifications,
+    setNotifications,
+    decrementUnread,
+    clearUnread,
+    markAsRead: markAsReadLocal,
+    removeNotification,
+  } = useNotifications({
+    enabled: true,
+    onNewNotification: (notification) => {
+      // Show toast for new notifications
+      toast.info(notification.title, {
+        description: notification.message,
+        duration: 5000,
+      });
+    },
+  });
+
+  // Load initial notifications
   useEffect(() => {
-    let isMounted = true;
+    if (!initialLoaded) {
+      getNotifications(20).then((notifs) => {
+        // Cast to ensure type compatibility
+        const typedNotifs = notifs as Notification[];
+        setNotifications(typedNotifs);
+        setInitialLoaded(true);
+      });
+    }
+  }, [initialLoaded, setNotifications]);
 
-    const loadNotifications = async () => {
-      const [notifs, count] = await Promise.all([
-        getNotifications(20),
-        getUnreadCount(),
-      ]);
-      if (isMounted) {
-        setNotifications(notifs);
-        setUnreadCount(count);
-      }
-    };
+  const handleMarkAsRead = useCallback(
+    (id: string) => {
+      // Optimistic update
+      markAsReadLocal(id);
+      decrementUnread();
 
-    loadNotifications();
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(loadNotifications, 30000);
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
-  }, []);
+      startTransition(async () => {
+        await markAsRead(id);
+      });
+    },
+    [markAsReadLocal, decrementUnread],
+  );
 
-  const handleMarkAsRead = (id: string) => {
-    startTransition(async () => {
-      await markAsRead(id);
-      setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)),
-      );
-      setUnreadCount((prev) => Math.max(0, prev - 1));
-    });
-  };
+  const handleMarkAllAsRead = useCallback(() => {
+    // Optimistic update - cast notifications to proper type
+    setNotifications((prev) =>
+      (prev as Notification[]).map((n) => ({ ...n, isRead: true })),
+    );
+    clearUnread();
 
-  const handleMarkAllAsRead = () => {
     startTransition(async () => {
       await markAllAsRead();
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      setUnreadCount(0);
     });
-  };
+  }, [setNotifications, clearUnread]);
 
-  const handleDelete = (id: string) => {
-    startTransition(async () => {
-      await deleteNotification(id);
-      const wasUnread = notifications.find((n) => n._id === id && !n.isRead);
-      setNotifications((prev) => prev.filter((n) => n._id !== id));
-      if (wasUnread) setUnreadCount((prev) => Math.max(0, prev - 1));
-    });
-  };
+  const handleDelete = useCallback(
+    (id: string) => {
+      // Optimistic update
+      removeNotification(id);
+
+      startTransition(async () => {
+        await deleteNotification(id);
+      });
+    },
+    [removeNotification],
+  );
 
   const getIcon = (type: Notification["type"]) => {
     switch (type) {
@@ -151,6 +182,13 @@ export function NotificationBell({ role }: NotificationBellProps) {
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
+  const settingsLink =
+    role === "student"
+      ? "/student/notifications/settings"
+      : role === "professor"
+        ? "/professor/notifications/settings"
+        : null;
+
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -159,7 +197,7 @@ export function NotificationBell({ role }: NotificationBellProps) {
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
-              className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs"
+              className="absolute -top-1 -right-1 flex h-5 w-5 animate-pulse items-center justify-center rounded-full p-0 text-xs"
             >
               {unreadCount > 9 ? "9+" : unreadCount}
             </Badge>
@@ -168,19 +206,37 @@ export function NotificationBell({ role }: NotificationBellProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <div className="flex items-center justify-between border-b px-4 py-3">
-          <h4 className="font-semibold">Notifications</h4>
-          {unreadCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-auto p-1 text-xs"
-              onClick={handleMarkAllAsRead}
-              disabled={isPending}
-            >
-              <CheckCheck className="mr-1 h-3 w-3" />
-              Mark all read
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            <h4 className="font-semibold">Notifications</h4>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  {isConnected ? (
+                    <Wifi className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <WifiOff className="text-muted-foreground h-3 w-3" />
+                  )}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isConnected ? "Real-time updates active" : "Reconnecting..."}
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          <div className="flex items-center gap-1">
+            {unreadCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto p-1 text-xs"
+                onClick={handleMarkAllAsRead}
+                disabled={isPending}
+              >
+                <CheckCheck className="mr-1 h-3 w-3" />
+                Mark all read
+              </Button>
+            )}
+          </div>
         </div>
         <ScrollArea className="h-[400px]">
           {notifications.length === 0 ? (
@@ -190,7 +246,7 @@ export function NotificationBell({ role }: NotificationBellProps) {
             </div>
           ) : (
             <div className="divide-y">
-              {notifications.map((notification) => {
+              {(notifications as Notification[]).map((notification) => {
                 const link = getLink(notification);
                 const content = (
                   <div
@@ -268,6 +324,19 @@ export function NotificationBell({ role }: NotificationBellProps) {
             </div>
           )}
         </ScrollArea>
+        {settingsLink && (
+          <>
+            <DropdownMenuSeparator />
+            <div className="p-2">
+              <Link href={settingsLink} onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" size="sm" className="w-full">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Notification Settings
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
