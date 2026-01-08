@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const userAvatarVariants = cva(
-  "relative flex shrink-0 overflow-hidden rounded-full",
+  "relative flex shrink-0 overflow-hidden rounded-full ring-2 ring-background transition-all duration-200",
   {
     variants: {
       size: {
@@ -24,33 +24,33 @@ const userAvatarVariants = cva(
   },
 );
 
-// Generate consistent color based on name
-function getAvatarColor(name: string): string {
-  const colors = [
-    "bg-red-500",
-    "bg-orange-500",
-    "bg-amber-500",
-    "bg-yellow-500",
-    "bg-lime-500",
-    "bg-green-500",
-    "bg-emerald-500",
-    "bg-teal-500",
-    "bg-cyan-500",
-    "bg-sky-500",
-    "bg-blue-500",
-    "bg-indigo-500",
-    "bg-violet-500",
-    "bg-purple-500",
-    "bg-fuchsia-500",
-    "bg-pink-500",
-    "bg-rose-500",
+// Generate consistent gradient based on name
+function getAvatarGradient(name: string): string {
+  const gradients = [
+    "bg-linear-to-br from-red-400 to-red-600",
+    "bg-linear-to-br from-orange-400 to-orange-600",
+    "bg-linear-to-br from-amber-400 to-amber-600",
+    "bg-linear-to-br from-yellow-400 to-yellow-600",
+    "bg-linear-to-br from-lime-400 to-lime-600",
+    "bg-linear-to-br from-green-400 to-green-600",
+    "bg-linear-to-br from-emerald-400 to-emerald-600",
+    "bg-linear-to-br from-teal-400 to-teal-600",
+    "bg-linear-to-br from-cyan-400 to-cyan-600",
+    "bg-linear-to-br from-sky-400 to-sky-600",
+    "bg-linear-to-br from-blue-400 to-blue-600",
+    "bg-linear-to-br from-indigo-400 to-indigo-600",
+    "bg-linear-to-br from-violet-400 to-violet-600",
+    "bg-linear-to-br from-purple-400 to-purple-600",
+    "bg-linear-to-br from-fuchsia-400 to-fuchsia-600",
+    "bg-linear-to-br from-pink-400 to-pink-600",
+    "bg-linear-to-br from-rose-400 to-rose-600",
   ];
 
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return colors[Math.abs(hash) % colors.length];
+  return gradients[Math.abs(hash) % gradients.length];
 }
 
 // Get initials from name
@@ -91,12 +91,12 @@ export function UserAvatar({
   ...props
 }: UserAvatarProps) {
   const initials = getInitials(name);
-  const bgColor = getAvatarColor(name);
+  const bgGradient = getAvatarGradient(name);
 
   return (
     <div className="relative inline-block">
       <Avatar
-        className={cn(userAvatarVariants({ size }), className)}
+        className={cn(userAvatarVariants({ size }), "hover:ring-primary/50", className)}
         {...props}
       >
         {image && (
@@ -104,8 +104,8 @@ export function UserAvatar({
         )}
         <AvatarFallback
           className={cn(
-            bgColor,
-            "flex items-center justify-center font-medium text-white",
+            bgGradient,
+            "flex items-center justify-center font-semibold text-white shadow-inner",
           )}
           delayMs={image ? 600 : 0}
         >
@@ -115,7 +115,7 @@ export function UserAvatar({
       {showStatus && (
         <span
           className={cn(
-            "ring-background absolute right-0 bottom-0 block rounded-full ring-2",
+            "ring-background absolute right-0 bottom-0 block rounded-full ring-2 shadow-sm",
             statusColors[status],
             size === "xs" && "h-1.5 w-1.5",
             size === "sm" && "h-2 w-2",

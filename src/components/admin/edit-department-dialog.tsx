@@ -21,8 +21,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { updateDepartment } from "@/lib/actions/academic.actions";
-import { Loader2 } from "lucide-react";
+import {
+  Loader2,
+  Building2,
+  Code2,
+  UserCheck,
+  Info,
+  Save,
+} from "lucide-react";
 import { IDepartment, IUser } from "@/lib/db";
 import { toast } from "sonner";
 
@@ -81,9 +90,31 @@ export function EditDepartmentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Department</DialogTitle>
-          <DialogDescription>Update department details</DialogDescription>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/10">
+              <Building2 className="h-5 w-5 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <DialogTitle>Edit Department</DialogTitle>
+                <Badge
+                  variant="outline"
+                  className={
+                    department.isActive
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                      : "border-amber-500/30 bg-amber-500/10 text-amber-600"
+                  }
+                >
+                  {department.isActive ? "Active" : "Inactive"}
+                </Badge>
+              </div>
+              <DialogDescription>Update department details</DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
+
+        <Separator />
+
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             {error && (
@@ -91,8 +122,12 @@ export function EditDepartmentDialog({
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+
             <div className="space-y-2">
-              <Label htmlFor="name">Department Name</Label>
+              <Label htmlFor="name" className="flex items-center gap-2">
+                <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                Department Name
+              </Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -101,10 +136,15 @@ export function EditDepartmentDialog({
                 }
                 required
                 disabled={isLoading}
+                className="h-10"
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="code">Department Code</Label>
+              <Label htmlFor="code" className="flex items-center gap-2">
+                <Code2 className="h-3.5 w-3.5 text-muted-foreground" />
+                Department Code
+              </Label>
               <Input
                 id="code"
                 value={formData.code}
@@ -117,22 +157,29 @@ export function EditDepartmentDialog({
                 required
                 disabled={isLoading}
                 maxLength={10}
+                className="h-10 font-mono uppercase"
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="hod">Head of Department</Label>
+              <Label htmlFor="hod" className="flex items-center gap-2">
+                <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                Head of Department
+              </Label>
               <Select
                 value={formData.hodId}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, hodId: value })
+                  setFormData({ ...formData, hodId: value === "none" ? "" : value })
                 }
                 disabled={isLoading}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-10">
                   <SelectValue placeholder="Select HOD" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="none">
+                    <span className="text-muted-foreground">None</span>
+                  </SelectItem>
                   {hods.map((hod) => (
                     <SelectItem
                       key={(
@@ -142,14 +189,29 @@ export function EditDepartmentDialog({
                         hod._id as unknown as { toString(): string }
                       ).toString()}
                     >
-                      {hod.firstName} {hod.lastName}
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-violet-500/10 text-xs font-medium text-violet-600">
+                          {hod.firstName?.[0]}
+                          {hod.lastName?.[0]}
+                        </div>
+                        {hod.firstName} {hod.lastName}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {hods.length === 0 && (
+                <div className="flex items-start gap-2 rounded-md bg-amber-500/10 p-2 text-xs text-amber-600">
+                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <span>No HOD users available. Create HOD users first.</span>
+                </div>
+              )}
             </div>
           </div>
-          <DialogFooter>
+
+          <Separator />
+
+          <DialogFooter className="pt-4">
             <Button
               type="button"
               variant="outline"
@@ -165,7 +227,10 @@ export function EditDepartmentDialog({
                   Saving...
                 </>
               ) : (
-                "Save Changes"
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </>
               )}
             </Button>
           </DialogFooter>

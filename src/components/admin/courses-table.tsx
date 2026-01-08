@@ -16,6 +16,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -50,7 +51,17 @@ import {
   bulkDeleteCourses,
   bulkToggleCourseStatus,
 } from "@/lib/actions/academic.actions";
-import { MoreHorizontal, Trash2, Power, PowerOff } from "lucide-react";
+import {
+  MoreHorizontal,
+  Trash2,
+  Power,
+  PowerOff,
+  BookOpen,
+  Building2,
+  Clock,
+  Layers,
+  AlertTriangle,
+} from "lucide-react";
 import { ICourse, IDepartment } from "@/lib/db";
 import { toast } from "sonner";
 
@@ -70,10 +81,22 @@ interface CourseWithId {
   totalSemesters?: number;
 }
 
-const courseTypeLabels: Record<string, string> = {
-  diploma: "Diploma",
-  ug: "UG",
-  pg: "PG",
+const courseTypeConfig: Record<
+  string,
+  { label: string; color: string }
+> = {
+  diploma: {
+    label: "Diploma",
+    color: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+  },
+  ug: {
+    label: "UG",
+    color: "border-blue-500/30 bg-blue-500/10 text-blue-600",
+  },
+  pg: {
+    label: "PG",
+    color: "border-violet-500/30 bg-violet-500/10 text-violet-600",
+  },
 };
 
 export function CoursesTable({ courses, departments }: CoursesTableProps) {
@@ -176,13 +199,11 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
     })) as CourseWithId[];
   }, [filteredCourses]);
 
-  // Sorting
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
     coursesWithId,
     "code" as keyof CourseWithId,
   );
 
-  // Pagination
   const {
     paginatedData,
     currentPage,
@@ -276,8 +297,14 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
 
   if (courses.length === 0) {
     return (
-      <div className="text-muted-foreground py-8 text-center">
-        No courses found. Create your first course to get started.
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+          <BookOpen className="h-7 w-7 text-muted-foreground" />
+        </div>
+        <h3 className="mt-4 text-lg font-medium">No courses yet</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Create your first course to get started.
+        </p>
       </div>
     );
   }
@@ -300,133 +327,189 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
         />
 
         {filteredCourses.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center">
-            No courses match your filters.
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <BookOpen className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              No courses match your filters.
+            </p>
           </div>
         ) : (
           <>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]">
-                    <SelectAllCheckbox
-                      checked={
-                        isAllSelected
-                          ? true
-                          : isIndeterminate
-                            ? "indeterminate"
-                            : false
-                      }
-                      onCheckedChange={toggleAll}
+            <div className="rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="w-[50px]">
+                      <SelectAllCheckbox
+                        checked={
+                          isAllSelected
+                            ? true
+                            : isIndeterminate
+                              ? "indeterminate"
+                              : false
+                        }
+                        onCheckedChange={toggleAll}
+                      />
+                    </TableHead>
+                    <SimpleSortableHeader<CourseWithId>
+                      label="Code"
+                      sortKey="code"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
                     />
-                  </TableHead>
-                  <SimpleSortableHeader<CourseWithId>
-                    label="Code"
-                    sortKey="code"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<CourseWithId>
-                    label="Name"
-                    sortKey="name"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <TableHead>Department</TableHead>
-                  <TableHead>Type</TableHead>
-                  <SimpleSortableHeader<CourseWithId>
-                    label="Duration"
-                    sortKey="duration"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <TableHead>Semesters</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((course) => {
-                  const id = course._id;
-                  const dept = course.departmentId as unknown as
-                    | IDepartment
-                    | undefined;
-                  const courseData = course as unknown as {
-                    courseType?: string;
-                    totalSemesters?: number;
-                  };
-                  return (
-                    <TableRow
-                      key={id}
-                      data-state={isSelected(id) ? "selected" : undefined}
-                    >
-                      <TableCell>
-                        <SelectRowCheckbox
-                          checked={isSelected(id)}
-                          onCheckedChange={(checked) => toggleRow(id, checked)}
-                        />
-                      </TableCell>
-                      <TableCell className="font-mono font-medium">
-                        {course.code}
-                      </TableCell>
-                      <TableCell>{course.name}</TableCell>
-                      <TableCell>
-                        {dept ? (
-                          <Badge variant="outline">{dept.code}</Badge>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {courseData.courseType ? (
-                          <Badge variant="secondary">
-                            {courseTypeLabels[courseData.courseType] ||
-                              courseData.courseType}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="tabular-nums">
-                        {course.duration}{" "}
-                        {course.duration === 1 ? "Year" : "Years"}
-                      </TableCell>
-                      <TableCell className="tabular-nums">
-                        {courseData.totalSemesters || "-"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={course.isActive ? "default" : "secondary"}
-                        >
-                          {course.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => setDeleteId(id)}
+                    <SimpleSortableHeader<CourseWithId>
+                      label="Name"
+                      sortKey="name"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <TableHead>Department</TableHead>
+                    <TableHead>Type</TableHead>
+                    <SimpleSortableHeader<CourseWithId>
+                      label="Duration"
+                      sortKey="duration"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <TableHead>Semesters</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.map((course) => {
+                    const id = course._id;
+                    const dept = course.departmentId as unknown as
+                      | IDepartment
+                      | undefined;
+                    const courseData = course as unknown as {
+                      courseType?: string;
+                      totalSemesters?: number;
+                    };
+                    const typeConfig = courseData.courseType
+                      ? courseTypeConfig[courseData.courseType]
+                      : null;
+
+                    return (
+                      <TableRow
+                        key={id}
+                        data-state={isSelected(id) ? "selected" : undefined}
+                        className="group"
+                      >
+                        <TableCell>
+                          <SelectRowCheckbox
+                            checked={isSelected(id)}
+                            onCheckedChange={(checked) =>
+                              toggleRow(id, checked)
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                              <BookOpen className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <span className="font-mono font-semibold">
+                              {course.code}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium max-w-[200px] truncate">
+                          {course.name}
+                        </TableCell>
+                        <TableCell>
+                          {dept ? (
+                            <div className="flex items-center gap-1.5">
+                              <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                              <Badge variant="outline" className="font-mono">
+                                {dept.code}
+                              </Badge>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {typeConfig ? (
+                            <Badge
+                              variant="outline"
+                              className={typeConfig.color}
                             >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                              {typeConfig.label}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5 text-sm">
+                            <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="tabular-nums">
+                              {course.duration}{" "}
+                              {course.duration === 1 ? "Year" : "Years"}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5 text-sm">
+                            <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="tabular-nums">
+                              {courseData.totalSemesters || "-"}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={
+                              course.isActive
+                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                                : "border-zinc-500/30 bg-zinc-500/10 text-zinc-600"
+                            }
+                          >
+                            <span
+                              className={`mr-1.5 h-1.5 w-1.5 rounded-full ${
+                                course.isActive
+                                  ? "bg-emerald-500"
+                                  : "bg-zinc-400"
+                              }`}
+                            />
+                            {course.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => setDeleteId(id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
             <PaginationControls
               pageIndex={currentPage}
               pageSize={pageSize}
@@ -444,11 +527,18 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Course</AlertDialogTitle>
-            <AlertDialogDescription>
-              {error ||
-                "Are you sure? This will also delete all auto-generated semesters for this course. Courses with subjects cannot be deleted."}
-            </AlertDialogDescription>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <AlertDialogTitle>Delete Course</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {error ||
+                    "Are you sure? This will also delete all auto-generated semesters for this course. Courses with subjects cannot be deleted."}
+                </AlertDialogDescription>
+              </div>
+            </div>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>

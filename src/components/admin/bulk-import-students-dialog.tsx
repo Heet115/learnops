@@ -4,14 +4,14 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
@@ -31,6 +31,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
 import {
   validateBulkStudentData,
   bulkCreateStudents,
@@ -48,6 +50,10 @@ import {
   Download,
   Loader2,
   Users,
+  GraduationCap,
+  ArrowRight,
+  FileUp,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -75,9 +81,8 @@ interface BulkImportStudentsDialogProps {
 
 type Step = "upload" | "preview" | "importing" | "results";
 
-// CSV column headers mapping
 const COLUMN_MAP: Record<string, keyof ParsedStudentRow> = {
-  "full name": "firstName", // Will be split
+  "full name": "firstName",
   first_name: "firstName",
   firstname: "firstName",
   "first name": "firstName",
@@ -138,9 +143,7 @@ export function BulkImportStudentsDialog({
   const [step, setStep] = useState<Step>("upload");
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [parsedRows, setParsedRows] = useState<ParsedStudentRow[]>([]);
-  const [importResult, setImportResult] = useState<BulkImportResult | null>(
-    null,
-  );
+  const [importResult, setImportResult] = useState<BulkImportResult | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
@@ -157,114 +160,86 @@ export function BulkImportStudentsDialog({
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
-    if (!newOpen) {
-      resetState();
-    }
+    if (!newOpen) resetState();
   };
 
-  const parseCSV = (
-    content: string,
-  ): Omit<ParsedStudentRow, "errors" | "isValid">[] => {
+  const parseCSV = (content: string): Omit<ParsedStudentRow, "errors" | "isValid">[] => {
     const lines = content.trim().split(/\r?\n/);
     if (lines.length < 2) return [];
 
-    // Parse header to find column indices
-    const headers = lines[0]
-      .split(",")
-      .map((h) => h.trim().toLowerCase().replace(/["']/g, ""));
-
-    // Build column index map
+    const headers = lines[0].split(",").map((h) => h.trim().toLowerCase().replace(/["']/g, ""));
     const columnIndices: Record<string, number> = {};
     headers.forEach((header, index) => {
       const mappedKey = COLUMN_MAP[header];
-      if (mappedKey) {
-        columnIndices[mappedKey] = index;
-      }
+      if (mappedKey) columnIndices[mappedKey] = index;
     });
 
-    // Check for "Full Name" column (needs special handling)
     const fullNameIdx = headers.findIndex((h) => h === "full name");
     const hasFullName = fullNameIdx >= 0;
 
-    return lines
-      .slice(1)
-      .map((line, index) => {
-        // Handle CSV with quoted values containing commas
-        const cols: string[] = [];
-        let current = "";
-        let inQuotes = false;
+    return lines.slice(1).map((line, index) => {
+      const cols: string[] = [];
+      let current = "";
+      let inQuotes = false;
 
-        for (const char of line) {
-          if (char === '"') {
-            inQuotes = !inQuotes;
-          } else if (char === "," && !inQuotes) {
-            cols.push(current.trim().replace(/^["']|["']$/g, ""));
-            current = "";
-          } else {
-            current += char;
-          }
-        }
-        cols.push(current.trim().replace(/^["']|["']$/g, ""));
+      for (const char of line) {
+        if (char === '"') inQuotes = !inQuotes;
+        else if (char === "," && !inQuotes) {
+          cols.push(current.trim().replace(/^["']|["']$/g, ""));
+          current = "";
+        } else current += char;
+      }
+      cols.push(current.trim().replace(/^["']|["']$/g, ""));
 
-        // Parse full name if present
-        let firstName = "";
-        let lastName = "";
+      let firstName = "";
+      let lastName = "";
 
-        if (hasFullName && cols[fullNameIdx]) {
-          const fullName = cols[fullNameIdx];
-          // Check if it's in "last_name, first_name" format
-          if (fullName.includes(",")) {
-            const parts = fullName.split(",").map((p) => p.trim());
-            lastName = parts[0] || "";
-            firstName = parts[1] || "";
-          } else {
-            // "first_name last_name" format
-            const parts = fullName.split(/\s+/);
-            firstName = parts[0] || "";
-            lastName = parts.slice(1).join(" ") || "";
-          }
+      if (hasFullName && cols[fullNameIdx]) {
+        const fullName = cols[fullNameIdx];
+        if (fullName.includes(",")) {
+          const parts = fullName.split(",").map((p) => p.trim());
+          lastName = parts[0] || "";
+          firstName = parts[1] || "";
         } else {
-          firstName =
-            columnIndices.firstName !== undefined
-              ? cols[columnIndices.firstName] || ""
-              : "";
-          lastName =
-            columnIndices.lastName !== undefined
-              ? cols[columnIndices.lastName] || ""
-              : "";
+          const parts = fullName.split(/\s+/);
+          firstName = parts[0] || "";
+          lastName = parts.slice(1).join(" ") || "";
         }
+      } else {
+        firstName = columnIndices.firstName !== undefined ? cols[columnIndices.firstName] || "" : "";
+        lastName = columnIndices.lastName !== undefined ? cols[columnIndices.lastName] || "" : "";
+      }
 
-        const getValue = (key: keyof ParsedStudentRow): string => {
-          const idx = columnIndices[key];
-          return idx !== undefined ? cols[idx] || "" : "";
-        };
+      const getValue = (key: keyof ParsedStudentRow): string => {
+        const idx = columnIndices[key];
+        return idx !== undefined ? cols[idx] || "" : "";
+      };
 
-        return {
-          rowNumber: index + 2,
-          email: getValue("email"),
-          firstName,
-          lastName,
-          classId: selectedClassId,
-          fatherName: getValue("fatherName"),
-          motherName: getValue("motherName"),
-          gender: getValue("gender"),
-          dateOfBirth: getValue("dateOfBirth"),
-          bloodGroup: getValue("bloodGroup"),
-          alternateEmail: getValue("alternateEmail"),
-          primaryMobile: getValue("primaryMobile"),
-          alternateMobile: getValue("alternateMobile"),
-          batch: getValue("batch"),
-          academicSession: getValue("academicSession"),
-          admissionDate: getValue("admissionDate"),
-          addressLine1: getValue("addressLine1"),
-          addressLine2: getValue("addressLine2"),
-          city: getValue("city"),
-          state: getValue("state"),
-          country: getValue("country"),
-          postalCode: getValue("postalCode"),
-        };
-      })
-      .filter((row) => row.email || row.firstName || row.lastName);
+      return {
+        rowNumber: index + 2,
+        email: getValue("email"),
+        firstName,
+        lastName,
+        classId: selectedClassId,
+        fatherName: getValue("fatherName"),
+        motherName: getValue("motherName"),
+        gender: getValue("gender"),
+        dateOfBirth: getValue("dateOfBirth"),
+        bloodGroup: getValue("bloodGroup"),
+        alternateEmail: getValue("alternateEmail"),
+        primaryMobile: getValue("primaryMobile"),
+        alternateMobile: getValue("alternateMobile"),
+        batch: getValue("batch"),
+        academicSession: getValue("academicSession"),
+        admissionDate: getValue("admissionDate"),
+        addressLine1: getValue("addressLine1"),
+        addressLine2: getValue("addressLine2"),
+        city: getValue("city"),
+        state: getValue("state"),
+        country: getValue("country"),
+        postalCode: getValue("postalCode"),
+      };
+    }).filter((row) => row.email || row.firstName || row.lastName);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -276,8 +251,7 @@ export function BulkImportStudentsDialog({
       return;
     }
 
-    const fileName = file.name.toLowerCase();
-    if (!fileName.endsWith(".csv")) {
+    if (!file.name.toLowerCase().endsWith(".csv")) {
       toast.error("Please upload a CSV file");
       return;
     }
@@ -294,9 +268,8 @@ export function BulkImportStudentsDialog({
         return;
       }
 
-      // Validate against database
       const validatedRows = await validateBulkStudentData(
-        rows.map((r) => ({ ...r, errors: [], isValid: false })),
+        rows.map((r) => ({ ...r, errors: [], isValid: false }))
       );
 
       setParsedRows(validatedRows);
@@ -375,51 +348,20 @@ export function BulkImportStudentsDialog({
 
   const downloadTemplate = () => {
     const headers = [
-      "Full Name",
-      "Father's Name",
-      "Mother's Name",
-      "Gender",
-      "Date of Birth",
-      "Blood Group",
-      "Primary Email",
-      "Alternate Email",
-      "Primary Mobile",
-      "Alternate Mobile",
-      "Batch",
-      "Academic Session",
-      "Admission Date",
-      "Address Line 1",
-      "Address Line 2",
-      "City / District",
-      "State",
-      "Country",
-      "Postal Code",
+      "Full Name", "Father's Name", "Mother's Name", "Gender", "Date of Birth",
+      "Blood Group", "Primary Email", "Alternate Email", "Primary Mobile",
+      "Alternate Mobile", "Batch", "Academic Session", "Admission Date",
+      "Address Line 1", "Address Line 2", "City / District", "State", "Country", "Postal Code",
     ].join(",");
 
     const sampleRow = [
-      "Doe, John",
-      "Robert Doe",
-      "Jane Doe",
-      "Male",
-      "15/06/2000",
-      "O+",
-      "john.doe@example.com",
-      "john.alt@example.com",
-      "9876543210",
-      "9876543211",
-      "2024",
-      "2024-25",
-      "01/08/2024",
-      "123 Main Street",
-      "Apt 4B",
-      "Mumbai",
-      "Maharashtra",
-      "India",
-      "400001",
+      "Doe, John", "Robert Doe", "Jane Doe", "Male", "15/06/2000", "O+",
+      "john.doe@example.com", "john.alt@example.com", "9876543210", "9876543211",
+      "2024", "2024-25", "01/08/2024", "123 Main Street", "Apt 4B", "Mumbai",
+      "Maharashtra", "India", "400001",
     ].join(",");
 
-    const template = `${headers}\n${sampleRow}`;
-    const blob = new Blob([template], { type: "text/csv" });
+    const blob = new Blob([`${headers}\n${sampleRow}`], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -433,8 +375,7 @@ export function BulkImportStudentsDialog({
     const csv = [
       "email,student_id,status,temporary_password,error",
       ...importResult.results.map(
-        (r) =>
-          `${r.email},${r.studentId || ""},${r.success ? "success" : "failed"},${r.tempPassword || ""},${r.error || ""}`,
+        (r) => `${r.email},${r.studentId || ""},${r.success ? "success" : "failed"},${r.tempPassword || ""},${r.error || ""}`
       ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -457,274 +398,297 @@ export function BulkImportStudentsDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetTrigger asChild>
         <Button variant="outline">
           <Upload className="mr-2 h-4 w-4" />
           Bulk Import
         </Button>
-      </DialogTrigger>
-      <DialogContent className="max-h-[90vh] max-w-4xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Bulk Import Students
-          </DialogTitle>
-          <DialogDescription>
-            Upload a CSV file to create multiple student accounts with profiles.
-          </DialogDescription>
-        </DialogHeader>
-
-        {step === "upload" && (
-          <div className="space-y-6 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Select Class</label>
-              <Select
-                value={selectedClassId}
-                onValueChange={setSelectedClassId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a class for all students" />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes.map((cls) => (
-                    <SelectItem key={cls._id} value={cls._id}>
-                      {getClassLabel(cls)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-full sm:max-w-2xl flex flex-col">
+        <SheetHeader className="space-y-1">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+              <Users className="h-5 w-5 text-primary" />
             </div>
-
-            <div className="space-y-4 rounded-lg border-2 border-dashed p-8 text-center">
-              <FileSpreadsheet className="text-muted-foreground mx-auto h-12 w-12" />
-              <div>
-                <p className="font-medium">Upload CSV File</p>
-                <p className="text-muted-foreground text-sm">
-                  Required: Full Name (or First/Last Name), Primary Email
-                </p>
-              </div>
-              <div className="flex justify-center gap-4">
-                <Button
-                  variant="outline"
-                  onClick={downloadTemplate}
-                  disabled={isValidating}
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Template
-                </Button>
-                <label>
-                  <Button asChild disabled={!selectedClassId || isValidating}>
-                    <span>
-                      {isValidating ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Upload className="mr-2 h-4 w-4" />
-                      )}
-                      {isValidating ? "Validating..." : "Choose File"}
-                    </span>
-                  </Button>
-                  <input
-                    type="file"
-                    accept=".csv"
-                    className="hidden"
-                    onChange={handleFileUpload}
-                    disabled={!selectedClassId || isValidating}
-                  />
-                </label>
-              </div>
+            <div>
+              <SheetTitle>Bulk Import Students</SheetTitle>
+              <SheetDescription>
+                Upload a CSV file to create multiple student accounts
+              </SheetDescription>
             </div>
-
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>CSV Format</AlertTitle>
-              <AlertDescription>
-                <ul className="mt-2 list-inside list-disc space-y-1 text-sm">
-                  <li>
-                    Full Name can be &quot;Last, First&quot; or &quot;First
-                    Last&quot;
-                  </li>
-                  <li>Date format: DD/MM/YYYY or YYYY-MM-DD</li>
-                  <li>Gender: Male, Female, or Other</li>
-                  <li>Blood Group: A+, A-, B+, B-, AB+, AB-, O+, O-</li>
-                </ul>
-              </AlertDescription>
-            </Alert>
           </div>
-        )}
+        </SheetHeader>
 
-        {step === "preview" && (
-          <div className="space-y-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex gap-4">
-                <Badge variant="default" className="gap-1">
-                  <CheckCircle2 className="h-3 w-3" />
-                  {validCount} Valid
-                </Badge>
-                {invalidCount > 0 && (
-                  <Badge variant="destructive" className="gap-1">
-                    <XCircle className="h-3 w-3" />
-                    {invalidCount} Invalid
-                  </Badge>
-                )}
+        {/* Step Indicator */}
+        <div className="flex items-center justify-center gap-2 py-3">
+          {["upload", "preview", "results"].map((s, i) => (
+            <div key={s} className="flex items-center gap-2">
+              <div
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium ${
+                  step === s || (step === "importing" && s === "preview")
+                    ? "bg-primary text-primary-foreground"
+                    : ["preview", "importing", "results"].indexOf(step) > ["upload", "preview", "results"].indexOf(s)
+                    ? "bg-primary/20 text-primary"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {i + 1}
               </div>
-              <p className="text-muted-foreground text-sm">
-                Total: {parsedRows.length} rows
-              </p>
+              <span className="hidden text-sm sm:inline">
+                {s === "upload" ? "Upload" : s === "preview" ? "Preview" : "Results"}
+              </span>
+              {i < 2 && <ArrowRight className="h-4 w-4 text-muted-foreground" />}
             </div>
+          ))}
+        </div>
 
-            <ScrollArea className="h-[400px] rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">#</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Mobile</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {parsedRows.map((row) => (
-                    <TableRow
-                      key={row.rowNumber}
-                      className={!row.isValid ? "bg-destructive/10" : ""}
-                    >
-                      <TableCell className="font-mono text-xs">
-                        {row.rowNumber}
-                      </TableCell>
-                      <TableCell>
-                        {row.firstName} {row.lastName}
-                      </TableCell>
-                      <TableCell className="text-sm">{row.email}</TableCell>
-                      <TableCell className="text-sm">
-                        {row.primaryMobile || "-"}
-                      </TableCell>
-                      <TableCell>
-                        {row.isValid ? (
-                          <Badge variant="outline" className="text-green-600">
-                            <CheckCircle2 className="mr-1 h-3 w-3" />
-                            Valid
-                          </Badge>
+        <Separator />
+
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto px-3.5">
+          {step === "upload" && (
+            <div className="space-y-6 p-1 py-4">
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                  Select Class
+                </Label>
+                <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a class for all students" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {classes.map((cls) => (
+                      <SelectItem key={cls._id} value={cls._id}>
+                        {getClassLabel(cls)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-4 rounded-xl border-2 border-dashed bg-muted/30 p-6 text-center transition-colors hover:border-primary/50 hover:bg-muted/50">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                  <FileSpreadsheet className="h-7 w-7 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium">Upload CSV File</p>
+                  <p className="text-sm text-muted-foreground">
+                    Required: Full Name (or First/Last Name), Primary Email
+                  </p>
+                </div>
+                <div className="flex flex-col justify-center gap-2 sm:flex-row">
+                  <Button variant="outline" size="sm" onClick={downloadTemplate} disabled={isValidating}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Template
+                  </Button>
+                  <label>
+                    <Button size="sm" asChild disabled={!selectedClassId || isValidating}>
+                      <span>
+                        {isValidating ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         ) : (
-                          <div className="space-y-1">
-                            {row.errors.map((err, i) => (
-                              <Badge
-                                key={i}
-                                variant="destructive"
-                                className="text-xs"
-                              >
-                                {err}
-                              </Badge>
-                            ))}
-                          </div>
+                          <FileUp className="mr-2 h-4 w-4" />
                         )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </ScrollArea>
+                        {isValidating ? "Validating..." : "Choose File"}
+                      </span>
+                    </Button>
+                    <input
+                      type="file"
+                      accept=".csv"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      disabled={!selectedClassId || isValidating}
+                    />
+                  </label>
+                </div>
+              </div>
 
-            {invalidCount > 0 && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>CSV Format Guide</AlertTitle>
                 <AlertDescription>
-                  {invalidCount} row(s) have errors and will be skipped during
-                  import.
+                  <ul className="mt-2 list-inside list-disc space-y-1 text-sm">
+                    <li>Full Name: &quot;Last, First&quot; or &quot;First Last&quot;</li>
+                    <li>Date format: DD/MM/YYYY or YYYY-MM-DD</li>
+                    <li>Gender: Male, Female, or Other</li>
+                    <li>Blood Group: A+, A-, B+, B-, AB+, AB-, O+, O-</li>
+                  </ul>
                 </AlertDescription>
               </Alert>
-            )}
-          </div>
-        )}
-
-        {step === "importing" && (
-          <div className="space-y-6 py-12">
-            <div className="space-y-2 text-center">
-              <Loader2 className="text-primary mx-auto h-12 w-12 animate-spin" />
-              <p className="font-medium">Creating student accounts...</p>
-              <p className="text-muted-foreground text-sm">
-                This may take a moment for large imports.
-              </p>
             </div>
-            <Progress value={importProgress} className="w-full" />
-          </div>
-        )}
+          )}
 
-        {step === "results" && importResult && (
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-muted rounded-lg p-4 text-center">
-                <p className="text-2xl font-bold">
-                  {importResult.totalProcessed}
+          {step === "preview" && (
+            <div className="space-y-4 p-1 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex gap-3">
+                  <Badge variant="default" className="gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    {validCount} Valid
+                  </Badge>
+                  {invalidCount > 0 && (
+                    <Badge variant="destructive" className="gap-1.5">
+                      <XCircle className="h-3.5 w-3.5" />
+                      {invalidCount} Invalid
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Total: {parsedRows.length} rows
                 </p>
-                <p className="text-muted-foreground text-sm">Total Processed</p>
               </div>
-              <div className="rounded-lg bg-green-50 p-4 text-center dark:bg-green-950">
-                <p className="text-2xl font-bold text-green-600">
-                  {importResult.successCount}
-                </p>
-                <p className="text-muted-foreground text-sm">Successful</p>
-              </div>
-              <div className="rounded-lg bg-red-50 p-4 text-center dark:bg-red-950">
-                <p className="text-2xl font-bold text-red-600">
-                  {importResult.failedCount}
-                </p>
-                <p className="text-muted-foreground text-sm">Failed</p>
-              </div>
-            </div>
 
-            <ScrollArea className="h-[300px] rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Student ID</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Temp Password</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {importResult.results.map((result, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{result.email}</TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {result.studentId || "-"}
-                      </TableCell>
-                      <TableCell>
-                        {result.success ? (
-                          <Badge variant="outline" className="text-green-600">
-                            <CheckCircle2 className="mr-1 h-3 w-3" />
-                            Created
-                          </Badge>
-                        ) : (
-                          <Badge variant="destructive">
-                            <XCircle className="mr-1 h-3 w-3" />
-                            {result.error}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {result.tempPassword || "-"}
-                      </TableCell>
+              <ScrollArea className="h-[calc(100vh-380px)] rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="w-12">#</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </ScrollArea>
+                  </TableHeader>
+                  <TableBody>
+                    {parsedRows.map((row) => (
+                      <TableRow
+                        key={row.rowNumber}
+                        className={!row.isValid ? "bg-destructive/5" : ""}
+                      >
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          {row.rowNumber}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {row.firstName} {row.lastName}
+                        </TableCell>
+                        <TableCell className="max-w-[150px] truncate text-sm">
+                          {row.email}
+                        </TableCell>
+                        <TableCell>
+                          {row.isValid ? (
+                            <Badge variant="outline" className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600">
+                              <CheckCircle2 className="h-3 w-3" />
+                              Valid
+                            </Badge>
+                          ) : (
+                            <div className="space-y-1">
+                              {row.errors.slice(0, 2).map((err, i) => (
+                                <Badge key={i} variant="destructive" className="text-xs">
+                                  {err}
+                                </Badge>
+                              ))}
+                              {row.errors.length > 2 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{row.errors.length - 2} more
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
 
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Important</AlertTitle>
-              <AlertDescription>
-                Download the results to save temporary passwords. Students need
-                these for first login.
-              </AlertDescription>
-            </Alert>
-          </div>
-        )}
+              {invalidCount > 0 && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    {invalidCount} row(s) have errors and will be skipped during import.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          )}
 
-        <DialogFooter>
+          {step === "importing" && (
+            <div className="flex flex-1 flex-col items-center justify-center space-y-6 py-12">
+              <div className="space-y-3 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+                <p className="font-medium">Creating student accounts...</p>
+                <p className="text-sm text-muted-foreground">
+                  This may take a moment for large imports
+                </p>
+              </div>
+              <div className="w-full max-w-xs space-y-2">
+                <Progress value={importProgress} className="h-2" />
+                <p className="text-center text-sm text-muted-foreground">{importProgress}%</p>
+              </div>
+            </div>
+          )}
+
+          {step === "results" && importResult && (
+            <div className="space-y-4 p-1 py-4">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-xl border bg-card p-3 text-center">
+                  <p className="text-2xl font-bold">{importResult.totalProcessed}</p>
+                  <p className="text-xs text-muted-foreground">Total</p>
+                </div>
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-center">
+                  <p className="text-2xl font-bold text-emerald-600">{importResult.successCount}</p>
+                  <p className="text-xs text-muted-foreground">Success</p>
+                </div>
+                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-center">
+                  <p className="text-2xl font-bold text-red-600">{importResult.failedCount}</p>
+                  <p className="text-xs text-muted-foreground">Failed</p>
+                </div>
+              </div>
+
+              <ScrollArea className="h-[calc(100vh-420px)] rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead>Email</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Password</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {importResult.results.map((result, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="max-w-[150px] truncate text-sm">
+                          {result.email}
+                        </TableCell>
+                        <TableCell>
+                          {result.success ? (
+                            <Badge variant="outline" className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600">
+                              <CheckCircle2 className="h-3 w-3" />
+                              Created
+                            </Badge>
+                          ) : (
+                            <Badge variant="destructive" className="gap-1 text-xs">
+                              <XCircle className="h-3 w-3" />
+                              Failed
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {result.tempPassword || "-"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Important</AlertTitle>
+                <AlertDescription className="text-sm">
+                  Download results to save temporary passwords for student login.
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
+        <SheetFooter className="flex-row justify-end gap-2 pt-2">
           {step === "upload" && (
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel
@@ -736,11 +700,9 @@ export function BulkImportStudentsDialog({
               <Button variant="outline" onClick={resetState}>
                 Back
               </Button>
-              <Button
-                onClick={handleImport}
-                disabled={validCount === 0 || isImporting}
-              >
-                Import {validCount} Students
+              <Button onClick={handleImport} disabled={validCount === 0 || isImporting}>
+                <Users className="mr-2 h-4 w-4" />
+                Import {validCount}
               </Button>
             </>
           )}
@@ -749,13 +711,13 @@ export function BulkImportStudentsDialog({
             <>
               <Button variant="outline" onClick={downloadResults}>
                 <Download className="mr-2 h-4 w-4" />
-                Download Results
+                Download
               </Button>
               <Button onClick={() => setOpen(false)}>Done</Button>
             </>
           )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
