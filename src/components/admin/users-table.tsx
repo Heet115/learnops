@@ -507,7 +507,7 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                           }
                         >
                           <span
-                            className={`mr-1.5 h-1.5 w-1.5 rounded-full ${
+                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${
                               user.isActive ? "bg-emerald-500" : "bg-zinc-400"
                             }`}
                           />

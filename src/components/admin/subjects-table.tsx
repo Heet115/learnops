@@ -15,6 +15,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +37,19 @@ import {
   SimpleSortableHeader,
   PaginationControls,
 } from "@/components/ui/enhanced-data-table";
-import { MoreHorizontal, Pencil, Trash2, Power, PowerOff } from "lucide-react";
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Power,
+  PowerOff,
+  BookMarked,
+  Calendar,
+  BookOpen,
+  Building2,
+  Award,
+  AlertTriangle,
+} from "lucide-react";
 import {
   deleteSubject,
   bulkDeleteSubjects,
@@ -198,7 +211,6 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
     });
   }, [subjects, filters]);
 
-  // Sorting
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
     filteredSubjects,
     "code" as keyof Subject,
@@ -295,8 +307,14 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
 
   if (subjects.length === 0) {
     return (
-      <div className="text-muted-foreground py-8 text-center">
-        No subjects found. Create your first subject to get started.
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+          <BookMarked className="h-7 w-7 text-muted-foreground" />
+        </div>
+        <h3 className="mt-4 text-lg font-medium">No subjects yet</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Create your first subject to get started.
+        </p>
       </div>
     );
   }
@@ -319,121 +337,192 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
         />
 
         {filteredSubjects.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center">
-            No subjects match your filters.
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <BookMarked className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              No subjects match your filters.
+            </p>
           </div>
         ) : (
           <>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]">
-                    <SelectAllCheckbox
-                      checked={
-                        isAllSelected
-                          ? true
-                          : isIndeterminate
-                            ? "indeterminate"
-                            : false
-                      }
-                      onCheckedChange={toggleAll}
-                    />
-                  </TableHead>
-                  <SimpleSortableHeader<Subject>
-                    label="Code"
-                    sortKey="code"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<Subject>
-                    label="Name"
-                    sortKey="name"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <TableHead>Semester</TableHead>
-                  <TableHead>Course</TableHead>
-                  <TableHead>Department</TableHead>
-                  <SimpleSortableHeader<Subject>
-                    label="Credits"
-                    sortKey="credits"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[70px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((subject) => (
-                  <TableRow
-                    key={subject._id}
-                    data-state={
-                      isSelected(subject._id) ? "selected" : undefined
-                    }
-                  >
-                    <TableCell>
-                      <SelectRowCheckbox
-                        checked={isSelected(subject._id)}
-                        onCheckedChange={(checked) =>
-                          toggleRow(subject._id, checked)
+            <div className="rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="w-[50px]">
+                      <SelectAllCheckbox
+                        checked={
+                          isAllSelected
+                            ? true
+                            : isIndeterminate
+                              ? "indeterminate"
+                              : false
                         }
+                        onCheckedChange={toggleAll}
                       />
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {subject.code}
-                    </TableCell>
-                    <TableCell>{subject.name}</TableCell>
-                    <TableCell>{subject.semesterId?.name || "N/A"}</TableCell>
-                    <TableCell>
-                      {subject.semesterId?.courseId?.name || "N/A"} (
-                      {subject.semesterId?.courseId?.code || ""})
-                    </TableCell>
-                    <TableCell>
-                      {subject.semesterId?.courseId?.departmentId?.code ||
-                        "N/A"}
-                    </TableCell>
-                    <TableCell>{subject.credits}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={subject.isActive ? "default" : "secondary"}
-                      >
-                        {subject.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => setEditingSubject(subject)}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() =>
-                              handleDeleteClick(subject._id, subject.name)
-                            }
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+                    </TableHead>
+                    <SimpleSortableHeader<Subject>
+                      label="Code"
+                      sortKey="code"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<Subject>
+                      label="Name"
+                      sortKey="name"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <TableHead>Semester</TableHead>
+                    <TableHead>Course</TableHead>
+                    <TableHead>Department</TableHead>
+                    <SimpleSortableHeader<Subject>
+                      label="Credits"
+                      sortKey="credits"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.map((subject) => (
+                    <TableRow
+                      key={subject._id}
+                      data-state={
+                        isSelected(subject._id) ? "selected" : undefined
+                      }
+                      className="group"
+                    >
+                      <TableCell>
+                        <SelectRowCheckbox
+                          checked={isSelected(subject._id)}
+                          onCheckedChange={(checked) =>
+                            toggleRow(subject._id, checked)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                            <BookMarked className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <span className="font-mono font-semibold">
+                            {subject.code}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium max-w-[180px] truncate">
+                        {subject.name}
+                      </TableCell>
+                      <TableCell>
+                        {subject.semesterId?.name ? (
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-sm">
+                              {subject.semesterId.name}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {subject.semesterId?.courseId ? (
+                          <div className="flex items-center gap-1.5">
+                            <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                            <Badge variant="outline" className="font-mono">
+                              {subject.semesterId.courseId.code}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {subject.semesterId?.courseId?.departmentId ? (
+                          <div className="flex items-center gap-1.5">
+                            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-sm">
+                              {subject.semesterId.courseId.departmentId.code}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <Award className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Badge
+                            variant="outline"
+                            className="border-violet-500/30 bg-violet-500/10 text-violet-600 font-mono"
+                          >
+                            {subject.credits}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            subject.isActive
+                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                              : "border-zinc-500/30 bg-zinc-500/10 text-zinc-600"
+                          }
+                        >
+                          <span
+                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${
+                              subject.isActive
+                                ? "bg-emerald-500"
+                                : "bg-zinc-400"
+                            }`}
+                          />
+                          {subject.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => setEditingSubject(subject)}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() =>
+                                handleDeleteClick(subject._id, subject.name)
+                              }
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
             <PaginationControls
               pageIndex={currentPage}
               pageSize={pageSize}

@@ -473,7 +473,7 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
                             }
                           >
                             <span
-                              className={`mr-1.5 h-1.5 w-1.5 rounded-full ${
+                              className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${
                                 course.isActive
                                   ? "bg-emerald-500"
                                   : "bg-zinc-400"

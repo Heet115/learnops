@@ -21,7 +21,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import {
+  Plus,
+  BookMarked,
+  Code2,
+  Calendar,
+  Award,
+  Loader2,
+} from "lucide-react";
 import { createSubject } from "@/lib/actions/academic.actions";
 import { toast } from "sonner";
 
@@ -82,70 +90,131 @@ export function CreateSubjectDialog({ semesters }: CreateSubjectDialogProps) {
           Add Subject
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create Subject</DialogTitle>
-            <DialogDescription>
-              Add a new subject to a semester
-            </DialogDescription>
+            <div className="flex items-center pb-3 gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <BookMarked className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <DialogTitle>Create Subject</DialogTitle>
+                <DialogDescription>
+                  Add a new subject to a semester
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
+
+          <Separator />
+
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Subject Name</Label>
+            <div className="space-y-2">
+              <Label htmlFor="name" className="flex items-center gap-2">
+                <BookMarked className="h-3.5 w-3.5 text-muted-foreground" />
+                Subject Name
+              </Label>
               <Input
                 id="name"
                 name="name"
                 placeholder="e.g., Data Structures"
                 required
+                disabled={loading}
+                className="h-10"
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="code">Subject Code</Label>
-              <Input id="code" name="code" placeholder="e.g., CS201" required />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="code" className="flex items-center gap-2">
+                  <Code2 className="h-3.5 w-3.5 text-muted-foreground" />
+                  Subject Code
+                </Label>
+                <Input
+                  id="code"
+                  name="code"
+                  placeholder="e.g., CS201"
+                  required
+                  disabled={loading}
+                  className="h-10 font-mono uppercase"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="credits" className="flex items-center gap-2">
+                  <Award className="h-3.5 w-3.5 text-muted-foreground" />
+                  Credits
+                </Label>
+                <Select name="credits" required disabled={loading}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6].map((credit) => (
+                      <SelectItem key={credit} value={credit.toString()}>
+                        <div className="flex items-center gap-2">
+                          <span className="flex h-5 w-5 items-center justify-center rounded bg-violet-500/10 text-xs font-medium text-violet-600">
+                            {credit}
+                          </span>
+                          <span>{credit === 1 ? "Credit" : "Credits"}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="semesterId">Semester</Label>
-              <Select name="semesterId" required>
-                <SelectTrigger>
+
+            <div className="space-y-2">
+              <Label htmlFor="semesterId" className="flex items-center gap-2">
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                Semester
+              </Label>
+              <Select name="semesterId" required disabled={loading}>
+                <SelectTrigger className="h-10">
                   <SelectValue placeholder="Select semester" />
                 </SelectTrigger>
                 <SelectContent>
                   {semesters.map((semester) => (
                     <SelectItem key={semester._id} value={semester._id}>
-                      {semester.courseId.departmentId.code} -{" "}
-                      {semester.courseId.code} - {semester.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="credits">Credits</Label>
-              <Select name="credits" required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select credits" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5, 6].map((credit) => (
-                    <SelectItem key={credit} value={credit.toString()}>
-                      {credit} {credit === 1 ? "Credit" : "Credits"}
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs text-muted-foreground">
+                          {semester.courseId.departmentId.code}
+                        </span>
+                        <span>
+                          {semester.courseId.code} - {semester.name}
+                        </span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
-          <DialogFooter>
+
+          <Separator />
+
+          <DialogFooter className="pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
+              disabled={loading}
             >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create Subject"}
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Subject
+                </>
+              )}
             </Button>
           </DialogFooter>
         </form>
