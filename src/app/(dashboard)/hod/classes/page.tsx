@@ -26,7 +26,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Users } from "lucide-react";
+import {
+  GraduationCap,
+  Users,
+  BookOpen,
+  Calendar,
+  TrendingUp,
+  Layers,
+} from "lucide-react";
 
 async function getHodClasses() {
   const { userId } = await auth();
@@ -72,7 +79,7 @@ async function getHodClasses() {
         SubjectOffering.countDocuments({ classId: cls._id, isActive: true }),
       ]);
       return { ...cls, studentCount, subjectCount };
-    }),
+    })
   );
 
   return JSON.parse(JSON.stringify(classStats));
@@ -97,6 +104,53 @@ export default async function HodClassesPage() {
     avatar: dbUser?.profileImage,
   };
 
+  // Calculate stats
+  const totalStudents = classes.reduce(
+    (acc: number, c: { studentCount: number }) => acc + c.studentCount,
+    0
+  );
+  const totalSubjects = classes.reduce(
+    (acc: number, c: { subjectCount: number }) => acc + c.subjectCount,
+    0
+  );
+  const uniqueAcademicYears = new Set(
+    classes.map((c: { academicYear: string }) => c.academicYear)
+  ).size;
+
+  const statCards = [
+    {
+      title: "Total Classes",
+      value: classes.length,
+      icon: GraduationCap,
+      color: "blue",
+    },
+    {
+      title: "Total Students",
+      value: totalStudents,
+      icon: Users,
+      color: "violet",
+    },
+    {
+      title: "Subject Offerings",
+      value: totalSubjects,
+      icon: BookOpen,
+      color: "emerald",
+    },
+    {
+      title: "Academic Years",
+      value: uniqueAcademicYears,
+      icon: Calendar,
+      color: "amber",
+    },
+  ];
+
+  const colorMap: Record<string, string> = {
+    blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    emerald: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    amber: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    violet: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+  };
+
   return (
     <DashboardLayout
       role="hod"
@@ -105,34 +159,77 @@ export default async function HodClassesPage() {
     >
       <div className="space-y-6 pt-4">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">Classes</h2>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h2 className="text-2xl font-bold">Classes</h2>
+              <Badge variant="secondary" className="gap-1">
+                <TrendingUp className="h-3 w-3" />
+                {classes.length} total
+              </Badge>
+            </div>
             <p className="text-muted-foreground">
               All sections in your department
             </p>
           </div>
-          <Badge variant="secondary" className="px-4 py-2 text-lg">
-            <GraduationCap className="mr-2 h-4 w-4" />
-            {classes.length} Classes
-          </Badge>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-4">
+          {statCards.map((stat) => (
+            <Card
+              key={stat.title}
+              className="group relative overflow-hidden transition-all hover:shadow-md"
+            >
+              <div
+                className={`absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full ${colorMap[stat.color].split(" ")[0]} opacity-50 transition-transform group-hover:scale-150`}
+              />
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {stat.title}
+                </CardTitle>
+                <div
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${colorMap[stat.color]}`}
+                >
+                  <stat.icon className="h-4 w-4" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold">{stat.value}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>All Classes</CardTitle>
-            <CardDescription>
-              View class details and student enrollment
-            </CardDescription>
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <GraduationCap className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <CardTitle>All Classes</CardTitle>
+                <CardDescription>
+                  View class details and student enrollment
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             {classes.length === 0 ? (
-              <p className="text-muted-foreground py-8 text-center">
-                No classes found
-              </p>
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+                  <GraduationCap className="h-7 w-7 text-muted-foreground" />
+                </div>
+                <h3 className="mt-4 text-lg font-medium">No classes found</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  No classes are available in your department yet.
+                </p>
+              </div>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-muted/50">
                     <TableHead>Class Name</TableHead>
                     <TableHead>Course</TableHead>
                     <TableHead>Semester</TableHead>
@@ -155,28 +252,65 @@ export default async function HodClassesPage() {
                         courseId?: { name: string; code: string };
                       };
                     }) => (
-                      <TableRow key={cls._id}>
-                        <TableCell className="font-medium">
-                          {cls.name}
+                      <TableRow key={cls._id} className="group">
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
+                              <GraduationCap className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <div className="space-y-0.5">
+                              <p className="font-medium leading-none">
+                                {cls.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Section
+                              </p>
+                            </div>
+                          </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">
+                          <Badge
+                            variant="outline"
+                            className="border-violet-500/30 bg-violet-500/10 text-violet-600"
+                          >
+                            <Layers className="mr-1.5 h-3 w-3" />
                             {cls.semesterId?.courseId?.code || "N/A"}
                           </Badge>
                         </TableCell>
-                        <TableCell>{cls.semesterId?.name || "N/A"}</TableCell>
-                        <TableCell>{cls.academicYear}</TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <Users className="text-muted-foreground h-4 w-4" />
-                            {cls.studentCount}
-                          </div>
+                        <TableCell>
+                          <span className="text-sm">
+                            {cls.semesterId?.name || "N/A"}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+                          >
+                            <Calendar className="mr-1.5 h-3 w-3" />
+                            {cls.academicYear}
+                          </Badge>
                         </TableCell>
                         <TableCell className="text-center">
-                          {cls.subjectCount}
+                          <Badge
+                            variant="outline"
+                            className="border-blue-500/30 bg-blue-500/10 text-blue-600"
+                          >
+                            <Users className="mr-1.5 h-3 w-3" />
+                            {cls.studentCount}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge
+                            variant="outline"
+                            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                          >
+                            <BookOpen className="mr-1.5 h-3 w-3" />
+                            {cls.subjectCount}
+                          </Badge>
                         </TableCell>
                       </TableRow>
-                    ),
+                    )
                   )}
                 </TableBody>
               </Table>
