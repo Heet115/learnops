@@ -75,21 +75,25 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
   }
 
   return (
-    <Card className="border-blue-200 bg-blue-50/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-blue-700">
-          <Users className="h-5 w-5" />
-          Group Invitations
-        </CardTitle>
-        <CardDescription>
-          You have {localInvites.length} pending group invitation
-          {localInvites.length !== 1 ? "s" : ""}
-        </CardDescription>
+    <Card className="border-blue-500/30 bg-blue-500/5">
+      <CardHeader className="border-b">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+            <Users className="h-4 w-4 text-blue-600" />
+          </div>
+          <div>
+            <CardTitle className="text-blue-700">Group Invitations</CardTitle>
+            <CardDescription>
+              You have {localInvites.length} pending group invitation
+              {localInvites.length !== 1 ? "s" : ""}
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 pt-6">
         {localInvites.map((invite) => {
           const acceptedMembers = invite.members.filter(
-            (m) => m.status === "accepted",
+            (m) => m.status === "accepted"
           );
           const deadline = new Date(invite.alaId.deadline);
           const isPastDeadline = deadline < new Date();
@@ -97,7 +101,7 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
           return (
             <div
               key={invite._id}
-              className="space-y-3 rounded-lg border bg-white p-4"
+              className="space-y-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50"
             >
               <div className="flex items-start justify-between">
                 <div>
@@ -107,7 +111,15 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
                     {invite.createdBy.lastName}
                   </p>
                 </div>
-                {isPastDeadline && <Badge variant="destructive">Expired</Badge>}
+                {isPastDeadline && (
+                  <Badge
+                    variant="outline"
+                    className="border-rose-500/30 bg-rose-500/10 text-rose-600"
+                  >
+                    <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-rose-500" />
+                    Expired
+                  </Badge>
+                )}
               </div>
 
               <div className="text-sm">

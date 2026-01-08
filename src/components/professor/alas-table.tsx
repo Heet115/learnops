@@ -46,6 +46,11 @@ import {
   Unlock,
   Eye,
   Users,
+  FileText,
+  Calendar,
+  Award,
+  BookMarked,
+  GraduationCap,
 } from "lucide-react";
 import {
   deleteALA,
@@ -156,10 +161,9 @@ export function ALAsTable({ alas }: ALAsTableProps) {
         ],
       },
     ],
-    [subjectOptions, classOptions],
+    [subjectOptions, classOptions]
   );
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const filteredALAs = useMemo(() => {
     return alas.filter((ala) => {
       const search = (filters.search as string)?.toLowerCase() || "";
@@ -202,7 +206,7 @@ export function ALAsTable({ alas }: ALAsTableProps) {
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
     filteredALAs,
     "deadline" as keyof ALA,
-    "desc",
+    "desc"
   );
 
   const {
@@ -274,7 +278,7 @@ export function ALAsTable({ alas }: ALAsTableProps) {
         },
       },
     ],
-    [clearSelection, router],
+    [clearSelection, router]
   );
 
   const handleDeleteClick = (id: string, title: string) => {
@@ -305,12 +309,16 @@ export function ALAsTable({ alas }: ALAsTableProps) {
   };
 
   const getStatus = (ala: ALA) => {
-    if (ala.isLocked)
-      return { label: "Locked", variant: "destructive" as const };
+    if (ala.isLocked) return { label: "Locked", color: "violet" };
     const deadline = new Date(ala.deadline);
-    if (deadline < new Date())
-      return { label: "Past Due", variant: "secondary" as const };
-    return { label: "Active", variant: "default" as const };
+    if (deadline < new Date()) return { label: "Past Due", color: "amber" };
+    return { label: "Active", color: "emerald" };
+  };
+
+  const statusColorMap: Record<string, string> = {
+    emerald: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
+    amber: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+    violet: "border-violet-500/30 bg-violet-500/10 text-violet-600",
   };
 
   const formatDeadline = (deadline: string) => {
@@ -326,8 +334,14 @@ export function ALAsTable({ alas }: ALAsTableProps) {
 
   if (alas.length === 0) {
     return (
-      <div className="text-muted-foreground py-8 text-center">
-        No ALAs created yet. Create your first ALA to get started.
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+          <FileText className="h-7 w-7 text-muted-foreground" />
+        </div>
+        <h3 className="mt-4 text-lg font-medium">No ALAs created yet</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Create your first ALA to get started.
+        </p>
       </div>
     );
   }
@@ -350,14 +364,19 @@ export function ALAsTable({ alas }: ALAsTableProps) {
         />
 
         {filteredALAs.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center">
-            No ALAs match your filters.
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <FileText className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              No ALAs match your filters.
+            </p>
           </div>
         ) : (
           <>
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="bg-muted/50">
                   <TableHead className="w-[50px]">
                     <SelectAllCheckbox
                       checked={
@@ -404,6 +423,7 @@ export function ALAsTable({ alas }: ALAsTableProps) {
                   return (
                     <TableRow
                       key={ala._id}
+                      className="group"
                       data-state={isSelected(ala._id) ? "selected" : undefined}
                     >
                       <TableCell>
@@ -414,20 +434,52 @@ export function ALAsTable({ alas }: ALAsTableProps) {
                           }
                         />
                       </TableCell>
-                      <TableCell className="max-w-[200px] truncate font-medium">
-                        {ala.title}
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                            <FileText className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <span className="max-w-[180px] truncate font-medium">
+                            {ala.title}
+                          </span>
+                        </div>
                       </TableCell>
                       <TableCell>
-                        {ala.subjectOfferingId?.subjectId?.code || "-"}
+                        <Badge
+                          variant="outline"
+                          className="border-violet-500/30 bg-violet-500/10 text-violet-600"
+                        >
+                          <BookMarked className="mr-1.5 h-3 w-3" />
+                          {ala.subjectOfferingId?.subjectId?.code || "-"}
+                        </Badge>
                       </TableCell>
                       <TableCell>
-                        {ala.subjectOfferingId?.classId?.name || "-"}
+                        <div className="flex items-center gap-1.5 text-sm">
+                          <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                          {ala.subjectOfferingId?.classId?.name || "-"}
+                        </div>
                       </TableCell>
-                      <TableCell>{formatDeadline(ala.deadline)}</TableCell>
-                      <TableCell>{ala.maxMarks}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground tabular-nums">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {formatDeadline(ala.deadline)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+                        >
+                          <Award className="mr-1.5 h-3 w-3" />
+                          {ala.maxMarks}
+                        </Badge>
+                      </TableCell>
                       <TableCell>
                         {ala.isGroupSubmission ? (
-                          <Badge variant="outline" className="gap-1">
+                          <Badge
+                            variant="outline"
+                            className="gap-1 border-blue-500/30 bg-blue-500/10 text-blue-600"
+                          >
                             <Users className="h-3 w-3" />
                             Group ({ala.maxGroupSize})
                           </Badge>
@@ -436,12 +488,30 @@ export function ALAsTable({ alas }: ALAsTableProps) {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={status.variant}>{status.label}</Badge>
+                        <Badge
+                          variant="outline"
+                          className={statusColorMap[status.color]}
+                        >
+                          <span
+                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${
+                              status.color === "emerald"
+                                ? "bg-emerald-500"
+                                : status.color === "amber"
+                                  ? "bg-amber-500"
+                                  : "bg-violet-500"
+                            }`}
+                          />
+                          {status.label}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="opacity-0 group-hover:opacity-100"
+                            >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>

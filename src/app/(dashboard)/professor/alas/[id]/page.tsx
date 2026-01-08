@@ -4,7 +4,13 @@ import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
 import { getALAById } from "@/lib/actions/ala.actions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -16,6 +22,8 @@ import {
   Unlock,
   ArrowLeft,
   BookOpen,
+  Info,
+  Settings,
 } from "lucide-react";
 import { ALAResourcesSection } from "@/components/professor/ala-resources-section";
 import { GroupManagement } from "@/components/professor/group-management";
@@ -53,10 +61,22 @@ export default async function ALADetailPage({ params }: PageProps) {
 
   const getStatus = () => {
     if (ala.isLocked)
-      return { label: "Locked", variant: "destructive" as const };
+      return {
+        label: "Locked",
+        className: "border-rose-500/30 bg-rose-500/10 text-rose-600",
+        dotColor: "bg-rose-500",
+      };
     if (isPastDeadline)
-      return { label: "Past Due", variant: "secondary" as const };
-    return { label: "Active", variant: "default" as const };
+      return {
+        label: "Past Due",
+        className: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+        dotColor: "bg-amber-500",
+      };
+    return {
+      label: "Active",
+      className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
+      dotColor: "bg-emerald-500",
+    };
   };
 
   const status = getStatus();
@@ -81,7 +101,12 @@ export default async function ALADetailPage({ params }: PageProps) {
           <div className="flex-1">
             <div className="flex items-center gap-3">
               <h2 className="text-2xl font-bold">{ala.title}</h2>
-              <Badge variant={status.variant}>{status.label}</Badge>
+              <Badge variant="outline" className={status.className}>
+                <span
+                  className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${status.dotColor}`}
+                />
+                {status.label}
+              </Badge>
             </div>
             <p className="text-muted-foreground">
               {ala.subjectOfferingId?.subjectId?.code} -{" "}
@@ -94,10 +119,18 @@ export default async function ALADetailPage({ params }: PageProps) {
         <div className="grid gap-6 md:grid-cols-3">
           <div className="space-y-6 md:col-span-2">
             <Card>
-              <CardHeader>
-                <CardTitle>Description</CardTitle>
+              <CardHeader className="border-b">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                    <Info className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Description</CardTitle>
+                    <CardDescription>Assignment details</CardDescription>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 <p className="whitespace-pre-wrap">{ala.description}</p>
               </CardContent>
             </Card>
@@ -117,12 +150,19 @@ export default async function ALADetailPage({ params }: PageProps) {
 
           <div className="space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Details</CardTitle>
+              <CardHeader className="border-b">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+                    <Settings className="h-4 w-4 text-violet-600" />
+                  </div>
+                  <CardTitle>Details</CardTitle>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-6">
                 <div className="flex items-center gap-3">
-                  <Calendar className="text-muted-foreground h-4 w-4" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10">
+                    <Calendar className="h-4 w-4 text-amber-600" />
+                  </div>
                   <div>
                     <p className="text-sm font-medium">Deadline</p>
                     <p className="text-muted-foreground text-sm">
@@ -141,7 +181,9 @@ export default async function ALADetailPage({ params }: PageProps) {
                 <Separator />
 
                 <div className="flex items-center gap-3">
-                  <BookOpen className="text-muted-foreground h-4 w-4" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
+                    <BookOpen className="h-4 w-4 text-blue-600" />
+                  </div>
                   <div>
                     <p className="text-sm font-medium">Max Marks</p>
                     <p className="text-muted-foreground text-sm">
@@ -153,7 +195,9 @@ export default async function ALADetailPage({ params }: PageProps) {
                 <Separator />
 
                 <div className="flex items-center gap-3">
-                  <Users className="text-muted-foreground h-4 w-4" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10">
+                    <Users className="h-4 w-4 text-violet-600" />
+                  </div>
                   <div>
                     <p className="text-sm font-medium">Submission Type</p>
                     <p className="text-muted-foreground text-sm">
@@ -174,7 +218,9 @@ export default async function ALADetailPage({ params }: PageProps) {
                 <Separator />
 
                 <div className="flex items-center gap-3">
-                  <FileText className="text-muted-foreground h-4 w-4" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10">
+                    <FileText className="h-4 w-4 text-emerald-600" />
+                  </div>
                   <div>
                     <p className="text-sm font-medium">Allowed Files</p>
                     <p className="text-muted-foreground text-sm uppercase">
@@ -186,11 +232,15 @@ export default async function ALADetailPage({ params }: PageProps) {
                 <Separator />
 
                 <div className="flex items-center gap-3">
-                  {ala.isLocked ? (
-                    <Lock className="h-4 w-4 text-red-500" />
-                  ) : (
-                    <Unlock className="h-4 w-4 text-green-500" />
-                  )}
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${ala.isLocked ? "bg-rose-500/10" : "bg-emerald-500/10"}`}
+                  >
+                    {ala.isLocked ? (
+                      <Lock className="h-4 w-4 text-rose-600" />
+                    ) : (
+                      <Unlock className="h-4 w-4 text-emerald-600" />
+                    )}
+                  </div>
                   <div>
                     <p className="text-sm font-medium">Status</p>
                     <p className="text-muted-foreground text-sm">

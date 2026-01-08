@@ -25,7 +25,17 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
-import { Plus } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import {
+  Plus,
+  FileText,
+  BookMarked,
+  Calendar,
+  Award,
+  Users,
+  FileType,
+  HardDrive,
+} from "lucide-react";
 import { createALA } from "@/lib/actions/ala.actions";
 import { ALLOWED_FILE_TYPES } from "@/lib/validations/ala.validation";
 import { toast } from "sonner";
@@ -47,7 +57,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
   const [loading, setLoading] = useState(false);
   const [isGroupSubmission, setIsGroupSubmission] = useState(false);
   const [groupFormation, setGroupFormation] = useState<"student" | "professor">(
-    "student",
+    "student"
   );
   const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(["pdf"]);
   const [deadline, setDeadline] = useState<Date | undefined>(undefined);
@@ -118,14 +128,25 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[550px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create New ALA</DialogTitle>
-            <DialogDescription>
-              Create an Active Learning Activity for your students.
-            </DialogDescription>
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <FileText className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <DialogTitle>Create New ALA</DialogTitle>
+                <DialogDescription>
+                  Create an Active Learning Activity for your students.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <Separator className="my-4" />
+          <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="subjectOfferingId">Subject & Class</Label>
+              <Label htmlFor="subjectOfferingId" className="flex items-center gap-2">
+                <BookMarked className="h-4 w-4 text-muted-foreground" />
+                Subject & Class
+              </Label>
               <Select name="subjectOfferingId" required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select subject" />
@@ -142,7 +163,10 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title" className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                Title
+              </Label>
               <Input
                 id="title"
                 name="title"
@@ -165,16 +189,24 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <DateTimePicker
-                id="deadline"
-                label="Deadline"
-                value={deadline}
-                onChange={setDeadline}
-                required
-                placeholder="Select deadline"
-              />
               <div className="grid gap-2">
-                <Label htmlFor="maxMarks">Max Marks</Label>
+                <Label className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  Deadline
+                </Label>
+                <DateTimePicker
+                  id="deadline"
+                  value={deadline}
+                  onChange={setDeadline}
+                  required
+                  placeholder="Select deadline"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="maxMarks" className="flex items-center gap-2">
+                  <Award className="h-4 w-4 text-muted-foreground" />
+                  Max Marks
+                </Label>
                 <Input
                   id="maxMarks"
                   name="maxMarks"
@@ -188,7 +220,10 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="maxFileSize">Max File Size (MB)</Label>
+              <Label htmlFor="maxFileSize" className="flex items-center gap-2">
+                <HardDrive className="h-4 w-4 text-muted-foreground" />
+                Max File Size (MB)
+              </Label>
               <Input
                 id="maxFileSize"
                 name="maxFileSize"
@@ -201,7 +236,10 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
             </div>
 
             <div className="grid gap-2">
-              <Label>Allowed File Types</Label>
+              <Label className="flex items-center gap-2">
+                <FileType className="h-4 w-4 text-muted-foreground" />
+                Allowed File Types
+              </Label>
               <div className="flex flex-wrap gap-4">
                 {ALLOWED_FILE_TYPES.map((type) => (
                   <div key={type} className="flex items-center space-x-2">
@@ -231,13 +269,14 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
                   setIsGroupSubmission(checked as boolean)
                 }
               />
-              <label htmlFor="isGroupSubmission" className="text-sm">
+              <label htmlFor="isGroupSubmission" className="flex items-center gap-2 text-sm">
+                <Users className="h-4 w-4 text-muted-foreground" />
                 Allow group submissions
               </label>
             </div>
 
             {isGroupSubmission && (
-              <div className="space-y-4 rounded-lg border p-4">
+              <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
                 <div className="grid gap-2">
                   <Label>Group Formation</Label>
                   <RadioGroup
@@ -288,6 +327,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
               </div>
             )}
           </div>
+          <Separator className="my-4" />
           <DialogFooter>
             <Button
               type="button"

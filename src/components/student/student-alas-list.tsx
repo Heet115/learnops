@@ -64,47 +64,47 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
     if (ala.submission?.status === "graded") {
       return {
         label: "Graded",
-        variant: "default" as const,
-        color: "text-green-600",
+        className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
+        dotColor: "bg-emerald-500",
         key: "graded",
       };
     }
     if (ala.submission?.status === "submitted") {
       return {
         label: "Submitted",
-        variant: "secondary" as const,
-        color: "text-blue-600",
+        className: "border-blue-500/30 bg-blue-500/10 text-blue-600",
+        dotColor: "bg-blue-500",
         key: "submitted",
       };
     }
     if (ala.submission?.status === "rejected") {
       return {
         label: "Rejected",
-        variant: "destructive" as const,
-        color: "text-red-600",
+        className: "border-rose-500/30 bg-rose-500/10 text-rose-600",
+        dotColor: "bg-rose-500",
         key: "rejected",
       };
     }
     if (ala.isLocked) {
       return {
         label: "Locked",
-        variant: "outline" as const,
-        color: "text-gray-500",
+        className: "border-gray-500/30 bg-gray-500/10 text-gray-600",
+        dotColor: "bg-gray-500",
         key: "locked",
       };
     }
     if (new Date(ala.deadline) < new Date()) {
       return {
         label: "Overdue",
-        variant: "destructive" as const,
-        color: "text-black",
+        className: "border-rose-500/30 bg-rose-500/10 text-rose-600",
+        dotColor: "bg-rose-500",
         key: "overdue",
       };
     }
     return {
       label: "Pending",
-      variant: "outline" as const,
-      color: "text-yellow-600",
+      className: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+      dotColor: "bg-amber-500",
       key: "pending",
     };
   };
@@ -255,7 +255,7 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
               ala.submission?.status !== "graded";
 
             return (
-              <Card key={ala._id} className="transition-shadow hover:shadow-md">
+              <Card key={ala._id} className="group transition-all hover:shadow-md">
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
@@ -265,7 +265,10 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
                         {ala.subjectOfferingId?.subjectId?.name}
                       </CardDescription>
                     </div>
-                    <Badge variant={status.variant} className={status.color}>
+                    <Badge variant="outline" className={status.className}>
+                      <span
+                        className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${status.dotColor}`}
+                      />
                       {status.label}
                     </Badge>
                   </div>
@@ -280,13 +283,13 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
                       <Calendar className="h-4 w-4" />
                       <span
                         className={
-                          deadline.urgent ? "font-medium text-red-600" : ""
+                          deadline.urgent ? "font-medium text-rose-600" : ""
                         }
                       >
                         {deadline.text}
                       </span>
                       {deadline.urgent && (
-                        <span className="font-medium text-red-600">
+                        <span className="font-medium text-rose-600">
                           ({deadline.label})
                         </span>
                       )}
@@ -296,7 +299,10 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
                       <span>{ala.maxMarks} marks</span>
                     </div>
                     {ala.isGroupSubmission && (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge
+                        variant="outline"
+                        className="border-violet-500/30 bg-violet-500/10 text-violet-600 text-xs"
+                      >
                         Group
                       </Badge>
                     )}
@@ -306,14 +312,14 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
                     <div className="text-sm">
                       {ala.submission?.status === "graded" && (
                         <div className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                          <span className="font-medium">
+                          <CheckCircle className="h-4 w-4 text-emerald-500" />
+                          <span className="font-medium text-emerald-600">
                             Score: {ala.submission.marks}/{ala.maxMarks}
                           </span>
                         </div>
                       )}
                       {ala.submission?.status === "rejected" && (
-                        <div className="flex items-center gap-2 text-red-600">
+                        <div className="flex items-center gap-2 text-rose-600">
                           <XCircle className="h-4 w-4" />
                           <span>Resubmission required</span>
                         </div>

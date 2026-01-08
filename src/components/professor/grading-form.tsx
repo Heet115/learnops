@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Loader2,
+  Award,
+  MessageSquare,
+  AlertTriangle,
+} from "lucide-react";
 import {
   gradeSubmission,
   rejectSubmission,
@@ -106,34 +114,51 @@ export function GradingForm({
   // Show current grade if already graded
   if (currentStatus === "graded") {
     return (
-      <Card className="border-green-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-green-700">
-            <CheckCircle className="h-5 w-5" />
-            Graded
-          </CardTitle>
-          <CardDescription>This submission has been graded</CardDescription>
+      <Card className="border-emerald-500/30">
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10">
+              <CheckCircle className="h-4 w-4 text-emerald-600" />
+            </div>
+            <div>
+              <CardTitle className="text-emerald-600">Graded</CardTitle>
+              <CardDescription>This submission has been graded</CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <p className="text-sm font-medium">Score</p>
-            <p className="text-3xl font-bold text-green-600">
-              {currentMarks} / {maxMarks}
-            </p>
+        <CardContent className="space-y-4 pt-4">
+          <div className="flex items-center gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-emerald-500/10">
+              <Award className="h-8 w-8 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Score</p>
+              <p className="text-3xl font-bold text-emerald-600">
+                {currentMarks} <span className="text-lg text-muted-foreground">/ {maxMarks}</span>
+              </p>
+            </div>
           </div>
           {currentFeedback && (
-            <div>
-              <p className="text-sm font-medium">Feedback</p>
-              <p className="text-muted-foreground text-sm">{currentFeedback}</p>
+            <div className="rounded-lg border bg-muted/30 p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm font-medium">Feedback</p>
+              </div>
+              <p className="text-sm text-muted-foreground">{currentFeedback}</p>
             </div>
           )}
 
-          <div className="border-t pt-4">
-            <p className="text-muted-foreground mb-3 text-sm">Update grade:</p>
+          <Separator />
+
+          <div>
+            <p className="text-sm text-muted-foreground mb-3">Update grade:</p>
             <form onSubmit={handleGrade} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="marks">Marks</Label>
+                  <Label htmlFor="marks" className="flex items-center gap-2">
+                    <Award className="h-4 w-4 text-muted-foreground" />
+                    Marks
+                  </Label>
                   <Input
                     id="marks"
                     name="marks"
@@ -144,14 +169,17 @@ export function GradingForm({
                     required
                   />
                 </div>
-                <div className="flex items-end">
+                <div className="flex items-end pb-2">
                   <span className="text-muted-foreground text-sm">
                     / {maxMarks}
                   </span>
                 </div>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="feedback">Feedback (optional)</Label>
+                <Label htmlFor="feedback" className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                  Feedback (optional)
+                </Label>
                 <Textarea
                   id="feedback"
                   name="feedback"
@@ -180,18 +208,25 @@ export function GradingForm({
   // Show rejection reason if rejected
   if (currentStatus === "rejected") {
     return (
-      <Card className="border-red-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-red-700">
-            <XCircle className="h-5 w-5" />
-            Rejected
-          </CardTitle>
-          <CardDescription>This submission was rejected</CardDescription>
+      <Card className="border-red-500/30">
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10">
+              <XCircle className="h-4 w-4 text-red-600" />
+            </div>
+            <div>
+              <CardTitle className="text-red-600">Rejected</CardTitle>
+              <CardDescription>This submission was rejected</CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div>
-            <p className="text-sm font-medium">Reason</p>
-            <p className="text-muted-foreground text-sm">
+        <CardContent className="pt-4">
+          <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+              <p className="text-sm font-medium text-red-600">Reason</p>
+            </div>
+            <p className="text-sm text-muted-foreground">
               {currentRejectionReason}
             </p>
           </div>
@@ -206,15 +241,25 @@ export function GradingForm({
   // Show grading form for pending submissions
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Grade Submission</CardTitle>
-        <CardDescription>Review the work and provide a grade</CardDescription>
+      <CardHeader className="border-b">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+            <Award className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <CardTitle>Grade Submission</CardTitle>
+            <CardDescription>Review the work and provide a grade</CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-4">
         <form onSubmit={handleGrade} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="marks">Marks</Label>
+              <Label htmlFor="marks" className="flex items-center gap-2">
+                <Award className="h-4 w-4 text-muted-foreground" />
+                Marks
+              </Label>
               <Input
                 id="marks"
                 name="marks"
@@ -233,7 +278,10 @@ export function GradingForm({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="feedback">Feedback (optional)</Label>
+            <Label htmlFor="feedback" className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              Feedback (optional)
+            </Label>
             <Textarea
               id="feedback"
               name="feedback"
@@ -267,22 +315,33 @@ export function GradingForm({
               <DialogContent>
                 <form onSubmit={handleReject}>
                   <DialogHeader>
-                    <DialogTitle>Reject Submission</DialogTitle>
-                    <DialogDescription>
-                      The student will be notified and can resubmit their work.
-                    </DialogDescription>
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10">
+                        <XCircle className="h-5 w-5 text-red-600" />
+                      </div>
+                      <div>
+                        <DialogTitle>Reject Submission</DialogTitle>
+                        <DialogDescription>
+                          The student will be notified and can resubmit their work.
+                        </DialogDescription>
+                      </div>
+                    </div>
                   </DialogHeader>
-                  <div className="py-4">
-                    <Label htmlFor="reason">Reason for rejection</Label>
+                  <Separator className="my-4" />
+                  <div className="grid gap-2">
+                    <Label htmlFor="reason" className="flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                      Reason for rejection
+                    </Label>
                     <Textarea
                       id="reason"
                       name="reason"
                       placeholder="Explain why this submission is being rejected..."
                       rows={4}
                       required
-                      className="mt-2"
                     />
                   </div>
+                  <Separator className="my-4" />
                   <DialogFooter>
                     <Button
                       type="button"

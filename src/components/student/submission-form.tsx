@@ -22,6 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Separator } from "@/components/ui/separator";
 import {
   Upload,
   Loader2,
@@ -31,6 +32,8 @@ import {
   Plus,
   Send,
   Download,
+  File,
+  ExternalLink,
 } from "lucide-react";
 import {
   createSubmission,
@@ -252,20 +255,33 @@ export function SubmissionForm({
   return (
     <>
       <Card className={isResubmit ? "border-blue-200" : ""}>
-        <CardHeader>
-          <CardTitle>
-            {isResubmit ? "Modify Submission" : "Your Submission"}
-          </CardTitle>
-          <CardDescription>
-            {isResubmit
-              ? "Update your submission before the deadline"
-              : "Add files and links, then click Submit"}
-          </CardDescription>
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+              <File className="h-4 w-4 text-blue-600" />
+            </div>
+            <div>
+              <CardTitle>
+                {isResubmit ? "Modify Submission" : "Your Submission"}
+              </CardTitle>
+              <CardDescription>
+                {isResubmit
+                  ? "Update your submission before the deadline"
+                  : "Add files and links, then click Submit"}
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 pt-6">
+          {/* Files Section */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>Files</Label>
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-500/10">
+                  <FileText className="h-3.5 w-3.5 text-violet-600" />
+                </div>
+                <Label className="font-medium">Files</Label>
+              </div>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -293,10 +309,12 @@ export function SubmissionForm({
                     href={file.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:bg-muted flex items-center justify-between rounded-lg border p-3 transition-colors"
+                    className="flex items-center justify-between rounded-lg border bg-emerald-500/5 p-3 transition-colors hover:bg-emerald-500/10"
                   >
                     <div className="flex items-center gap-3">
-                      <FileText className="text-muted-foreground h-4 w-4" />
+                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-500/10">
+                        <FileText className="h-4 w-4 text-emerald-600" />
+                      </div>
                       <div>
                         <p className="text-sm font-medium">{file.name}</p>
                         <p className="text-muted-foreground text-xs">
@@ -304,7 +322,7 @@ export function SubmissionForm({
                         </p>
                       </div>
                     </div>
-                    <Download className="h-4 w-4 text-blue-600" />
+                    <Download className="h-4 w-4 text-emerald-600" />
                   </a>
                 ))}
               </div>
@@ -315,10 +333,12 @@ export function SubmissionForm({
                 {localFiles.map((file, index) => (
                   <div
                     key={`local-${index}`}
-                    className="flex items-center justify-between rounded-lg border border-dashed border-blue-300 bg-blue-50/50 p-3"
+                    className="flex items-center justify-between rounded-lg border border-dashed border-blue-300 bg-blue-500/5 p-3"
                   >
                     <div className="flex items-center gap-3">
-                      <Upload className="h-4 w-4 text-blue-500" />
+                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-500/10">
+                        <Upload className="h-4 w-4 text-blue-600" />
+                      </div>
                       <div>
                         <p className="text-sm font-medium">{file.name}</p>
                         <p className="text-xs text-blue-600">
@@ -331,8 +351,9 @@ export function SubmissionForm({
                       size="icon"
                       onClick={() => handleRemoveLocalFile(index)}
                       disabled={submitting}
+                      className="h-8 w-8 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600"
                     >
-                      <Trash2 className="text-destructive h-4 w-4" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
@@ -340,9 +361,12 @@ export function SubmissionForm({
             )}
 
             {existingFiles.length === 0 && localFiles.length === 0 && (
-              <p className="text-muted-foreground text-sm">
-                No files added yet
-              </p>
+              <div className="rounded-lg border border-dashed p-4 text-center">
+                <FileText className="mx-auto h-8 w-8 text-muted-foreground/50" />
+                <p className="text-muted-foreground mt-2 text-sm">
+                  No files added yet
+                </p>
+              </div>
             )}
 
             <p className="text-muted-foreground text-xs">
@@ -351,9 +375,17 @@ export function SubmissionForm({
             </p>
           </div>
 
+          <Separator />
+
+          {/* Links Section */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>Links</Label>
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/10">
+                  <LinkIcon className="h-3.5 w-3.5 text-amber-600" />
+                </div>
+                <Label className="font-medium">Links</Label>
+              </div>
               <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
@@ -369,12 +401,20 @@ export function SubmissionForm({
                 <DialogContent>
                   <form onSubmit={handleAddLink}>
                     <DialogHeader>
-                      <DialogTitle>Add Link</DialogTitle>
-                      <DialogDescription>
-                        Add a link to your work (GitHub, Google Drive, etc.)
-                      </DialogDescription>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
+                          <ExternalLink className="h-5 w-5 text-amber-600" />
+                        </div>
+                        <div>
+                          <DialogTitle>Add Link</DialogTitle>
+                          <DialogDescription>
+                            Add a link to your work (GitHub, Google Drive, etc.)
+                          </DialogDescription>
+                        </div>
+                      </div>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
+                    <Separator className="my-4" />
+                    <div className="grid gap-4 py-2">
                       <div className="grid gap-2">
                         <Label htmlFor="title">Title</Label>
                         <Input
@@ -395,7 +435,7 @@ export function SubmissionForm({
                         />
                       </div>
                     </div>
-                    <DialogFooter>
+                    <DialogFooter className="mt-4">
                       <Button
                         type="button"
                         variant="outline"
@@ -415,13 +455,15 @@ export function SubmissionForm({
                 {links.map((link, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between rounded-lg border p-3"
+                    className="flex items-center justify-between rounded-lg border bg-amber-500/5 p-3"
                   >
                     <div className="flex items-center gap-3">
-                      <LinkIcon className="text-muted-foreground h-4 w-4" />
+                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-amber-500/10">
+                        <LinkIcon className="h-4 w-4 text-amber-600" />
+                      </div>
                       <div>
                         <p className="text-sm font-medium">{link.title}</p>
-                        <p className="max-w-[250px] truncate text-xs text-blue-600">
+                        <p className="max-w-[250px] truncate text-xs text-amber-600">
                           {link.url}
                         </p>
                       </div>
@@ -431,18 +473,24 @@ export function SubmissionForm({
                       size="icon"
                       onClick={() => handleRemoveLink(link.url)}
                       disabled={submitting}
+                      className="h-8 w-8 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600"
                     >
-                      <Trash2 className="text-destructive h-4 w-4" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground text-sm">
-                No links added yet
-              </p>
+              <div className="rounded-lg border border-dashed p-4 text-center">
+                <LinkIcon className="mx-auto h-8 w-8 text-muted-foreground/50" />
+                <p className="text-muted-foreground mt-2 text-sm">
+                  No links added yet
+                </p>
+              </div>
             )}
           </div>
+
+          <Separator />
 
           <div className="flex gap-2">
             {isResubmit && hasContent && (
@@ -451,6 +499,7 @@ export function SubmissionForm({
                 variant="outline"
                 onClick={() => setClearConfirmOpen(true)}
                 disabled={submitting}
+                className="text-rose-600 hover:bg-rose-500/10 hover:text-rose-700"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Clear All

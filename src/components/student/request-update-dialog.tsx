@@ -23,8 +23,16 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { createProfileUpdateRequest } from "@/lib/actions/student-profile.actions";
-import { Loader2, AlertCircle } from "lucide-react";
+import {
+  Loader2,
+  AlertCircle,
+  FileEdit,
+  User,
+  Phone,
+  MapPin,
+} from "lucide-react";
 import { toast } from "sonner";
 
 interface CurrentProfile {
@@ -57,6 +65,8 @@ interface RequestUpdateDialogProps {
 const editableFieldGroups = [
   {
     title: "Identity Information",
+    icon: User,
+    color: "blue",
     fields: [
       { key: "firstName", label: "First Name", type: "text" },
       { key: "middleName", label: "Middle Name", type: "text" },
@@ -80,6 +90,8 @@ const editableFieldGroups = [
   },
   {
     title: "Contact Information",
+    icon: Phone,
+    color: "emerald",
     fields: [
       { key: "email", label: "Primary Email", type: "email" },
       { key: "alternateEmail", label: "Alternate Email", type: "email" },
@@ -89,6 +101,8 @@ const editableFieldGroups = [
   },
   {
     title: "Address",
+    icon: MapPin,
+    color: "amber",
     fields: [
       { key: "presentAddressLine1", label: "Address Line 1", type: "text" },
       { key: "presentAddressLine2", label: "Address Line 2", type: "text" },
@@ -99,6 +113,12 @@ const editableFieldGroups = [
     ],
   },
 ];
+
+const groupColorMap: Record<string, string> = {
+  blue: "bg-blue-500/10 text-blue-600",
+  emerald: "bg-emerald-500/10 text-emerald-600",
+  amber: "bg-amber-500/10 text-amber-600",
+};
 
 const allEditableFields = editableFieldGroups.flatMap((g) => g.fields);
 
@@ -202,110 +222,137 @@ export function RequestUpdateDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Request Profile Update</DialogTitle>
-          <DialogDescription>
-            Select the fields you want to update. Your request will be reviewed
-            by an administrator.
-          </DialogDescription>
+      <DialogContent className="max-h-[90vh] p-0 sm:max-w-lg">
+        <DialogHeader className="p-6 pb-0">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <FileEdit className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <DialogTitle>Request Profile Update</DialogTitle>
+              <DialogDescription>
+                Select fields to update. Your request will be reviewed by an
+                administrator.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
+        <Separator className="mt-4" />
 
         <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+          <ScrollArea className="max-h-[50vh] px-6">
+            <div className="space-y-4 py-4">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
 
-            {editableFieldGroups.map((group, groupIdx) => (
-              <div key={group.title} className="space-y-3">
-                {groupIdx > 0 && <Separator />}
-                <h4 className="text-muted-foreground text-sm font-semibold">
-                  {group.title}
-                </h4>
-                <div className="space-y-3">
-                  {group.fields.map((field) => (
-                    <div key={field.key} className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`check-${field.key}`}
-                          checked={selectedFields.has(field.key)}
-                          onCheckedChange={(checked) =>
-                            handleFieldToggle(field.key, checked as boolean)
-                          }
-                          disabled={isLoading}
-                        />
-                        <Label
-                          htmlFor={`check-${field.key}`}
-                          className="cursor-pointer text-sm font-medium"
-                        >
-                          {field.label}
-                        </Label>
+              {editableFieldGroups.map((group, groupIdx) => {
+                const IconComponent = group.icon;
+                return (
+                  <div key={group.title} className="space-y-3">
+                    {groupIdx > 0 && <Separator />}
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`flex h-6 w-6 items-center justify-center rounded-md ${groupColorMap[group.color]}`}
+                      >
+                        <IconComponent className="h-3.5 w-3.5" />
                       </div>
-
-                      {selectedFields.has(field.key) && (
-                        <div className="ml-6 space-y-1">
-                          <p className="text-muted-foreground text-xs">
-                            Current:{" "}
-                            {formatDisplayValue(
-                              field,
-                              currentProfile[field.key as keyof CurrentProfile],
-                            )}
-                          </p>
-                          {field.type === "select" ? (
-                            <Select
-                              value={
-                                formData[field.key as keyof CurrentProfile]
-                              }
-                              onValueChange={(value) =>
-                                setFormData({ ...formData, [field.key]: value })
-                              }
-                              disabled={isLoading}
-                            >
-                              <SelectTrigger>
-                                <SelectValue
-                                  placeholder={`Select ${field.label.toLowerCase()}`}
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {field.options?.map((opt) => (
-                                  <SelectItem key={opt} value={opt}>
-                                    {field.key === "gender"
-                                      ? genderLabels[opt] || opt
-                                      : opt}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <Input
-                              type={field.type}
-                              placeholder={`New ${field.label.toLowerCase()}`}
-                              value={
-                                formData[field.key as keyof CurrentProfile]
-                              }
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  [field.key]: e.target.value,
-                                })
+                      <h4 className="text-sm font-semibold">{group.title}</h4>
+                    </div>
+                    <div className="space-y-3 pl-8">
+                      {group.fields.map((field) => (
+                        <div key={field.key} className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`check-${field.key}`}
+                              checked={selectedFields.has(field.key)}
+                              onCheckedChange={(checked) =>
+                                handleFieldToggle(field.key, checked as boolean)
                               }
                               disabled={isLoading}
                             />
+                            <Label
+                              htmlFor={`check-${field.key}`}
+                              className="cursor-pointer text-sm font-medium"
+                            >
+                              {field.label}
+                            </Label>
+                          </div>
+
+                          {selectedFields.has(field.key) && (
+                            <div className="ml-6 space-y-1.5 rounded-lg border bg-muted/30 p-3">
+                              <p className="text-muted-foreground text-xs">
+                                Current:{" "}
+                                <span className="font-medium text-foreground">
+                                  {formatDisplayValue(
+                                    field,
+                                    currentProfile[
+                                      field.key as keyof CurrentProfile
+                                    ],
+                                  )}
+                                </span>
+                              </p>
+                              {field.type === "select" ? (
+                                <Select
+                                  value={
+                                    formData[field.key as keyof CurrentProfile]
+                                  }
+                                  onValueChange={(value) =>
+                                    setFormData({
+                                      ...formData,
+                                      [field.key]: value,
+                                    })
+                                  }
+                                  disabled={isLoading}
+                                >
+                                  <SelectTrigger className="bg-background">
+                                    <SelectValue
+                                      placeholder={`Select ${field.label.toLowerCase()}`}
+                                    />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {field.options?.map((opt) => (
+                                      <SelectItem key={opt} value={opt}>
+                                        {field.key === "gender"
+                                          ? genderLabels[opt] || opt
+                                          : opt}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <Input
+                                  type={field.type}
+                                  placeholder={`New ${field.label.toLowerCase()}`}
+                                  value={
+                                    formData[field.key as keyof CurrentProfile]
+                                  }
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      [field.key]: e.target.value,
+                                    })
+                                  }
+                                  disabled={isLoading}
+                                  className="bg-background"
+                                />
+                              )}
+                            </div>
                           )}
                         </div>
-                      )}
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+                  </div>
+                );
+              })}
+            </div>
+          </ScrollArea>
 
-          <DialogFooter>
+          <Separator />
+          <DialogFooter className="p-6 pt-4">
             <Button
               type="button"
               variant="outline"

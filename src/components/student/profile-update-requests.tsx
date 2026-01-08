@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Accordion,
@@ -8,7 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Clock, CheckCircle, XCircle } from "lucide-react";
+import { Clock, CheckCircle, XCircle, FileEdit } from "lucide-react";
 
 interface RequestedChange {
   fieldKey: string;
@@ -37,17 +43,20 @@ interface ProfileUpdateRequestsProps {
 const statusConfig = {
   pending: {
     label: "Pending",
-    variant: "outline" as const,
+    className: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+    dotColor: "bg-amber-500",
     icon: Clock,
   },
   approved: {
     label: "Approved",
-    variant: "default" as const,
+    className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
+    dotColor: "bg-emerald-500",
     icon: CheckCircle,
   },
   rejected: {
     label: "Rejected",
-    variant: "destructive" as const,
+    className: "border-rose-500/30 bg-rose-500/10 text-rose-600",
+    dotColor: "bg-rose-500",
     icon: XCircle,
   },
 };
@@ -68,11 +77,17 @@ export function ProfileUpdateRequests({
   if (requests.length === 0) {
     return (
       <Card>
-        <CardContent className="py-8 text-center">
-          <p className="text-muted-foreground">
-            No update requests yet. Click &quot;Request Update&quot; on your
-            profile to submit a change request.
-          </p>
+        <CardContent className="py-8">
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <FileEdit className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mt-4 text-sm font-medium">No update requests</p>
+            <p className="text-muted-foreground text-sm">
+              Click &quot;Request Update&quot; on your profile to submit a
+              change request.
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -80,10 +95,18 @@ export function ProfileUpdateRequests({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Your Update Requests</CardTitle>
+      <CardHeader className="border-b">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+            <FileEdit className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <CardTitle>Your Update Requests</CardTitle>
+            <CardDescription>{requests.length} request(s)</CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <Accordion type="single" collapsible className="w-full">
           {requests.map((request) => {
             const status = statusConfig[request.requestStatus];
@@ -93,7 +116,11 @@ export function ProfileUpdateRequests({
               <AccordionItem key={request._id} value={request._id}>
                 <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center gap-3 text-left">
-                    <StatusIcon className="h-4 w-4 shrink-0" />
+                    <div
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${status.className.split(" ").slice(0, 2).join(" ")}`}
+                    >
+                      <StatusIcon className="h-4 w-4" />
+                    </div>
                     <div className="flex-1">
                       <span className="font-medium">
                         {request.requestedChanges.length} field
@@ -104,17 +131,20 @@ export function ProfileUpdateRequests({
                         {formatDate(request.requestedAt)}
                       </span>
                     </div>
-                    <Badge variant={status.variant}>{status.label}</Badge>
+                    <Badge variant="outline" className={status.className}>
+                      <span
+                        className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${status.dotColor}`}
+                      />
+                      {status.label}
+                    </Badge>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-4 pt-2">
                     {/* Requested Changes */}
                     <div className="space-y-2">
-                      <h4 className="text-sm font-medium">
-                        Requested Changes:
-                      </h4>
-                      <div className="rounded-md border">
+                      <h4 className="text-sm font-medium">Requested Changes:</h4>
+                      <div className="rounded-lg border">
                         {request.requestedChanges.map((change, idx) => (
                           <div
                             key={idx}
@@ -128,7 +158,7 @@ export function ProfileUpdateRequests({
                                 {change.currentValue || "(empty)"}
                               </span>
                               <span>→</span>
-                              <span className="text-primary font-medium">
+                              <span className="font-medium text-emerald-600">
                                 {change.requestedValue}
                               </span>
                             </div>
@@ -139,7 +169,7 @@ export function ProfileUpdateRequests({
 
                     {/* Review Info */}
                     {request.requestStatus !== "pending" && (
-                      <div className="bg-muted space-y-2 rounded-md p-3">
+                      <div className="space-y-2 rounded-lg border bg-muted/30 p-3">
                         <div className="flex items-center gap-2 text-sm">
                           <span className="text-muted-foreground">
                             Reviewed by:

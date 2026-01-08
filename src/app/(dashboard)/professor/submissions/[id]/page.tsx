@@ -4,7 +4,13 @@ import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
 import { getSubmissionForGrading } from "@/lib/actions/grading.actions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -20,6 +26,8 @@ import {
   XCircle,
   Clock,
   Users,
+  BookOpen,
+  Info,
 } from "lucide-react";
 import { GradingForm } from "@/components/professor/grading-form";
 
@@ -61,22 +69,31 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
     switch (submission.status) {
       case "graded":
         return (
-          <Badge className="bg-green-100 text-green-800">
-            <CheckCircle className="mr-1 h-3 w-3" />
+          <Badge
+            variant="outline"
+            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+          >
+            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
             Graded
           </Badge>
         );
       case "submitted":
         return (
-          <Badge className="bg-orange-100 text-orange-800">
-            <Clock className="mr-1 h-3 w-3" />
+          <Badge
+            variant="outline"
+            className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+          >
+            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
             Pending Review
           </Badge>
         );
       case "rejected":
         return (
-          <Badge variant="destructive">
-            <XCircle className="mr-1 h-3 w-3" />
+          <Badge
+            variant="outline"
+            className="border-rose-500/30 bg-rose-500/10 text-rose-600"
+          >
+            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-rose-500" />
             Rejected
           </Badge>
         );
@@ -117,26 +134,35 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
           <div className="space-y-6 md:col-span-2">
             {/* Submitted Files */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Submitted Files
-                </CardTitle>
+              <CardHeader className="border-b">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                    <FileText className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Submitted Files</CardTitle>
+                    <CardDescription>
+                      {submission.files?.length || 0} file(s) uploaded
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 {submission.files && submission.files.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {submission.files.map(
                       (
                         file: { name: string; url: string; size: number },
-                        index: number,
+                        index: number
                       ) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between rounded-lg border p-3"
+                          className="group flex items-center justify-between rounded-lg border bg-card p-3 transition-colors hover:bg-muted/50"
                         >
                           <div className="flex items-center gap-3">
-                            <FileText className="text-muted-foreground h-4 w-4" />
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
+                              <FileText className="h-4 w-4 text-blue-600" />
+                            </div>
                             <div>
                               <p className="text-sm font-medium">{file.name}</p>
                               <p className="text-muted-foreground text-xs">
@@ -144,7 +170,12 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                               </p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="opacity-0 transition-opacity group-hover:opacity-100"
+                          >
                             <a
                               href={file.url}
                               target="_blank"
@@ -155,36 +186,51 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                             </a>
                           </Button>
                         </div>
-                      ),
+                      )
                     )}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-sm">
-                    No files submitted
-                  </p>
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                      <FileText className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <p className="mt-4 text-sm font-medium">No files</p>
+                    <p className="text-muted-foreground text-sm">
+                      No files were submitted
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
 
             {/* Submitted Links */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <LinkIcon className="h-5 w-5" />
-                  Submitted Links
-                </CardTitle>
+              <CardHeader className="border-b">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+                    <LinkIcon className="h-4 w-4 text-violet-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Submitted Links</CardTitle>
+                    <CardDescription>
+                      {submission.links?.length || 0} link(s) provided
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 {submission.links && submission.links.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {submission.links.map(
                       (link: { title: string; url: string }, index: number) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between rounded-lg border p-3"
+                          className="group flex items-center justify-between rounded-lg border bg-card p-3 transition-colors hover:bg-muted/50"
                         >
                           <div className="flex items-center gap-3">
-                            <LinkIcon className="text-muted-foreground h-4 w-4" />
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10">
+                              <LinkIcon className="h-4 w-4 text-violet-600" />
+                            </div>
                             <div>
                               <p className="text-sm font-medium">
                                 {link.title}
@@ -194,7 +240,12 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                               </p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="opacity-0 transition-opacity group-hover:opacity-100"
+                          >
                             <a
                               href={link.url}
                               target="_blank"
@@ -205,13 +256,19 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                             </a>
                           </Button>
                         </div>
-                      ),
+                      )
                     )}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-sm">
-                    No links submitted
-                  </p>
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                      <LinkIcon className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <p className="mt-4 text-sm font-medium">No links</p>
+                    <p className="text-muted-foreground text-sm">
+                      No links were submitted
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -230,19 +287,21 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
           <div className="space-y-6">
             {/* Student/Group Info */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  {isGroupSubmission ? (
-                    <>
-                      <Users className="h-4 w-4" />
-                      Group Submission
-                    </>
-                  ) : (
-                    "Student"
-                  )}
-                </CardTitle>
+              <CardHeader className="border-b">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10">
+                    {isGroupSubmission ? (
+                      <Users className="h-4 w-4 text-emerald-600" />
+                    ) : (
+                      <User className="h-4 w-4 text-emerald-600" />
+                    )}
+                  </div>
+                  <CardTitle>
+                    {isGroupSubmission ? "Group Submission" : "Student"}
+                  </CardTitle>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-6">
                 {isGroupSubmission ? (
                   <>
                     <div>
@@ -257,18 +316,20 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                               lastName: string;
                               email?: string;
                             },
-                            index: number,
+                            index: number
                           ) => (
                             <div
                               key={index}
-                              className="flex items-center gap-2"
+                              className="flex items-center gap-2 rounded-lg border bg-muted/30 p-2"
                             >
-                              <User className="text-muted-foreground h-3 w-3" />
+                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
+                                <User className="h-3 w-3 text-primary" />
+                              </div>
                               <span className="text-sm">
                                 {member.firstName} {member.lastName}
                               </span>
                             </div>
-                          ),
+                          )
                         )}
                       </div>
                     </div>
@@ -287,7 +348,9 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                   </>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <User className="text-muted-foreground h-4 w-4" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                      <User className="h-5 w-5 text-primary" />
+                    </div>
                     <div>
                       <p className="text-sm font-medium">
                         {student?.firstName} {student?.lastName}
@@ -303,22 +366,34 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
 
             {/* ALA Info */}
             <Card>
-              <CardHeader>
-                <CardTitle>ALA Details</CardTitle>
+              <CardHeader className="border-b">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+                    <Info className="h-4 w-4 text-amber-600" />
+                  </div>
+                  <CardTitle>ALA Details</CardTitle>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm font-medium">{ala?.title}</p>
-                  <p className="text-muted-foreground text-xs">
-                    {ala?.subjectOfferingId?.subjectId?.code} -{" "}
-                    {ala?.subjectOfferingId?.subjectId?.name}
-                  </p>
+              <CardContent className="space-y-4 pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
+                    <BookOpen className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{ala?.title}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {ala?.subjectOfferingId?.subjectId?.code} -{" "}
+                      {ala?.subjectOfferingId?.subjectId?.name}
+                    </p>
+                  </div>
                 </div>
 
                 <Separator />
 
                 <div className="flex items-center gap-3">
-                  <Calendar className="text-muted-foreground h-4 w-4" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10">
+                    <Calendar className="h-4 w-4 text-amber-600" />
+                  </div>
                   <div>
                     <p className="text-sm font-medium">Deadline</p>
                     <p className="text-muted-foreground text-xs">
@@ -329,32 +404,37 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
 
                 <Separator />
 
-                <div>
-                  <p className="text-sm font-medium">Max Marks</p>
-                  <p className="text-muted-foreground text-xs">
-                    {ala?.maxMarks}
-                  </p>
-                </div>
-
-                <Separator />
-
-                <div>
-                  <p className="text-sm font-medium">Submitted At</p>
-                  <p className="text-muted-foreground text-xs">
-                    {submission.submittedAt
-                      ? new Date(submission.submittedAt).toLocaleString()
-                      : "-"}
-                  </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-lg border bg-muted/30 p-3 text-center">
+                    <p className="text-muted-foreground text-xs">Max Marks</p>
+                    <p className="text-lg font-bold">{ala?.maxMarks}</p>
+                  </div>
+                  <div className="rounded-lg border bg-muted/30 p-3 text-center">
+                    <p className="text-muted-foreground text-xs">Submitted</p>
+                    <p className="text-sm font-medium">
+                      {submission.submittedAt
+                        ? new Date(submission.submittedAt).toLocaleDateString(
+                            "en-US",
+                            { month: "short", day: "numeric" }
+                          )
+                        : "-"}
+                    </p>
+                  </div>
                 </div>
 
                 {submission.gradedAt && (
                   <>
                     <Separator />
-                    <div>
-                      <p className="text-sm font-medium">Graded At</p>
-                      <p className="text-muted-foreground text-xs">
-                        {new Date(submission.gradedAt).toLocaleString()}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10">
+                        <CheckCircle className="h-4 w-4 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Graded At</p>
+                        <p className="text-muted-foreground text-xs">
+                          {new Date(submission.gradedAt).toLocaleString()}
+                        </p>
+                      </div>
                     </div>
                   </>
                 )}

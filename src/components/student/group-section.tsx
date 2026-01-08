@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +36,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Users, Plus, LogOut, Loader2, Clock, Check } from "lucide-react";
+import {
+  Users,
+  Plus,
+  LogOut,
+  Loader2,
+  Clock,
+  Check,
+  UserPlus,
+  Crown,
+  Lock,
+} from "lucide-react";
 import {
   getStudentGroup,
   getClassmatesForInvite,
@@ -123,38 +136,83 @@ export function GroupSection({
 
     return (
       <Card>
-        <CardHeader>
+        <CardHeader className="border-b">
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                {group.name}
-              </CardTitle>
-              <CardDescription>
-                {groupFormation === "professor"
-                  ? "Assigned by professor"
-                  : `Created by ${group.createdBy.firstName} ${group.createdBy.lastName}`}
-              </CardDescription>
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+                <Users className="h-4 w-4 text-violet-600" />
+              </div>
+              <div>
+                <CardTitle>{group.name}</CardTitle>
+                <CardDescription>
+                  {groupFormation === "professor"
+                    ? "Assigned by professor"
+                    : `Created by ${group.createdBy.firstName} ${group.createdBy.lastName}`}
+                </CardDescription>
+              </div>
             </div>
-            {group.isLocked && <Badge variant="secondary">Submitted</Badge>}
+            {group.isLocked && (
+              <Badge
+                variant="outline"
+                className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+              >
+                <Lock className="mr-1 h-3 w-3" />
+                Submitted
+              </Badge>
+            )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6">
           <div>
-            <p className="mb-2 text-sm font-medium">Members</p>
+            <div className="mb-3 flex items-center gap-2">
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-500/10">
+                <Users className="h-3.5 w-3.5 text-blue-600" />
+              </div>
+              <p className="text-sm font-medium">
+                Members ({acceptedMembers.length + pendingMembers.length})
+              </p>
+            </div>
             <div className="space-y-2">
               {acceptedMembers.map((member) => (
                 <div
                   key={member.studentId._id}
-                  className="flex items-center justify-between text-sm"
+                  className="flex items-center justify-between rounded-lg border bg-emerald-500/5 p-3"
                 >
-                  <span>
-                    {member.studentId.firstName} {member.studentId.lastName}
-                    {member.studentId._id === studentId && " (You)"}
-                    {member.studentId._id === group.createdBy._id && " ★"}
-                  </span>
-                  <Badge variant="outline" className="text-green-600">
-                    <Check className="mr-1 h-3 w-3" />
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-emerald-500/10 text-emerald-600 text-xs">
+                        {member.studentId.firstName[0]}
+                        {member.studentId.lastName[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-medium">
+                          {member.studentId.firstName}{" "}
+                          {member.studentId.lastName}
+                        </span>
+                        {member.studentId._id === studentId && (
+                          <Badge
+                            variant="outline"
+                            className="border-blue-500/30 bg-blue-500/10 px-1.5 py-0 text-[10px] text-blue-600"
+                          >
+                            You
+                          </Badge>
+                        )}
+                        {member.studentId._id === group.createdBy._id && (
+                          <Crown className="h-3.5 w-3.5 text-amber-500" />
+                        )}
+                      </div>
+                      <p className="text-muted-foreground text-xs">
+                        {member.studentId.email}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                  >
+                    <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     Joined
                   </Badge>
                 </div>
@@ -162,13 +220,29 @@ export function GroupSection({
               {pendingMembers.map((member) => (
                 <div
                   key={member.studentId._id}
-                  className="flex items-center justify-between text-sm"
+                  className="flex items-center justify-between rounded-lg border border-dashed bg-amber-500/5 p-3"
                 >
-                  <span className="text-muted-foreground">
-                    {member.studentId.firstName} {member.studentId.lastName}
-                  </span>
-                  <Badge variant="outline">
-                    <Clock className="mr-1 h-3 w-3" />
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-amber-500/10 text-amber-600 text-xs">
+                        {member.studentId.firstName[0]}
+                        {member.studentId.lastName[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <span className="text-muted-foreground text-sm">
+                        {member.studentId.firstName} {member.studentId.lastName}
+                      </span>
+                      <p className="text-muted-foreground text-xs">
+                        {member.studentId.email}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+                  >
+                    <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
                     Pending
                   </Badge>
                 </div>
@@ -192,17 +266,22 @@ export function GroupSection({
   if (groupFormation === "professor") {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Group Assignment
-          </CardTitle>
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+              <Users className="h-4 w-4 text-violet-600" />
+            </div>
+            <CardTitle>Group Assignment</CardTitle>
+          </div>
         </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-sm">
-            You have not been assigned to a group yet. Please wait for your
-            professor to assign you to a group.
-          </p>
+        <CardContent className="pt-6">
+          <div className="rounded-lg border border-dashed p-4 text-center">
+            <Users className="mx-auto h-8 w-8 text-muted-foreground/50" />
+            <p className="text-muted-foreground mt-2 text-sm">
+              You have not been assigned to a group yet. Please wait for your
+              professor to assign you to a group.
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -211,16 +290,20 @@ export function GroupSection({
   // Student can create group
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          Group Submission
-        </CardTitle>
-        <CardDescription>
-          Create a group and invite your classmates
-        </CardDescription>
+      <CardHeader className="border-b">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+            <Users className="h-4 w-4 text-violet-600" />
+          </div>
+          <div>
+            <CardTitle>Group Submission</CardTitle>
+            <CardDescription>
+              Create a group and invite your classmates
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         {canModify ? (
           <CreateGroupDialog
             alaId={alaId}
@@ -228,9 +311,12 @@ export function GroupSection({
             onSuccess={loadGroup}
           />
         ) : (
-          <p className="text-muted-foreground text-sm">
-            Cannot create group - deadline passed or ALA is locked
-          </p>
+          <div className="rounded-lg border border-dashed p-4 text-center">
+            <Lock className="mx-auto h-8 w-8 text-muted-foreground/50" />
+            <p className="text-muted-foreground mt-2 text-sm">
+              Cannot create group - deadline passed or ALA is locked
+            </p>
+          </div>
         )}
       </CardContent>
     </Card>
@@ -327,16 +413,24 @@ function CreateGroupDialog({
           Create Group
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] p-0">
         <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Create Group</DialogTitle>
-            <DialogDescription>
-              Create a group and invite classmates. They will need to accept
-              your invitation.
-            </DialogDescription>
+          <DialogHeader className="p-6 pb-0">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10">
+                <UserPlus className="h-5 w-5 text-violet-600" />
+              </div>
+              <div>
+                <DialogTitle>Create Group</DialogTitle>
+                <DialogDescription>
+                  Create a group and invite classmates. They will need to accept
+                  your invitation.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <Separator className="mt-4" />
+          <div className="grid gap-4 p-6">
             <div className="grid gap-2">
               <Label htmlFor="name">Group Name</Label>
               <Input
@@ -347,45 +441,80 @@ function CreateGroupDialog({
               />
             </div>
             <div className="grid gap-2">
-              <Label>
-                Invite Classmates ({selectedIds.length}/{maxGroupSize - 1})
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label>Invite Classmates</Label>
+                <Badge
+                  variant="outline"
+                  className="border-blue-500/30 bg-blue-500/10 text-blue-600"
+                >
+                  {selectedIds.length}/{maxGroupSize - 1} selected
+                </Badge>
+              </div>
               {loadingClassmates ? (
-                <div className="rounded-lg border p-4 text-center">
-                  <Loader2 className="mx-auto h-5 w-5 animate-spin" />
+                <div className="rounded-lg border p-8 text-center">
+                  <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+                  <p className="text-muted-foreground mt-2 text-sm">
+                    Loading classmates...
+                  </p>
                 </div>
               ) : classmates.length === 0 ? (
-                <div className="text-muted-foreground rounded-lg border p-4 text-center text-sm">
-                  No available classmates to invite
+                <div className="rounded-lg border border-dashed p-8 text-center">
+                  <Users className="mx-auto h-8 w-8 text-muted-foreground/50" />
+                  <p className="text-muted-foreground mt-2 text-sm">
+                    No available classmates to invite
+                  </p>
                 </div>
               ) : (
-                <div className="max-h-60 overflow-y-auto rounded-lg border">
-                  {classmates.map((classmate) => (
-                    <div
-                      key={classmate._id}
-                      className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b p-3 last:border-0"
-                      onClick={() => toggleClassmate(classmate._id)}
-                    >
-                      <Checkbox
-                        checked={selectedIds.includes(classmate._id)}
-                        onClick={(e) => e.stopPropagation()}
-                        onCheckedChange={() => toggleClassmate(classmate._id)}
-                      />
-                      <div>
-                        <p className="text-sm font-medium">
-                          {classmate.firstName} {classmate.lastName}
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          {classmate.email}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <ScrollArea className="h-60 rounded-lg border">
+                  <div className="p-1">
+                    {classmates.map((classmate) => {
+                      const isSelected = selectedIds.includes(classmate._id);
+                      return (
+                        <div
+                          key={classmate._id}
+                          className={`flex cursor-pointer items-center gap-3 rounded-md p-3 transition-colors ${
+                            isSelected
+                              ? "bg-violet-500/10"
+                              : "hover:bg-muted/50"
+                          }`}
+                          onClick={() => toggleClassmate(classmate._id)}
+                        >
+                          <Checkbox
+                            checked={isSelected}
+                            onClick={(e) => e.stopPropagation()}
+                            onCheckedChange={() =>
+                              toggleClassmate(classmate._id)
+                            }
+                          />
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback
+                              className={`text-xs ${isSelected ? "bg-violet-500/20 text-violet-600" : "bg-muted"}`}
+                            >
+                              {classmate.firstName[0]}
+                              {classmate.lastName[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">
+                              {classmate.firstName} {classmate.lastName}
+                            </p>
+                            <p className="text-muted-foreground text-xs">
+                              {classmate.email}
+                            </p>
+                          </div>
+                          {isSelected && (
+                            <Check className="h-4 w-4 text-violet-600" />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
               )}
             </div>
           </div>
-          <DialogFooter>
+          <Separator />
+          <DialogFooter className="p-6 pt-4">
             <Button
               type="button"
               variant="outline"
@@ -394,7 +523,14 @@ function CreateGroupDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={loading || selectedIds.length < 1}>
-              {loading ? "Creating..." : "Create & Send Invites"}
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create & Send Invites"
+              )}
             </Button>
           </DialogFooter>
         </form>
@@ -430,7 +566,11 @@ function LeaveGroupButton({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" className="w-full" disabled={leaving}>
+        <Button
+          variant="outline"
+          className="w-full text-rose-600 hover:bg-rose-500/10 hover:text-rose-700"
+          disabled={leaving}
+        >
           <LogOut className="mr-2 h-4 w-4" />
           {isCreator ? "Delete Group" : "Leave Group"}
         </Button>
@@ -448,8 +588,20 @@ function LeaveGroupButton({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleLeave}>
-            {isCreator ? "Delete" : "Leave"}
+          <AlertDialogAction
+            onClick={handleLeave}
+            className="bg-rose-600 hover:bg-rose-700"
+          >
+            {leaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {isCreator ? "Deleting..." : "Leaving..."}
+              </>
+            ) : isCreator ? (
+              "Delete"
+            ) : (
+              "Leave"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

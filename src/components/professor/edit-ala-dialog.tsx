@@ -15,7 +15,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
+import {
+  Pencil,
+  FileText,
+  Calendar,
+  Award,
+  Users,
+  FileType,
+  HardDrive,
+} from "lucide-react";
 import { updateALA } from "@/lib/actions/ala.actions";
 import { ALLOWED_FILE_TYPES } from "@/lib/validations/ala.validation";
 import { toast } from "sonner";
@@ -41,13 +51,13 @@ interface EditALADialogProps {
 export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
   const [loading, setLoading] = useState(false);
   const [isGroupSubmission, setIsGroupSubmission] = useState(
-    ala.isGroupSubmission,
+    ala.isGroupSubmission
   );
   const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(
-    ala.allowedFileTypes || ["pdf"],
+    ala.allowedFileTypes || ["pdf"]
   );
   const [deadline, setDeadline] = useState<Date | undefined>(
-    new Date(ala.deadline),
+    new Date(ala.deadline)
   );
   const router = useRouter();
 
@@ -95,12 +105,23 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[550px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Edit ALA</DialogTitle>
-            <DialogDescription>Update the ALA details.</DialogDescription>
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10">
+                <Pencil className="h-5 w-5 text-violet-600" />
+              </div>
+              <div>
+                <DialogTitle>Edit ALA</DialogTitle>
+                <DialogDescription>Update the ALA details.</DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <Separator className="my-4" />
+          <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title" className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                Title
+              </Label>
               <Input
                 id="title"
                 name="title"
@@ -123,16 +144,24 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <DateTimePicker
-                id="deadline"
-                label="Deadline"
-                value={deadline}
-                onChange={setDeadline}
-                required
-                placeholder="Select deadline"
-              />
               <div className="grid gap-2">
-                <Label htmlFor="maxMarks">Max Marks</Label>
+                <Label className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  Deadline
+                </Label>
+                <DateTimePicker
+                  id="deadline"
+                  value={deadline}
+                  onChange={setDeadline}
+                  required
+                  placeholder="Select deadline"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="maxMarks" className="flex items-center gap-2">
+                  <Award className="h-4 w-4 text-muted-foreground" />
+                  Max Marks
+                </Label>
                 <Input
                   id="maxMarks"
                   name="maxMarks"
@@ -146,7 +175,10 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="maxFileSize">Max File Size (MB)</Label>
+              <Label htmlFor="maxFileSize" className="flex items-center gap-2">
+                <HardDrive className="h-4 w-4 text-muted-foreground" />
+                Max File Size (MB)
+              </Label>
               <Input
                 id="maxFileSize"
                 name="maxFileSize"
@@ -161,7 +193,10 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
             </div>
 
             <div className="grid gap-2">
-              <Label>Allowed File Types</Label>
+              <Label className="flex items-center gap-2">
+                <FileType className="h-4 w-4 text-muted-foreground" />
+                Allowed File Types
+              </Label>
               <div className="flex flex-wrap gap-4">
                 {ALLOWED_FILE_TYPES.map((type) => (
                   <div key={type} className="flex items-center space-x-2">
@@ -191,26 +226,33 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
                   setIsGroupSubmission(checked as boolean)
                 }
               />
-              <label htmlFor="edit-isGroupSubmission" className="text-sm">
+              <label
+                htmlFor="edit-isGroupSubmission"
+                className="flex items-center gap-2 text-sm"
+              >
+                <Users className="h-4 w-4 text-muted-foreground" />
                 Allow group submissions
               </label>
             </div>
 
             {isGroupSubmission && (
-              <div className="grid gap-2">
-                <Label htmlFor="maxGroupSize">Max Group Size</Label>
-                <Input
-                  id="maxGroupSize"
-                  name="maxGroupSize"
-                  type="number"
-                  min={2}
-                  max={10}
-                  defaultValue={ala.maxGroupSize || 4}
-                  required
-                />
+              <div className="rounded-lg border bg-muted/30 p-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="maxGroupSize">Max Group Size</Label>
+                  <Input
+                    id="maxGroupSize"
+                    name="maxGroupSize"
+                    type="number"
+                    min={2}
+                    max={10}
+                    defaultValue={ala.maxGroupSize || 4}
+                    required
+                  />
+                </div>
               </div>
             )}
           </div>
+          <Separator className="my-4" />
           <DialogFooter>
             <Button
               type="button"

@@ -18,7 +18,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { FadeIn, SlideUp } from "@/components/ui/page-transition";
 import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
 import {
@@ -54,43 +53,47 @@ export default async function StudentDashboard() {
     avatar: dbUser?.profileImage,
   };
 
+  const colorMap: Record<string, string> = {
+    blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    amber: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    emerald: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    rose: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+  };
+
   const statCards = [
     {
       title: "Pending ALAs",
       value: stats.pending,
       icon: FileText,
       description: "To submit",
-      color: "text-blue-600",
-      bgColor: "bg-blue-500/10",
-      borderColor: "group-hover:border-blue-500/30",
+      color: "blue",
+      highlight: false,
+      isNegative: false,
     },
     {
       title: "Due Soon",
       value: stats.dueSoon,
       icon: Clock,
       description: "Within 3 days",
-      color: "text-orange-600",
-      bgColor: "bg-orange-500/10",
-      borderColor: "group-hover:border-orange-500/30",
+      color: "amber",
       highlight: stats.dueSoon > 0,
+      isNegative: false,
     },
     {
       title: "Submitted",
       value: stats.submitted,
       icon: CheckCircle,
       description: "This semester",
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-500/10",
-      borderColor: "group-hover:border-emerald-500/30",
+      color: "emerald",
+      highlight: false,
+      isNegative: false,
     },
     {
       title: "Overdue",
       value: stats.overdue,
       icon: AlertCircle,
       description: "Missed deadline",
-      color: "text-red-600",
-      bgColor: "bg-red-500/10",
-      borderColor: "group-hover:border-red-500/30",
+      color: "rose",
       highlight: stats.overdue > 0,
       isNegative: true,
     },
@@ -153,22 +156,41 @@ export default async function StudentDashboard() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {statCards.map((stat, index) => (
             <SlideUp key={stat.title} delay={index * 75}>
-              <Card className={`group transition-all duration-300 hover:shadow-md ${stat.borderColor} ${stat.highlight ? (stat.isNegative ? "ring-2 ring-red-500/20" : "ring-2 ring-orange-500/20") : ""}`}>
+              <Card
+                className={`group relative overflow-hidden transition-all duration-300 hover:shadow-md ${stat.highlight ? (stat.isNegative ? "ring-2 ring-rose-500/20" : "ring-2 ring-amber-500/20") : ""}`}
+              >
+                <div
+                  className={`absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full ${colorMap[stat.color].split(" ")[0]} opacity-50 transition-transform group-hover:scale-150`}
+                />
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     {stat.title}
                   </CardTitle>
-                  <div className={`rounded-lg p-2 ${stat.bgColor}`}>
-                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                  <div
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg border ${colorMap[stat.color]}`}
+                  >
+                    <stat.icon className="h-4 w-4" />
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-1">
                   <div className="flex items-baseline gap-2">
-                    <span className={`text-3xl font-bold tabular-nums ${stat.highlight && stat.isNegative ? "text-red-600" : ""}`}>
+                    <span
+                      className={`text-3xl font-bold tabular-nums ${stat.highlight && stat.isNegative ? "text-rose-600" : ""}`}
+                    >
                       {stat.value}
                     </span>
                     {stat.highlight && stat.value > 0 && (
-                      <Badge variant={stat.isNegative ? "destructive" : "default"} className="text-xs">
+                      <Badge
+                        variant="outline"
+                        className={
+                          stat.isNegative
+                            ? "border-rose-500/30 bg-rose-500/10 text-rose-600"
+                            : "border-amber-500/30 bg-amber-500/10 text-amber-600"
+                        }
+                      >
+                        <span
+                          className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${stat.isNegative ? "bg-rose-500" : "bg-amber-500"}`}
+                        />
                         {stat.isNegative ? "Action needed" : "Urgent"}
                       </Badge>
                     )}
@@ -187,18 +209,26 @@ export default async function StudentDashboard() {
           {/* Upcoming Deadlines */}
           <FadeIn delay={300}>
             <Card className="flex flex-col">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    Upcoming Deadlines
-                    {stats.dueSoon > 0 && (
-                      <Badge variant="default" className="ml-1">
-                        {stats.dueSoon} due soon
-                      </Badge>
-                    )}
-                  </CardTitle>
-                  <CardDescription>ALAs due soon</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between border-b">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+                    <Calendar className="h-4 w-4 text-amber-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      Upcoming Deadlines
+                      {stats.dueSoon > 0 && (
+                        <Badge
+                          variant="outline"
+                          className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+                        >
+                          <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+                          {stats.dueSoon} due soon
+                        </Badge>
+                      )}
+                    </CardTitle>
+                    <CardDescription>ALAs due soon</CardDescription>
+                  </div>
                 </div>
                 <Button variant="ghost" size="sm" asChild>
                   <Link href="/student/deadlines">
@@ -207,12 +237,11 @@ export default async function StudentDashboard() {
                   </Link>
                 </Button>
               </CardHeader>
-              <Separator />
-              <CardContent className="flex-1 pt-4">
+              <CardContent className="flex-1 pt-6">
                 {upcomingDeadlines.length === 0 ? (
                   <IllustratedEmpty preset="noDeadlines" size="sm" />
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {upcomingDeadlines.map(
                       (ala: {
                         _id: string;
@@ -228,11 +257,15 @@ export default async function StudentDashboard() {
                           <Link
                             key={ala._id}
                             href={`/student/alas/${ala._id}`}
-                            className="group/item flex items-center justify-between rounded-lg border bg-card p-3 transition-all hover:bg-accent/50 hover:shadow-sm"
+                            className="group/item flex items-center justify-between rounded-lg border bg-card p-3 transition-all hover:bg-muted/50 hover:shadow-sm"
                           >
                             <div className="flex items-center gap-3">
-                              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${variant === "destructive" ? "bg-red-500/10" : variant === "default" ? "bg-orange-500/10" : "bg-blue-500/10"}`}>
-                                <FileText className={`h-4 w-4 ${variant === "destructive" ? "text-red-600" : variant === "default" ? "text-orange-600" : "text-blue-600"}`} />
+                              <div
+                                className={`flex h-9 w-9 items-center justify-center rounded-lg ${variant === "destructive" ? "bg-rose-500/10" : variant === "default" ? "bg-amber-500/10" : "bg-blue-500/10"}`}
+                              >
+                                <FileText
+                                  className={`h-4 w-4 ${variant === "destructive" ? "text-rose-600" : variant === "default" ? "text-amber-600" : "text-blue-600"}`}
+                                />
                               </div>
                               <div className="space-y-0.5">
                                 <p className="text-sm font-medium leading-none">
@@ -244,7 +277,10 @@ export default async function StudentDashboard() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge variant={variant} className="gap-1">
+                              <Badge
+                                variant="outline"
+                                className={`gap-1 ${variant === "destructive" ? "border-rose-500/30 bg-rose-500/10 text-rose-600" : variant === "default" ? "border-amber-500/30 bg-amber-500/10 text-amber-600" : "border-blue-500/30 bg-blue-500/10 text-blue-600"}`}
+                              >
                                 <Clock className="h-3 w-3" />
                                 {deadlineText}
                               </Badge>
@@ -263,13 +299,15 @@ export default async function StudentDashboard() {
           {/* Recent Grades */}
           <FadeIn delay={375}>
             <Card className="flex flex-col">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="flex items-center gap-2">
-                    <Trophy className="h-4 w-4 text-muted-foreground" />
-                    Recent Grades
-                  </CardTitle>
-                  <CardDescription>Your latest results</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between border-b">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10">
+                    <Trophy className="h-4 w-4 text-emerald-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Recent Grades</CardTitle>
+                    <CardDescription>Your latest results</CardDescription>
+                  </div>
                 </div>
                 <Button variant="ghost" size="sm" asChild>
                   <Link href="/student/grades">
@@ -278,12 +316,11 @@ export default async function StudentDashboard() {
                   </Link>
                 </Button>
               </CardHeader>
-              <Separator />
-              <CardContent className="flex-1 pt-4">
+              <CardContent className="flex-1 pt-6">
                 {recentGrades.length === 0 ? (
                   <IllustratedEmpty preset="noGrades" size="sm" />
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {recentGrades.map(
                       (sub: {
                         _id: string;
@@ -303,20 +340,20 @@ export default async function StudentDashboard() {
                         const getGradeColor = (pct: number) => {
                           if (pct >= 80) return "text-emerald-600";
                           if (pct >= 60) return "text-blue-600";
-                          if (pct >= 40) return "text-orange-600";
-                          return "text-red-600";
+                          if (pct >= 40) return "text-amber-600";
+                          return "text-rose-600";
                         };
                         const getProgressColor = (pct: number) => {
                           if (pct >= 80) return "bg-emerald-500";
                           if (pct >= 60) return "bg-blue-500";
-                          if (pct >= 40) return "bg-orange-500";
-                          return "bg-red-500";
+                          if (pct >= 40) return "bg-amber-500";
+                          return "bg-rose-500";
                         };
                         return (
                           <Link
                             key={sub._id}
                             href={`/student/alas/${sub.alaId._id}`}
-                            className="group/item flex items-center justify-between rounded-lg border bg-card p-3 transition-all hover:bg-accent/50 hover:shadow-sm"
+                            className="group/item flex items-center justify-between rounded-lg border bg-card p-3 transition-all hover:bg-muted/50 hover:shadow-sm"
                           >
                             <div className="flex items-center gap-3">
                               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10">
@@ -327,25 +364,29 @@ export default async function StudentDashboard() {
                                   {sub.alaId.title}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                  {sub.alaId.subjectOfferingId?.subjectId?.code || ""}
+                                  {sub.alaId.subjectOfferingId?.subjectId
+                                    ?.code || ""}
                                 </p>
                               </div>
                             </div>
                             <div className="flex items-center gap-3">
                               <div className="w-24 space-y-1">
                                 <div className="flex justify-between text-xs">
-                                  <span className={`font-bold tabular-nums ${getGradeColor(percentage)}`}>
+                                  <span
+                                    className={`font-bold tabular-nums ${getGradeColor(percentage)}`}
+                                  >
                                     {sub.marks}/{sub.alaId.maxMarks}
                                   </span>
                                   <span className="text-muted-foreground tabular-nums">
                                     {percentage}%
                                   </span>
                                 </div>
-                                <Progress 
-                                  value={percentage} 
+                                <Progress
+                                  value={percentage}
                                   className="h-1.5"
                                   style={{
-                                    ["--progress-background" as string]: getProgressColor(percentage),
+                                    ["--progress-background" as string]:
+                                      getProgressColor(percentage),
                                   }}
                                 />
                               </div>

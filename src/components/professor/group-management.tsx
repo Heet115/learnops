@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +34,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Users, Plus, Trash2, Pencil, Loader2 } from "lucide-react";
+import { Users, Plus, Trash2, Pencil, Loader2, Lock, UserPlus } from "lucide-react";
 import {
   getStudentsForGroupAssignment,
   createGroupByProfessor,
@@ -108,13 +109,13 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
   }, [alaId]);
 
   const unassignedStudents = students.filter(
-    (s) => !assignedIds.includes(s._id),
+    (s) => !assignedIds.includes(s._id)
   );
 
   if (loading) {
     return (
       <Card>
-        <CardContent className="py-8 text-center">
+        <CardContent className="py-12 text-center">
           <Loader2 className="text-muted-foreground mx-auto h-8 w-8 animate-spin" />
           <p className="text-muted-foreground mt-2">Loading groups...</p>
         </CardContent>
@@ -124,16 +125,18 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="border-b">
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Group Management
-            </CardTitle>
-            <CardDescription>
-              Assign students to groups (max {maxGroupSize} per group)
-            </CardDescription>
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+              <Users className="h-4 w-4 text-blue-600" />
+            </div>
+            <div>
+              <CardTitle>Group Management</CardTitle>
+              <CardDescription>
+                Assign students to groups (max {maxGroupSize} per group)
+              </CardDescription>
+            </div>
           </div>
           <CreateGroupDialog
             alaId={alaId}
@@ -145,12 +148,16 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
           />
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-4">
         {groups.length === 0 ? (
-          <p className="text-muted-foreground py-4 text-center">
-            No groups created yet. Click &quot;Create Group&quot; to get
-            started.
-          </p>
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <Users className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              No groups created yet. Click &quot;Create Group&quot; to get started.
+            </p>
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {groups.map((group) => (
@@ -168,12 +175,19 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
 
         {unassignedStudents.length > 0 && (
           <div className="border-t pt-4">
-            <p className="mb-2 text-sm font-medium">
-              Unassigned Students ({unassignedStudents.length})
-            </p>
+            <div className="flex items-center gap-2 mb-3">
+              <UserPlus className="h-4 w-4 text-muted-foreground" />
+              <p className="text-sm font-medium">
+                Unassigned Students ({unassignedStudents.length})
+              </p>
+            </div>
             <div className="flex flex-wrap gap-2">
               {unassignedStudents.map((s) => (
-                <Badge key={s._id} variant="outline">
+                <Badge
+                  key={s._id}
+                  variant="outline"
+                  className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+                >
                   {s.firstName} {s.lastName}
                 </Badge>
               ))}
@@ -252,12 +266,20 @@ function CreateGroupDialog({
       <DialogContent className="max-h-[80vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create Group</DialogTitle>
-            <DialogDescription>
-              Select students to form a group.
-            </DialogDescription>
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+                <Users className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <DialogTitle>Create Group</DialogTitle>
+                <DialogDescription>
+                  Select students to form a group.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <Separator className="my-4" />
+          <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="name">Group Name</Label>
               <Input
@@ -280,7 +302,7 @@ function CreateGroupDialog({
                   students.map((student) => (
                     <div
                       key={student._id}
-                      className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b p-3 last:border-0"
+                      className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b p-3 last:border-0 transition-colors"
                       onClick={() => toggleStudent(student._id)}
                     >
                       <Checkbox
@@ -302,6 +324,7 @@ function CreateGroupDialog({
               </div>
             </div>
           </div>
+          <Separator className="my-4" />
           <DialogFooter>
             <Button
               type="button"
@@ -352,16 +375,23 @@ function GroupCard({
   // Available students = unassigned + current group members
   const currentMemberIds = group.members.map((m) => m.studentId._id);
   const availableStudents = allStudents.filter(
-    (s) => !assignedIds.includes(s._id) || currentMemberIds.includes(s._id),
+    (s) => !assignedIds.includes(s._id) || currentMemberIds.includes(s._id)
   );
 
   return (
-    <div className="rounded-lg border p-4">
+    <div className="rounded-lg border bg-card p-4 transition-all hover:shadow-sm">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+            <Users className="h-4 w-4 text-violet-600" />
+          </div>
           <h4 className="font-medium">{group.name}</h4>
           {group.isLocked && (
-            <Badge variant="secondary" className="text-xs">
+            <Badge
+              variant="outline"
+              className="gap-1 border-muted-foreground/30 text-muted-foreground"
+            >
+              <Lock className="h-3 w-3" />
               Locked
             </Badge>
           )}
@@ -402,14 +432,21 @@ function GroupCard({
       </div>
       <div className="space-y-1">
         {group.members.map((member) => (
-          <div key={member.studentId._id} className="text-sm">
+          <div
+            key={member.studentId._id}
+            className="flex items-center gap-2 text-sm"
+          >
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             {member.studentId.firstName} {member.studentId.lastName}
           </div>
         ))}
       </div>
-      <p className="text-muted-foreground mt-2 text-xs">
+      <Badge
+        variant="outline"
+        className="mt-3 border-blue-500/30 bg-blue-500/10 text-blue-600"
+      >
         {group.members.length} member{group.members.length !== 1 ? "s" : ""}
-      </p>
+      </Badge>
     </div>
   );
 }
@@ -432,7 +469,7 @@ function EditGroupDialog({
 }) {
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(
-    group.members.map((m) => m.studentId._id),
+    group.members.map((m) => m.studentId._id)
   );
   const [name, setName] = useState(group.name);
 
@@ -479,9 +516,20 @@ function EditGroupDialog({
       <DialogContent className="max-h-[80vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Edit Group</DialogTitle>
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10">
+                <Pencil className="h-5 w-5 text-violet-600" />
+              </div>
+              <div>
+                <DialogTitle>Edit Group</DialogTitle>
+                <DialogDescription>
+                  Update group name and members.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <Separator className="my-4" />
+          <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="edit-name">Group Name</Label>
               <Input
@@ -499,7 +547,7 @@ function EditGroupDialog({
                 {availableStudents.map((student) => (
                   <div
                     key={student._id}
-                    className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b p-3 last:border-0"
+                    className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b p-3 last:border-0 transition-colors"
                     onClick={() => toggleStudent(student._id)}
                   >
                     <Checkbox
@@ -520,6 +568,7 @@ function EditGroupDialog({
               </div>
             </div>
           </div>
+          <Separator className="my-4" />
           <DialogFooter>
             <Button
               type="button"

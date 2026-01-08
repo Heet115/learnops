@@ -4,7 +4,13 @@ import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
 import { getStudentSubmissions } from "@/lib/actions/submission.actions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +21,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Eye, CheckCircle, Clock, XCircle } from "lucide-react";
+import {
+  Eye,
+  CheckCircle,
+  Clock,
+  XCircle,
+  FileText,
+  ClipboardList,
+} from "lucide-react";
+
+const colorMap: Record<string, string> = {
+  blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  emerald: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  rose: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+};
 
 export default async function StudentSubmissionsPage() {
   const { sessionClaims } = await auth();
@@ -36,33 +55,74 @@ export default async function StudentSubmissionsPage() {
     avatar: dbUser?.profileImage,
   };
 
+  // Calculate stats
+  const submitted = submissions.filter(
+    (s: { status: string }) => s.status === "submitted"
+  ).length;
+  const graded = submissions.filter(
+    (s: { status: string }) => s.status === "graded"
+  ).length;
+  const rejected = submissions.filter(
+    (s: { status: string }) => s.status === "rejected"
+  ).length;
+
+  const statCards = [
+    {
+      title: "Submitted",
+      value: submitted,
+      icon: Clock,
+      color: "blue",
+    },
+    {
+      title: "Graded",
+      value: graded,
+      icon: CheckCircle,
+      color: "emerald",
+    },
+    {
+      title: "Rejected",
+      value: rejected,
+      icon: XCircle,
+      color: "rose",
+    },
+  ];
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "graded":
         return (
-          <Badge className="bg-green-100 text-green-800">
-            <CheckCircle className="mr-1 h-3 w-3" />
+          <Badge
+            variant="outline"
+            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+          >
+            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
             Graded
           </Badge>
         );
       case "submitted":
         return (
-          <Badge className="bg-blue-100 text-blue-800">
-            <Clock className="mr-1 h-3 w-3" />
+          <Badge
+            variant="outline"
+            className="border-blue-500/30 bg-blue-500/10 text-blue-600"
+          >
+            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-blue-500" />
             Submitted
           </Badge>
         );
       case "rejected":
         return (
-          <Badge variant="destructive">
-            <XCircle className="mr-1 h-3 w-3" />
+          <Badge
+            variant="outline"
+            className="border-rose-500/30 bg-rose-500/10 text-rose-600"
+          >
+            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-rose-500" />
             Rejected
           </Badge>
         );
       default:
         return (
           <Badge variant="outline">
-            <Clock className="mr-1 h-3 w-3" />
+            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-gray-500" />
             Pending
           </Badge>
         );
@@ -79,82 +139,153 @@ export default async function StudentSubmissionsPage() {
       ]}
     >
       <div className="space-y-6 pt-4">
-        <div>
-          <h2 className="text-2xl font-bold">My Submissions</h2>
-          <p className="text-muted-foreground">View all your ALA submissions</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-bold">My Submissions</h2>
+              <Badge variant="secondary" className="text-sm">
+                {submissions.length} Total
+              </Badge>
+            </div>
+            <p className="text-muted-foreground">
+              View all your ALA submissions
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          {statCards.map((stat) => (
+            <Card
+              key={stat.title}
+              className="group relative overflow-hidden transition-all hover:shadow-md"
+            >
+              <div
+                className={`absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full ${colorMap[stat.color].split(" ")[0]} opacity-50 transition-transform group-hover:scale-150`}
+              />
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {stat.title}
+                </CardTitle>
+                <div
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg border ${colorMap[stat.color]}`}
+                >
+                  <stat.icon className="h-4 w-4" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>All Submissions</CardTitle>
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <ClipboardList className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <CardTitle>All Submissions</CardTitle>
+                <CardDescription>
+                  Your submitted work and grades
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {submissions.length === 0 ? (
-              <p className="text-muted-foreground py-8 text-center">
-                No submissions yet. Go to My ALAs to start submitting.
-              </p>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                  <FileText className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <p className="mt-4 text-sm font-medium">No submissions yet</p>
+                <p className="text-muted-foreground text-sm">
+                  Go to My ALAs to start submitting.
+                </p>
+              </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ALA</TableHead>
-                    <TableHead>Subject</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Marks</TableHead>
-                    <TableHead>Submitted</TableHead>
-                    <TableHead className="w-[80px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {submissions.map(
-                    (sub: {
-                      _id: string;
-                      status: string;
-                      marks?: number;
-                      submittedAt?: string;
-                      alaId: {
+              <div className="rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead>ALA</TableHead>
+                      <TableHead>Subject</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Marks</TableHead>
+                      <TableHead>Submitted</TableHead>
+                      <TableHead className="w-[80px]"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {submissions.map(
+                      (sub: {
                         _id: string;
-                        title: string;
-                        maxMarks: number;
-                        subjectOfferingId?: {
-                          subjectId?: { name: string; code: string };
+                        status: string;
+                        marks?: number;
+                        submittedAt?: string;
+                        alaId: {
+                          _id: string;
+                          title: string;
+                          maxMarks: number;
+                          subjectOfferingId?: {
+                            subjectId?: { name: string; code: string };
+                          };
                         };
-                      };
-                    }) => (
-                      <TableRow key={sub._id}>
-                        <TableCell className="max-w-[200px] truncate font-medium">
-                          {sub.alaId?.title || "Unknown ALA"}
-                        </TableCell>
-                        <TableCell>
-                          {sub.alaId?.subjectOfferingId?.subjectId?.code || "-"}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(sub.status)}</TableCell>
-                        <TableCell>
-                          {sub.status === "graded" ? (
-                            <span className="font-medium">
-                              {sub.marks}/{sub.alaId?.maxMarks}
-                            </span>
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {sub.submittedAt
-                            ? new Date(sub.submittedAt).toLocaleDateString()
-                            : "-"}
-                        </TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="icon" asChild>
-                            <Link href={`/student/alas/${sub.alaId?._id}`}>
-                              <Eye className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ),
-                  )}
-                </TableBody>
-              </Table>
+                      }) => (
+                        <TableRow key={sub._id} className="group">
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                                <FileText className="h-4 w-4 text-primary" />
+                              </div>
+                              <span className="max-w-[200px] truncate font-medium">
+                                {sub.alaId?.title || "Unknown ALA"}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className="border-blue-500/30 bg-blue-500/10 text-blue-600"
+                            >
+                              {sub.alaId?.subjectOfferingId?.subjectId?.code ||
+                                "-"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(sub.status)}</TableCell>
+                          <TableCell>
+                            {sub.status === "graded" ? (
+                              <span className="font-medium">
+                                {sub.marks}/{sub.alaId?.maxMarks}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {sub.submittedAt
+                              ? new Date(sub.submittedAt).toLocaleDateString()
+                              : "-"}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              asChild
+                              className="opacity-0 transition-opacity group-hover:opacity-100"
+                            >
+                              <Link href={`/student/alas/${sub.alaId?._id}`}>
+                                <Eye className="h-4 w-4" />
+                              </Link>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>

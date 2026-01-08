@@ -9,6 +9,8 @@ import {
 import { StudentProfileView } from "@/components/student/student-profile-view";
 import { ProfileUpdateRequests } from "@/components/student/profile-update-requests";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { UserCircle } from "lucide-react";
 
 export default async function StudentProfilePage() {
   const { sessionClaims } = await auth();
@@ -30,6 +32,10 @@ export default async function StudentProfilePage() {
     avatar: dbUser?.profileImage,
   };
 
+  const pendingRequests = updateRequests.filter(
+    (r: { requestStatus: string }) => r.requestStatus === "pending"
+  ).length;
+
   if (!profileResult.success || !profileResult.data) {
     return (
       <DashboardLayout
@@ -41,8 +47,11 @@ export default async function StudentProfilePage() {
         ]}
       >
         <div className="pt-4">
-          <div className="rounded-lg border border-dashed p-8 text-center">
-            <h2 className="text-lg font-semibold">Profile Not Found</h2>
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <UserCircle className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h2 className="mt-4 text-lg font-semibold">Profile Not Found</h2>
             <p className="text-muted-foreground mt-2">
               Your profile has not been set up yet. Please contact the
               administrator.
@@ -63,29 +72,35 @@ export default async function StudentProfilePage() {
       ]}
     >
       <div className="space-y-6 pt-4">
-        <div>
-          <h2 className="text-2xl font-bold">My Profile</h2>
-          <p className="text-muted-foreground">
-            View your profile information. Contact admin to request changes.
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-bold">My Profile</h2>
+              {pendingRequests > 0 && (
+                <Badge
+                  variant="outline"
+                  className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+                >
+                  {pendingRequests} Pending Request
+                  {pendingRequests > 1 ? "s" : ""}
+                </Badge>
+              )}
+            </div>
+            <p className="text-muted-foreground">
+              View your profile information. Contact admin to request changes.
+            </p>
+          </div>
         </div>
 
         <Tabs defaultValue="profile" className="space-y-4">
           <TabsList>
             <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="requests">
+            <TabsTrigger value="requests" className="flex items-center gap-2">
               Update Requests
-              {updateRequests.filter(
-                (r: { requestStatus: string }) => r.requestStatus === "pending",
-              ).length > 0 && (
-                <span className="bg-primary text-primary-foreground ml-2 rounded-full px-2 py-0.5 text-xs">
-                  {
-                    updateRequests.filter(
-                      (r: { requestStatus: string }) =>
-                        r.requestStatus === "pending",
-                    ).length
-                  }
-                </span>
+              {pendingRequests > 0 && (
+                <Badge className="h-5 min-w-5 rounded-full bg-primary px-1.5 text-xs text-primary-foreground">
+                  {pendingRequests}
+                </Badge>
               )}
             </TabsTrigger>
           </TabsList>

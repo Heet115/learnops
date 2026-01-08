@@ -7,7 +7,15 @@ import { getStudentPendingInvites } from "@/lib/actions/group.actions";
 import { StudentALAsList } from "@/components/student/student-alas-list";
 import { GroupInvitations } from "@/components/student/group-invitations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { FileText, Clock, CheckCircle, AlertCircle } from "lucide-react";
+
+const colorMap: Record<string, string> = {
+  blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  amber: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  emerald: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  rose: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+};
 
 export default async function StudentALAsPage() {
   const { sessionClaims } = await auth();
@@ -32,15 +40,15 @@ export default async function StudentALAsPage() {
   const now = new Date();
   const pending = alas.filter(
     (a: { submission: unknown; deadline: string; isLocked: boolean }) =>
-      !a.submission && new Date(a.deadline) > now && !a.isLocked,
+      !a.submission && new Date(a.deadline) > now && !a.isLocked
   ).length;
   const submitted = alas.filter(
     (a: { submission?: { status: string } }) =>
-      a.submission?.status === "submitted" || a.submission?.status === "graded",
+      a.submission?.status === "submitted" || a.submission?.status === "graded"
   ).length;
   const overdue = alas.filter(
     (a: { submission: unknown; deadline: string }) =>
-      !a.submission && new Date(a.deadline) < now,
+      !a.submission && new Date(a.deadline) < now
   ).length;
   const dueSoon = alas.filter(
     (a: { submission: unknown; deadline: string; isLocked: boolean }) => {
@@ -48,8 +56,35 @@ export default async function StudentALAsPage() {
       const deadline = new Date(a.deadline);
       const threeDays = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
       return deadline > now && deadline <= threeDays;
-    },
+    }
   ).length;
+
+  const statCards = [
+    {
+      title: "Pending",
+      value: pending,
+      icon: FileText,
+      color: "blue",
+    },
+    {
+      title: "Due Soon",
+      value: dueSoon,
+      icon: Clock,
+      color: "amber",
+    },
+    {
+      title: "Submitted",
+      value: submitted,
+      icon: CheckCircle,
+      color: "emerald",
+    },
+    {
+      title: "Overdue",
+      value: overdue,
+      icon: AlertCircle,
+      color: "rose",
+    },
+  ];
 
   return (
     <DashboardLayout
@@ -61,54 +96,44 @@ export default async function StudentALAsPage() {
       ]}
     >
       <div className="space-y-6 pt-4">
-        <div>
-          <h2 className="text-2xl font-bold">My ALAs</h2>
-          <p className="text-muted-foreground">
-            View and submit your assignments
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-bold">My ALAs</h2>
+              <Badge variant="secondary" className="text-sm">
+                {alas.length} Total
+              </Badge>
+            </div>
+            <p className="text-muted-foreground">
+              View and submit your assignments
+            </p>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Pending</CardTitle>
-              <FileText className="text-muted-foreground h-4 w-4" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{pending}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Due Soon</CardTitle>
-              <Clock className="h-4 w-4 text-orange-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
-                {dueSoon}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Submitted</CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {submitted}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Overdue</CardTitle>
-              <AlertCircle className="h-4 w-4 text-red-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{overdue}</div>
-            </CardContent>
-          </Card>
+          {statCards.map((stat) => (
+            <Card
+              key={stat.title}
+              className="group relative overflow-hidden transition-all hover:shadow-md"
+            >
+              <div
+                className={`absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full ${colorMap[stat.color].split(" ")[0]} opacity-50 transition-transform group-hover:scale-150`}
+              />
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {stat.title}
+                </CardTitle>
+                <div
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg border ${colorMap[stat.color]}`}
+                >
+                  <stat.icon className="h-4 w-4" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         <GroupInvitations invitations={pendingInvites} />

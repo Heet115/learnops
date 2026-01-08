@@ -28,6 +28,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Plus,
@@ -37,6 +38,9 @@ import {
   ExternalLink,
   Upload,
   Loader2,
+  FolderOpen,
+  Type,
+  Globe,
 } from "lucide-react";
 import { addResource, removeResource } from "@/lib/actions/ala.actions";
 import {
@@ -189,21 +193,20 @@ export function ALAResourcesSection({
     }
   };
 
-  const getResourceIcon = (type: string) => {
-    const resourceType = RESOURCE_TYPES.find((t) => t.value === type);
-    const Icon = resourceType?.icon || FileText;
-    return <Icon className="h-4 w-4" />;
-  };
-
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Resources</CardTitle>
-            <CardDescription>
-              Study materials and references for students
-            </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between border-b">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+              <FolderOpen className="h-4 w-4 text-amber-600" />
+            </div>
+            <div>
+              <CardTitle>Resources</CardTitle>
+              <CardDescription>
+                Study materials and references for students
+              </CardDescription>
+            </div>
           </div>
           <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
@@ -215,14 +218,25 @@ export function ALAResourcesSection({
             <DialogContent>
               <form onSubmit={handleAddResource}>
                 <DialogHeader>
-                  <DialogTitle>Add Resource</DialogTitle>
-                  <DialogDescription>
-                    Upload a document or add a link for students.
-                  </DialogDescription>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
+                      <Plus className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <DialogTitle>Add Resource</DialogTitle>
+                      <DialogDescription>
+                        Upload a document or add a link for students.
+                      </DialogDescription>
+                    </div>
+                  </div>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
+                <Separator className="my-4" />
+                <div className="grid gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="type">Resource Type</Label>
+                    <Label htmlFor="type" className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      Resource Type
+                    </Label>
                     <Select
                       value={resourceType}
                       onValueChange={setResourceType}
@@ -233,7 +247,10 @@ export function ALAResourcesSection({
                       <SelectContent>
                         {RESOURCE_TYPES.map((type) => (
                           <SelectItem key={type.value} value={type.value}>
-                            {type.label}
+                            <div className="flex items-center gap-2">
+                              <type.icon className="h-4 w-4" />
+                              {type.label}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -241,7 +258,10 @@ export function ALAResourcesSection({
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="name">Name</Label>
+                    <Label htmlFor="name" className="flex items-center gap-2">
+                      <Type className="h-4 w-4 text-muted-foreground" />
+                      Name
+                    </Label>
                     <Input
                       id="name"
                       name="name"
@@ -252,7 +272,10 @@ export function ALAResourcesSection({
 
                   {resourceType === "link" ? (
                     <div className="grid gap-2">
-                      <Label htmlFor="url">URL</Label>
+                      <Label htmlFor="url" className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-muted-foreground" />
+                        URL
+                      </Label>
                       <Input
                         id="url"
                         name="url"
@@ -263,7 +286,10 @@ export function ALAResourcesSection({
                     </div>
                   ) : (
                     <div className="grid gap-2">
-                      <Label>Upload File</Label>
+                      <Label className="flex items-center gap-2">
+                        <Upload className="h-4 w-4 text-muted-foreground" />
+                        Upload File
+                      </Label>
                       <div className="flex flex-col gap-2">
                         <input
                           ref={fileInputRef}
@@ -278,7 +304,7 @@ export function ALAResourcesSection({
                           variant="outline"
                           onClick={() => fileInputRef.current?.click()}
                           disabled={uploading}
-                          className="w-full"
+                          className="w-full justify-start"
                         >
                           {uploading ? (
                             <>
@@ -293,10 +319,13 @@ export function ALAResourcesSection({
                           )}
                         </Button>
                         {fileName && (
-                          <p className="text-muted-foreground text-sm">
-                            {uploadedUrl ? "✓ " : ""}
-                            {fileName}
-                          </p>
+                          <div className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
+                            <FileText className="h-4 w-4 text-emerald-600" />
+                            <span className="text-sm text-emerald-600">
+                              {uploadedUrl ? "✓ " : ""}
+                              {fileName}
+                            </span>
+                          </div>
                         )}
                         <p className="text-muted-foreground text-xs">
                           PDF, DOC, DOCX, PPT, PPTX (max 10MB)
@@ -305,6 +334,7 @@ export function ALAResourcesSection({
                     </div>
                   )}
                 </div>
+                <Separator className="my-4" />
                 <DialogFooter>
                   <Button
                     type="button"
@@ -328,20 +358,38 @@ export function ALAResourcesSection({
             </DialogContent>
           </Dialog>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {resources.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
-              No resources added yet. Add study materials for your students.
-            </p>
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                <FolderOpen className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <p className="mt-4 text-sm font-medium">No resources yet</p>
+              <p className="text-muted-foreground text-sm">
+                Add study materials for your students.
+              </p>
+            </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {resources.map((resource, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between rounded-lg border p-3"
+                  className="group flex items-center justify-between rounded-lg border bg-card p-3 transition-colors hover:bg-muted/50"
                 >
                   <div className="flex items-center gap-3">
-                    {getResourceIcon(resource.type)}
+                    <div
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg ${
+                        resource.type === "link"
+                          ? "bg-blue-500/10"
+                          : "bg-amber-500/10"
+                      }`}
+                    >
+                      {resource.type === "link" ? (
+                        <LinkIcon className="h-4 w-4 text-blue-600" />
+                      ) : (
+                        <FileText className="h-4 w-4 text-amber-600" />
+                      )}
+                    </div>
                     <div>
                       <p className="text-sm font-medium">{resource.name}</p>
                       <p className="text-muted-foreground max-w-[300px] truncate text-xs">
@@ -349,7 +397,7 @@ export function ALAResourcesSection({
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                     <Button variant="ghost" size="icon" asChild>
                       <a
                         href={resource.url}

@@ -12,7 +12,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Calendar, CheckCircle, AlertTriangle } from "lucide-react";
+import {
+  Clock,
+  Calendar,
+  CheckCircle,
+  AlertTriangle,
+  FileText,
+} from "lucide-react";
+
+const colorMap: Record<string, string> = {
+  blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  rose: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+  emerald: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+};
 
 async function getStudentDeadlines() {
   const { userId } = await auth();
@@ -123,6 +135,27 @@ export default async function StudentDeadlinesPage() {
     });
   };
 
+  const statCards = [
+    {
+      title: "Upcoming",
+      value: deadlines.upcoming.length,
+      icon: Clock,
+      color: "blue",
+    },
+    {
+      title: "Overdue",
+      value: deadlines.overdue.length,
+      icon: AlertTriangle,
+      color: "rose",
+    },
+    {
+      title: "Completed",
+      value: deadlines.completed.length,
+      icon: CheckCircle,
+      color: "emerald",
+    },
+  ];
+
   return (
     <DashboardLayout
       role="student"
@@ -130,64 +163,59 @@ export default async function StudentDeadlinesPage() {
       breadcrumbs={[{ label: "Student" }, { label: "Deadlines" }]}
     >
       <div className="space-y-6 pt-4">
-        <div>
-          <h2 className="text-2xl font-bold">Deadlines</h2>
-          <p className="text-muted-foreground">Track your ALA deadlines</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-bold">Deadlines</h2>
+              <Badge variant="secondary" className="text-sm">
+                {deadlines.upcoming.length + deadlines.overdue.length} Active
+              </Badge>
+            </div>
+            <p className="text-muted-foreground">Track your ALA deadlines</p>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                <Clock className="h-4 w-4 text-blue-500" />
-                Upcoming
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {deadlines.upcoming.length}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                <AlertTriangle className="h-4 w-4 text-red-500" />
-                Overdue
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {deadlines.overdue.length}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                Completed
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {deadlines.completed.length}
-              </div>
-            </CardContent>
-          </Card>
+          {statCards.map((stat) => (
+            <Card
+              key={stat.title}
+              className="group relative overflow-hidden transition-all hover:shadow-md"
+            >
+              <div
+                className={`absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full ${colorMap[stat.color].split(" ")[0]} opacity-50 transition-transform group-hover:scale-150`}
+              />
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {stat.title}
+                </CardTitle>
+                <div
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg border ${colorMap[stat.color]}`}
+                >
+                  <stat.icon className="h-4 w-4" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {deadlines.overdue.length > 0 && (
-          <Card className="border-red-200">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-red-600">
-                <AlertTriangle className="h-5 w-5" />
-                Overdue ALAs
-              </CardTitle>
-              <CardDescription>These deadlines have passed</CardDescription>
+          <Card className="border-rose-500/30">
+            <CardHeader className="border-b">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500/10">
+                  <AlertTriangle className="h-4 w-4 text-rose-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-rose-600">Overdue ALAs</CardTitle>
+                  <CardDescription>These deadlines have passed</CardDescription>
+                </div>
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
+            <CardContent className="pt-6">
+              <div className="space-y-2">
                 {deadlines.overdue.map(
                   (ala: {
                     _id: string;
@@ -199,20 +227,29 @@ export default async function StudentDeadlinesPage() {
                     <Link
                       key={ala._id}
                       href={`/student/alas/${ala._id}`}
-                      className="flex items-center justify-between rounded-lg border border-red-100 p-3 transition-colors hover:bg-red-50"
+                      className="group/item flex items-center justify-between rounded-lg border border-rose-500/20 bg-rose-500/5 p-3 transition-colors hover:bg-rose-500/10"
                     >
-                      <div>
-                        <p className="font-medium">{ala.title}</p>
-                        <p className="text-muted-foreground text-sm">
-                          {ala.subjectOfferingId?.subjectId?.code} •{" "}
-                          {formatDate(ala.deadline)}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-500/10">
+                          <FileText className="h-4 w-4 text-rose-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{ala.title}</p>
+                          <p className="text-muted-foreground text-sm">
+                            {ala.subjectOfferingId?.subjectId?.code} •{" "}
+                            {formatDate(ala.deadline)}
+                          </p>
+                        </div>
                       </div>
-                      <Badge variant="destructive">
+                      <Badge
+                        variant="outline"
+                        className="border-rose-500/30 bg-rose-500/10 text-rose-600"
+                      >
+                        <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-rose-500" />
                         {ala.isLocked ? "Locked" : "Overdue"}
                       </Badge>
                     </Link>
-                  ),
+                  )
                 )}
               </div>
             </CardContent>
@@ -220,20 +257,30 @@ export default async function StudentDeadlinesPage() {
         )}
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Upcoming Deadlines
-            </CardTitle>
-            <CardDescription>ALAs you need to submit</CardDescription>
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <Calendar className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <CardTitle>Upcoming Deadlines</CardTitle>
+                <CardDescription>ALAs you need to submit</CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {deadlines.upcoming.length === 0 ? (
-              <p className="text-muted-foreground py-8 text-center">
-                No upcoming deadlines
-              </p>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                  <Calendar className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <p className="mt-4 text-sm font-medium">No upcoming deadlines</p>
+                <p className="text-muted-foreground text-sm">
+                  You&apos;re all caught up!
+                </p>
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {deadlines.upcoming.map(
                   (ala: {
                     _id: string;
@@ -254,19 +301,36 @@ export default async function StudentDeadlinesPage() {
                       <Link
                         key={ala._id}
                         href={`/student/alas/${ala._id}`}
-                        className="hover:bg-muted/50 flex items-center justify-between rounded-lg border p-3 transition-colors"
+                        className="group/item flex items-center justify-between rounded-lg border bg-card p-3 transition-colors hover:bg-muted/50"
                       >
-                        <div>
-                          <p className="font-medium">{ala.title}</p>
-                          <p className="text-muted-foreground text-sm">
-                            {ala.subjectOfferingId?.subjectId?.code} •{" "}
-                            {ala.maxMarks} marks
-                          </p>
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`flex h-9 w-9 items-center justify-center rounded-lg ${isUrgent ? "bg-amber-500/10" : "bg-blue-500/10"}`}
+                          >
+                            <FileText
+                              className={`h-4 w-4 ${isUrgent ? "text-amber-600" : "text-blue-600"}`}
+                            />
+                          </div>
+                          <div>
+                            <p className="font-medium">{ala.title}</p>
+                            <p className="text-muted-foreground text-sm">
+                              {ala.subjectOfferingId?.subjectId?.code} •{" "}
+                              {ala.maxMarks} marks
+                            </p>
+                          </div>
                         </div>
                         <div className="text-right">
                           <Badge
-                            variant={isUrgent ? "destructive" : "secondary"}
+                            variant="outline"
+                            className={
+                              isUrgent
+                                ? "border-amber-500/30 bg-amber-500/10 text-amber-600"
+                                : "border-blue-500/30 bg-blue-500/10 text-blue-600"
+                            }
                           >
+                            <span
+                              className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${isUrgent ? "bg-amber-500" : "bg-blue-500"}`}
+                            />
                             {deadlineText}
                           </Badge>
                           <p className="text-muted-foreground mt-1 text-xs">
@@ -275,7 +339,7 @@ export default async function StudentDeadlinesPage() {
                         </div>
                       </Link>
                     );
-                  },
+                  }
                 )}
               </div>
             )}

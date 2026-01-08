@@ -21,7 +21,14 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Award, TrendingUp, BarChart3 } from "lucide-react";
+import { Award, TrendingUp, BarChart3, TrendingDown, Trophy } from "lucide-react";
+
+const colorMap: Record<string, string> = {
+  violet: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+  blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  emerald: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  amber: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+};
 
 async function getStudentGrades() {
   const { userId } = await auth();
@@ -114,20 +121,70 @@ export default async function StudentGradesPage() {
   };
 
   const getGradeColor = (percentage: number) => {
-    if (percentage >= 90) return "text-green-600";
+    if (percentage >= 90) return "text-emerald-600";
     if (percentage >= 70) return "text-blue-600";
-    if (percentage >= 50) return "text-yellow-600";
-    return "text-red-600";
+    if (percentage >= 50) return "text-amber-600";
+    return "text-rose-600";
   };
 
   const getGradeBadge = (percentage: number) => {
-    if (percentage >= 90) return { label: "A+", variant: "default" as const };
-    if (percentage >= 80) return { label: "A", variant: "default" as const };
-    if (percentage >= 70) return { label: "B", variant: "secondary" as const };
-    if (percentage >= 60) return { label: "C", variant: "secondary" as const };
-    if (percentage >= 50) return { label: "D", variant: "outline" as const };
-    return { label: "F", variant: "destructive" as const };
+    if (percentage >= 90)
+      return {
+        label: "A+",
+        className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
+      };
+    if (percentage >= 80)
+      return {
+        label: "A",
+        className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
+      };
+    if (percentage >= 70)
+      return {
+        label: "B",
+        className: "border-blue-500/30 bg-blue-500/10 text-blue-600",
+      };
+    if (percentage >= 60)
+      return {
+        label: "C",
+        className: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+      };
+    if (percentage >= 50)
+      return {
+        label: "D",
+        className: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+      };
+    return {
+      label: "F",
+      className: "border-rose-500/30 bg-rose-500/10 text-rose-600",
+    };
   };
+
+  const statCards = [
+    {
+      title: "Total Graded",
+      value: stats.graded,
+      icon: Award,
+      color: "violet",
+    },
+    {
+      title: "Average Score",
+      value: `${stats.average}%`,
+      icon: BarChart3,
+      color: "blue",
+    },
+    {
+      title: "Highest",
+      value: `${stats.highest}%`,
+      icon: TrendingUp,
+      color: "emerald",
+    },
+    {
+      title: "Lowest",
+      value: `${stats.lowest}%`,
+      icon: TrendingDown,
+      color: "amber",
+    },
+  ];
 
   return (
     <DashboardLayout
@@ -136,154 +193,156 @@ export default async function StudentGradesPage() {
       breadcrumbs={[{ label: "Student" }, { label: "Grades" }]}
     >
       <div className="space-y-6 pt-4">
-        <div>
-          <h2 className="text-2xl font-bold">My Grades</h2>
-          <p className="text-muted-foreground">
-            View your ALA grades and performance
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-bold">My Grades</h2>
+              <Badge variant="secondary" className="text-sm">
+                {stats.graded} Graded
+              </Badge>
+            </div>
+            <p className="text-muted-foreground">
+              View your ALA grades and performance
+            </p>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                <Award className="h-4 w-4 text-purple-500" />
-                Total Graded
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.graded}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                <BarChart3 className="h-4 w-4 text-blue-500" />
-                Average Score
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          {statCards.map((stat) => (
+            <Card
+              key={stat.title}
+              className="group relative overflow-hidden transition-all hover:shadow-md"
+            >
               <div
-                className={`text-2xl font-bold ${getGradeColor(stats.average)}`}
-              >
-                {stats.average}%
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                <TrendingUp className="h-4 w-4 text-green-500" />
-                Highest
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {stats.highest}%
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Lowest</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div
-                className={`text-2xl font-bold ${getGradeColor(stats.lowest)}`}
-              >
-                {stats.lowest}%
-              </div>
-            </CardContent>
-          </Card>
+                className={`absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full ${colorMap[stat.color].split(" ")[0]} opacity-50 transition-transform group-hover:scale-150`}
+              />
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {stat.title}
+                </CardTitle>
+                <div
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg border ${colorMap[stat.color]}`}
+                >
+                  <stat.icon className="h-4 w-4" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Grade History</CardTitle>
-            <CardDescription>All your graded submissions</CardDescription>
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <Trophy className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <CardTitle>Grade History</CardTitle>
+                <CardDescription>All your graded submissions</CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {grades.length === 0 ? (
-              <p className="text-muted-foreground py-8 text-center">
-                No grades yet
-              </p>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                  <Award className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <p className="mt-4 text-sm font-medium">No grades yet</p>
+                <p className="text-muted-foreground text-sm">
+                  Your graded submissions will appear here
+                </p>
+              </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ALA</TableHead>
-                    <TableHead>Subject</TableHead>
-                    <TableHead className="text-center">Marks</TableHead>
-                    <TableHead className="text-center">Score</TableHead>
-                    <TableHead>Grade</TableHead>
-                    <TableHead>Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {grades.map(
-                    (grade: {
-                      _id: string;
-                      alaId: string;
-                      title: string;
-                      subjectCode: string;
-                      marks: number;
-                      maxMarks: number;
-                      percentage: number;
-                      gradedAt: string;
-                    }) => {
-                      const gradeBadge = getGradeBadge(grade.percentage);
-                      return (
-                        <TableRow key={grade._id}>
-                          <TableCell>
-                            <Link
-                              href={`/student/alas/${grade.alaId}`}
-                              className="font-medium hover:underline"
-                            >
-                              {grade.title}
-                            </Link>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{grade.subjectCode}</Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <span className="font-medium">{grade.marks}</span>
-                            <span className="text-muted-foreground">
-                              /{grade.maxMarks}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Progress
-                                value={grade.percentage}
-                                className="h-2 w-16"
-                              />
-                              <span
-                                className={`text-sm font-medium ${getGradeColor(grade.percentage)}`}
+              <div className="rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead>ALA</TableHead>
+                      <TableHead>Subject</TableHead>
+                      <TableHead className="text-center">Marks</TableHead>
+                      <TableHead className="text-center">Score</TableHead>
+                      <TableHead>Grade</TableHead>
+                      <TableHead>Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {grades.map(
+                      (grade: {
+                        _id: string;
+                        alaId: string;
+                        title: string;
+                        subjectCode: string;
+                        marks: number;
+                        maxMarks: number;
+                        percentage: number;
+                        gradedAt: string;
+                      }) => {
+                        const gradeBadge = getGradeBadge(grade.percentage);
+                        return (
+                          <TableRow key={grade._id} className="group">
+                            <TableCell>
+                              <Link
+                                href={`/student/alas/${grade.alaId}`}
+                                className="font-medium hover:underline"
                               >
-                                {grade.percentage}%
+                                {grade.title}
+                              </Link>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="outline"
+                                className="border-blue-500/30 bg-blue-500/10 text-blue-600"
+                              >
+                                {grade.subjectCode}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <span className="font-medium">{grade.marks}</span>
+                              <span className="text-muted-foreground">
+                                /{grade.maxMarks}
                               </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={gradeBadge.variant}>
-                              {gradeBadge.label}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-muted-foreground text-sm">
-                            {new Date(grade.gradedAt).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                              },
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    },
-                  )}
-                </TableBody>
-              </Table>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Progress
+                                  value={grade.percentage}
+                                  className="h-2 w-16"
+                                />
+                                <span
+                                  className={`text-sm font-medium ${getGradeColor(grade.percentage)}`}
+                                >
+                                  {grade.percentage}%
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="outline"
+                                className={gradeBadge.className}
+                              >
+                                {gradeBadge.label}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground text-sm">
+                              {new Date(grade.gradedAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                }
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>

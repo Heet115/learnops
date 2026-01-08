@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -76,14 +82,18 @@ interface StudentProfileViewProps {
   data: ProfileData;
 }
 
-const statusColors: Record<
-  string,
-  "default" | "secondary" | "destructive" | "outline"
-> = {
-  active: "default",
-  regular: "secondary",
-  detained: "destructive",
-  alumni: "outline",
+const statusColors: Record<string, string> = {
+  active: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
+  regular: "border-blue-500/30 bg-blue-500/10 text-blue-600",
+  detained: "border-rose-500/30 bg-rose-500/10 text-rose-600",
+  alumni: "border-violet-500/30 bg-violet-500/10 text-violet-600",
+};
+
+const statusDotColors: Record<string, string> = {
+  active: "bg-emerald-500",
+  regular: "bg-blue-500",
+  detained: "bg-rose-500",
+  alumni: "bg-violet-500",
 };
 
 const genderLabels: Record<string, string> = {
@@ -120,12 +130,14 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
   return (
     <div className="space-y-6">
       {/* Header Card */}
-      <Card>
+      <Card className="overflow-hidden">
         <CardContent className="pt-6">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-            <Avatar className="h-20 w-20">
+            <Avatar className="h-20 w-20 border-4 border-primary/10">
               <AvatarImage src={user.profileImage} alt={fullName} />
-              <AvatarFallback className="text-xl">{initials}</AvatarFallback>
+              <AvatarFallback className="bg-primary/10 text-primary text-xl">
+                {initials}
+              </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <h2 className="text-2xl font-bold">{fullName}</h2>
@@ -133,15 +145,32 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
               <div className="mt-2 flex flex-wrap gap-2">
                 {profile && (
                   <>
-                    <Badge variant="outline">{profile.studentId}</Badge>
-                    <Badge variant={statusColors[profile.studentStatus]}>
+                    <Badge
+                      variant="outline"
+                      className="border-blue-500/30 bg-blue-500/10 text-blue-600"
+                    >
+                      {profile.studentId}
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className={statusColors[profile.studentStatus]}
+                    >
+                      <span
+                        className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${statusDotColors[profile.studentStatus]}`}
+                      />
                       {profile.studentStatus.charAt(0).toUpperCase() +
                         profile.studentStatus.slice(1)}
                     </Badge>
                   </>
                 )}
                 {!user.isActive && (
-                  <Badge variant="destructive">Inactive</Badge>
+                  <Badge
+                    variant="outline"
+                    className="border-rose-500/30 bg-rose-500/10 text-rose-600"
+                  >
+                    <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-rose-500" />
+                    Inactive
+                  </Badge>
                 )}
               </div>
             </div>
@@ -156,13 +185,15 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
       <div className="grid gap-6 md:grid-cols-2">
         {/* Identity Information */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <User className="h-5 w-5" />
-              Identity Information
-            </CardTitle>
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                <User className="h-4 w-4 text-blue-600" />
+              </div>
+              <CardTitle className="text-lg">Identity Information</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-6">
             <ProfileField label="Student ID" value={profile?.studentId} />
             <ProfileField
               label="Enrollment Number"
@@ -186,13 +217,15 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
 
         {/* Contact Information */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Mail className="h-5 w-5" />
-              Contact Information
-            </CardTitle>
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10">
+                <Mail className="h-4 w-4 text-emerald-600" />
+              </div>
+              <CardTitle className="text-lg">Contact Information</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-6">
             <ProfileField label="Primary Email" value={user.email} />
             <ProfileField
               label="Alternate Email"
@@ -212,13 +245,15 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
 
         {/* Academic Information */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <GraduationCap className="h-5 w-5" />
-              Academic Information
-            </CardTitle>
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+                <GraduationCap className="h-4 w-4 text-violet-600" />
+              </div>
+              <CardTitle className="text-lg">Academic Information</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-6">
             <ProfileField
               label="Department"
               value={
@@ -276,13 +311,15 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
 
         {/* Address */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <MapPin className="h-5 w-5" />
-              Address
-            </CardTitle>
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+                <MapPin className="h-4 w-4 text-amber-600" />
+              </div>
+              <CardTitle className="text-lg">Address</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-6">
             <ProfileField
               label="Address Line 1"
               value={profile?.presentAddressLine1}
@@ -307,13 +344,15 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
 
       {/* Account Info */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Calendar className="h-5 w-5" />
-            Account Information
-          </CardTitle>
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <Calendar className="h-4 w-4 text-primary" />
+            </div>
+            <CardTitle className="text-lg">Account Information</CardTitle>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <ProfileField
               label="Account Created"

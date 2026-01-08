@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   DataTableFilter,
   FilterConfig,
@@ -46,6 +45,10 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  FileText,
+  BookMarked,
+  GraduationCap,
+  Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -211,13 +214,13 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
         ],
       },
     ],
-    [subjectOptions, classOptions],
+    [subjectOptions, classOptions]
   );
 
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
     return Object.entries(filters).some(
-      ([, v]) => v && v !== "" && v !== "all",
+      ([, v]) => v && v !== "" && v !== "all"
     );
   }, [filters]);
 
@@ -257,7 +260,7 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
   // Sorting
   const { sortedData, sortState, toggleSort } = useTableSort(
     filteredSubmissions,
-    tableColumns,
+    tableColumns
   );
 
   // Pagination
@@ -294,33 +297,42 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
         },
       },
     ],
-    [clearSelection],
+    [clearSelection]
   );
 
   const getStatusBadge = (
     status: string,
     marks?: number,
-    maxMarks?: number,
+    maxMarks?: number
   ) => {
     switch (status) {
       case "graded":
         return (
-          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-            <CheckCircle className="mr-1 h-3 w-3" />
+          <Badge
+            variant="outline"
+            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+          >
+            <CheckCircle className="mr-1.5 h-3 w-3" />
             {marks}/{maxMarks}
           </Badge>
         );
       case "submitted":
         return (
-          <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
-            <Clock className="mr-1 h-3 w-3" />
+          <Badge
+            variant="outline"
+            className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+          >
+            <span className="inline-block mr-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
             Pending
           </Badge>
         );
       case "rejected":
         return (
-          <Badge variant="destructive">
-            <XCircle className="mr-1 h-3 w-3" />
+          <Badge
+            variant="outline"
+            className="border-red-500/30 bg-red-500/10 text-red-600"
+          >
+            <XCircle className="mr-1.5 h-3 w-3" />
             Rejected
           </Badge>
         );
@@ -358,221 +370,236 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
 
   if (submissions.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-8">
-          <IllustratedEmpty preset="noSubmissions" size="md" />
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+          <FileText className="h-7 w-7 text-muted-foreground" />
+        </div>
+        <h3 className="mt-4 text-lg font-medium">No submissions yet</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Student submissions will appear here.
+        </p>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="space-y-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <DataTableFilter
-              filters={filterConfigs}
-              values={filters}
-              onChange={setFilters}
-            />
-            <div className="flex items-center gap-2">
-              <FilterPresetsDropdown
-                tableId="professor-submissions"
-                currentFilters={filters}
-                onApplyPreset={setFilters}
-                hasActiveFilters={hasActiveFilters}
-              />
-              <DataExportButton
-                data={sortedData}
-                columns={exportColumns}
-                filename="submissions"
-                formats={["csv", "excel"]}
-              />
-            </div>
-          </div>
-
-          <BulkActionsBar
-            selectedCount={selectedCount}
-            totalCount={paginatedData.length}
-            actions={bulkActions}
-            selectedItems={selectedItems}
-            onClearSelection={clearSelection}
+    <div className="space-y-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <DataTableFilter
+          filters={filterConfigs}
+          values={filters}
+          onChange={setFilters}
+        />
+        <div className="flex items-center gap-2">
+          <FilterPresetsDropdown
+            tableId="professor-submissions"
+            currentFilters={filters}
+            onApplyPreset={setFilters}
+            hasActiveFilters={hasActiveFilters}
           />
-
-          {sortedData.length === 0 ? (
-            <IllustratedEmpty
-              preset="noResults"
-              size="sm"
-              action={{
-                label: "Clear filters",
-                onClick: () =>
-                  setFilters({
-                    search: "",
-                    subject: "",
-                    class: "",
-                    status: "",
-                  }),
-                variant: "outline",
-              }}
-            />
-          ) : (
-            <>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[50px]">
-                        <SelectAllCheckbox
-                          checked={
-                            isAllSelected
-                              ? true
-                              : isIndeterminate
-                                ? "indeterminate"
-                                : false
-                          }
-                          onCheckedChange={toggleAll}
-                        />
-                      </TableHead>
-                      <TableHead>
-                        {renderSortableHeader("student", "Student")}
-                      </TableHead>
-                      <TableHead>
-                        {renderSortableHeader("ala", "ALA")}
-                      </TableHead>
-                      <TableHead>
-                        {renderSortableHeader("subject", "Subject")}
-                      </TableHead>
-                      <TableHead>
-                        {renderSortableHeader("class", "Class")}
-                      </TableHead>
-                      <TableHead>
-                        {renderSortableHeader("submittedAt", "Submitted")}
-                      </TableHead>
-                      <TableHead>
-                        {renderSortableHeader("status", "Status")}
-                      </TableHead>
-                      <TableHead className="w-[80px]"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedData.map((sub) => {
-                      const isGroup =
-                        sub.alaId?.isGroupSubmission &&
-                        sub.groupMembers &&
-                        sub.groupMembers.length > 0;
-                      const allMembers = isGroup
-                        ? [sub.studentId, ...(sub.groupMembers || [])]
-                        : [sub.studentId];
-
-                      return (
-                        <TableRow
-                          key={sub._id}
-                          data-state={
-                            isSelected(sub._id) ? "selected" : undefined
-                          }
-                          className="transition-colors"
-                        >
-                          <TableCell>
-                            <SelectRowCheckbox
-                              checked={isSelected(sub._id)}
-                              onCheckedChange={(checked) =>
-                                toggleRow(sub._id, checked)
-                              }
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <UserAvatar
-                                name={`${sub.studentId?.firstName} ${sub.studentId?.lastName}`}
-                                size="sm"
-                              />
-                              <div>
-                                {isGroup ? (
-                                  <>
-                                    <div className="mb-0.5 flex items-center gap-1">
-                                      <Users className="text-muted-foreground h-3 w-3" />
-                                      <span className="text-muted-foreground text-xs">
-                                        Group ({allMembers.length})
-                                      </span>
-                                    </div>
-                                    <p className="text-sm font-medium">
-                                      {sub.studentId?.firstName}{" "}
-                                      {sub.studentId?.lastName}
-                                    </p>
-                                  </>
-                                ) : (
-                                  <>
-                                    <p className="font-medium">
-                                      {sub.studentId?.firstName}{" "}
-                                      {sub.studentId?.lastName}
-                                    </p>
-                                    <p className="text-muted-foreground text-xs">
-                                      {sub.studentId?.email}
-                                    </p>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="max-w-[150px] truncate">
-                            {sub.alaId?.title || "Unknown"}
-                          </TableCell>
-                          <TableCell>
-                            {sub.alaId?.subjectOfferingId?.subjectId?.code ||
-                              "-"}
-                          </TableCell>
-                          <TableCell>
-                            {sub.alaId?.subjectOfferingId?.classId?.name || "-"}
-                          </TableCell>
-                          <TableCell className="tabular-nums">
-                            {sub.submittedAt
-                              ? new Date(sub.submittedAt).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    month: "short",
-                                    day: "numeric",
-                                    hour: "numeric",
-                                    minute: "2-digit",
-                                  },
-                                )
-                              : "-"}
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(
-                              sub.status,
-                              sub.marks,
-                              sub.alaId?.maxMarks,
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="icon" asChild>
-                              <Link href={`/professor/submissions/${sub._id}`}>
-                                <Eye className="h-4 w-4" />
-                              </Link>
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-
-              <PaginationControls
-                pageIndex={pagination.pageIndex}
-                pageSize={pagination.pageSize}
-                pageCount={pageCount}
-                totalItems={sortedData.length}
-                canPreviousPage={canPreviousPage}
-                canNextPage={canNextPage}
-                onPageChange={goToPage}
-                onPageSizeChange={setPageSize}
-              />
-            </>
-          )}
+          <DataExportButton
+            data={sortedData}
+            columns={exportColumns}
+            filename="submissions"
+            formats={["csv", "excel"]}
+          />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      <BulkActionsBar
+        selectedCount={selectedCount}
+        totalCount={paginatedData.length}
+        actions={bulkActions}
+        selectedItems={selectedItems}
+        onClearSelection={clearSelection}
+      />
+
+      {sortedData.length === 0 ? (
+        <IllustratedEmpty
+          preset="noResults"
+          size="sm"
+          action={{
+            label: "Clear filters",
+            onClick: () =>
+              setFilters({
+                search: "",
+                subject: "",
+                class: "",
+                status: "",
+              }),
+            variant: "outline",
+          }}
+        />
+      ) : (
+        <>
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="w-[50px]">
+                  <SelectAllCheckbox
+                    checked={
+                      isAllSelected
+                        ? true
+                        : isIndeterminate
+                          ? "indeterminate"
+                          : false
+                    }
+                    onCheckedChange={toggleAll}
+                  />
+                </TableHead>
+                <TableHead>
+                  {renderSortableHeader("student", "Student")}
+                </TableHead>
+                <TableHead>{renderSortableHeader("ala", "ALA")}</TableHead>
+                <TableHead>
+                  {renderSortableHeader("subject", "Subject")}
+                </TableHead>
+                <TableHead>{renderSortableHeader("class", "Class")}</TableHead>
+                <TableHead>
+                  {renderSortableHeader("submittedAt", "Submitted")}
+                </TableHead>
+                <TableHead>
+                  {renderSortableHeader("status", "Status")}
+                </TableHead>
+                <TableHead className="w-[80px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedData.map((sub) => {
+                const isGroup =
+                  sub.alaId?.isGroupSubmission &&
+                  sub.groupMembers &&
+                  sub.groupMembers.length > 0;
+                const allMembers = isGroup
+                  ? [sub.studentId, ...(sub.groupMembers || [])]
+                  : [sub.studentId];
+
+                return (
+                  <TableRow
+                    key={sub._id}
+                    className="group"
+                    data-state={isSelected(sub._id) ? "selected" : undefined}
+                  >
+                    <TableCell>
+                      <SelectRowCheckbox
+                        checked={isSelected(sub._id)}
+                        onCheckedChange={(checked) =>
+                          toggleRow(sub._id, checked)
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <UserAvatar
+                          name={`${sub.studentId?.firstName} ${sub.studentId?.lastName}`}
+                          size="sm"
+                        />
+                        <div>
+                          {isGroup ? (
+                            <>
+                              <div className="mb-0.5 flex items-center gap-1">
+                                <Users className="text-blue-600 h-3 w-3" />
+                                <span className="text-blue-600 text-xs font-medium">
+                                  Group ({allMembers.length})
+                                </span>
+                              </div>
+                              <p className="text-sm font-medium">
+                                {sub.studentId?.firstName}{" "}
+                                {sub.studentId?.lastName}
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="font-medium">
+                                {sub.studentId?.firstName}{" "}
+                                {sub.studentId?.lastName}
+                              </p>
+                              <p className="text-muted-foreground text-xs">
+                                {sub.studentId?.email}
+                              </p>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10">
+                          <FileText className="h-3.5 w-3.5 text-blue-600" />
+                        </div>
+                        <span className="max-w-[140px] truncate text-sm">
+                          {sub.alaId?.title || "Unknown"}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className="border-violet-500/30 bg-violet-500/10 text-violet-600"
+                      >
+                        <BookMarked className="mr-1.5 h-3 w-3" />
+                        {sub.alaId?.subjectOfferingId?.subjectId?.code || "-"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-sm">
+                        <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                        {sub.alaId?.subjectOfferingId?.classId?.name || "-"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground tabular-nums">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {sub.submittedAt
+                          ? new Date(sub.submittedAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                hour: "numeric",
+                                minute: "2-digit",
+                              }
+                            )
+                          : "-"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {getStatusBadge(
+                        sub.status,
+                        sub.marks,
+                        sub.alaId?.maxMarks
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100"
+                        asChild
+                      >
+                        <Link href={`/professor/submissions/${sub._id}`}>
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+
+          <PaginationControls
+            pageIndex={pagination.pageIndex}
+            pageSize={pagination.pageSize}
+            pageCount={pageCount}
+            totalItems={sortedData.length}
+            canPreviousPage={canPreviousPage}
+            canNextPage={canNextPage}
+            onPageChange={goToPage}
+            onPageSizeChange={setPageSize}
+          />
+        </>
+      )}
+    </div>
   );
 }
