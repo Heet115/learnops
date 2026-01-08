@@ -15,6 +15,7 @@ import {
 import { AppSidebar, UserRole } from "./app-sidebar";
 import { ModeToggle } from "../mode-toggle";
 import { NotificationBell } from "./notification-bell";
+import { ColorThemeSwitcher } from "../color-theme-switcher";
 
 interface BreadcrumbItemType {
   label: string;
@@ -79,6 +80,7 @@ export function DashboardLayout({
               orientation="vertical"
               className="mr-2 data-[orientation=vertical]:h-4"
             />
+            <ColorThemeSwitcher />
             <ModeToggle />
           </div>
         </header>

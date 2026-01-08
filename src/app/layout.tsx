@@ -3,6 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ColorThemeProvider } from "@/components/color-theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
@@ -33,13 +34,15 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {children}
-            <Toaster
-              richColors
-              closeButton
-              duration={2000}
-              position="top-right"
-            />
+            <ColorThemeProvider defaultTheme="sky">
+              {children}
+              <Toaster
+                richColors
+                closeButton
+                duration={2000}
+                position="top-right"
+              />
+            </ColorThemeProvider>
           </ThemeProvider>
         </body>
       </html>

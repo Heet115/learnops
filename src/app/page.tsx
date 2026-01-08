@@ -13,6 +13,8 @@ import {
   CheckCircle,
   ArrowRight,
 } from "lucide-react";
+import { ColorThemeSwitcher } from "@/components/color-theme-switcher";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export default async function HomePage() {
   const { userId } = await auth();
@@ -93,6 +95,8 @@ export default async function HomePage() {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
+          <ColorThemeSwitcher />
+          <ModeToggle />
         </div>
       </header>
 
