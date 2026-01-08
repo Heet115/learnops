@@ -13,7 +13,6 @@ import {
   CheckCircle,
   ArrowRight,
 } from "lucide-react";
-import { ColorThemeSwitcher } from "@/components/Theme/color-theme-switcher";
 import { ModeToggle } from "@/components/Theme/mode-toggle";
 
 export default async function HomePage() {
@@ -89,14 +88,15 @@ export default async function HomePage() {
             </div>
             <span className="text-xl font-bold">LearnOps</span>
           </div>
-          <Button asChild>
-            <Link href="/sign-in">
-              Sign In
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-          <ColorThemeSwitcher />
-          <ModeToggle />
+          <div className="flex justify-center items-center gap-4">
+            <Button asChild>
+              <Link href="/sign-in">
+                Sign In
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <ModeToggle />
+          </div>
         </div>
       </header>
 
