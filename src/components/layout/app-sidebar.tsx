@@ -56,7 +56,6 @@ const getNavItems = (role: UserRole) => {
         title: "Dashboard",
         url: "/admin",
         icon: LayoutDashboard,
-        isActive: true,
       },
       {
         title: "Users",
@@ -124,7 +123,6 @@ const getNavItems = (role: UserRole) => {
         title: "Dashboard",
         url: "/hod",
         icon: LayoutDashboard,
-        isActive: true,
       },
       {
         title: "Department",
@@ -157,7 +155,6 @@ const getNavItems = (role: UserRole) => {
         title: "Dashboard",
         url: "/professor",
         icon: LayoutDashboard,
-        isActive: true,
       },
       {
         title: "My Subjects",
@@ -185,7 +182,6 @@ const getNavItems = (role: UserRole) => {
         title: "Dashboard",
         url: "/student",
         icon: LayoutDashboard,
-        isActive: true,
       },
       {
         title: "My Profile",
