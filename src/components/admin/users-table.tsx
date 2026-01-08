@@ -75,6 +75,7 @@ import {
 import { IUser, ICourse } from "@/lib/db";
 import { toast } from "sonner";
 import { StudentProfileDialog } from "./student-profile-dialog";
+import { EditUserDialog } from "./edit-user-dialog";
 
 interface UsersTableProps {
   users: IUser[];
@@ -182,6 +183,7 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
   const [profileDialogUser, setProfileDialogUser] = useState<IUser | null>(
     null,
   );
+  const [editDialogUser, setEditDialogUser] = useState<IUser | null>(null);
 
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
@@ -541,6 +543,19 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                                 <DropdownMenuSeparator />
                               </>
                             )}
+                            {user.role === "professor" && (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    setEditDialogUser(user as unknown as IUser)
+                                  }
+                                >
+                                  <UserCog className="mr-2 h-4 w-4" />
+                                  Edit User
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                              </>
+                            )}
                             {user.isActive ? (
                               <DropdownMenuItem
                                 onClick={() => {
@@ -643,6 +658,14 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
             name: c.name,
             code: c.code,
           }))}
+        />
+      )}
+
+      {editDialogUser && (
+        <EditUserDialog
+          open={!!editDialogUser}
+          onOpenChange={(open) => !open && setEditDialogUser(null)}
+          user={editDialogUser}
         />
       )}
     </>

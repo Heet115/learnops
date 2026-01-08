@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +14,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { createUser } from "@/lib/actions/admin.actions";
+import { getAllDepartments } from "@/lib/actions/academic.actions";
 import {
   Loader2,
   Plus,
@@ -29,6 +37,7 @@ import {
   BookOpen,
   GraduationCap,
   AlertCircle,
+  Building2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -63,11 +72,18 @@ const roleOptions = [
   },
 ];
 
+interface Department {
+  _id: string;
+  name: string;
+  code: string;
+}
+
 export function CreateUserDialog() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [departments, setDepartments] = useState<Department[]>([]);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -75,7 +91,19 @@ export function CreateUserDialog() {
     lastName: "",
     password: "",
     role: "" as "admin" | "hod" | "professor" | "student" | "",
+    departmentId: "",
   });
+
+  // Fetch departments when dialog opens
+  useEffect(() => {
+    if (open) {
+      getAllDepartments().then((data) => {
+        setDepartments(data || []);
+      });
+    }
+  }, [open]);
+
+  const needsDepartment = formData.role === "professor";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,9 +116,16 @@ export function CreateUserDialog() {
       return;
     }
 
+    if (needsDepartment && !formData.departmentId) {
+      setError("Please select a department");
+      setIsLoading(false);
+      return;
+    }
+
     const result = await createUser({
       ...formData,
       role: formData.role as "admin" | "hod" | "professor" | "student",
+      departmentId: needsDepartment ? formData.departmentId : undefined,
     });
 
     if (result.success) {
@@ -102,6 +137,7 @@ export function CreateUserDialog() {
         lastName: "",
         password: "",
         role: "",
+        departmentId: "",
       });
       router.refresh();
     } else {
@@ -234,6 +270,7 @@ export function CreateUserDialog() {
                         setFormData({
                           ...formData,
                           role: role.value as typeof formData.role,
+                          departmentId: "", // Reset department when role changes
                         })
                       }
                       disabled={isLoading}
@@ -261,6 +298,37 @@ export function CreateUserDialog() {
                 })}
               </div>
             </div>
+
+            {/* Department Selection - shown for HOD and Professor */}
+            {needsDepartment && (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-sm font-medium">
+                  <Building2 className="text-muted-foreground h-4 w-4" />
+                  Department
+                </Label>
+                <Select
+                  value={formData.departmentId}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, departmentId: value })
+                  }
+                  disabled={isLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept._id} value={dept._id}>
+                        {dept.name} ({dept.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-muted-foreground text-xs">
+                  The department this professor belongs to
+                </p>
+              </div>
+            )}
           </div>
 
           <Separator />
