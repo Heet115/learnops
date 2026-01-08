@@ -171,11 +171,11 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
   if (requests.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-          <FileEdit className="h-7 w-7 text-muted-foreground" />
+        <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+          <FileEdit className="text-muted-foreground h-7 w-7" />
         </div>
         <h3 className="mt-4 text-lg font-medium">No requests found</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           Profile update requests will appear here.
         </p>
       </div>
@@ -214,10 +214,10 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
 
         {filteredRequests.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <FileEdit className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <FileEdit className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               No requests match your filter.
             </p>
           </div>
@@ -253,7 +253,7 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
                               {request.requestedBy.firstName}{" "}
                               {request.requestedBy.lastName}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               {request.requestedBy.email}
                             </p>
                           </div>
@@ -273,7 +273,7 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
                           <Calendar className="h-3.5 w-3.5" />
                           {formatDate(request.requestedAt)}
                         </div>
@@ -281,10 +281,12 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className={statusConfig[request.requestStatus].className}
+                          className={
+                            statusConfig[request.requestStatus].className
+                          }
                         >
                           <span
-                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${statusConfig[request.requestStatus].dotColor}`}
+                            className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${statusConfig[request.requestStatus].dotColor}`}
                           />
                           {statusConfig[request.requestStatus].label}
                         </Badge>
@@ -294,7 +296,7 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
                           variant="ghost"
                           size="sm"
                           onClick={() => setSelectedRequest(request)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="opacity-0 transition-opacity group-hover:opacity-100"
                         >
                           <Eye className="mr-1 h-4 w-4" />
                           View
@@ -330,8 +332,8 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <FileEdit className="h-5 w-5 text-primary" />
+              <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+                <FileEdit className="text-primary h-5 w-5" />
               </div>
               <div>
                 <DialogTitle>Review Profile Update Request</DialogTitle>
@@ -350,7 +352,7 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
               {/* Requested Changes */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
-                  <FileEdit className="h-3.5 w-3.5 text-muted-foreground" />
+                  <FileEdit className="text-muted-foreground h-3.5 w-3.5" />
                   Requested Changes
                 </Label>
                 <div className="divide-y rounded-lg border">
@@ -358,11 +360,11 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
                     <div key={idx} className="space-y-1 p-3">
                       <p className="text-sm font-medium">{change.fieldLabel}</p>
                       <div className="flex items-center gap-2 text-sm">
-                        <span className="text-muted-foreground rounded bg-muted px-2 py-0.5">
+                        <span className="text-muted-foreground bg-muted rounded px-2 py-0.5">
                           {change.currentValue || "(empty)"}
                         </span>
-                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="font-medium text-emerald-600 rounded bg-emerald-500/10 px-2 py-0.5">
+                        <ArrowRight className="text-muted-foreground h-3.5 w-3.5" />
+                        <span className="rounded bg-emerald-500/10 px-2 py-0.5 font-medium text-emerald-600">
                           {change.requestedValue}
                         </span>
                       </div>
@@ -373,37 +375,43 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
 
               {/* Status Info for reviewed requests */}
               {selectedRequest.requestStatus !== "pending" && (
-                <div className="space-y-2 rounded-lg border bg-muted/50 p-3 text-sm">
+                <div className="bg-muted/50 space-y-2 rounded-lg border p-3 text-sm">
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground">Status:</span>
                     <Badge
                       variant="outline"
-                      className={statusConfig[selectedRequest.requestStatus].className}
+                      className={
+                        statusConfig[selectedRequest.requestStatus].className
+                      }
                     >
                       <span
-                        className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${statusConfig[selectedRequest.requestStatus].dotColor}`}
+                        className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${statusConfig[selectedRequest.requestStatus].dotColor}`}
                       />
                       {statusConfig[selectedRequest.requestStatus].label}
                     </Badge>
                   </div>
                   {selectedRequest.reviewedBy && (
                     <div className="flex items-center gap-2">
-                      <User className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Reviewed by:</span>
+                      <User className="text-muted-foreground h-3.5 w-3.5" />
+                      <span className="text-muted-foreground">
+                        Reviewed by:
+                      </span>
                       {selectedRequest.reviewedBy.firstName}{" "}
                       {selectedRequest.reviewedBy.lastName}
                     </div>
                   )}
                   {selectedRequest.reviewedAt && (
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Reviewed on:</span>
+                      <Calendar className="text-muted-foreground h-3.5 w-3.5" />
+                      <span className="text-muted-foreground">
+                        Reviewed on:
+                      </span>
                       {formatDate(selectedRequest.reviewedAt)}
                     </div>
                   )}
                   {selectedRequest.reviewComment && (
                     <div className="flex items-start gap-2">
-                      <MessageSquare className="h-3.5 w-3.5 text-muted-foreground mt-0.5" />
+                      <MessageSquare className="text-muted-foreground mt-0.5 h-3.5 w-3.5" />
                       <span className="text-muted-foreground">Comment:</span>
                       <span>{selectedRequest.reviewComment}</span>
                     </div>
@@ -414,11 +422,8 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
               {/* Review Form for pending requests */}
               {selectedRequest.requestStatus === "pending" && (
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="comment"
-                    className="flex items-center gap-2"
-                  >
-                    <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                  <Label htmlFor="comment" className="flex items-center gap-2">
+                    <MessageSquare className="text-muted-foreground h-3.5 w-3.5" />
                     Comment (optional)
                   </Label>
                   <Textarea

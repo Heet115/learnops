@@ -98,8 +98,8 @@ export function AssignStudentDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <UserPlus className="h-5 w-5 text-primary" />
+              <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+                <UserPlus className="text-primary h-5 w-5" />
               </div>
               <div>
                 <DialogTitle>Assign Student to Class</DialogTitle>
@@ -113,7 +113,7 @@ export function AssignStudentDialog({
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="studentId" className="flex items-center gap-2">
-                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                <User className="text-muted-foreground h-3.5 w-3.5" />
                 Student
               </Label>
               <Select name="studentId" required>
@@ -146,7 +146,7 @@ export function AssignStudentDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="classId" className="flex items-center gap-2">
-                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
                 Class
               </Label>
               <Select name="classId" required>
@@ -157,7 +157,7 @@ export function AssignStudentDialog({
                   {classes.map((classItem) => (
                     <SelectItem key={classItem._id} value={classItem._id}>
                       <div className="flex items-center gap-2">
-                        <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        <Building2 className="text-muted-foreground h-3.5 w-3.5" />
                         {classItem.semesterId?.courseId?.departmentId?.code} -{" "}
                         {classItem.semesterId?.courseId?.code} -{" "}
                         {classItem.semesterId?.name} - {classItem.name}

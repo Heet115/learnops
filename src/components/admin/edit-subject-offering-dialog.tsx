@@ -97,8 +97,8 @@ export function EditSubjectOfferingDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <Pencil className="h-5 w-5 text-primary" />
+              <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+                <Pencil className="text-primary h-5 w-5" />
               </div>
               <div>
                 <DialogTitle>Edit Subject Offering</DialogTitle>
@@ -113,10 +113,10 @@ export function EditSubjectOfferingDialog({
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label className="flex items-center gap-2">
-                <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                <BookOpen className="text-muted-foreground h-3.5 w-3.5" />
                 Subject
               </Label>
-              <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
+              <div className="bg-muted/50 flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                 <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/10">
                   <BookOpen className="h-3.5 w-3.5 text-blue-600" />
                 </div>
@@ -130,10 +130,10 @@ export function EditSubjectOfferingDialog({
 
             <div className="grid gap-2">
               <Label className="flex items-center gap-2">
-                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
                 Class
               </Label>
-              <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
+              <div className="bg-muted/50 flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                 <div className="flex h-6 w-6 items-center justify-center rounded bg-emerald-500/10">
                   <GraduationCap className="h-3.5 w-3.5 text-emerald-600" />
                 </div>
@@ -143,7 +143,7 @@ export function EditSubjectOfferingDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="professorId" className="flex items-center gap-2">
-                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                <User className="text-muted-foreground h-3.5 w-3.5" />
                 Professor
               </Label>
               <Select
@@ -173,7 +173,7 @@ export function EditSubjectOfferingDialog({
 
             <div className="flex items-center justify-between rounded-lg border p-3">
               <div className="flex items-center gap-2">
-                <Power className="h-4 w-4 text-muted-foreground" />
+                <Power className="text-muted-foreground h-4 w-4" />
                 <Label htmlFor="isActive" className="cursor-pointer">
                   Active Status
                 </Label>

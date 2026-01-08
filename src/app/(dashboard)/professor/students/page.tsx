@@ -141,19 +141,21 @@ export default async function ProfessorStudentsPage() {
   // Calculate stats
   const totalSubmissions = students.reduce(
     (acc: number, s: { submitted: number }) => acc + s.submitted,
-    0
+    0,
   );
   const totalGraded = students.reduce(
     (acc: number, s: { graded: number }) => acc + s.graded,
-    0
+    0,
   );
   const avgScore =
     students.length > 0
       ? Math.round(
           students.reduce(
-            (acc: number, s: { avgPercentage: number }) => acc + s.avgPercentage,
-            0
-          ) / students.filter((s: { graded: number }) => s.graded > 0).length || 0
+            (acc: number, s: { avgPercentage: number }) =>
+              acc + s.avgPercentage,
+            0,
+          ) / students.filter((s: { graded: number }) => s.graded > 0).length ||
+            0,
         )
       : 0;
 
@@ -232,8 +234,8 @@ export default async function ProfessorStudentsPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <GraduationCap className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <GraduationCap className="text-primary h-4 w-4" />
               </div>
               <div>
                 <CardTitle>All Students</CardTitle>
@@ -246,8 +248,8 @@ export default async function ProfessorStudentsPage() {
           <CardContent className="pt-6">
             {students.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                  <Users className="h-6 w-6 text-muted-foreground" />
+                <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                  <Users className="text-muted-foreground h-6 w-6" />
                 </div>
                 <p className="mt-4 text-sm font-medium">No students yet</p>
                 <p className="text-muted-foreground text-sm">
@@ -331,7 +333,7 @@ export default async function ProfessorStudentsPage() {
                             )}
                           </TableCell>
                         </TableRow>
-                      )
+                      ),
                     )}
                   </TableBody>
                 </Table>

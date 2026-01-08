@@ -1,12 +1,13 @@
 LearnOps - Complete Features & Functionality
+
 1. Authentication & Authorization
-Clerk-based authentication (admin-only user creation)
-Role-based access control (RBAC): Admin, HOD, Professor, Student
-Session management with role metadata
-Middleware-protected routes
-Webhook sync for Clerk user events
+   Clerk-based authentication (admin-only user creation)
+   Role-based access control (RBAC): Admin, HOD, Professor, Student
+   Session management with role metadata
+   Middleware-protected routes
+   Webhook sync for Clerk user events
 2. Admin Features
-User Management
+   User Management
 
 Create users (all roles) via Clerk + MongoDB sync
 Update user details and roles
@@ -34,8 +35,7 @@ Profile update request review (approve/reject)
 Audit Trail
 
 Activity logging for all actions
-View audit logs with filtering
-3. HOD Features
+View audit logs with filtering 3. HOD Features
 Department Oversight
 
 View department structure
@@ -48,8 +48,7 @@ Professor activity/grading stats
 Submissions by class
 Subject completion rates
 Submission heatmap (day/hour)
-ALA status overview
-4. Professor Features
+ALA status overview 4. Professor Features
 ALA (Active Learning Activity) Management
 
 Create ALAs with:
@@ -78,8 +77,7 @@ Update/delete groups
 View group compositions
 Student View
 
-View students in assigned classes
-5. Student Features
+View students in assigned classes 5. Student Features
 Dashboard
 
 View assigned ALAs with deadlines
@@ -110,8 +108,7 @@ View all grades
 Grade history
 Timeline/Activity
 
-Activity timeline view
-6. Notification System
+Activity timeline view 6. Notification System
 Real-time notifications via SSE (Server-Sent Events)
 Notification types:
 New ALA posted
@@ -122,19 +119,16 @@ System notifications
 Mark as read (single/all)
 Delete notifications
 Notification preferences per type
-Cron job for deadline reminders
-7. File Management
+Cron job for deadline reminders 7. File Management
 Cloudinary integration for file storage
 File upload with type validation
 File size limits (30MB max)
 Automatic cleanup on deletion
-Support for: PDF, DOCX, PPT, ZIP
-8. Activity Logging
+Support for: PDF, DOCX, PPT, ZIP 8. Activity Logging
 Comprehensive audit trail
 Tracks: user actions, entity changes
 Activity feed components
-Dashboard activity view
-9. UI/UX Features
+Dashboard activity view 9. UI/UX Features
 Dark/light mode toggle
 Responsive sidebar navigation
 Role-based navigation menus
@@ -148,14 +142,12 @@ Bulk selection
 Export functionality
 Empty states with illustrations
 Confirmation dialogs
-Form validation with Zod
-10. API Routes
+Form validation with Zod 10. API Routes
 File upload endpoint
 File deletion endpoint
 Notification SSE stream
 Clerk webhook handler
-Cron endpoint for deadline reminders
-11. Data Models (16 collections)
+Cron endpoint for deadline reminders 11. Data Models (16 collections)
 User, Department, Course, Semester
 Subject, Class, SubjectOffering
 ALA, Submission, Group

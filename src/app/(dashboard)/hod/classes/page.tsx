@@ -79,7 +79,7 @@ async function getHodClasses() {
         SubjectOffering.countDocuments({ classId: cls._id, isActive: true }),
       ]);
       return { ...cls, studentCount, subjectCount };
-    })
+    }),
   );
 
   return JSON.parse(JSON.stringify(classStats));
@@ -107,14 +107,14 @@ export default async function HodClassesPage() {
   // Calculate stats
   const totalStudents = classes.reduce(
     (acc: number, c: { studentCount: number }) => acc + c.studentCount,
-    0
+    0,
   );
   const totalSubjects = classes.reduce(
     (acc: number, c: { subjectCount: number }) => acc + c.subjectCount,
-    0
+    0,
   );
   const uniqueAcademicYears = new Set(
-    classes.map((c: { academicYear: string }) => c.academicYear)
+    classes.map((c: { academicYear: string }) => c.academicYear),
   ).size;
 
   const statCards = [
@@ -204,8 +204,8 @@ export default async function HodClassesPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <GraduationCap className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <GraduationCap className="text-primary h-4 w-4" />
               </div>
               <div>
                 <CardTitle>All Classes</CardTitle>
@@ -218,11 +218,11 @@ export default async function HodClassesPage() {
           <CardContent className="pt-4">
             {classes.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-                  <GraduationCap className="h-7 w-7 text-muted-foreground" />
+                <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+                  <GraduationCap className="text-muted-foreground h-7 w-7" />
                 </div>
                 <h3 className="mt-4 text-lg font-medium">No classes found</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-sm">
                   No classes are available in your department yet.
                 </p>
               </div>
@@ -259,10 +259,10 @@ export default async function HodClassesPage() {
                               <GraduationCap className="h-4 w-4 text-blue-600" />
                             </div>
                             <div className="space-y-0.5">
-                              <p className="font-medium leading-none">
+                              <p className="leading-none font-medium">
                                 {cls.name}
                               </p>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-muted-foreground text-xs">
                                 Section
                               </p>
                             </div>
@@ -310,7 +310,7 @@ export default async function HodClassesPage() {
                           </Badge>
                         </TableCell>
                       </TableRow>
-                    )
+                    ),
                   )}
                 </TableBody>
               </Table>

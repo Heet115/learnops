@@ -94,8 +94,8 @@ export function ChangeClassDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <Pencil className="h-5 w-5 text-primary" />
+              <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+                <Pencil className="text-primary h-5 w-5" />
               </div>
               <div>
                 <DialogTitle>
@@ -113,10 +113,10 @@ export function ChangeClassDialog({
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label className="flex items-center gap-2">
-                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                <User className="text-muted-foreground h-3.5 w-3.5" />
                 Student
               </Label>
-              <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
+              <div className="bg-muted/50 flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500/10">
                   <User className="h-3.5 w-3.5 text-blue-600" />
                 </div>
@@ -130,10 +130,10 @@ export function ChangeClassDialog({
             {student.classId && (
               <div className="grid gap-2">
                 <Label className="flex items-center gap-2">
-                  <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                  <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
                   Current Class
                 </Label>
-                <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
+                <div className="bg-muted/50 flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                   <div className="flex h-6 w-6 items-center justify-center rounded bg-emerald-500/10">
                     <GraduationCap className="h-3.5 w-3.5 text-emerald-600" />
                   </div>
@@ -144,7 +144,7 @@ export function ChangeClassDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="classId" className="flex items-center gap-2">
-                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
                 New Class
               </Label>
               <Select
@@ -159,7 +159,7 @@ export function ChangeClassDialog({
                   {classes.map((classItem) => (
                     <SelectItem key={classItem._id} value={classItem._id}>
                       <div className="flex items-center gap-2">
-                        <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        <Building2 className="text-muted-foreground h-3.5 w-3.5" />
                         {classItem.semesterId?.courseId?.departmentId?.code} -{" "}
                         {classItem.semesterId?.courseId?.code} -{" "}
                         {classItem.semesterId?.name} - {classItem.name}

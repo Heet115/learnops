@@ -132,31 +132,34 @@ export function GradingForm({
               <Award className="h-8 w-8 text-emerald-600" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Score</p>
+              <p className="text-muted-foreground text-sm">Score</p>
               <p className="text-3xl font-bold text-emerald-600">
-                {currentMarks} <span className="text-lg text-muted-foreground">/ {maxMarks}</span>
+                {currentMarks}{" "}
+                <span className="text-muted-foreground text-lg">
+                  / {maxMarks}
+                </span>
               </p>
             </div>
           </div>
           {currentFeedback && (
-            <div className="rounded-lg border bg-muted/30 p-3">
-              <div className="flex items-center gap-2 mb-2">
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <div className="bg-muted/30 rounded-lg border p-3">
+              <div className="mb-2 flex items-center gap-2">
+                <MessageSquare className="text-muted-foreground h-4 w-4" />
                 <p className="text-sm font-medium">Feedback</p>
               </div>
-              <p className="text-sm text-muted-foreground">{currentFeedback}</p>
+              <p className="text-muted-foreground text-sm">{currentFeedback}</p>
             </div>
           )}
 
           <Separator />
 
           <div>
-            <p className="text-sm text-muted-foreground mb-3">Update grade:</p>
+            <p className="text-muted-foreground mb-3 text-sm">Update grade:</p>
             <form onSubmit={handleGrade} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="marks" className="flex items-center gap-2">
-                    <Award className="h-4 w-4 text-muted-foreground" />
+                    <Award className="text-muted-foreground h-4 w-4" />
                     Marks
                   </Label>
                   <Input
@@ -177,7 +180,7 @@ export function GradingForm({
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="feedback" className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                  <MessageSquare className="text-muted-foreground h-4 w-4" />
                   Feedback (optional)
                 </Label>
                 <Textarea
@@ -222,11 +225,11 @@ export function GradingForm({
         </CardHeader>
         <CardContent className="pt-4">
           <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="mb-2 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-red-600" />
               <p className="text-sm font-medium text-red-600">Reason</p>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {currentRejectionReason}
             </p>
           </div>
@@ -243,12 +246,14 @@ export function GradingForm({
     <Card>
       <CardHeader className="border-b">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-            <Award className="h-4 w-4 text-primary" />
+          <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+            <Award className="text-primary h-4 w-4" />
           </div>
           <div>
             <CardTitle>Grade Submission</CardTitle>
-            <CardDescription>Review the work and provide a grade</CardDescription>
+            <CardDescription>
+              Review the work and provide a grade
+            </CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -257,7 +262,7 @@ export function GradingForm({
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="marks" className="flex items-center gap-2">
-                <Award className="h-4 w-4 text-muted-foreground" />
+                <Award className="text-muted-foreground h-4 w-4" />
                 Marks
               </Label>
               <Input
@@ -279,7 +284,7 @@ export function GradingForm({
 
           <div className="grid gap-2">
             <Label htmlFor="feedback" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              <MessageSquare className="text-muted-foreground h-4 w-4" />
               Feedback (optional)
             </Label>
             <Textarea
@@ -322,7 +327,8 @@ export function GradingForm({
                       <div>
                         <DialogTitle>Reject Submission</DialogTitle>
                         <DialogDescription>
-                          The student will be notified and can resubmit their work.
+                          The student will be notified and can resubmit their
+                          work.
                         </DialogDescription>
                       </div>
                     </div>
@@ -330,7 +336,7 @@ export function GradingForm({
                   <Separator className="my-4" />
                   <div className="grid gap-2">
                     <Label htmlFor="reason" className="flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                      <AlertTriangle className="text-muted-foreground h-4 w-4" />
                       Reason for rejection
                     </Label>
                     <Textarea

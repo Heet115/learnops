@@ -163,7 +163,7 @@ export default async function StudentDashboard() {
                   className={`absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full ${colorMap[stat.color].split(" ")[0]} opacity-50 transition-transform group-hover:scale-150`}
                 />
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                  <CardTitle className="text-muted-foreground text-sm font-medium">
                     {stat.title}
                   </CardTitle>
                   <div
@@ -195,7 +195,7 @@ export default async function StudentDashboard() {
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {stat.description}
                   </p>
                 </CardContent>
@@ -257,7 +257,7 @@ export default async function StudentDashboard() {
                           <Link
                             key={ala._id}
                             href={`/student/alas/${ala._id}`}
-                            className="group/item flex items-center justify-between rounded-lg border bg-card p-3 transition-all hover:bg-muted/50 hover:shadow-sm"
+                            className="group/item bg-card hover:bg-muted/50 flex items-center justify-between rounded-lg border p-3 transition-all hover:shadow-sm"
                           >
                             <div className="flex items-center gap-3">
                               <div
@@ -268,10 +268,10 @@ export default async function StudentDashboard() {
                                 />
                               </div>
                               <div className="space-y-0.5">
-                                <p className="text-sm font-medium leading-none">
+                                <p className="text-sm leading-none font-medium">
                                   {ala.title}
                                 </p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-muted-foreground text-xs">
                                   {ala.subjectOfferingId?.subjectId?.code || ""}
                                 </p>
                               </div>
@@ -284,11 +284,11 @@ export default async function StudentDashboard() {
                                 <Clock className="h-3 w-3" />
                                 {deadlineText}
                               </Badge>
-                              <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100" />
+                              <ArrowRight className="text-muted-foreground h-4 w-4 opacity-0 transition-opacity group-hover/item:opacity-100" />
                             </div>
                           </Link>
                         );
-                      }
+                      },
                     )}
                   </div>
                 )}
@@ -335,7 +335,7 @@ export default async function StudentDashboard() {
                         };
                       }) => {
                         const percentage = Math.round(
-                          (sub.marks / sub.alaId.maxMarks) * 100
+                          (sub.marks / sub.alaId.maxMarks) * 100,
                         );
                         const getGradeColor = (pct: number) => {
                           if (pct >= 80) return "text-emerald-600";
@@ -353,17 +353,17 @@ export default async function StudentDashboard() {
                           <Link
                             key={sub._id}
                             href={`/student/alas/${sub.alaId._id}`}
-                            className="group/item flex items-center justify-between rounded-lg border bg-card p-3 transition-all hover:bg-muted/50 hover:shadow-sm"
+                            className="group/item bg-card hover:bg-muted/50 flex items-center justify-between rounded-lg border p-3 transition-all hover:shadow-sm"
                           >
                             <div className="flex items-center gap-3">
                               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10">
                                 <CheckCircle className="h-4 w-4 text-emerald-600" />
                               </div>
                               <div className="space-y-0.5">
-                                <p className="text-sm font-medium leading-none">
+                                <p className="text-sm leading-none font-medium">
                                   {sub.alaId.title}
                                 </p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-muted-foreground text-xs">
                                   {sub.alaId.subjectOfferingId?.subjectId
                                     ?.code || ""}
                                 </p>
@@ -390,11 +390,11 @@ export default async function StudentDashboard() {
                                   }}
                                 />
                               </div>
-                              <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100" />
+                              <ArrowRight className="text-muted-foreground h-4 w-4 opacity-0 transition-opacity group-hover/item:opacity-100" />
                             </div>
                           </Link>
                         );
-                      }
+                      },
                     )}
                   </div>
                 )}

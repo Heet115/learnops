@@ -13,24 +13,24 @@ export default function UnauthorizedPage() {
   return (
     <div className="relative flex h-screen items-center justify-center overflow-hidden px-4">
       {/* Animated background */}
-      <div className="bg-linear-to-br from-destructive/5 via-background to-muted/50 absolute inset-0" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-destructive/10 via-transparent to-transparent" />
+      <div className="from-destructive/5 via-background to-muted/50 absolute inset-0 bg-linear-to-br" />
+      <div className="from-destructive/10 absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] via-transparent to-transparent" />
 
       {/* Floating decorative elements */}
-      <div className="absolute top-20 left-10 h-72 w-72 rounded-full bg-destructive/5 blur-3xl" />
-      <div className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-muted/50 blur-3xl" />
+      <div className="bg-destructive/5 absolute top-20 left-10 h-72 w-72 rounded-full blur-3xl" />
+      <div className="bg-muted/50 absolute right-10 bottom-20 h-96 w-96 rounded-full blur-3xl" />
 
-      <div className="relative z-10 w-full max-w-md animate-fade-in">
-        <Card className="border-destructive/20 bg-card/80 shadow-2xl shadow-destructive/5 backdrop-blur-sm">
+      <div className="animate-fade-in relative z-10 w-full max-w-md">
+        <Card className="border-destructive/20 bg-card/80 shadow-destructive/5 shadow-2xl backdrop-blur-sm">
           <CardHeader className="pb-2 text-center">
             {/* Icon with animated ring */}
             <div className="relative mx-auto mb-3">
               <div
-                className="absolute inset-0 animate-ping rounded-full bg-destructive/20"
+                className="bg-destructive/20 absolute inset-0 animate-ping rounded-full"
                 style={{ animationDuration: "2s" }}
               />
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-destructive/20 to-destructive/10 ring-1 ring-destructive/20">
-                <ShieldX className="h-8 w-8 text-destructive" />
+              <div className="from-destructive/20 to-destructive/10 ring-destructive/20 relative flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br ring-1">
+                <ShieldX className="text-destructive h-8 w-8" />
               </div>
             </div>
 
@@ -44,9 +44,9 @@ export default function UnauthorizedPage() {
 
           <CardContent className="space-y-4">
             {/* Info box */}
-            <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+            <div className="border-destructive/20 bg-destructive/5 rounded-lg border p-3">
               <div className="flex gap-3">
-                <AlertTriangle className="h-5 w-5 shrink-0 text-destructive" />
+                <AlertTriangle className="text-destructive h-5 w-5 shrink-0" />
                 <p className="text-muted-foreground text-sm">
                   Contact your administrator if you believe this is an error.
                 </p>
@@ -72,11 +72,11 @@ export default function UnauthorizedPage() {
         </Card>
 
         {/* Help text */}
-        <p className="mt-4 text-center text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-4 text-center text-sm">
           Need help?{" "}
           <Link
             href="mailto:admin@learnops.edu"
-            className="font-medium text-primary underline-offset-4 hover:underline"
+            className="text-primary font-medium underline-offset-4 hover:underline"
           >
             Contact Support
           </Link>

@@ -250,7 +250,10 @@ const toKebabCase = (str: string) =>
   str.replace(/([A-Z])/g, "-$1").toLowerCase();
 
 // Helper to get initial theme from localStorage
-const getStoredTheme = (storageKey: string, defaultTheme: ColorTheme): ColorTheme => {
+const getStoredTheme = (
+  storageKey: string,
+  defaultTheme: ColorTheme,
+): ColorTheme => {
   if (typeof window === "undefined") return defaultTheme;
   const stored = localStorage.getItem(storageKey) as ColorTheme | null;
   return stored && colorThemes[stored] ? stored : defaultTheme;
@@ -300,30 +303,34 @@ export function ColorThemeProvider({
   const subscribe = useCallback(
     (callback: () => void) => {
       listeners.add(callback);
-      
+
       const handleStorage = (e: StorageEvent) => {
         if (e.key === storageKey) {
           callback();
         }
       };
       window.addEventListener("storage", handleStorage);
-      
+
       return () => {
         listeners.delete(callback);
         window.removeEventListener("storage", handleStorage);
       };
     },
-    [storageKey]
+    [storageKey],
   );
 
   const getSnapshot = useCallback(
     () => getStoredTheme(storageKey, defaultTheme),
-    [storageKey, defaultTheme]
+    [storageKey, defaultTheme],
   );
 
   const getServerSnapshot = useCallback(() => defaultTheme, [defaultTheme]);
 
-  const colorTheme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const colorTheme = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
 
   // Apply styles whenever theme changes
   React.useEffect(() => {
@@ -336,7 +343,7 @@ export function ColorThemeProvider({
       applyThemeStyles(theme);
       listeners.forEach((listener) => listener());
     },
-    [storageKey]
+    [storageKey],
   );
 
   const value = React.useMemo(
@@ -345,7 +352,7 @@ export function ColorThemeProvider({
       setColorTheme,
       themes: colorThemes,
     }),
-    [colorTheme, setColorTheme]
+    [colorTheme, setColorTheme],
   );
 
   return (

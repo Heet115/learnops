@@ -79,8 +79,8 @@ export function ProfileUpdateRequests({
       <Card>
         <CardContent className="py-8">
           <div className="flex flex-col items-center justify-center text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <FileEdit className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <FileEdit className="text-muted-foreground h-6 w-6" />
             </div>
             <p className="mt-4 text-sm font-medium">No update requests</p>
             <p className="text-muted-foreground text-sm">
@@ -97,8 +97,8 @@ export function ProfileUpdateRequests({
     <Card>
       <CardHeader className="border-b">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-            <FileEdit className="h-4 w-4 text-primary" />
+          <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+            <FileEdit className="text-primary h-4 w-4" />
           </div>
           <div>
             <CardTitle>Your Update Requests</CardTitle>
@@ -143,7 +143,9 @@ export function ProfileUpdateRequests({
                   <div className="space-y-4 pt-2">
                     {/* Requested Changes */}
                     <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Requested Changes:</h4>
+                      <h4 className="text-sm font-medium">
+                        Requested Changes:
+                      </h4>
                       <div className="rounded-lg border">
                         {request.requestedChanges.map((change, idx) => (
                           <div
@@ -169,7 +171,7 @@ export function ProfileUpdateRequests({
 
                     {/* Review Info */}
                     {request.requestStatus !== "pending" && (
-                      <div className="space-y-2 rounded-lg border bg-muted/30 p-3">
+                      <div className="bg-muted/30 space-y-2 rounded-lg border p-3">
                         <div className="flex items-center gap-2 text-sm">
                           <span className="text-muted-foreground">
                             Reviewed by:

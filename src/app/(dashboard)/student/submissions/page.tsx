@@ -57,13 +57,13 @@ export default async function StudentSubmissionsPage() {
 
   // Calculate stats
   const submitted = submissions.filter(
-    (s: { status: string }) => s.status === "submitted"
+    (s: { status: string }) => s.status === "submitted",
   ).length;
   const graded = submissions.filter(
-    (s: { status: string }) => s.status === "graded"
+    (s: { status: string }) => s.status === "graded",
   ).length;
   const rejected = submissions.filter(
-    (s: { status: string }) => s.status === "rejected"
+    (s: { status: string }) => s.status === "rejected",
   ).length;
 
   const statCards = [
@@ -182,8 +182,8 @@ export default async function StudentSubmissionsPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <ClipboardList className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <ClipboardList className="text-primary h-4 w-4" />
               </div>
               <div>
                 <CardTitle>All Submissions</CardTitle>
@@ -196,8 +196,8 @@ export default async function StudentSubmissionsPage() {
           <CardContent className="pt-6">
             {submissions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                  <FileText className="h-6 w-6 text-muted-foreground" />
+                <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                  <FileText className="text-muted-foreground h-6 w-6" />
                 </div>
                 <p className="mt-4 text-sm font-medium">No submissions yet</p>
                 <p className="text-muted-foreground text-sm">
@@ -236,8 +236,8 @@ export default async function StudentSubmissionsPage() {
                         <TableRow key={sub._id} className="group">
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                                <FileText className="h-4 w-4 text-primary" />
+                              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                                <FileText className="text-primary h-4 w-4" />
                               </div>
                               <span className="max-w-[200px] truncate font-medium">
                                 {sub.alaId?.title || "Unknown ALA"}
@@ -281,7 +281,7 @@ export default async function StudentSubmissionsPage() {
                             </Button>
                           </TableCell>
                         </TableRow>
-                      )
+                      ),
                     )}
                   </TableBody>
                 </Table>

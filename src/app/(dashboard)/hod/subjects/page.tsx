@@ -76,7 +76,7 @@ async function getHodSubjects() {
         isActive: true,
       });
       return { ...sub, offeringCount };
-    })
+    }),
   );
 
   return JSON.parse(JSON.stringify(subjectStats));
@@ -104,14 +104,14 @@ export default async function HodSubjectsPage() {
   // Calculate stats
   const totalCredits = subjects.reduce(
     (acc: number, s: { credits: number }) => acc + s.credits,
-    0
+    0,
   );
   const totalOfferings = subjects.reduce(
     (acc: number, s: { offeringCount: number }) => acc + s.offeringCount,
-    0
+    0,
   );
   const subjectsWithOfferings = subjects.filter(
-    (s: { offeringCount: number }) => s.offeringCount > 0
+    (s: { offeringCount: number }) => s.offeringCount > 0,
   ).length;
 
   const statCards = [
@@ -201,8 +201,8 @@ export default async function HodSubjectsPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <BookMarked className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <BookMarked className="text-primary h-4 w-4" />
               </div>
               <div>
                 <CardTitle>All Subjects</CardTitle>
@@ -215,11 +215,11 @@ export default async function HodSubjectsPage() {
           <CardContent className="pt-4">
             {subjects.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-                  <BookMarked className="h-7 w-7 text-muted-foreground" />
+                <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+                  <BookMarked className="text-muted-foreground h-7 w-7" />
                 </div>
                 <h3 className="mt-4 text-lg font-medium">No subjects found</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-sm">
                   No subjects are available in your department yet.
                 </p>
               </div>
@@ -257,7 +257,7 @@ export default async function HodSubjectsPage() {
                             </div>
                             <Badge
                               variant="outline"
-                              className="font-mono border-blue-500/30 bg-blue-500/10 text-blue-600"
+                              className="border-blue-500/30 bg-blue-500/10 font-mono text-blue-600"
                             >
                               {sub.code}
                             </Badge>
@@ -265,10 +265,10 @@ export default async function HodSubjectsPage() {
                         </TableCell>
                         <TableCell>
                           <div className="space-y-0.5">
-                            <p className="font-medium leading-none">
+                            <p className="leading-none font-medium">
                               {sub.name}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               Subject
                             </p>
                           </div>
@@ -283,7 +283,7 @@ export default async function HodSubjectsPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                          <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
                             <Calendar className="h-3.5 w-3.5" />
                             {sub.semesterId?.name || "N/A"}
                           </div>
@@ -303,7 +303,7 @@ export default async function HodSubjectsPage() {
                               variant="outline"
                               className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
                             >
-                              <span className="inline-block mr-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                              <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
                               {sub.offeringCount}
                             </Badge>
                           ) : (
@@ -316,7 +316,7 @@ export default async function HodSubjectsPage() {
                           )}
                         </TableCell>
                       </TableRow>
-                    )
+                    ),
                   )}
                 </TableBody>
               </Table>

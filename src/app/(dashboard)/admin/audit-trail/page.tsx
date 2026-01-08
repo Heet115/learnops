@@ -35,15 +35,21 @@ export default async function AuditTrailPage() {
 
   // Count activities by entity type
   const userActions = auditData.activities.filter(
-    (a: { entityType: string }) => a.entityType === "user"
+    (a: { entityType: string }) => a.entityType === "user",
   ).length;
   const academicActions = auditData.activities.filter(
     (a: { entityType: string }) =>
-      ["department", "course", "semester", "subject", "class", "subject_offering"].includes(a.entityType)
+      [
+        "department",
+        "course",
+        "semester",
+        "subject",
+        "class",
+        "subject_offering",
+      ].includes(a.entityType),
   ).length;
-  const alaActions = auditData.activities.filter(
-    (a: { entityType: string }) =>
-      ["ala", "submission", "group"].includes(a.entityType)
+  const alaActions = auditData.activities.filter((a: { entityType: string }) =>
+    ["ala", "submission", "group"].includes(a.entityType),
   ).length;
 
   const statCards = [
@@ -134,7 +140,7 @@ export default async function AuditTrailPage() {
                   {stat.badge && (
                     <Badge
                       variant="outline"
-                      className="text-xs border-blue-500/30 bg-blue-500/10 text-blue-600"
+                      className="border-blue-500/30 bg-blue-500/10 text-xs text-blue-600"
                     >
                       {stat.badge}
                     </Badge>

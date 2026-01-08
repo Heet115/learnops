@@ -131,7 +131,7 @@ export function AssignCoordinatorDialog({
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="classId" className="flex items-center gap-2">
-                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
                 Class
               </Label>
               <Select name="classId" required>
@@ -142,7 +142,7 @@ export function AssignCoordinatorDialog({
                   {classes.map((classItem) => (
                     <SelectItem key={classItem._id} value={classItem._id}>
                       <div className="flex items-center gap-2">
-                        <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        <Building2 className="text-muted-foreground h-3.5 w-3.5" />
                         {classItem.semesterId?.courseId?.departmentId?.code} -{" "}
                         {classItem.semesterId?.courseId?.code} -{" "}
                         {classItem.semesterId?.name} - {classItem.name}
@@ -155,7 +155,7 @@ export function AssignCoordinatorDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="professorId" className="flex items-center gap-2">
-                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                <User className="text-muted-foreground h-3.5 w-3.5" />
                 Professor
               </Label>
               <Select name="professorId" required>
@@ -182,7 +182,7 @@ export function AssignCoordinatorDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="academicYear" className="flex items-center gap-2">
-                <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+                <CalendarDays className="text-muted-foreground h-3.5 w-3.5" />
                 Academic Year
               </Label>
               <Select name="academicYear" required>

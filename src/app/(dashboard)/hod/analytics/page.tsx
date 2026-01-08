@@ -22,7 +22,6 @@ import {
   BarChart3,
   TrendingUp,
   FileCheck,
-  Users,
   Clock,
   CheckCircle2,
 } from "lucide-react";
@@ -62,15 +61,15 @@ export default async function HodAnalyticsPage() {
   // Calculate summary stats
   const totalSubmissions = submissionTrends.reduce(
     (acc: number, curr: { submitted: number }) => acc + curr.submitted,
-    0
+    0,
   );
   const totalGraded = submissionTrends.reduce(
     (acc: number, curr: { graded: number }) => acc + curr.graded,
-    0
+    0,
   );
   const totalPending = professorActivity.reduce(
     (acc: number, curr: { pending: number }) => acc + curr.pending,
-    0
+    0,
   );
   const avgCompletion =
     subjectCompletion.length > 0
@@ -78,8 +77,8 @@ export default async function HodAnalyticsPage() {
           subjectCompletion.reduce(
             (acc: number, curr: { completionRate: number }) =>
               acc + curr.completionRate,
-            0
-          ) / subjectCompletion.length
+            0,
+          ) / subjectCompletion.length,
         )
       : 0;
 

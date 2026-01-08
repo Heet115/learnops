@@ -33,7 +33,7 @@ export default async function StudentProfilePage() {
   };
 
   const pendingRequests = updateRequests.filter(
-    (r: { requestStatus: string }) => r.requestStatus === "pending"
+    (r: { requestStatus: string }) => r.requestStatus === "pending",
   ).length;
 
   if (!profileResult.success || !profileResult.data) {
@@ -48,8 +48,8 @@ export default async function StudentProfilePage() {
       >
         <div className="pt-4">
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <UserCircle className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <UserCircle className="text-muted-foreground h-6 w-6" />
             </div>
             <h2 className="mt-4 text-lg font-semibold">Profile Not Found</h2>
             <p className="text-muted-foreground mt-2">
@@ -98,7 +98,7 @@ export default async function StudentProfilePage() {
             <TabsTrigger value="requests" className="flex items-center gap-2">
               Update Requests
               {pendingRequests > 0 && (
-                <Badge className="h-5 min-w-5 rounded-full bg-primary px-1.5 text-xs text-primary-foreground">
+                <Badge className="bg-primary text-primary-foreground h-5 min-w-5 rounded-full px-1.5 text-xs">
                   {pendingRequests}
                 </Badge>
               )}

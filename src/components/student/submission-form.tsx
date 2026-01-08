@@ -362,7 +362,7 @@ export function SubmissionForm({
 
             {existingFiles.length === 0 && localFiles.length === 0 && (
               <div className="rounded-lg border border-dashed p-4 text-center">
-                <FileText className="mx-auto h-8 w-8 text-muted-foreground/50" />
+                <FileText className="text-muted-foreground/50 mx-auto h-8 w-8" />
                 <p className="text-muted-foreground mt-2 text-sm">
                   No files added yet
                 </p>
@@ -482,7 +482,7 @@ export function SubmissionForm({
               </div>
             ) : (
               <div className="rounded-lg border border-dashed p-4 text-center">
-                <LinkIcon className="mx-auto h-8 w-8 text-muted-foreground/50" />
+                <LinkIcon className="text-muted-foreground/50 mx-auto h-8 w-8" />
                 <p className="text-muted-foreground mt-2 text-sm">
                   No links added yet
                 </p>

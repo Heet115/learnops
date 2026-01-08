@@ -48,7 +48,6 @@ import {
   BookOpen,
   Building2,
   Award,
-  AlertTriangle,
 } from "lucide-react";
 import {
   deleteSubject,
@@ -308,11 +307,11 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
   if (subjects.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-          <BookMarked className="h-7 w-7 text-muted-foreground" />
+        <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+          <BookMarked className="text-muted-foreground h-7 w-7" />
         </div>
         <h3 className="mt-4 text-lg font-medium">No subjects yet</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           Create your first subject to get started.
         </p>
       </div>
@@ -338,10 +337,10 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
 
         {filteredSubjects.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <BookMarked className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <BookMarked className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               No subjects match your filters.
             </p>
           </div>
@@ -418,13 +417,13 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="font-medium max-w-[180px] truncate">
+                      <TableCell className="max-w-[180px] truncate font-medium">
                         {subject.name}
                       </TableCell>
                       <TableCell>
                         {subject.semesterId?.name ? (
                           <div className="flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                            <Calendar className="text-muted-foreground h-3.5 w-3.5" />
                             <span className="text-sm">
                               {subject.semesterId.name}
                             </span>
@@ -436,7 +435,7 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
                       <TableCell>
                         {subject.semesterId?.courseId ? (
                           <div className="flex items-center gap-1.5">
-                            <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                            <BookOpen className="text-muted-foreground h-3.5 w-3.5" />
                             <Badge variant="outline" className="font-mono">
                               {subject.semesterId.courseId.code}
                             </Badge>
@@ -448,7 +447,7 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
                       <TableCell>
                         {subject.semesterId?.courseId?.departmentId ? (
                           <div className="flex items-center gap-1.5">
-                            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                            <Building2 className="text-muted-foreground h-3.5 w-3.5" />
                             <span className="text-sm">
                               {subject.semesterId.courseId.departmentId.code}
                             </span>
@@ -459,10 +458,10 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5">
-                          <Award className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Award className="text-muted-foreground h-3.5 w-3.5" />
                           <Badge
                             variant="outline"
-                            className="border-violet-500/30 bg-violet-500/10 text-violet-600 font-mono"
+                            className="border-violet-500/30 bg-violet-500/10 font-mono text-violet-600"
                           >
                             {subject.credits}
                           </Badge>
@@ -478,7 +477,7 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
                           }
                         >
                           <span
-                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${
+                            className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
                               subject.isActive
                                 ? "bg-emerald-500"
                                 : "bg-zinc-400"
@@ -493,7 +492,7 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="opacity-0 transition-opacity group-hover:opacity-100"
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>

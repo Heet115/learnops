@@ -41,13 +41,13 @@ export default async function ProfessorALAsPage() {
   const now = new Date();
   const activeCount = alas.filter(
     (a: { deadline: string; isLocked: boolean }) =>
-      new Date(a.deadline) > now && !a.isLocked
+      new Date(a.deadline) > now && !a.isLocked,
   ).length;
   const pastDeadline = alas.filter(
-    (a: { deadline: string }) => new Date(a.deadline) <= now
+    (a: { deadline: string }) => new Date(a.deadline) <= now,
   ).length;
   const lockedCount = alas.filter(
-    (a: { isLocked: boolean }) => a.isLocked
+    (a: { isLocked: boolean }) => a.isLocked,
   ).length;
 
   const statCards = [
@@ -141,8 +141,8 @@ export default async function ProfessorALAsPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <FileText className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <FileText className="text-primary h-4 w-4" />
               </div>
               <div>
                 <CardTitle>All ALAs</CardTitle>

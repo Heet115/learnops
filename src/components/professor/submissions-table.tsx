@@ -38,7 +38,6 @@ import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import {
   Eye,
-  Clock,
   CheckCircle,
   XCircle,
   Users,
@@ -214,13 +213,13 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
         ],
       },
     ],
-    [subjectOptions, classOptions]
+    [subjectOptions, classOptions],
   );
 
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
     return Object.entries(filters).some(
-      ([, v]) => v && v !== "" && v !== "all"
+      ([, v]) => v && v !== "" && v !== "all",
     );
   }, [filters]);
 
@@ -260,7 +259,7 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
   // Sorting
   const { sortedData, sortState, toggleSort } = useTableSort(
     filteredSubmissions,
-    tableColumns
+    tableColumns,
   );
 
   // Pagination
@@ -297,13 +296,13 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
         },
       },
     ],
-    [clearSelection]
+    [clearSelection],
   );
 
   const getStatusBadge = (
     status: string,
     marks?: number,
-    maxMarks?: number
+    maxMarks?: number,
   ) => {
     switch (status) {
       case "graded":
@@ -322,7 +321,7 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
             variant="outline"
             className="border-amber-500/30 bg-amber-500/10 text-amber-600"
           >
-            <span className="inline-block mr-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
+            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
             Pending
           </Badge>
         );
@@ -371,11 +370,11 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
   if (submissions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-          <FileText className="h-7 w-7 text-muted-foreground" />
+        <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+          <FileText className="text-muted-foreground h-7 w-7" />
         </div>
         <h3 className="mt-4 text-lg font-medium">No submissions yet</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           Student submissions will appear here.
         </p>
       </div>
@@ -498,8 +497,8 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
                           {isGroup ? (
                             <>
                               <div className="mb-0.5 flex items-center gap-1">
-                                <Users className="text-blue-600 h-3 w-3" />
-                                <span className="text-blue-600 text-xs font-medium">
+                                <Users className="h-3 w-3 text-blue-600" />
+                                <span className="text-xs font-medium text-blue-600">
                                   Group ({allMembers.length})
                                 </span>
                               </div>
@@ -543,12 +542,12 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5 text-sm">
-                        <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                        <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
                         {sub.alaId?.subjectOfferingId?.classId?.name || "-"}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground tabular-nums">
+                      <div className="text-muted-foreground flex items-center gap-1.5 text-sm tabular-nums">
                         <Calendar className="h-3.5 w-3.5" />
                         {sub.submittedAt
                           ? new Date(sub.submittedAt).toLocaleDateString(
@@ -558,7 +557,7 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
                                 day: "numeric",
                                 hour: "numeric",
                                 minute: "2-digit",
-                              }
+                              },
                             )
                           : "-"}
                       </div>
@@ -567,7 +566,7 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
                       {getStatusBadge(
                         sub.status,
                         sub.marks,
-                        sub.alaId?.maxMarks
+                        sub.alaId?.maxMarks,
                       )}
                     </TableCell>
                     <TableCell>

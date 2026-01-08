@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -41,7 +40,6 @@ import {
   Plus,
   LogOut,
   Loader2,
-  Clock,
   Check,
   UserPlus,
   Crown,
@@ -54,6 +52,7 @@ import {
   leaveGroup,
 } from "@/lib/actions/group.actions";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface Student {
   _id: string;
@@ -180,7 +179,7 @@ export function GroupSection({
                 >
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-emerald-500/10 text-emerald-600 text-xs">
+                      <AvatarFallback className="bg-emerald-500/10 text-xs text-emerald-600">
                         {member.studentId.firstName[0]}
                         {member.studentId.lastName[0]}
                       </AvatarFallback>
@@ -224,7 +223,7 @@ export function GroupSection({
                 >
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-amber-500/10 text-amber-600 text-xs">
+                      <AvatarFallback className="bg-amber-500/10 text-xs text-amber-600">
                         {member.studentId.firstName[0]}
                         {member.studentId.lastName[0]}
                       </AvatarFallback>
@@ -276,7 +275,7 @@ export function GroupSection({
         </CardHeader>
         <CardContent className="pt-6">
           <div className="rounded-lg border border-dashed p-4 text-center">
-            <Users className="mx-auto h-8 w-8 text-muted-foreground/50" />
+            <Users className="text-muted-foreground/50 mx-auto h-8 w-8" />
             <p className="text-muted-foreground mt-2 text-sm">
               You have not been assigned to a group yet. Please wait for your
               professor to assign you to a group.
@@ -312,7 +311,7 @@ export function GroupSection({
           />
         ) : (
           <div className="rounded-lg border border-dashed p-4 text-center">
-            <Lock className="mx-auto h-8 w-8 text-muted-foreground/50" />
+            <Lock className="text-muted-foreground/50 mx-auto h-8 w-8" />
             <p className="text-muted-foreground mt-2 text-sm">
               Cannot create group - deadline passed or ALA is locked
             </p>
@@ -452,14 +451,14 @@ function CreateGroupDialog({
               </div>
               {loadingClassmates ? (
                 <div className="rounded-lg border p-8 text-center">
-                  <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+                  <Loader2 className="text-muted-foreground mx-auto h-6 w-6 animate-spin" />
                   <p className="text-muted-foreground mt-2 text-sm">
                     Loading classmates...
                   </p>
                 </div>
               ) : classmates.length === 0 ? (
                 <div className="rounded-lg border border-dashed p-8 text-center">
-                  <Users className="mx-auto h-8 w-8 text-muted-foreground/50" />
+                  <Users className="text-muted-foreground/50 mx-auto h-8 w-8" />
                   <p className="text-muted-foreground mt-2 text-sm">
                     No available classmates to invite
                   </p>
@@ -479,13 +478,16 @@ function CreateGroupDialog({
                           }`}
                           onClick={() => toggleClassmate(classmate._id)}
                         >
-                          <Checkbox
-                            checked={isSelected}
-                            onClick={(e) => e.stopPropagation()}
-                            onCheckedChange={() =>
-                              toggleClassmate(classmate._id)
-                            }
-                          />
+                          <div
+                            className={cn(
+                              "flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border",
+                              isSelected
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-input",
+                            )}
+                          >
+                            {isSelected && <Check className="h-3 w-3" />}
+                          </div>
                           <Avatar className="h-8 w-8">
                             <AvatarFallback
                               className={`text-xs ${isSelected ? "bg-violet-500/20 text-violet-600" : "bg-muted"}`}

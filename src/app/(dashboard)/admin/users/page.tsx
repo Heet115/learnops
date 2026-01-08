@@ -131,8 +131,8 @@ export default async function UsersPage() {
                       variant="outline"
                       className={
                         stat.title === "Inactive"
-                          ? "text-xs border-amber-500/30 bg-amber-500/10 text-amber-600"
-                          : "text-xs border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                          ? "border-amber-500/30 bg-amber-500/10 text-xs text-amber-600"
+                          : "border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-600"
                       }
                     >
                       {stat.badge}
@@ -147,8 +147,8 @@ export default async function UsersPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <Users className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <Users className="text-primary h-4 w-4" />
               </div>
               <CardTitle>All Users</CardTitle>
             </div>

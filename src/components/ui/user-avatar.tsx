@@ -96,7 +96,11 @@ export function UserAvatar({
   return (
     <div className="relative inline-block">
       <Avatar
-        className={cn(userAvatarVariants({ size }), "hover:ring-primary/50", className)}
+        className={cn(
+          userAvatarVariants({ size }),
+          "hover:ring-primary/50",
+          className,
+        )}
         {...props}
       >
         {image && (
@@ -115,7 +119,7 @@ export function UserAvatar({
       {showStatus && (
         <span
           className={cn(
-            "ring-background absolute right-0 bottom-0 block rounded-full ring-2 shadow-sm",
+            "ring-background absolute right-0 bottom-0 block rounded-full shadow-sm ring-2",
             statusColors[status],
             size === "xs" && "h-1.5 w-1.5",
             size === "sm" && "h-2 w-2",

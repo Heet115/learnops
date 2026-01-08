@@ -10,7 +10,13 @@ import { SubmissionsTable } from "@/components/professor/submissions-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Clock, CheckCircle, XCircle, FileText, ClipboardList } from "lucide-react";
+import {
+  Clock,
+  CheckCircle,
+  XCircle,
+  FileText,
+  ClipboardList,
+} from "lucide-react";
 
 const colorMap: Record<string, string> = {
   blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
@@ -126,8 +132,8 @@ export default async function ProfessorSubmissionsPage({
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <ClipboardList className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <ClipboardList className="text-primary h-4 w-4" />
               </div>
               <CardTitle>All Submissions</CardTitle>
             </div>
@@ -149,21 +155,21 @@ export default async function ProfessorSubmissionsPage({
               <TabsContent value="pending">
                 <SubmissionsTable
                   submissions={submissions.filter(
-                    (s: { status: string }) => s.status === "submitted"
+                    (s: { status: string }) => s.status === "submitted",
                   )}
                 />
               </TabsContent>
               <TabsContent value="graded">
                 <SubmissionsTable
                   submissions={submissions.filter(
-                    (s: { status: string }) => s.status === "graded"
+                    (s: { status: string }) => s.status === "graded",
                   )}
                 />
               </TabsContent>
               <TabsContent value="rejected">
                 <SubmissionsTable
                   submissions={submissions.filter(
-                    (s: { status: string }) => s.status === "rejected"
+                    (s: { status: string }) => s.status === "rejected",
                   )}
                 />
               </TabsContent>

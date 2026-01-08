@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
@@ -34,7 +33,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Users, Plus, Trash2, Pencil, Loader2, Lock, UserPlus } from "lucide-react";
+import {
+  Users,
+  Plus,
+  Trash2,
+  Pencil,
+  Loader2,
+  Lock,
+  UserPlus,
+  Check,
+} from "lucide-react";
 import {
   getStudentsForGroupAssignment,
   createGroupByProfessor,
@@ -42,6 +50,7 @@ import {
   deleteGroupByProfessor,
 } from "@/lib/actions/group.actions";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface Student {
   _id: string;
@@ -109,7 +118,7 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
   }, [alaId]);
 
   const unassignedStudents = students.filter(
-    (s) => !assignedIds.includes(s._id)
+    (s) => !assignedIds.includes(s._id),
   );
 
   if (loading) {
@@ -151,11 +160,12 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
       <CardContent className="space-y-4 pt-4">
         {groups.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <Users className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <Users className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
-              No groups created yet. Click &quot;Create Group&quot; to get started.
+            <p className="text-muted-foreground mt-3 text-sm">
+              No groups created yet. Click &quot;Create Group&quot; to get
+              started.
             </p>
           </div>
         ) : (
@@ -175,8 +185,8 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
 
         {unassignedStudents.length > 0 && (
           <div className="border-t pt-4">
-            <div className="flex items-center gap-2 mb-3">
-              <UserPlus className="h-4 w-4 text-muted-foreground" />
+            <div className="mb-3 flex items-center gap-2">
+              <UserPlus className="text-muted-foreground h-4 w-4" />
               <p className="text-sm font-medium">
                 Unassigned Students ({unassignedStudents.length})
               </p>
@@ -218,6 +228,11 @@ function CreateGroupDialog({
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+  // Reset selection when dialog opens/closes - handled via onOpenChange
+  const resetSelection = useCallback(() => {
+    setSelectedIds([]);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (selectedIds.length < 2) {
@@ -245,18 +260,34 @@ function CreateGroupDialog({
     setLoading(false);
   };
 
-  const toggleStudent = (id: string) => {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter((s) => s !== id));
-    } else if (selectedIds.length < maxGroupSize) {
-      setSelectedIds([...selectedIds, id]);
-    } else {
-      toast.error(`Max ${maxGroupSize} students per group`);
-    }
-  };
+  const toggleStudent = useCallback(
+    (id: string) => {
+      setSelectedIds((prev) => {
+        if (prev.includes(id)) {
+          return prev.filter((s) => s !== id);
+        } else if (prev.length < maxGroupSize) {
+          return [...prev, id];
+        } else {
+          toast.error(`Max ${maxGroupSize} students per group`);
+          return prev;
+        }
+      });
+    },
+    [maxGroupSize],
+  );
+
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (!newOpen) {
+        resetSelection();
+      }
+      onOpenChange(newOpen);
+    },
+    [onOpenChange, resetSelection],
+  );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm" disabled={students.length < 2}>
           <Plus className="mr-2 h-4 w-4" />
@@ -299,27 +330,35 @@ function CreateGroupDialog({
                     All students are assigned to groups
                   </p>
                 ) : (
-                  students.map((student) => (
-                    <div
-                      key={student._id}
-                      className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b p-3 last:border-0 transition-colors"
-                      onClick={() => toggleStudent(student._id)}
-                    >
-                      <Checkbox
-                        checked={selectedIds.includes(student._id)}
-                        onClick={(e) => e.stopPropagation()}
-                        onCheckedChange={() => toggleStudent(student._id)}
-                      />
-                      <div>
-                        <p className="text-sm font-medium">
-                          {student.firstName} {student.lastName}
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          {student.email}
-                        </p>
+                  students.map((student) => {
+                    const isSelected = selectedIds.includes(student._id);
+                    return (
+                      <div
+                        key={student._id}
+                        className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b p-3 transition-colors last:border-0"
+                        onClick={() => toggleStudent(student._id)}
+                      >
+                        <div
+                          className={cn(
+                            "flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border",
+                            isSelected
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-input",
+                          )}
+                        >
+                          {isSelected && <Check className="h-3 w-3" />}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">
+                            {student.firstName} {student.lastName}
+                          </p>
+                          <p className="text-muted-foreground text-xs">
+                            {student.email}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -329,7 +368,7 @@ function CreateGroupDialog({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
             >
               Cancel
             </Button>
@@ -375,11 +414,11 @@ function GroupCard({
   // Available students = unassigned + current group members
   const currentMemberIds = group.members.map((m) => m.studentId._id);
   const availableStudents = allStudents.filter(
-    (s) => !assignedIds.includes(s._id) || currentMemberIds.includes(s._id)
+    (s) => !assignedIds.includes(s._id) || currentMemberIds.includes(s._id),
   );
 
   return (
-    <div className="rounded-lg border bg-card p-4 transition-all hover:shadow-sm">
+    <div className="bg-card rounded-lg border p-4 transition-all hover:shadow-sm">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
@@ -389,7 +428,7 @@ function GroupCard({
           {group.isLocked && (
             <Badge
               variant="outline"
-              className="gap-1 border-muted-foreground/30 text-muted-foreground"
+              className="border-muted-foreground/30 text-muted-foreground gap-1"
             >
               <Lock className="h-3 w-3" />
               Locked
@@ -469,9 +508,15 @@ function EditGroupDialog({
 }) {
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(
-    group.members.map((m) => m.studentId._id)
+    group.members.map((m) => m.studentId._id),
   );
   const [name, setName] = useState(group.name);
+
+  // Sync state when group changes (not on open/close)
+  const syncFromGroup = useCallback(() => {
+    setSelectedIds(group.members.map((m) => m.studentId._id));
+    setName(group.name);
+  }, [group]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -496,18 +541,34 @@ function EditGroupDialog({
     setLoading(false);
   };
 
-  const toggleStudent = (id: string) => {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter((s) => s !== id));
-    } else if (selectedIds.length < maxGroupSize) {
-      setSelectedIds([...selectedIds, id]);
-    } else {
-      toast.error(`Max ${maxGroupSize} students per group`);
-    }
-  };
+  const toggleStudent = useCallback(
+    (id: string) => {
+      setSelectedIds((prev) => {
+        if (prev.includes(id)) {
+          return prev.filter((s) => s !== id);
+        } else if (prev.length < maxGroupSize) {
+          return [...prev, id];
+        } else {
+          toast.error(`Max ${maxGroupSize} students per group`);
+          return prev;
+        }
+      });
+    },
+    [maxGroupSize],
+  );
+
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (newOpen) {
+        syncFromGroup();
+      }
+      onOpenChange(newOpen);
+    },
+    [onOpenChange, syncFromGroup],
+  );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon">
           <Pencil className="h-4 w-4" />
@@ -544,27 +605,35 @@ function EditGroupDialog({
                 Members ({selectedIds.length}/{maxGroupSize})
               </Label>
               <div className="max-h-60 overflow-y-auto rounded-lg border">
-                {availableStudents.map((student) => (
-                  <div
-                    key={student._id}
-                    className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b p-3 last:border-0 transition-colors"
-                    onClick={() => toggleStudent(student._id)}
-                  >
-                    <Checkbox
-                      checked={selectedIds.includes(student._id)}
-                      onClick={(e) => e.stopPropagation()}
-                      onCheckedChange={() => toggleStudent(student._id)}
-                    />
-                    <div>
-                      <p className="text-sm font-medium">
-                        {student.firstName} {student.lastName}
-                      </p>
-                      <p className="text-muted-foreground text-xs">
-                        {student.email}
-                      </p>
+                {availableStudents.map((student) => {
+                  const isSelected = selectedIds.includes(student._id);
+                  return (
+                    <div
+                      key={student._id}
+                      className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b p-3 transition-colors last:border-0"
+                      onClick={() => toggleStudent(student._id)}
+                    >
+                      <div
+                        className={cn(
+                          "flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border",
+                          isSelected
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-input",
+                        )}
+                      >
+                        {isSelected && <Check className="h-3 w-3" />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {student.firstName} {student.lastName}
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          {student.email}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -573,7 +642,7 @@ function EditGroupDialog({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
             >
               Cancel
             </Button>

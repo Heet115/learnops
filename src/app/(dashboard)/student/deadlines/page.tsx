@@ -249,7 +249,7 @@ export default async function StudentDeadlinesPage() {
                         {ala.isLocked ? "Locked" : "Overdue"}
                       </Badge>
                     </Link>
-                  )
+                  ),
                 )}
               </div>
             </CardContent>
@@ -259,8 +259,8 @@ export default async function StudentDeadlinesPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <Calendar className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <Calendar className="text-primary h-4 w-4" />
               </div>
               <div>
                 <CardTitle>Upcoming Deadlines</CardTitle>
@@ -271,10 +271,12 @@ export default async function StudentDeadlinesPage() {
           <CardContent className="pt-6">
             {deadlines.upcoming.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                  <Calendar className="h-6 w-6 text-muted-foreground" />
+                <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                  <Calendar className="text-muted-foreground h-6 w-6" />
                 </div>
-                <p className="mt-4 text-sm font-medium">No upcoming deadlines</p>
+                <p className="mt-4 text-sm font-medium">
+                  No upcoming deadlines
+                </p>
                 <p className="text-muted-foreground text-sm">
                   You&apos;re all caught up!
                 </p>
@@ -301,7 +303,7 @@ export default async function StudentDeadlinesPage() {
                       <Link
                         key={ala._id}
                         href={`/student/alas/${ala._id}`}
-                        className="group/item flex items-center justify-between rounded-lg border bg-card p-3 transition-colors hover:bg-muted/50"
+                        className="group/item bg-card hover:bg-muted/50 flex items-center justify-between rounded-lg border p-3 transition-colors"
                       >
                         <div className="flex items-center gap-3">
                           <div
@@ -339,7 +341,7 @@ export default async function StudentDeadlinesPage() {
                         </div>
                       </Link>
                     );
-                  }
+                  },
                 )}
               </div>
             )}

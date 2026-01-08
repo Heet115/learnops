@@ -51,13 +51,13 @@ interface EditALADialogProps {
 export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
   const [loading, setLoading] = useState(false);
   const [isGroupSubmission, setIsGroupSubmission] = useState(
-    ala.isGroupSubmission
+    ala.isGroupSubmission,
   );
   const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(
-    ala.allowedFileTypes || ["pdf"]
+    ala.allowedFileTypes || ["pdf"],
   );
   const [deadline, setDeadline] = useState<Date | undefined>(
-    new Date(ala.deadline)
+    new Date(ala.deadline),
   );
   const router = useRouter();
 
@@ -119,7 +119,7 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="title" className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-muted-foreground" />
+                <FileText className="text-muted-foreground h-4 w-4" />
                 Title
               </Label>
               <Input
@@ -146,7 +146,7 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="text-muted-foreground h-4 w-4" />
                   Deadline
                 </Label>
                 <DateTimePicker
@@ -159,7 +159,7 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="maxMarks" className="flex items-center gap-2">
-                  <Award className="h-4 w-4 text-muted-foreground" />
+                  <Award className="text-muted-foreground h-4 w-4" />
                   Max Marks
                 </Label>
                 <Input
@@ -176,7 +176,7 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
 
             <div className="grid gap-2">
               <Label htmlFor="maxFileSize" className="flex items-center gap-2">
-                <HardDrive className="h-4 w-4 text-muted-foreground" />
+                <HardDrive className="text-muted-foreground h-4 w-4" />
                 Max File Size (MB)
               </Label>
               <Input
@@ -194,7 +194,7 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
 
             <div className="grid gap-2">
               <Label className="flex items-center gap-2">
-                <FileType className="h-4 w-4 text-muted-foreground" />
+                <FileType className="text-muted-foreground h-4 w-4" />
                 Allowed File Types
               </Label>
               <div className="flex flex-wrap gap-4">
@@ -230,13 +230,13 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
                 htmlFor="edit-isGroupSubmission"
                 className="flex items-center gap-2 text-sm"
               >
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="text-muted-foreground h-4 w-4" />
                 Allow group submissions
               </label>
             </div>
 
             {isGroupSubmission && (
-              <div className="rounded-lg border bg-muted/30 p-4">
+              <div className="bg-muted/30 rounded-lg border p-4">
                 <div className="grid gap-2">
                   <Label htmlFor="maxGroupSize">Max Group Size</Label>
                   <Input

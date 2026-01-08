@@ -143,7 +143,9 @@ export function BulkImportStudentsDialog({
   const [step, setStep] = useState<Step>("upload");
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [parsedRows, setParsedRows] = useState<ParsedStudentRow[]>([]);
-  const [importResult, setImportResult] = useState<BulkImportResult | null>(null);
+  const [importResult, setImportResult] = useState<BulkImportResult | null>(
+    null,
+  );
   const [isValidating, setIsValidating] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
@@ -163,11 +165,15 @@ export function BulkImportStudentsDialog({
     if (!newOpen) resetState();
   };
 
-  const parseCSV = (content: string): Omit<ParsedStudentRow, "errors" | "isValid">[] => {
+  const parseCSV = (
+    content: string,
+  ): Omit<ParsedStudentRow, "errors" | "isValid">[] => {
     const lines = content.trim().split(/\r?\n/);
     if (lines.length < 2) return [];
 
-    const headers = lines[0].split(",").map((h) => h.trim().toLowerCase().replace(/["']/g, ""));
+    const headers = lines[0]
+      .split(",")
+      .map((h) => h.trim().toLowerCase().replace(/["']/g, ""));
     const columnIndices: Record<string, number> = {};
     headers.forEach((header, index) => {
       const mappedKey = COLUMN_MAP[header];
@@ -177,69 +183,78 @@ export function BulkImportStudentsDialog({
     const fullNameIdx = headers.findIndex((h) => h === "full name");
     const hasFullName = fullNameIdx >= 0;
 
-    return lines.slice(1).map((line, index) => {
-      const cols: string[] = [];
-      let current = "";
-      let inQuotes = false;
+    return lines
+      .slice(1)
+      .map((line, index) => {
+        const cols: string[] = [];
+        let current = "";
+        let inQuotes = false;
 
-      for (const char of line) {
-        if (char === '"') inQuotes = !inQuotes;
-        else if (char === "," && !inQuotes) {
-          cols.push(current.trim().replace(/^["']|["']$/g, ""));
-          current = "";
-        } else current += char;
-      }
-      cols.push(current.trim().replace(/^["']|["']$/g, ""));
-
-      let firstName = "";
-      let lastName = "";
-
-      if (hasFullName && cols[fullNameIdx]) {
-        const fullName = cols[fullNameIdx];
-        if (fullName.includes(",")) {
-          const parts = fullName.split(",").map((p) => p.trim());
-          lastName = parts[0] || "";
-          firstName = parts[1] || "";
-        } else {
-          const parts = fullName.split(/\s+/);
-          firstName = parts[0] || "";
-          lastName = parts.slice(1).join(" ") || "";
+        for (const char of line) {
+          if (char === '"') inQuotes = !inQuotes;
+          else if (char === "," && !inQuotes) {
+            cols.push(current.trim().replace(/^["']|["']$/g, ""));
+            current = "";
+          } else current += char;
         }
-      } else {
-        firstName = columnIndices.firstName !== undefined ? cols[columnIndices.firstName] || "" : "";
-        lastName = columnIndices.lastName !== undefined ? cols[columnIndices.lastName] || "" : "";
-      }
+        cols.push(current.trim().replace(/^["']|["']$/g, ""));
 
-      const getValue = (key: keyof ParsedStudentRow): string => {
-        const idx = columnIndices[key];
-        return idx !== undefined ? cols[idx] || "" : "";
-      };
+        let firstName = "";
+        let lastName = "";
 
-      return {
-        rowNumber: index + 2,
-        email: getValue("email"),
-        firstName,
-        lastName,
-        classId: selectedClassId,
-        fatherName: getValue("fatherName"),
-        motherName: getValue("motherName"),
-        gender: getValue("gender"),
-        dateOfBirth: getValue("dateOfBirth"),
-        bloodGroup: getValue("bloodGroup"),
-        alternateEmail: getValue("alternateEmail"),
-        primaryMobile: getValue("primaryMobile"),
-        alternateMobile: getValue("alternateMobile"),
-        batch: getValue("batch"),
-        academicSession: getValue("academicSession"),
-        admissionDate: getValue("admissionDate"),
-        addressLine1: getValue("addressLine1"),
-        addressLine2: getValue("addressLine2"),
-        city: getValue("city"),
-        state: getValue("state"),
-        country: getValue("country"),
-        postalCode: getValue("postalCode"),
-      };
-    }).filter((row) => row.email || row.firstName || row.lastName);
+        if (hasFullName && cols[fullNameIdx]) {
+          const fullName = cols[fullNameIdx];
+          if (fullName.includes(",")) {
+            const parts = fullName.split(",").map((p) => p.trim());
+            lastName = parts[0] || "";
+            firstName = parts[1] || "";
+          } else {
+            const parts = fullName.split(/\s+/);
+            firstName = parts[0] || "";
+            lastName = parts.slice(1).join(" ") || "";
+          }
+        } else {
+          firstName =
+            columnIndices.firstName !== undefined
+              ? cols[columnIndices.firstName] || ""
+              : "";
+          lastName =
+            columnIndices.lastName !== undefined
+              ? cols[columnIndices.lastName] || ""
+              : "";
+        }
+
+        const getValue = (key: keyof ParsedStudentRow): string => {
+          const idx = columnIndices[key];
+          return idx !== undefined ? cols[idx] || "" : "";
+        };
+
+        return {
+          rowNumber: index + 2,
+          email: getValue("email"),
+          firstName,
+          lastName,
+          classId: selectedClassId,
+          fatherName: getValue("fatherName"),
+          motherName: getValue("motherName"),
+          gender: getValue("gender"),
+          dateOfBirth: getValue("dateOfBirth"),
+          bloodGroup: getValue("bloodGroup"),
+          alternateEmail: getValue("alternateEmail"),
+          primaryMobile: getValue("primaryMobile"),
+          alternateMobile: getValue("alternateMobile"),
+          batch: getValue("batch"),
+          academicSession: getValue("academicSession"),
+          admissionDate: getValue("admissionDate"),
+          addressLine1: getValue("addressLine1"),
+          addressLine2: getValue("addressLine2"),
+          city: getValue("city"),
+          state: getValue("state"),
+          country: getValue("country"),
+          postalCode: getValue("postalCode"),
+        };
+      })
+      .filter((row) => row.email || row.firstName || row.lastName);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -269,7 +284,7 @@ export function BulkImportStudentsDialog({
       }
 
       const validatedRows = await validateBulkStudentData(
-        rows.map((r) => ({ ...r, errors: [], isValid: false }))
+        rows.map((r) => ({ ...r, errors: [], isValid: false })),
       );
 
       setParsedRows(validatedRows);
@@ -348,17 +363,47 @@ export function BulkImportStudentsDialog({
 
   const downloadTemplate = () => {
     const headers = [
-      "Full Name", "Father's Name", "Mother's Name", "Gender", "Date of Birth",
-      "Blood Group", "Primary Email", "Alternate Email", "Primary Mobile",
-      "Alternate Mobile", "Batch", "Academic Session", "Admission Date",
-      "Address Line 1", "Address Line 2", "City / District", "State", "Country", "Postal Code",
+      "Full Name",
+      "Father's Name",
+      "Mother's Name",
+      "Gender",
+      "Date of Birth",
+      "Blood Group",
+      "Primary Email",
+      "Alternate Email",
+      "Primary Mobile",
+      "Alternate Mobile",
+      "Batch",
+      "Academic Session",
+      "Admission Date",
+      "Address Line 1",
+      "Address Line 2",
+      "City / District",
+      "State",
+      "Country",
+      "Postal Code",
     ].join(",");
 
     const sampleRow = [
-      "Doe, John", "Robert Doe", "Jane Doe", "Male", "15/06/2000", "O+",
-      "john.doe@example.com", "john.alt@example.com", "9876543210", "9876543211",
-      "2024", "2024-25", "01/08/2024", "123 Main Street", "Apt 4B", "Mumbai",
-      "Maharashtra", "India", "400001",
+      "Doe, John",
+      "Robert Doe",
+      "Jane Doe",
+      "Male",
+      "15/06/2000",
+      "O+",
+      "john.doe@example.com",
+      "john.alt@example.com",
+      "9876543210",
+      "9876543211",
+      "2024",
+      "2024-25",
+      "01/08/2024",
+      "123 Main Street",
+      "Apt 4B",
+      "Mumbai",
+      "Maharashtra",
+      "India",
+      "400001",
     ].join(",");
 
     const blob = new Blob([`${headers}\n${sampleRow}`], { type: "text/csv" });
@@ -375,7 +420,8 @@ export function BulkImportStudentsDialog({
     const csv = [
       "email,student_id,status,temporary_password,error",
       ...importResult.results.map(
-        (r) => `${r.email},${r.studentId || ""},${r.success ? "success" : "failed"},${r.tempPassword || ""},${r.error || ""}`
+        (r) =>
+          `${r.email},${r.studentId || ""},${r.success ? "success" : "failed"},${r.tempPassword || ""},${r.error || ""}`,
       ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -405,11 +451,11 @@ export function BulkImportStudentsDialog({
           Bulk Import
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-2xl flex flex-col">
+      <SheetContent side="right" className="flex w-full flex-col sm:max-w-2xl">
         <SheetHeader className="space-y-1">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <Users className="h-5 w-5 text-primary" />
+            <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+              <Users className="text-primary h-5 w-5" />
             </div>
             <div>
               <SheetTitle>Bulk Import Students</SheetTitle>
@@ -428,17 +474,24 @@ export function BulkImportStudentsDialog({
                 className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium ${
                   step === s || (step === "importing" && s === "preview")
                     ? "bg-primary text-primary-foreground"
-                    : ["preview", "importing", "results"].indexOf(step) > ["upload", "preview", "results"].indexOf(s)
-                    ? "bg-primary/20 text-primary"
-                    : "bg-muted text-muted-foreground"
+                    : ["preview", "importing", "results"].indexOf(step) >
+                        ["upload", "preview", "results"].indexOf(s)
+                      ? "bg-primary/20 text-primary"
+                      : "bg-muted text-muted-foreground"
                 }`}
               >
                 {i + 1}
               </div>
               <span className="hidden text-sm sm:inline">
-                {s === "upload" ? "Upload" : s === "preview" ? "Preview" : "Results"}
+                {s === "upload"
+                  ? "Upload"
+                  : s === "preview"
+                    ? "Preview"
+                    : "Results"}
               </span>
-              {i < 2 && <ArrowRight className="h-4 w-4 text-muted-foreground" />}
+              {i < 2 && (
+                <ArrowRight className="text-muted-foreground h-4 w-4" />
+              )}
             </div>
           ))}
         </div>
@@ -451,10 +504,13 @@ export function BulkImportStudentsDialog({
             <div className="space-y-6 p-1 py-4">
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
-                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                  <GraduationCap className="text-muted-foreground h-4 w-4" />
                   Select Class
                 </Label>
-                <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+                <Select
+                  value={selectedClassId}
+                  onValueChange={setSelectedClassId}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Choose a class for all students" />
                   </SelectTrigger>
@@ -468,23 +524,32 @@ export function BulkImportStudentsDialog({
                 </Select>
               </div>
 
-              <div className="space-y-4 rounded-xl border-2 border-dashed bg-muted/30 p-6 text-center transition-colors hover:border-primary/50 hover:bg-muted/50">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-                  <FileSpreadsheet className="h-7 w-7 text-primary" />
+              <div className="bg-muted/30 hover:border-primary/50 hover:bg-muted/50 space-y-4 rounded-xl border-2 border-dashed p-6 text-center transition-colors">
+                <div className="bg-primary/10 mx-auto flex h-14 w-14 items-center justify-center rounded-full">
+                  <FileSpreadsheet className="text-primary h-7 w-7" />
                 </div>
                 <div>
                   <p className="font-medium">Upload CSV File</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Required: Full Name (or First/Last Name), Primary Email
                   </p>
                 </div>
                 <div className="flex flex-col justify-center gap-2 sm:flex-row">
-                  <Button variant="outline" size="sm" onClick={downloadTemplate} disabled={isValidating}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={downloadTemplate}
+                    disabled={isValidating}
+                  >
                     <Download className="mr-2 h-4 w-4" />
                     Download Template
                   </Button>
                   <label>
-                    <Button size="sm" asChild disabled={!selectedClassId || isValidating}>
+                    <Button
+                      size="sm"
+                      asChild
+                      disabled={!selectedClassId || isValidating}
+                    >
                       <span>
                         {isValidating ? (
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -510,7 +575,10 @@ export function BulkImportStudentsDialog({
                 <AlertTitle>CSV Format Guide</AlertTitle>
                 <AlertDescription>
                   <ul className="mt-2 list-inside list-disc space-y-1 text-sm">
-                    <li>Full Name: &quot;Last, First&quot; or &quot;First Last&quot;</li>
+                    <li>
+                      Full Name: &quot;Last, First&quot; or &quot;First
+                      Last&quot;
+                    </li>
                     <li>Date format: DD/MM/YYYY or YYYY-MM-DD</li>
                     <li>Gender: Male, Female, or Other</li>
                     <li>Blood Group: A+, A-, B+, B-, AB+, AB-, O+, O-</li>
@@ -535,7 +603,7 @@ export function BulkImportStudentsDialog({
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Total: {parsedRows.length} rows
                 </p>
               </div>
@@ -556,7 +624,7 @@ export function BulkImportStudentsDialog({
                         key={row.rowNumber}
                         className={!row.isValid ? "bg-destructive/5" : ""}
                       >
-                        <TableCell className="font-mono text-xs text-muted-foreground">
+                        <TableCell className="text-muted-foreground font-mono text-xs">
                           {row.rowNumber}
                         </TableCell>
                         <TableCell className="font-medium">
@@ -567,14 +635,21 @@ export function BulkImportStudentsDialog({
                         </TableCell>
                         <TableCell>
                           {row.isValid ? (
-                            <Badge variant="outline" className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600">
+                            <Badge
+                              variant="outline"
+                              className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                            >
                               <CheckCircle2 className="h-3 w-3" />
                               Valid
                             </Badge>
                           ) : (
                             <div className="space-y-1">
                               {row.errors.slice(0, 2).map((err, i) => (
-                                <Badge key={i} variant="destructive" className="text-xs">
+                                <Badge
+                                  key={i}
+                                  variant="destructive"
+                                  className="text-xs"
+                                >
                                   {err}
                                 </Badge>
                               ))}
@@ -596,7 +671,8 @@ export function BulkImportStudentsDialog({
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    {invalidCount} row(s) have errors and will be skipped during import.
+                    {invalidCount} row(s) have errors and will be skipped during
+                    import.
                   </AlertDescription>
                 </Alert>
               )}
@@ -606,17 +682,19 @@ export function BulkImportStudentsDialog({
           {step === "importing" && (
             <div className="flex flex-1 flex-col items-center justify-center space-y-6 py-12">
               <div className="space-y-3 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <div className="bg-primary/10 mx-auto flex h-16 w-16 items-center justify-center rounded-full">
+                  <Loader2 className="text-primary h-8 w-8 animate-spin" />
                 </div>
                 <p className="font-medium">Creating student accounts...</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   This may take a moment for large imports
                 </p>
               </div>
               <div className="w-full max-w-xs space-y-2">
                 <Progress value={importProgress} className="h-2" />
-                <p className="text-center text-sm text-muted-foreground">{importProgress}%</p>
+                <p className="text-muted-foreground text-center text-sm">
+                  {importProgress}%
+                </p>
               </div>
             </div>
           )}
@@ -624,17 +702,23 @@ export function BulkImportStudentsDialog({
           {step === "results" && importResult && (
             <div className="space-y-4 p-1 py-4">
               <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-xl border bg-card p-3 text-center">
-                  <p className="text-2xl font-bold">{importResult.totalProcessed}</p>
-                  <p className="text-xs text-muted-foreground">Total</p>
+                <div className="bg-card rounded-xl border p-3 text-center">
+                  <p className="text-2xl font-bold">
+                    {importResult.totalProcessed}
+                  </p>
+                  <p className="text-muted-foreground text-xs">Total</p>
                 </div>
                 <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-center">
-                  <p className="text-2xl font-bold text-emerald-600">{importResult.successCount}</p>
-                  <p className="text-xs text-muted-foreground">Success</p>
+                  <p className="text-2xl font-bold text-emerald-600">
+                    {importResult.successCount}
+                  </p>
+                  <p className="text-muted-foreground text-xs">Success</p>
                 </div>
                 <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-center">
-                  <p className="text-2xl font-bold text-red-600">{importResult.failedCount}</p>
-                  <p className="text-xs text-muted-foreground">Failed</p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {importResult.failedCount}
+                  </p>
+                  <p className="text-muted-foreground text-xs">Failed</p>
                 </div>
               </div>
 
@@ -655,12 +739,18 @@ export function BulkImportStudentsDialog({
                         </TableCell>
                         <TableCell>
                           {result.success ? (
-                            <Badge variant="outline" className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600">
+                            <Badge
+                              variant="outline"
+                              className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                            >
                               <CheckCircle2 className="h-3 w-3" />
                               Created
                             </Badge>
                           ) : (
-                            <Badge variant="destructive" className="gap-1 text-xs">
+                            <Badge
+                              variant="destructive"
+                              className="gap-1 text-xs"
+                            >
                               <XCircle className="h-3 w-3" />
                               Failed
                             </Badge>
@@ -679,7 +769,8 @@ export function BulkImportStudentsDialog({
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Important</AlertTitle>
                 <AlertDescription className="text-sm">
-                  Download results to save temporary passwords for student login.
+                  Download results to save temporary passwords for student
+                  login.
                 </AlertDescription>
               </Alert>
             </div>
@@ -700,7 +791,10 @@ export function BulkImportStudentsDialog({
               <Button variant="outline" onClick={resetState}>
                 Back
               </Button>
-              <Button onClick={handleImport} disabled={validCount === 0 || isImporting}>
+              <Button
+                onClick={handleImport}
+                disabled={validCount === 0 || isImporting}
+              >
                 <Users className="mr-2 h-4 w-4" />
                 Import {validCount}
               </Button>

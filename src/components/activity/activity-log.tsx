@@ -10,12 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -320,8 +315,8 @@ export function ActivityLog({
         <CardHeader className="border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <ScrollText className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <ScrollText className="text-primary h-4 w-4" />
               </div>
               <CardTitle>{title}</CardTitle>
             </div>
@@ -329,11 +324,11 @@ export function ActivityLog({
         </CardHeader>
         <CardContent className="pt-4">
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-              <ScrollText className="h-7 w-7 text-muted-foreground" />
+            <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+              <ScrollText className="text-muted-foreground h-7 w-7" />
             </div>
             <h3 className="mt-4 text-lg font-medium">No activities yet</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-1 text-sm">
               Activity logs will appear here as actions are performed.
             </p>
           </div>
@@ -347,13 +342,13 @@ export function ActivityLog({
       <CardHeader className="border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <ScrollText className="h-4 w-4 text-primary" />
+            <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+              <ScrollText className="text-primary h-4 w-4" />
             </div>
             <div>
               <CardTitle>{title}</CardTitle>
               {description && (
-                <p className="text-sm text-muted-foreground">{description}</p>
+                <p className="text-muted-foreground text-sm">{description}</p>
               )}
             </div>
           </div>
@@ -376,10 +371,10 @@ export function ActivityLog({
 
           {filteredActivities.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                <ScrollText className="h-6 w-6 text-muted-foreground" />
+              <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                <ScrollText className="text-muted-foreground h-6 w-6" />
               </div>
-              <p className="mt-3 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-3 text-sm">
                 No activities match your filters.
               </p>
             </div>
@@ -415,7 +410,7 @@ export function ActivityLog({
                                   {activity.userId.firstName}{" "}
                                   {activity.userId.lastName}
                                 </p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-muted-foreground text-xs">
                                   {activity.userId.email}
                                 </p>
                               </div>
@@ -423,8 +418,8 @@ export function ActivityLog({
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <div className="flex h-6 w-6 items-center justify-center rounded bg-muted">
-                                <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                              <div className="bg-muted flex h-6 w-6 items-center justify-center rounded">
+                                <Icon className="text-muted-foreground h-3.5 w-3.5" />
                               </div>
                               <Badge
                                 variant="outline"
@@ -441,7 +436,7 @@ export function ActivityLog({
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
                               <Calendar className="h-3.5 w-3.5" />
                               {format(
                                 new Date(activity.createdAt),
@@ -455,7 +450,7 @@ export function ActivityLog({
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
                                   title="View details"
                                 >
                                   <Eye className="h-4 w-4" />

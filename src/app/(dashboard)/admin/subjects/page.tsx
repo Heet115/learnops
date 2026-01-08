@@ -39,12 +39,12 @@ export default async function SubjectsPage() {
   };
 
   const activeSubjects = subjects.filter(
-    (s: { isActive: boolean }) => s.isActive
+    (s: { isActive: boolean }) => s.isActive,
   ).length;
   const inactiveSubjects = subjects.length - activeSubjects;
   const totalCredits = subjects.reduce(
     (sum: number, s: { credits: number }) => sum + (s.credits || 0),
-    0
+    0,
   );
 
   const statCards = [
@@ -133,7 +133,7 @@ export default async function SubjectsPage() {
                   {stat.badge && (
                     <Badge
                       variant="outline"
-                      className="text-xs border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                      className="border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-600"
                     >
                       {stat.badge}
                     </Badge>
@@ -147,8 +147,8 @@ export default async function SubjectsPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <BookMarked className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <BookMarked className="text-primary h-4 w-4" />
               </div>
               <CardTitle>All Subjects</CardTitle>
             </div>

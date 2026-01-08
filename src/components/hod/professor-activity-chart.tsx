@@ -45,16 +45,18 @@ export function ProfessorActivityChart({ data }: ProfessorActivityChartProps) {
             </div>
             <div>
               <CardTitle>Professor Activity</CardTitle>
-              <CardDescription>Grading performance by professor</CardDescription>
+              <CardDescription>
+                Grading performance by professor
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="flex h-[300px] items-center justify-center">
           <div className="flex flex-col items-center justify-center text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <Users className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <Users className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               No activity data available
             </p>
           </div>

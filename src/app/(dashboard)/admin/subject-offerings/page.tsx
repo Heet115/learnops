@@ -46,15 +46,15 @@ export default async function SubjectOfferingsPage() {
   };
 
   const activeOfferings = offerings.filter(
-    (o: { isActive: boolean }) => o.isActive
+    (o: { isActive: boolean }) => o.isActive,
   ).length;
   const inactiveOfferings = offerings.length - activeOfferings;
 
   // Count unique professors with assignments
   const uniqueProfessors = new Set(
     offerings.map((o: { professorId?: { _id: unknown } }) =>
-      o.professorId?._id?.toString()
-    )
+      o.professorId?._id?.toString(),
+    ),
   ).size;
 
   const statCards = [
@@ -151,7 +151,7 @@ export default async function SubjectOfferingsPage() {
                   {stat.badge && (
                     <Badge
                       variant="outline"
-                      className="text-xs border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                      className="border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-600"
                     >
                       {stat.badge}
                     </Badge>
@@ -165,8 +165,8 @@ export default async function SubjectOfferingsPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <BookOpen className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <BookOpen className="text-primary h-4 w-4" />
               </div>
               <CardTitle>All Subject Offerings</CardTitle>
             </div>

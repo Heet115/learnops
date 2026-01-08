@@ -93,9 +93,9 @@ export function CreateSubjectDialog({ semesters }: CreateSubjectDialogProps) {
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <div className="flex items-center pb-3 gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <BookMarked className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-3 pb-3">
+              <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+                <BookMarked className="text-primary h-5 w-5" />
               </div>
               <div>
                 <DialogTitle>Create Subject</DialogTitle>
@@ -111,7 +111,7 @@ export function CreateSubjectDialog({ semesters }: CreateSubjectDialogProps) {
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="flex items-center gap-2">
-                <BookMarked className="h-3.5 w-3.5 text-muted-foreground" />
+                <BookMarked className="text-muted-foreground h-3.5 w-3.5" />
                 Subject Name
               </Label>
               <Input
@@ -127,7 +127,7 @@ export function CreateSubjectDialog({ semesters }: CreateSubjectDialogProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="code" className="flex items-center gap-2">
-                  <Code2 className="h-3.5 w-3.5 text-muted-foreground" />
+                  <Code2 className="text-muted-foreground h-3.5 w-3.5" />
                   Subject Code
                 </Label>
                 <Input
@@ -142,7 +142,7 @@ export function CreateSubjectDialog({ semesters }: CreateSubjectDialogProps) {
 
               <div className="space-y-2">
                 <Label htmlFor="credits" className="flex items-center gap-2">
-                  <Award className="h-3.5 w-3.5 text-muted-foreground" />
+                  <Award className="text-muted-foreground h-3.5 w-3.5" />
                   Credits
                 </Label>
                 <Select name="credits" required disabled={loading}>
@@ -167,7 +167,7 @@ export function CreateSubjectDialog({ semesters }: CreateSubjectDialogProps) {
 
             <div className="space-y-2">
               <Label htmlFor="semesterId" className="flex items-center gap-2">
-                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                <Calendar className="text-muted-foreground h-3.5 w-3.5" />
                 Semester
               </Label>
               <Select name="semesterId" required disabled={loading}>
@@ -178,7 +178,7 @@ export function CreateSubjectDialog({ semesters }: CreateSubjectDialogProps) {
                   {semesters.map((semester) => (
                     <SelectItem key={semester._id} value={semester._id}>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs text-muted-foreground">
+                        <span className="text-muted-foreground font-mono text-xs">
                           {semester.courseId.departmentId.code}
                         </span>
                         <span>

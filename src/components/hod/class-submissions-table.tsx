@@ -76,7 +76,7 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
         options: courseOptions,
       },
     ],
-    [courseOptions]
+    [courseOptions],
   );
 
   const filteredData = useMemo(() => {
@@ -95,7 +95,7 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
     filteredData,
     "name" as keyof ClassSubmission,
-    "asc"
+    "asc",
   );
 
   // Pagination
@@ -293,7 +293,10 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Progress value={progressPercent} className="h-2 w-20" />
+                          <Progress
+                            value={progressPercent}
+                            className="h-2 w-20"
+                          />
                           <span className="text-muted-foreground w-10 text-xs tabular-nums">
                             {progressPercent}%
                           </span>

@@ -21,7 +21,13 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Award, TrendingUp, BarChart3, TrendingDown, Trophy } from "lucide-react";
+import {
+  Award,
+  TrendingUp,
+  BarChart3,
+  TrendingDown,
+  Trophy,
+} from "lucide-react";
 
 const colorMap: Record<string, string> = {
   violet: "bg-violet-500/10 text-violet-600 border-violet-500/20",
@@ -236,8 +242,8 @@ export default async function StudentGradesPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <Trophy className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <Trophy className="text-primary h-4 w-4" />
               </div>
               <div>
                 <CardTitle>Grade History</CardTitle>
@@ -248,8 +254,8 @@ export default async function StudentGradesPage() {
           <CardContent className="pt-6">
             {grades.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                  <Award className="h-6 w-6 text-muted-foreground" />
+                <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                  <Award className="text-muted-foreground h-6 w-6" />
                 </div>
                 <p className="mt-4 text-sm font-medium">No grades yet</p>
                 <p className="text-muted-foreground text-sm">
@@ -333,12 +339,12 @@ export default async function StudentGradesPage() {
                                 {
                                   month: "short",
                                   day: "numeric",
-                                }
+                                },
                               )}
                             </TableCell>
                           </TableRow>
                         );
-                      }
+                      },
                     )}
                   </TableBody>
                 </Table>

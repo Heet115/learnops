@@ -57,7 +57,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
   const [loading, setLoading] = useState(false);
   const [isGroupSubmission, setIsGroupSubmission] = useState(false);
   const [groupFormation, setGroupFormation] = useState<"student" | "professor">(
-    "student"
+    "student",
   );
   const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(["pdf"]);
   const [deadline, setDeadline] = useState<Date | undefined>(undefined);
@@ -129,8 +129,8 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <FileText className="h-5 w-5 text-primary" />
+              <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
+                <FileText className="text-primary h-5 w-5" />
               </div>
               <div>
                 <DialogTitle>Create New ALA</DialogTitle>
@@ -143,8 +143,11 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
           <Separator className="my-4" />
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="subjectOfferingId" className="flex items-center gap-2">
-                <BookMarked className="h-4 w-4 text-muted-foreground" />
+              <Label
+                htmlFor="subjectOfferingId"
+                className="flex items-center gap-2"
+              >
+                <BookMarked className="text-muted-foreground h-4 w-4" />
                 Subject & Class
               </Label>
               <Select name="subjectOfferingId" required>
@@ -164,7 +167,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
 
             <div className="grid gap-2">
               <Label htmlFor="title" className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-muted-foreground" />
+                <FileText className="text-muted-foreground h-4 w-4" />
                 Title
               </Label>
               <Input
@@ -191,7 +194,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="text-muted-foreground h-4 w-4" />
                   Deadline
                 </Label>
                 <DateTimePicker
@@ -204,7 +207,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="maxMarks" className="flex items-center gap-2">
-                  <Award className="h-4 w-4 text-muted-foreground" />
+                  <Award className="text-muted-foreground h-4 w-4" />
                   Max Marks
                 </Label>
                 <Input
@@ -221,7 +224,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
 
             <div className="grid gap-2">
               <Label htmlFor="maxFileSize" className="flex items-center gap-2">
-                <HardDrive className="h-4 w-4 text-muted-foreground" />
+                <HardDrive className="text-muted-foreground h-4 w-4" />
                 Max File Size (MB)
               </Label>
               <Input
@@ -237,7 +240,7 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
 
             <div className="grid gap-2">
               <Label className="flex items-center gap-2">
-                <FileType className="h-4 w-4 text-muted-foreground" />
+                <FileType className="text-muted-foreground h-4 w-4" />
                 Allowed File Types
               </Label>
               <div className="flex flex-wrap gap-4">
@@ -269,14 +272,17 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
                   setIsGroupSubmission(checked as boolean)
                 }
               />
-              <label htmlFor="isGroupSubmission" className="flex items-center gap-2 text-sm">
-                <Users className="h-4 w-4 text-muted-foreground" />
+              <label
+                htmlFor="isGroupSubmission"
+                className="flex items-center gap-2 text-sm"
+              >
+                <Users className="text-muted-foreground h-4 w-4" />
                 Allow group submissions
               </label>
             </div>
 
             {isGroupSubmission && (
-              <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
+              <div className="bg-muted/30 space-y-4 rounded-lg border p-4">
                 <div className="grid gap-2">
                   <Label>Group Formation</Label>
                   <RadioGroup

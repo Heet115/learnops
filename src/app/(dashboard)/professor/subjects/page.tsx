@@ -63,7 +63,7 @@ async function getProfessorSubjects() {
       ]);
 
       return { ...off, alaCount: alas.length, studentCount, pending };
-    })
+    }),
   );
 
   return JSON.parse(JSON.stringify(offeringStats));
@@ -91,15 +91,15 @@ export default async function ProfessorSubjectsPage() {
   // Calculate stats
   const totalStudents = subjects.reduce(
     (acc: number, s: { studentCount: number }) => acc + s.studentCount,
-    0
+    0,
   );
   const totalALAs = subjects.reduce(
     (acc: number, s: { alaCount: number }) => acc + s.alaCount,
-    0
+    0,
   );
   const totalPending = subjects.reduce(
     (acc: number, s: { pending: number }) => acc + s.pending,
-    0
+    0,
   );
 
   const statCards = [
@@ -189,11 +189,11 @@ export default async function ProfessorSubjectsPage() {
         {subjects.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-                <BookMarked className="h-7 w-7 text-muted-foreground" />
+              <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+                <BookMarked className="text-muted-foreground h-7 w-7" />
               </div>
               <h3 className="mt-4 text-lg font-medium">No subjects assigned</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-sm">
                 Contact admin to get subjects assigned to you.
               </p>
             </CardContent>
@@ -220,7 +220,7 @@ export default async function ProfessorSubjectsPage() {
                     <div className="flex items-start justify-between">
                       <Badge
                         variant="outline"
-                        className="font-mono border-blue-500/30 bg-blue-500/10 text-blue-600"
+                        className="border-blue-500/30 bg-blue-500/10 font-mono text-blue-600"
                       >
                         {offering.subjectId?.code}
                       </Badge>
@@ -229,7 +229,7 @@ export default async function ProfessorSubjectsPage() {
                           variant="outline"
                           className="border-amber-500/30 bg-amber-500/10 text-amber-600"
                         >
-                          <span className="inline-block mr-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
+                          <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
                           {offering.pending} pending
                         </Badge>
                       )}
@@ -282,7 +282,7 @@ export default async function ProfessorSubjectsPage() {
                     </div>
                   </CardContent>
                 </Card>
-              )
+              ),
             )}
           </div>
         )}

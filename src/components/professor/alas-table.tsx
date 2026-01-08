@@ -161,17 +161,24 @@ export function ALAsTable({ alas }: ALAsTableProps) {
         ],
       },
     ],
-    [subjectOptions, classOptions]
+    [subjectOptions, classOptions],
   );
 
-  const filteredALAs = useMemo(() => {
-    return alas.filter((ala) => {
-      const search = (filters.search as string)?.toLowerCase() || "";
-      const subject = filters.subject as string;
-      const classFilter = filters.class as string;
-      const status = filters.status as string;
-      const type = filters.type as string;
+  const getStatus = (ala: ALA) => {
+    if (ala.isLocked) return { label: "Locked", color: "violet" };
+    const deadline = new Date(ala.deadline);
+    if (deadline < new Date()) return { label: "Past Due", color: "amber" };
+    return { label: "Active", color: "emerald" };
+  };
 
+  const filteredALAs = useMemo(() => {
+    const search = (filters.search as string)?.toLowerCase() || "";
+    const subject = filters.subject as string;
+    const classFilter = filters.class as string;
+    const status = filters.status as string;
+    const type = filters.type as string;
+
+    return alas.filter((ala) => {
       if (search && !ala.title.toLowerCase().includes(search)) return false;
       if (
         subject &&
@@ -206,7 +213,7 @@ export function ALAsTable({ alas }: ALAsTableProps) {
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
     filteredALAs,
     "deadline" as keyof ALA,
-    "desc"
+    "desc",
   );
 
   const {
@@ -278,7 +285,7 @@ export function ALAsTable({ alas }: ALAsTableProps) {
         },
       },
     ],
-    [clearSelection, router]
+    [clearSelection, router],
   );
 
   const handleDeleteClick = (id: string, title: string) => {
@@ -308,13 +315,6 @@ export function ALAsTable({ alas }: ALAsTableProps) {
     }
   };
 
-  const getStatus = (ala: ALA) => {
-    if (ala.isLocked) return { label: "Locked", color: "violet" };
-    const deadline = new Date(ala.deadline);
-    if (deadline < new Date()) return { label: "Past Due", color: "amber" };
-    return { label: "Active", color: "emerald" };
-  };
-
   const statusColorMap: Record<string, string> = {
     emerald: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
     amber: "border-amber-500/30 bg-amber-500/10 text-amber-600",
@@ -335,11 +335,11 @@ export function ALAsTable({ alas }: ALAsTableProps) {
   if (alas.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-          <FileText className="h-7 w-7 text-muted-foreground" />
+        <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+          <FileText className="text-muted-foreground h-7 w-7" />
         </div>
         <h3 className="mt-4 text-lg font-medium">No ALAs created yet</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           Create your first ALA to get started.
         </p>
       </div>
@@ -365,10 +365,10 @@ export function ALAsTable({ alas }: ALAsTableProps) {
 
         {filteredALAs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <FileText className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <FileText className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               No ALAs match your filters.
             </p>
           </div>
@@ -455,12 +455,12 @@ export function ALAsTable({ alas }: ALAsTableProps) {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5 text-sm">
-                          <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                          <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
                           {ala.subjectOfferingId?.classId?.name || "-"}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground tabular-nums">
+                        <div className="text-muted-foreground flex items-center gap-1.5 text-sm tabular-nums">
                           <Calendar className="h-3.5 w-3.5" />
                           {formatDeadline(ala.deadline)}
                         </div>
@@ -493,7 +493,7 @@ export function ALAsTable({ alas }: ALAsTableProps) {
                           className={statusColorMap[status.color]}
                         >
                           <span
-                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${
+                            className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
                               status.color === "emerald"
                                 ? "bg-emerald-500"
                                 : status.color === "amber"

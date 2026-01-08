@@ -93,11 +93,11 @@ export default async function HodDepartmentPage() {
         breadcrumbs={[{ label: "HOD" }, { label: "Department" }]}
       >
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-            <Building2 className="h-7 w-7 text-muted-foreground" />
+          <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+            <Building2 className="text-muted-foreground h-7 w-7" />
           </div>
           <h3 className="mt-4 text-lg font-medium">No department assigned</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             Contact admin to assign you to a department.
           </p>
         </div>
@@ -148,8 +148,8 @@ export default async function HodDepartmentPage() {
       <div className="space-y-6 pt-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-              <Building2 className="h-6 w-6 text-primary" />
+            <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+              <Building2 className="text-primary h-6 w-6" />
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
@@ -190,7 +190,7 @@ export default async function HodDepartmentPage() {
                   <span className="text-2xl font-bold">{stat.value}</span>
                   <Badge
                     variant="outline"
-                    className="text-xs border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                    className="border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-600"
                   >
                     Active
                   </Badge>
@@ -218,10 +218,10 @@ export default async function HodDepartmentPage() {
           <CardContent className="pt-4">
             {data.courses.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                  <BookOpen className="h-6 w-6 text-muted-foreground" />
+                <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                  <BookOpen className="text-muted-foreground h-6 w-6" />
                 </div>
-                <p className="mt-3 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-3 text-sm">
                   No courses found in this department
                 </p>
               </div>
@@ -237,22 +237,22 @@ export default async function HodDepartmentPage() {
                   }) => {
                     const courseSemesters = data.semesters.filter(
                       (s: { courseId: string }) =>
-                        s.courseId?.toString() === course._id?.toString()
+                        s.courseId?.toString() === course._id?.toString(),
                     );
                     return (
                       <div
                         key={course._id}
-                        className="group/item flex items-center justify-between rounded-lg border bg-card p-4 transition-all hover:bg-accent/50 hover:shadow-sm"
+                        className="group/item bg-card hover:bg-accent/50 flex items-center justify-between rounded-lg border p-4 transition-all hover:shadow-sm"
                       >
                         <div className="flex items-center gap-3">
                           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
                             <BookOpen className="h-5 w-5 text-blue-600" />
                           </div>
                           <div className="space-y-1">
-                            <p className="font-medium leading-none">
+                            <p className="leading-none font-medium">
                               {course.name}
                             </p>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <div className="text-muted-foreground flex items-center gap-2 text-xs">
                               <span>{course.code}</span>
                               <span>•</span>
                               <span>{course.duration} years</span>
@@ -270,13 +270,13 @@ export default async function HodDepartmentPage() {
                           }
                         >
                           <span
-                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${course.isActive ? "bg-emerald-500" : "bg-red-500"}`}
+                            className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${course.isActive ? "bg-emerald-500" : "bg-red-500"}`}
                           />
                           {course.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </div>
                     );
-                  }
+                  },
                 )}
               </div>
             )}
@@ -301,10 +301,10 @@ export default async function HodDepartmentPage() {
           <CardContent className="pt-4">
             {data.classes.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                  <GraduationCap className="h-6 w-6 text-muted-foreground" />
+                <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                  <GraduationCap className="text-muted-foreground h-6 w-6" />
                 </div>
-                <p className="mt-3 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-3 text-sm">
                   No classes found in this department
                 </p>
               </div>
@@ -320,28 +320,28 @@ export default async function HodDepartmentPage() {
                   }) => {
                     const semester = data.semesters.find(
                       (s: { _id: string }) =>
-                        s._id?.toString() === cls.semesterId?.toString()
+                        s._id?.toString() === cls.semesterId?.toString(),
                     );
                     const course = semester
                       ? data.courses.find(
                           (c: { _id: string }) =>
-                            c._id?.toString() === semester.courseId?.toString()
+                            c._id?.toString() === semester.courseId?.toString(),
                         )
                       : null;
                     return (
                       <div
                         key={cls._id}
-                        className="group/item flex items-center justify-between rounded-lg border bg-card p-4 transition-all hover:bg-accent/50 hover:shadow-sm"
+                        className="group/item bg-card hover:bg-accent/50 flex items-center justify-between rounded-lg border p-4 transition-all hover:shadow-sm"
                       >
                         <div className="flex items-center gap-3">
                           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
                             <GraduationCap className="h-5 w-5 text-amber-600" />
                           </div>
                           <div className="space-y-1">
-                            <p className="font-medium leading-none">
+                            <p className="leading-none font-medium">
                               {cls.name}
                             </p>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <div className="text-muted-foreground flex items-center gap-2 text-xs">
                               <span>{course?.code || "N/A"}</span>
                               <span>•</span>
                               <span>{semester?.name || "N/A"}</span>
@@ -360,13 +360,13 @@ export default async function HodDepartmentPage() {
                           }
                         >
                           <span
-                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${cls.isActive ? "bg-emerald-500" : "bg-red-500"}`}
+                            className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${cls.isActive ? "bg-emerald-500" : "bg-red-500"}`}
                           />
                           {cls.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </div>
                     );
-                  }
+                  },
                 )}
               </div>
             )}

@@ -14,13 +14,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { createUser } from "@/lib/actions/admin.actions";
@@ -119,8 +112,6 @@ export function CreateUserDialog() {
     setIsLoading(false);
   };
 
-  const selectedRole = roleOptions.find((r) => r.value === formData.role);
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -132,8 +123,8 @@ export function CreateUserDialog() {
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <UserPlus className="h-5 w-5 text-primary" />
+            <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+              <UserPlus className="text-primary h-5 w-5" />
             </div>
             <div>
               <DialogTitle>Create New User</DialogTitle>
@@ -156,7 +147,7 @@ export function CreateUserDialog() {
             {/* Name Fields */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-sm font-medium">
-                <User className="h-4 w-4 text-muted-foreground" />
+                <User className="text-muted-foreground h-4 w-4" />
                 Full Name
               </Label>
               <div className="grid grid-cols-2 gap-3">
@@ -183,8 +174,11 @@ export function CreateUserDialog() {
 
             {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2 text-sm font-medium">
-                <Mail className="h-4 w-4 text-muted-foreground" />
+              <Label
+                htmlFor="email"
+                className="flex items-center gap-2 text-sm font-medium"
+              >
+                <Mail className="text-muted-foreground h-4 w-4" />
                 Email Address
               </Label>
               <Input
@@ -202,8 +196,11 @@ export function CreateUserDialog() {
 
             {/* Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="flex items-center gap-2 text-sm font-medium">
-                <Lock className="h-4 w-4 text-muted-foreground" />
+              <Label
+                htmlFor="password"
+                className="flex items-center gap-2 text-sm font-medium"
+              >
+                <Lock className="text-muted-foreground h-4 w-4" />
                 Password
               </Label>
               <Input
@@ -240,10 +237,10 @@ export function CreateUserDialog() {
                         })
                       }
                       disabled={isLoading}
-                      className={`flex items-center gap-3 rounded-lg border-2 p-3 text-left transition-all hover:bg-accent/50 ${
+                      className={`hover:bg-accent/50 flex items-center gap-3 rounded-lg border-2 p-3 text-left transition-all ${
                         isSelected
                           ? "border-primary bg-primary/5"
-                          : "border-transparent bg-muted/50"
+                          : "bg-muted/50 border-transparent"
                       }`}
                     >
                       <div
@@ -255,7 +252,7 @@ export function CreateUserDialog() {
                       </div>
                       <div>
                         <p className="text-sm font-medium">{role.label}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           {role.description}
                         </p>
                       </div>

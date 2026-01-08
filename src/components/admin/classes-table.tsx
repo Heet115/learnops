@@ -320,11 +320,11 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
   if (classes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-          <Users2 className="h-7 w-7 text-muted-foreground" />
+        <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+          <Users2 className="text-muted-foreground h-7 w-7" />
         </div>
         <h3 className="mt-4 text-lg font-medium">No classes yet</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           Create your first class to get started.
         </p>
       </div>
@@ -350,10 +350,10 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
 
         {filteredClasses.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <Users2 className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <Users2 className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               No classes match your filters.
             </p>
           </div>
@@ -424,7 +424,7 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
                       <TableCell>
                         {classItem.semesterId?.name ? (
                           <div className="flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                            <Calendar className="text-muted-foreground h-3.5 w-3.5" />
                             <span className="text-sm">
                               {classItem.semesterId.name}
                             </span>
@@ -436,7 +436,7 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
                       <TableCell>
                         {classItem.semesterId?.courseId ? (
                           <div className="flex items-center gap-1.5">
-                            <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                            <BookOpen className="text-muted-foreground h-3.5 w-3.5" />
                             <Badge variant="outline" className="font-mono">
                               {classItem.semesterId.courseId.code}
                             </Badge>
@@ -448,7 +448,7 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
                       <TableCell>
                         {classItem.semesterId?.courseId?.departmentId ? (
                           <div className="flex items-center gap-1.5">
-                            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                            <Building2 className="text-muted-foreground h-3.5 w-3.5" />
                             <span className="text-sm">
                               {classItem.semesterId.courseId.departmentId.code}
                             </span>
@@ -459,10 +459,10 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5">
-                          <CalendarRange className="h-3.5 w-3.5 text-muted-foreground" />
+                          <CalendarRange className="text-muted-foreground h-3.5 w-3.5" />
                           <Badge
                             variant="outline"
-                            className="border-violet-500/30 bg-violet-500/10 text-violet-600 font-mono"
+                            className="border-violet-500/30 bg-violet-500/10 font-mono text-violet-600"
                           >
                             {classItem.academicYear}
                           </Badge>
@@ -478,7 +478,7 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
                           }
                         >
                           <span
-                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${
+                            className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
                               classItem.isActive
                                 ? "bg-emerald-500"
                                 : "bg-zinc-400"
@@ -493,7 +493,7 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="opacity-0 transition-opacity group-hover:opacity-100"
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>

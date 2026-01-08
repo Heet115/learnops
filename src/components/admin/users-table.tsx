@@ -70,6 +70,7 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  Users,
 } from "lucide-react";
 import { IUser, ICourse } from "@/lib/db";
 import { toast } from "sonner";
@@ -368,11 +369,11 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
   if (users.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-          <Users className="h-7 w-7 text-muted-foreground" />
+        <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+          <Users className="text-muted-foreground h-7 w-7" />
         </div>
         <h3 className="mt-4 text-lg font-medium">No users yet</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           Create your first user to get started.
         </p>
       </div>
@@ -414,10 +415,10 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
 
         {sortedData.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <Users className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <Users className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               No users match your filters.
             </p>
           </div>
@@ -507,7 +508,7 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                           }
                         >
                           <span
-                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${
+                            className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
                               user.isActive ? "bg-emerald-500" : "bg-zinc-400"
                             }`}
                           />

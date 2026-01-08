@@ -112,10 +112,20 @@ export function StudentProfileDialog({
   });
 
   useEffect(() => {
-    if (!open || !userId) return;
+    if (!open || !userId) {
+      return;
+    }
 
     let isMounted = true;
-    setIsFetching(true);
+    let fetchStarted = false;
+
+    // Use a microtask to batch the state update
+    Promise.resolve().then(() => {
+      if (isMounted && !fetchStarted) {
+        fetchStarted = true;
+        setIsFetching(true);
+      }
+    });
 
     getStudentProfile(userId).then((profile) => {
       if (!isMounted) return;
@@ -129,7 +139,9 @@ export function StudentProfileDialog({
           fatherName: profile.fatherName || "",
           motherName: profile.motherName || "",
           gender: profile.gender || "",
-          dateOfBirth: profile.dateOfBirth ? new Date(profile.dateOfBirth) : undefined,
+          dateOfBirth: profile.dateOfBirth
+            ? new Date(profile.dateOfBirth)
+            : undefined,
           bloodGroup: profile.bloodGroup || "",
           alternateEmail: profile.alternateEmail || "",
           primaryMobile: profile.primaryMobile || "",
@@ -138,7 +150,9 @@ export function StudentProfileDialog({
           batch: profile.batch || "",
           academicSession: profile.academicSession || "",
           rollNumber: profile.rollNumber || "",
-          admissionDate: profile.admissionDate ? new Date(profile.admissionDate) : undefined,
+          admissionDate: profile.admissionDate
+            ? new Date(profile.admissionDate)
+            : undefined,
           studentStatus: profile.studentStatus || "active",
           presentAddressLine1: profile.presentAddressLine1 || "",
           presentAddressLine2: profile.presentAddressLine2 || "",
@@ -172,12 +186,33 @@ export function StudentProfileDialog({
 
     const submitData = {
       ...formData,
-      gender: (formData.gender || undefined) as "male" | "female" | "other" | undefined,
-      bloodGroup: (formData.bloodGroup || undefined) as "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | undefined,
+      gender: (formData.gender || undefined) as
+        | "male"
+        | "female"
+        | "other"
+        | undefined,
+      bloodGroup: (formData.bloodGroup || undefined) as
+        | "A+"
+        | "A-"
+        | "B+"
+        | "B-"
+        | "AB+"
+        | "AB-"
+        | "O+"
+        | "O-"
+        | undefined,
       courseId: formData.courseId || undefined,
-      dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth.toISOString().split("T")[0] : undefined,
-      admissionDate: formData.admissionDate ? formData.admissionDate.toISOString().split("T")[0] : undefined,
-      studentStatus: formData.studentStatus as "active" | "regular" | "detained" | "alumni",
+      dateOfBirth: formData.dateOfBirth
+        ? formData.dateOfBirth.toISOString().split("T")[0]
+        : undefined,
+      admissionDate: formData.admissionDate
+        ? formData.admissionDate.toISOString().split("T")[0]
+        : undefined,
+      studentStatus: formData.studentStatus as
+        | "active"
+        | "regular"
+        | "detained"
+        | "alumni",
     };
 
     let result;
@@ -205,15 +240,17 @@ export function StudentProfileDialog({
     onOpenChange(false);
   };
 
-  const currentStatus = studentStatusOptions.find((s) => s.value === formData.studentStatus);
+  const currentStatus = studentStatusOptions.find(
+    (s) => s.value === formData.studentStatus,
+  );
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <UserCog className="h-5 w-5 text-primary" />
+            <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+              <UserCog className="text-primary h-5 w-5" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
@@ -222,7 +259,9 @@ export function StudentProfileDialog({
                 </DialogTitle>
                 {isEdit && currentStatus && (
                   <Badge variant="outline" className="gap-1">
-                    <span className={`h-2 w-2 rounded-full ${currentStatus.color}`} />
+                    <span
+                      className={`h-2 w-2 rounded-full ${currentStatus.color}`}
+                    />
                     {currentStatus.label}
                   </Badge>
                 )}
@@ -237,8 +276,10 @@ export function StudentProfileDialog({
         {isFetching ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
-              <p className="mt-2 text-sm text-muted-foreground">Loading profile...</p>
+              <Loader2 className="text-primary mx-auto h-8 w-8 animate-spin" />
+              <p className="text-muted-foreground mt-2 text-sm">
+                Loading profile...
+              </p>
             </div>
           </div>
         ) : (
@@ -250,7 +291,11 @@ export function StudentProfileDialog({
               </Alert>
             )}
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="identity" className="gap-1.5">
                   <User className="h-3.5 w-3.5" />
@@ -280,52 +325,73 @@ export function StudentProfileDialog({
                       id="studentId"
                       placeholder="e.g., STU2024001"
                       value={formData.studentId}
-                      onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, studentId: e.target.value })
+                      }
                       disabled={isLoading || isEdit}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="enrollmentNumber" className="text-sm">Enrollment Number</Label>
+                    <Label htmlFor="enrollmentNumber" className="text-sm">
+                      Enrollment Number
+                    </Label>
                     <Input
                       id="enrollmentNumber"
                       placeholder="e.g., EN2024001"
                       value={formData.enrollmentNumber}
-                      onChange={(e) => setFormData({ ...formData, enrollmentNumber: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          enrollmentNumber: e.target.value,
+                        })
+                      }
                       disabled={isLoading}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="middleName" className="text-sm">Middle Name</Label>
+                  <Label htmlFor="middleName" className="text-sm">
+                    Middle Name
+                  </Label>
                   <Input
                     id="middleName"
                     placeholder="Middle name (optional)"
                     value={formData.middleName}
-                    onChange={(e) => setFormData({ ...formData, middleName: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, middleName: e.target.value })
+                    }
                     disabled={isLoading}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="fatherName" className="text-sm">Father&apos;s Name</Label>
+                    <Label htmlFor="fatherName" className="text-sm">
+                      Father&apos;s Name
+                    </Label>
                     <Input
                       id="fatherName"
                       placeholder="Father's full name"
                       value={formData.fatherName}
-                      onChange={(e) => setFormData({ ...formData, fatherName: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, fatherName: e.target.value })
+                      }
                       disabled={isLoading}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="motherName" className="text-sm">Mother&apos;s Name</Label>
+                    <Label htmlFor="motherName" className="text-sm">
+                      Mother&apos;s Name
+                    </Label>
                     <Input
                       id="motherName"
                       placeholder="Mother's full name"
                       value={formData.motherName}
-                      onChange={(e) => setFormData({ ...formData, motherName: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, motherName: e.target.value })
+                      }
                       disabled={isLoading}
                     />
                   </div>
@@ -333,10 +399,14 @@ export function StudentProfileDialog({
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="gender" className="text-sm">Gender</Label>
+                    <Label htmlFor="gender" className="text-sm">
+                      Gender
+                    </Label>
                     <Select
                       value={formData.gender}
-                      onValueChange={(value) => setFormData({ ...formData, gender: value })}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, gender: value })
+                      }
                       disabled={isLoading}
                     >
                       <SelectTrigger>
@@ -355,16 +425,22 @@ export function StudentProfileDialog({
                     <Label className="text-sm">Date of Birth</Label>
                     <DatePicker
                       value={formData.dateOfBirth}
-                      onChange={(date) => setFormData({ ...formData, dateOfBirth: date })}
+                      onChange={(date) =>
+                        setFormData({ ...formData, dateOfBirth: date })
+                      }
                       disabled={isLoading}
                       placeholder="Select date"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="bloodGroup" className="text-sm">Blood Group</Label>
+                    <Label htmlFor="bloodGroup" className="text-sm">
+                      Blood Group
+                    </Label>
                     <Select
                       value={formData.bloodGroup}
-                      onValueChange={(value) => setFormData({ ...formData, bloodGroup: value })}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, bloodGroup: value })
+                      }
                       disabled={isLoading}
                     >
                       <SelectTrigger>
@@ -372,7 +448,9 @@ export function StudentProfileDialog({
                       </SelectTrigger>
                       <SelectContent>
                         {bloodGroupOptions.map((bg) => (
-                          <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+                          <SelectItem key={bg} value={bg}>
+                            {bg}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -383,10 +461,14 @@ export function StudentProfileDialog({
               <TabsContent value="academic" className="mt-4 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="courseId" className="text-sm">Course</Label>
+                    <Label htmlFor="courseId" className="text-sm">
+                      Course
+                    </Label>
                     <Select
                       value={formData.courseId}
-                      onValueChange={(value) => setFormData({ ...formData, courseId: value })}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, courseId: value })
+                      }
                       disabled={isLoading}
                     >
                       <SelectTrigger>
@@ -402,10 +484,14 @@ export function StudentProfileDialog({
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="studentStatus" className="text-sm">Status</Label>
+                    <Label htmlFor="studentStatus" className="text-sm">
+                      Status
+                    </Label>
                     <Select
                       value={formData.studentStatus}
-                      onValueChange={(value) => setFormData({ ...formData, studentStatus: value })}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, studentStatus: value })
+                      }
                       disabled={isLoading}
                     >
                       <SelectTrigger>
@@ -415,7 +501,9 @@ export function StudentProfileDialog({
                         {studentStatusOptions.map((opt) => (
                           <SelectItem key={opt.value} value={opt.value}>
                             <div className="flex items-center gap-2">
-                              <span className={`h-2 w-2 rounded-full ${opt.color}`} />
+                              <span
+                                className={`h-2 w-2 rounded-full ${opt.color}`}
+                              />
                               {opt.label}
                             </div>
                           </SelectItem>
@@ -427,22 +515,33 @@ export function StudentProfileDialog({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="batch" className="text-sm">Batch</Label>
+                    <Label htmlFor="batch" className="text-sm">
+                      Batch
+                    </Label>
                     <Input
                       id="batch"
                       placeholder="e.g., 2024-28"
                       value={formData.batch}
-                      onChange={(e) => setFormData({ ...formData, batch: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, batch: e.target.value })
+                      }
                       disabled={isLoading}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="academicSession" className="text-sm">Academic Session</Label>
+                    <Label htmlFor="academicSession" className="text-sm">
+                      Academic Session
+                    </Label>
                     <Input
                       id="academicSession"
                       placeholder="e.g., 2024-25"
                       value={formData.academicSession}
-                      onChange={(e) => setFormData({ ...formData, academicSession: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          academicSession: e.target.value,
+                        })
+                      }
                       disabled={isLoading}
                     />
                   </div>
@@ -450,12 +549,16 @@ export function StudentProfileDialog({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="rollNumber" className="text-sm">Roll Number</Label>
+                    <Label htmlFor="rollNumber" className="text-sm">
+                      Roll Number
+                    </Label>
                     <Input
                       id="rollNumber"
                       placeholder="e.g., 101"
                       value={formData.rollNumber}
-                      onChange={(e) => setFormData({ ...formData, rollNumber: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, rollNumber: e.target.value })
+                      }
                       disabled={isLoading}
                     />
                   </div>
@@ -463,7 +566,9 @@ export function StudentProfileDialog({
                     <Label className="text-sm">Admission Date</Label>
                     <DatePicker
                       value={formData.admissionDate}
-                      onChange={(date) => setFormData({ ...formData, admissionDate: date })}
+                      onChange={(date) =>
+                        setFormData({ ...formData, admissionDate: date })
+                      }
                       disabled={isLoading}
                       placeholder="Select date"
                     />
@@ -473,36 +578,57 @@ export function StudentProfileDialog({
 
               <TabsContent value="contact" className="mt-4 space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="alternateEmail" className="text-sm">Alternate Email</Label>
+                  <Label htmlFor="alternateEmail" className="text-sm">
+                    Alternate Email
+                  </Label>
                   <Input
                     id="alternateEmail"
                     type="email"
                     placeholder="alternate@example.com"
                     value={formData.alternateEmail}
-                    onChange={(e) => setFormData({ ...formData, alternateEmail: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        alternateEmail: e.target.value,
+                      })
+                    }
                     disabled={isLoading}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="primaryMobile" className="text-sm">Primary Mobile</Label>
+                    <Label htmlFor="primaryMobile" className="text-sm">
+                      Primary Mobile
+                    </Label>
                     <Input
                       id="primaryMobile"
                       type="tel"
                       placeholder="+91 9876543210"
                       value={formData.primaryMobile}
-                      onChange={(e) => setFormData({ ...formData, primaryMobile: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          primaryMobile: e.target.value,
+                        })
+                      }
                       disabled={isLoading}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="alternateMobile" className="text-sm">Alternate Mobile</Label>
+                    <Label htmlFor="alternateMobile" className="text-sm">
+                      Alternate Mobile
+                    </Label>
                     <Input
                       id="alternateMobile"
                       type="tel"
                       placeholder="+91 9876543210"
                       value={formData.alternateMobile}
-                      onChange={(e) => setFormData({ ...formData, alternateMobile: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          alternateMobile: e.target.value,
+                        })
+                      }
                       disabled={isLoading}
                     />
                   </div>
@@ -511,65 +637,107 @@ export function StudentProfileDialog({
 
               <TabsContent value="address" className="mt-4 space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="presentAddressLine1" className="text-sm">Address Line 1</Label>
+                  <Label htmlFor="presentAddressLine1" className="text-sm">
+                    Address Line 1
+                  </Label>
                   <Input
                     id="presentAddressLine1"
                     placeholder="Street address, building name"
                     value={formData.presentAddressLine1}
-                    onChange={(e) => setFormData({ ...formData, presentAddressLine1: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        presentAddressLine1: e.target.value,
+                      })
+                    }
                     disabled={isLoading}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="presentAddressLine2" className="text-sm">Address Line 2</Label>
+                  <Label htmlFor="presentAddressLine2" className="text-sm">
+                    Address Line 2
+                  </Label>
                   <Input
                     id="presentAddressLine2"
                     placeholder="Apartment, suite, unit (optional)"
                     value={formData.presentAddressLine2}
-                    onChange={(e) => setFormData({ ...formData, presentAddressLine2: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        presentAddressLine2: e.target.value,
+                      })
+                    }
                     disabled={isLoading}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="presentCity" className="text-sm">City / District</Label>
+                    <Label htmlFor="presentCity" className="text-sm">
+                      City / District
+                    </Label>
                     <Input
                       id="presentCity"
                       placeholder="City name"
                       value={formData.presentCity}
-                      onChange={(e) => setFormData({ ...formData, presentCity: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          presentCity: e.target.value,
+                        })
+                      }
                       disabled={isLoading}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="presentState" className="text-sm">State</Label>
+                    <Label htmlFor="presentState" className="text-sm">
+                      State
+                    </Label>
                     <Input
                       id="presentState"
                       placeholder="State name"
                       value={formData.presentState}
-                      onChange={(e) => setFormData({ ...formData, presentState: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          presentState: e.target.value,
+                        })
+                      }
                       disabled={isLoading}
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="presentCountry" className="text-sm">Country</Label>
+                    <Label htmlFor="presentCountry" className="text-sm">
+                      Country
+                    </Label>
                     <Input
                       id="presentCountry"
                       placeholder="Country name"
                       value={formData.presentCountry}
-                      onChange={(e) => setFormData({ ...formData, presentCountry: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          presentCountry: e.target.value,
+                        })
+                      }
                       disabled={isLoading}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="presentPostalCode" className="text-sm">Postal Code</Label>
+                    <Label htmlFor="presentPostalCode" className="text-sm">
+                      Postal Code
+                    </Label>
                     <Input
                       id="presentPostalCode"
                       placeholder="PIN / ZIP code"
                       value={formData.presentPostalCode}
-                      onChange={(e) => setFormData({ ...formData, presentPostalCode: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          presentPostalCode: e.target.value,
+                        })
+                      }
                       disabled={isLoading}
                     />
                   </div>
@@ -580,7 +748,12 @@ export function StudentProfileDialog({
             <Separator className="my-4" />
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                disabled={isLoading}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>

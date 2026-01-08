@@ -36,15 +36,15 @@ export default async function SemestersPage() {
   };
 
   const activeSemesters = semesters.filter(
-    (s: { isActive: boolean }) => s.isActive
+    (s: { isActive: boolean }) => s.isActive,
   ).length;
   const inactiveSemesters = semesters.length - activeSemesters;
 
   // Count unique courses that have semesters
   const uniqueCourses = new Set(
     semesters.map((s: { courseId?: { _id: unknown } }) =>
-      s.courseId?._id?.toString()
-    )
+      s.courseId?._id?.toString(),
+    ),
   ).size;
 
   const statCards = [
@@ -133,7 +133,7 @@ export default async function SemestersPage() {
                   {stat.badge && (
                     <Badge
                       variant="outline"
-                      className="text-xs border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                      className="border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-600"
                     >
                       {stat.badge}
                     </Badge>
@@ -147,8 +147,8 @@ export default async function SemestersPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <Calendar className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <Calendar className="text-primary h-4 w-4" />
               </div>
               <CardTitle>All Semesters</CardTitle>
             </div>

@@ -66,7 +66,7 @@ export function SubmissionTrendsChart({ data }: SubmissionTrendsChartProps) {
   return (
     <Card>
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
-        <div className="flex items-center gap-2 flex-1">
+        <div className="flex flex-1 items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
             <TrendingUp className="h-4 w-4 text-blue-600" />
           </div>

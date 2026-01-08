@@ -255,7 +255,10 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
               ala.submission?.status !== "graded";
 
             return (
-              <Card key={ala._id} className="group transition-all hover:shadow-md">
+              <Card
+                key={ala._id}
+                className="group transition-all hover:shadow-md"
+              >
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
@@ -301,7 +304,7 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
                     {ala.isGroupSubmission && (
                       <Badge
                         variant="outline"
-                        className="border-violet-500/30 bg-violet-500/10 text-violet-600 text-xs"
+                        className="border-violet-500/30 bg-violet-500/10 text-xs text-violet-600"
                       >
                         Group
                       </Badge>

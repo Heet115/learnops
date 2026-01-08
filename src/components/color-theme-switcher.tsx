@@ -29,15 +29,15 @@ export function ColorThemeSwitcher() {
           <Palette className="h-4 w-4" />
           <span
             className={cn(
-              "absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background",
-              themeColors[colorTheme]
+              "border-background absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2",
+              themeColors[colorTheme],
             )}
           />
           <span className="sr-only">Change color theme</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuLabel className="text-xs text-muted-foreground">
+        <DropdownMenuLabel className="text-muted-foreground text-xs">
           Color Theme
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -47,14 +47,11 @@ export function ColorThemeSwitcher() {
             <DropdownMenuItem
               key={key}
               onClick={() => setColorTheme(key)}
-              className="flex items-center justify-between cursor-pointer"
+              className="flex cursor-pointer items-center justify-between"
             >
               <div className="flex items-center gap-2">
                 <span
-                  className={cn(
-                    "h-4 w-4 rounded-full",
-                    themeColors[key]
-                  )}
+                  className={cn("h-4 w-4 rounded-full", themeColors[key])}
                 />
                 <span>{theme.emoji}</span>
                 <span>{theme.name}</span>

@@ -111,7 +111,8 @@ export default async function ProfessorDashboard() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <h2 className="text-2xl font-bold tracking-tight">
-                Welcome back, Prof. {dbUser?.lastName || dbUser?.firstName || ""}
+                Welcome back, Prof.{" "}
+                {dbUser?.lastName || dbUser?.firstName || ""}
               </h2>
               <Sparkles className="h-5 w-5 text-yellow-500" />
             </div>
@@ -155,9 +156,9 @@ export default async function ProfessorDashboard() {
                   {stat.highlight && stat.value > 0 ? (
                     <Badge
                       variant="outline"
-                      className="text-xs border-amber-500/30 bg-amber-500/10 text-amber-600"
+                      className="border-amber-500/30 bg-amber-500/10 text-xs text-amber-600"
                     >
-                      <span className="inline-block mr-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
+                      <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
                       Needs attention
                     </Badge>
                   ) : null}
@@ -207,24 +208,25 @@ export default async function ProfessorDashboard() {
                       <Link
                         key={offering._id}
                         href={`/professor/subjects/${offering._id}`}
-                        className="group/item flex items-center justify-between rounded-lg border bg-card p-3 transition-all hover:bg-accent/50 hover:shadow-sm"
+                        className="group/item bg-card hover:bg-accent/50 flex items-center justify-between rounded-lg border p-3 transition-all hover:shadow-sm"
                       >
                         <div className="flex items-center gap-3">
                           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10">
                             <BookOpen className="h-4 w-4 text-violet-600" />
                           </div>
                           <div className="space-y-0.5">
-                            <p className="text-sm font-medium leading-none">
-                              {offering.subjectId.code} - {offering.subjectId.name}
+                            <p className="text-sm leading-none font-medium">
+                              {offering.subjectId.code} -{" "}
+                              {offering.subjectId.name}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               {offering.classId.name}
                             </p>
                           </div>
                         </div>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100" />
+                        <ArrowRight className="text-muted-foreground h-4 w-4 opacity-0 transition-opacity group-hover/item:opacity-100" />
                       </Link>
-                    )
+                    ),
                   )}
                 </div>
               )}
@@ -246,7 +248,7 @@ export default async function ProfessorDashboard() {
                         variant="outline"
                         className="border-amber-500/30 bg-amber-500/10 text-amber-600"
                       >
-                        <span className="inline-block mr-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
+                        <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
                         {stats.pendingSubmissions} pending
                       </Badge>
                     )}
@@ -275,13 +277,17 @@ export default async function ProfessorDashboard() {
                     (sub: {
                       _id: string;
                       submittedAt: string;
-                      studentId: { firstName: string; lastName: string; profileImage?: string };
+                      studentId: {
+                        firstName: string;
+                        lastName: string;
+                        profileImage?: string;
+                      };
                       alaId: { _id: string; title: string };
                     }) => (
                       <Link
                         key={sub._id}
                         href={`/professor/submissions/${sub._id}`}
-                        className="group/item flex items-center justify-between rounded-lg border bg-card p-3 transition-all hover:bg-accent/50 hover:shadow-sm"
+                        className="group/item bg-card hover:bg-accent/50 flex items-center justify-between rounded-lg border p-3 transition-all hover:shadow-sm"
                       >
                         <div className="flex items-center gap-3">
                           <UserAvatar
@@ -290,10 +296,10 @@ export default async function ProfessorDashboard() {
                             size="sm"
                           />
                           <div className="space-y-0.5">
-                            <p className="text-sm font-medium leading-none">
+                            <p className="text-sm leading-none font-medium">
                               {sub.studentId.firstName} {sub.studentId.lastName}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               {sub.alaId.title}
                             </p>
                           </div>
@@ -301,15 +307,15 @@ export default async function ProfessorDashboard() {
                         <div className="flex items-center gap-2">
                           <Badge
                             variant="outline"
-                            className="tabular-nums border-muted-foreground/30"
+                            className="border-muted-foreground/30 tabular-nums"
                           >
                             <Clock className="mr-1.5 h-3 w-3" />
                             {formatTime(sub.submittedAt)}
                           </Badge>
-                          <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover/item:opacity-100" />
+                          <ArrowRight className="text-muted-foreground h-4 w-4 opacity-0 transition-opacity group-hover/item:opacity-100" />
                         </div>
                       </Link>
-                    )
+                    ),
                   )}
                 </div>
               )}

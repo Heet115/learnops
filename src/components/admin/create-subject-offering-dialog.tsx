@@ -160,8 +160,8 @@ export function CreateSubjectOfferingDialog({
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <BookOpen className="h-5 w-5 text-primary" />
+              <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+                <BookOpen className="text-primary h-5 w-5" />
               </div>
               <div>
                 <DialogTitle>Create Subject Offering</DialogTitle>
@@ -175,7 +175,7 @@ export function CreateSubjectOfferingDialog({
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="semesterId" className="flex items-center gap-2">
-                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                <Calendar className="text-muted-foreground h-3.5 w-3.5" />
                 Semester
               </Label>
               <Select
@@ -190,7 +190,7 @@ export function CreateSubjectOfferingDialog({
                   {semesters.map((semester) => (
                     <SelectItem key={semester._id} value={semester._id}>
                       <div className="flex items-center gap-2">
-                        <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        <Building2 className="text-muted-foreground h-3.5 w-3.5" />
                         {semester.courseId.departmentId.code} -{" "}
                         {semester.courseId.code} - {semester.name}
                       </div>
@@ -202,7 +202,7 @@ export function CreateSubjectOfferingDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="subjectId" className="flex items-center gap-2">
-                <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                <BookOpen className="text-muted-foreground h-3.5 w-3.5" />
                 Subject
               </Label>
               <Select name="subjectId" required disabled={!selectedSemester}>
@@ -229,7 +229,7 @@ export function CreateSubjectOfferingDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="classId" className="flex items-center gap-2">
-                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
                 Class
               </Label>
               <Select name="classId" required disabled={!selectedSemester}>
@@ -257,7 +257,7 @@ export function CreateSubjectOfferingDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="professorId" className="flex items-center gap-2">
-                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                <User className="text-muted-foreground h-3.5 w-3.5" />
                 Professor
               </Label>
               <Select name="professorId" required>
@@ -284,7 +284,7 @@ export function CreateSubjectOfferingDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="academicYear" className="flex items-center gap-2">
-                <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+                <CalendarDays className="text-muted-foreground h-3.5 w-3.5" />
                 Academic Year
               </Label>
               <Select name="academicYear" required>

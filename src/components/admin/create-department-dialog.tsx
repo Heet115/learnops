@@ -24,14 +24,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { createDepartment } from "@/lib/actions/academic.actions";
-import {
-  Loader2,
-  Plus,
-  Building2,
-  Code2,
-  UserCheck,
-  Info,
-} from "lucide-react";
+import { Loader2, Plus, Building2, Code2, UserCheck, Info } from "lucide-react";
 import { IUser } from "@/lib/db";
 import { toast } from "sonner";
 
@@ -86,8 +79,8 @@ export function CreateDepartmentDialog({ hods }: CreateDepartmentDialogProps) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <Building2 className="h-5 w-5 text-primary" />
+            <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+              <Building2 className="text-primary h-5 w-5" />
             </div>
             <div>
               <DialogTitle>Create Department</DialogTitle>
@@ -110,7 +103,7 @@ export function CreateDepartmentDialog({ hods }: CreateDepartmentDialogProps) {
 
             <div className="space-y-2">
               <Label htmlFor="name" className="flex items-center gap-2">
-                <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                <Building2 className="text-muted-foreground h-3.5 w-3.5" />
                 Department Name
               </Label>
               <Input
@@ -128,7 +121,7 @@ export function CreateDepartmentDialog({ hods }: CreateDepartmentDialogProps) {
 
             <div className="space-y-2">
               <Label htmlFor="code" className="flex items-center gap-2">
-                <Code2 className="h-3.5 w-3.5 text-muted-foreground" />
+                <Code2 className="text-muted-foreground h-3.5 w-3.5" />
                 Department Code
               </Label>
               <Input
@@ -146,21 +139,26 @@ export function CreateDepartmentDialog({ hods }: CreateDepartmentDialogProps) {
                 maxLength={10}
                 className="h-10 font-mono uppercase"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Short unique identifier (max 10 characters)
               </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="hod" className="flex items-center gap-2">
-                <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                <UserCheck className="text-muted-foreground h-3.5 w-3.5" />
                 Head of Department
-                <span className="text-xs text-muted-foreground">(Optional)</span>
+                <span className="text-muted-foreground text-xs">
+                  (Optional)
+                </span>
               </Label>
               <Select
                 value={formData.hodId}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, hodId: value === "none" ? "" : value })
+                  setFormData({
+                    ...formData,
+                    hodId: value === "none" ? "" : value,
+                  })
                 }
                 disabled={isLoading}
               >

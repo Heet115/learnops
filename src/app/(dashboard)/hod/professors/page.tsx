@@ -23,7 +23,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Users,
   BookOpen,
-  FileCheck,
   Clock,
   CheckCircle2,
   TrendingUp,
@@ -72,7 +71,7 @@ async function getHodProfessors() {
         pending,
         graded,
       };
-    })
+    }),
   );
 
   return JSON.parse(JSON.stringify(professorStats));
@@ -100,19 +99,15 @@ export default async function HodProfessorsPage() {
   // Calculate stats
   const totalSubjects = professors.reduce(
     (acc: number, p: { subjects: number }) => acc + p.subjects,
-    0
-  );
-  const totalALAs = professors.reduce(
-    (acc: number, p: { alas: number }) => acc + p.alas,
-    0
+    0,
   );
   const totalPending = professors.reduce(
     (acc: number, p: { pending: number }) => acc + p.pending,
-    0
+    0,
   );
   const totalGraded = professors.reduce(
     (acc: number, p: { graded: number }) => acc + p.graded,
-    0
+    0,
   );
 
   const statCards = [
@@ -202,8 +197,8 @@ export default async function HodProfessorsPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <Users className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <Users className="text-primary h-4 w-4" />
               </div>
               <div>
                 <CardTitle>All Professors</CardTitle>
@@ -216,11 +211,13 @@ export default async function HodProfessorsPage() {
           <CardContent className="pt-4">
             {professors.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-                  <Users className="h-7 w-7 text-muted-foreground" />
+                <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+                  <Users className="text-muted-foreground h-7 w-7" />
                 </div>
-                <h3 className="mt-4 text-lg font-medium">No professors found</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <h3 className="mt-4 text-lg font-medium">
+                  No professors found
+                </h3>
+                <p className="text-muted-foreground mt-1 text-sm">
                   No professors are assigned to your department yet.
                 </p>
               </div>
@@ -254,23 +251,23 @@ export default async function HodProfessorsPage() {
                           <div className="flex items-center gap-3">
                             <Avatar className="h-9 w-9 border">
                               <AvatarImage src={prof.profileImage} />
-                              <AvatarFallback className="bg-blue-500/10 text-blue-600 text-sm font-medium">
+                              <AvatarFallback className="bg-blue-500/10 text-sm font-medium text-blue-600">
                                 {prof.firstName[0]}
                                 {prof.lastName[0]}
                               </AvatarFallback>
                             </Avatar>
                             <div className="space-y-0.5">
-                              <p className="font-medium leading-none">
+                              <p className="leading-none font-medium">
                                 {prof.firstName} {prof.lastName}
                               </p>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-muted-foreground text-xs">
                                 Professor
                               </p>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2 text-muted-foreground">
+                          <div className="text-muted-foreground flex items-center gap-2">
                             <Mail className="h-3.5 w-3.5" />
                             <span className="text-sm">{prof.email}</span>
                           </div>
@@ -297,11 +294,11 @@ export default async function HodProfessorsPage() {
                               variant="outline"
                               className="border-amber-500/30 bg-amber-500/10 text-amber-600"
                             >
-                              <span className="inline-block mr-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
+                              <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
                               {prof.pending}
                             </Badge>
                           ) : (
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-muted-foreground text-sm">
                               0
                             </span>
                           )}
@@ -311,12 +308,12 @@ export default async function HodProfessorsPage() {
                             variant="outline"
                             className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
                           >
-                            <span className="inline-block mr-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
                             {prof.graded}
                           </Badge>
                         </TableCell>
                       </TableRow>
-                    )
+                    ),
                   )}
                 </TableBody>
               </Table>

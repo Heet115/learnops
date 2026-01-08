@@ -23,13 +23,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import {
-  Users2,
-  Calendar,
-  CalendarRange,
-  Loader2,
-  Save,
-} from "lucide-react";
+import { Users2, Calendar, CalendarRange, Loader2, Save } from "lucide-react";
 import { updateClass } from "@/lib/actions/academic.actions";
 import { toast } from "sonner";
 
@@ -146,7 +140,7 @@ export function EditClassDialog({
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="flex items-center gap-2">
-                <Users2 className="h-3.5 w-3.5 text-muted-foreground" />
+                <Users2 className="text-muted-foreground h-3.5 w-3.5" />
                 Class Name
               </Label>
               <Input
@@ -161,7 +155,7 @@ export function EditClassDialog({
 
             <div className="space-y-2">
               <Label htmlFor="semesterId" className="flex items-center gap-2">
-                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                <Calendar className="text-muted-foreground h-3.5 w-3.5" />
                 Semester
               </Label>
               <Select
@@ -176,7 +170,7 @@ export function EditClassDialog({
                   {semesters.map((semester) => (
                     <SelectItem key={semester._id} value={semester._id}>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs text-muted-foreground">
+                        <span className="text-muted-foreground font-mono text-xs">
                           {semester.courseId.departmentId.code}
                         </span>
                         <span>
@@ -191,7 +185,7 @@ export function EditClassDialog({
 
             <div className="space-y-2">
               <Label htmlFor="academicYear" className="flex items-center gap-2">
-                <CalendarRange className="h-3.5 w-3.5 text-muted-foreground" />
+                <CalendarRange className="text-muted-foreground h-3.5 w-3.5" />
                 Academic Year
               </Label>
               <Select
@@ -222,7 +216,7 @@ export function EditClassDialog({
                 <Label htmlFor="isActive" className="text-sm font-medium">
                   Active Status
                 </Label>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Inactive classes won&apos;t accept new students
                 </p>
               </div>

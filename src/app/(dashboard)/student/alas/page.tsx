@@ -40,15 +40,15 @@ export default async function StudentALAsPage() {
   const now = new Date();
   const pending = alas.filter(
     (a: { submission: unknown; deadline: string; isLocked: boolean }) =>
-      !a.submission && new Date(a.deadline) > now && !a.isLocked
+      !a.submission && new Date(a.deadline) > now && !a.isLocked,
   ).length;
   const submitted = alas.filter(
     (a: { submission?: { status: string } }) =>
-      a.submission?.status === "submitted" || a.submission?.status === "graded"
+      a.submission?.status === "submitted" || a.submission?.status === "graded",
   ).length;
   const overdue = alas.filter(
     (a: { submission: unknown; deadline: string }) =>
-      !a.submission && new Date(a.deadline) < now
+      !a.submission && new Date(a.deadline) < now,
   ).length;
   const dueSoon = alas.filter(
     (a: { submission: unknown; deadline: string; isLocked: boolean }) => {
@@ -56,7 +56,7 @@ export default async function StudentALAsPage() {
       const deadline = new Date(a.deadline);
       const threeDays = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
       return deadline > now && deadline <= threeDays;
-    }
+    },
   ).length;
 
   const statCards = [

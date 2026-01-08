@@ -24,14 +24,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { updateDepartment } from "@/lib/actions/academic.actions";
-import {
-  Loader2,
-  Building2,
-  Code2,
-  UserCheck,
-  Info,
-  Save,
-} from "lucide-react";
+import { Loader2, Building2, Code2, UserCheck, Info, Save } from "lucide-react";
 import { IDepartment, IUser } from "@/lib/db";
 import { toast } from "sonner";
 
@@ -125,7 +118,7 @@ export function EditDepartmentDialog({
 
             <div className="space-y-2">
               <Label htmlFor="name" className="flex items-center gap-2">
-                <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                <Building2 className="text-muted-foreground h-3.5 w-3.5" />
                 Department Name
               </Label>
               <Input
@@ -142,7 +135,7 @@ export function EditDepartmentDialog({
 
             <div className="space-y-2">
               <Label htmlFor="code" className="flex items-center gap-2">
-                <Code2 className="h-3.5 w-3.5 text-muted-foreground" />
+                <Code2 className="text-muted-foreground h-3.5 w-3.5" />
                 Department Code
               </Label>
               <Input
@@ -163,13 +156,16 @@ export function EditDepartmentDialog({
 
             <div className="space-y-2">
               <Label htmlFor="hod" className="flex items-center gap-2">
-                <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                <UserCheck className="text-muted-foreground h-3.5 w-3.5" />
                 Head of Department
               </Label>
               <Select
                 value={formData.hodId}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, hodId: value === "none" ? "" : value })
+                  setFormData({
+                    ...formData,
+                    hodId: value === "none" ? "" : value,
+                  })
                 }
                 disabled={isLoading}
               >

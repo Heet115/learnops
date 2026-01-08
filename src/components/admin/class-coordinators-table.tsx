@@ -274,11 +274,11 @@ export function ClassCoordinatorsTable({
   if (coordinators.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-          <Crown className="h-7 w-7 text-muted-foreground" />
+        <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+          <Crown className="text-muted-foreground h-7 w-7" />
         </div>
         <h3 className="mt-4 text-lg font-medium">No coordinators assigned</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           Assign your first class coordinator to get started.
         </p>
       </div>
@@ -304,10 +304,10 @@ export function ClassCoordinatorsTable({
 
         {filteredCoordinators.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <Crown className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <Crown className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               No coordinators match your filters.
             </p>
           </div>
@@ -373,13 +373,13 @@ export function ClassCoordinatorsTable({
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5">
-                          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Calendar className="text-muted-foreground h-3.5 w-3.5" />
                           {coordinator.classId?.semesterId?.name || "N/A"}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5">
-                          <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                          <BookOpen className="text-muted-foreground h-3.5 w-3.5" />
                           <Badge variant="outline" className="font-mono">
                             {coordinator.classId?.semesterId?.courseId?.code ||
                               "N/A"}
@@ -388,7 +388,7 @@ export function ClassCoordinatorsTable({
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5">
-                          <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Building2 className="text-muted-foreground h-3.5 w-3.5" />
                           <span>
                             {coordinator.classId?.semesterId?.courseId
                               ?.departmentId?.code || "N/A"}
@@ -405,7 +405,7 @@ export function ClassCoordinatorsTable({
                               {coordinator.professorId?.firstName}{" "}
                               {coordinator.professorId?.lastName}
                             </span>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               {coordinator.professorId?.email}
                             </p>
                           </div>
@@ -413,7 +413,7 @@ export function ClassCoordinatorsTable({
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5 tabular-nums">
-                          <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                          <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
                           {coordinator.academicYear}
                         </div>
                       </TableCell>
@@ -423,7 +423,7 @@ export function ClassCoordinatorsTable({
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="opacity-0 transition-opacity group-hover:opacity-100"
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
@@ -488,8 +488,8 @@ export function ClassCoordinatorsTable({
         <AlertDialogContent>
           <AlertDialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
+              <div className="bg-destructive/10 flex h-10 w-10 items-center justify-center rounded-full">
+                <AlertTriangle className="text-destructive h-5 w-5" />
               </div>
               <div>
                 <AlertDialogTitle>Remove Coordinator</AlertDialogTitle>

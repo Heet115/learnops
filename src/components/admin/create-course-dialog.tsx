@@ -155,8 +155,8 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <BookOpen className="h-5 w-5 text-primary" />
+            <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+              <BookOpen className="text-primary h-5 w-5" />
             </div>
             <div>
               <DialogTitle>Create Course</DialogTitle>
@@ -179,7 +179,7 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
 
             <div className="space-y-2">
               <Label htmlFor="name" className="flex items-center gap-2">
-                <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                <BookOpen className="text-muted-foreground h-3.5 w-3.5" />
                 Course Name
               </Label>
               <Input
@@ -198,7 +198,7 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="code" className="flex items-center gap-2">
-                  <Code2 className="h-3.5 w-3.5 text-muted-foreground" />
+                  <Code2 className="text-muted-foreground h-3.5 w-3.5" />
                   Course Code
                 </Label>
                 <Input
@@ -220,7 +220,7 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
 
               <div className="space-y-2">
                 <Label htmlFor="department" className="flex items-center gap-2">
-                  <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                  <Building2 className="text-muted-foreground h-3.5 w-3.5" />
                   Department
                 </Label>
                 <Select
@@ -244,7 +244,7 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
                         ).toString()}
                       >
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs text-muted-foreground">
+                          <span className="text-muted-foreground font-mono text-xs">
                             {dept.code}
                           </span>
                           <span>{dept.name}</span>
@@ -258,7 +258,7 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
 
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
-                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
                 Course Type
               </Label>
               <div className="grid grid-cols-3 gap-2">
@@ -271,11 +271,13 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
                     className={`rounded-lg border-2 p-3 text-left transition-all ${
                       formData.courseType === type.value
                         ? `${colorMap[type.color]} border-current`
-                        : "border-transparent bg-muted/50 hover:bg-muted"
+                        : "bg-muted/50 hover:bg-muted border-transparent"
                     }`}
                   >
-                    <div className="text-sm font-medium">{type.label.split(" ")[0]}</div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-sm font-medium">
+                      {type.label.split(" ")[0]}
+                    </div>
+                    <div className="text-muted-foreground text-xs">
                       {type.defaultDuration} years
                     </div>
                   </button>
@@ -286,7 +288,7 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="duration" className="flex items-center gap-2">
-                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                  <Clock className="text-muted-foreground h-3.5 w-3.5" />
                   Duration (Years)
                 </Label>
                 <Select
@@ -314,7 +316,7 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
                   htmlFor="semestersPerYear"
                   className="flex items-center gap-2"
                 >
-                  <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+                  <Layers className="text-muted-foreground h-3.5 w-3.5" />
                   Semesters/Year
                 </Label>
                 <Select
@@ -342,14 +344,14 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
             </div>
 
             {formData.courseType && (
-              <div className="flex items-start gap-2 rounded-lg border bg-muted/30 p-3">
-                <Info className="mt-0.5 h-4 w-4 text-primary" />
+              <div className="bg-muted/30 flex items-start gap-2 rounded-lg border p-3">
+                <Info className="text-primary mt-0.5 h-4 w-4" />
                 <div className="text-sm">
                   <span className="font-medium">Total Semesters:</span>{" "}
                   <span className="text-primary font-semibold">
                     {totalSemesters}
                   </span>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-muted-foreground mt-0.5 text-xs">
                     {totalSemesters} semesters will be auto-created for this
                     course
                   </p>

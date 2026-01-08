@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -133,7 +127,7 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
       <Card className="overflow-hidden">
         <CardContent className="pt-6">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-            <Avatar className="h-20 w-20 border-4 border-primary/10">
+            <Avatar className="border-primary/10 h-20 w-20 border-4">
               <AvatarImage src={user.profileImage} alt={fullName} />
               <AvatarFallback className="bg-primary/10 text-primary text-xl">
                 {initials}
@@ -346,8 +340,8 @@ export function StudentProfileView({ data }: StudentProfileViewProps) {
       <Card>
         <CardHeader className="border-b">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <Calendar className="h-4 w-4 text-primary" />
+            <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+              <Calendar className="text-primary h-4 w-4" />
             </div>
             <CardTitle className="text-lg">Account Information</CardTitle>
           </div>

@@ -23,8 +23,6 @@ import {
   ExternalLink,
   Download,
   CheckCircle,
-  XCircle,
-  Clock,
   Users,
   BookOpen,
   Info,
@@ -153,11 +151,11 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                     {submission.files.map(
                       (
                         file: { name: string; url: string; size: number },
-                        index: number
+                        index: number,
                       ) => (
                         <div
                           key={index}
-                          className="group flex items-center justify-between rounded-lg border bg-card p-3 transition-colors hover:bg-muted/50"
+                          className="group bg-card hover:bg-muted/50 flex items-center justify-between rounded-lg border p-3 transition-colors"
                         >
                           <div className="flex items-center gap-3">
                             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
@@ -186,13 +184,13 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                             </a>
                           </Button>
                         </div>
-                      )
+                      ),
                     )}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                      <FileText className="h-6 w-6 text-muted-foreground" />
+                    <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                      <FileText className="text-muted-foreground h-6 w-6" />
                     </div>
                     <p className="mt-4 text-sm font-medium">No files</p>
                     <p className="text-muted-foreground text-sm">
@@ -225,7 +223,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                       (link: { title: string; url: string }, index: number) => (
                         <div
                           key={index}
-                          className="group flex items-center justify-between rounded-lg border bg-card p-3 transition-colors hover:bg-muted/50"
+                          className="group bg-card hover:bg-muted/50 flex items-center justify-between rounded-lg border p-3 transition-colors"
                         >
                           <div className="flex items-center gap-3">
                             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10">
@@ -256,13 +254,13 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                             </a>
                           </Button>
                         </div>
-                      )
+                      ),
                     )}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                      <LinkIcon className="h-6 w-6 text-muted-foreground" />
+                    <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                      <LinkIcon className="text-muted-foreground h-6 w-6" />
                     </div>
                     <p className="mt-4 text-sm font-medium">No links</p>
                     <p className="text-muted-foreground text-sm">
@@ -316,20 +314,20 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                               lastName: string;
                               email?: string;
                             },
-                            index: number
+                            index: number,
                           ) => (
                             <div
                               key={index}
-                              className="flex items-center gap-2 rounded-lg border bg-muted/30 p-2"
+                              className="bg-muted/30 flex items-center gap-2 rounded-lg border p-2"
                             >
-                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10">
-                                <User className="h-3 w-3 text-primary" />
+                              <div className="bg-primary/10 flex h-7 w-7 items-center justify-center rounded-full">
+                                <User className="text-primary h-3 w-3" />
                               </div>
                               <span className="text-sm">
                                 {member.firstName} {member.lastName}
                               </span>
                             </div>
-                          )
+                          ),
                         )}
                       </div>
                     </div>
@@ -348,8 +346,8 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                   </>
                 ) : (
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                      <User className="h-5 w-5 text-primary" />
+                    <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+                      <User className="text-primary h-5 w-5" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">
@@ -405,17 +403,17 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                 <Separator />
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-lg border bg-muted/30 p-3 text-center">
+                  <div className="bg-muted/30 rounded-lg border p-3 text-center">
                     <p className="text-muted-foreground text-xs">Max Marks</p>
                     <p className="text-lg font-bold">{ala?.maxMarks}</p>
                   </div>
-                  <div className="rounded-lg border bg-muted/30 p-3 text-center">
+                  <div className="bg-muted/30 rounded-lg border p-3 text-center">
                     <p className="text-muted-foreground text-xs">Submitted</p>
                     <p className="text-sm font-medium">
                       {submission.submittedAt
                         ? new Date(submission.submittedAt).toLocaleDateString(
                             "en-US",
-                            { month: "short", day: "numeric" }
+                            { month: "short", day: "numeric" },
                           )
                         : "-"}
                     </p>

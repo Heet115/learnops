@@ -31,7 +31,8 @@ export function SubjectCompletionChart({ data }: SubjectCompletionChartProps) {
   const avgCompletion =
     data.length > 0
       ? Math.round(
-          data.reduce((acc, curr) => acc + curr.completionRate, 0) / data.length
+          data.reduce((acc, curr) => acc + curr.completionRate, 0) /
+            data.length,
         )
       : 0;
 
@@ -51,10 +52,10 @@ export function SubjectCompletionChart({ data }: SubjectCompletionChartProps) {
         </CardHeader>
         <CardContent className="flex h-[300px] items-center justify-center">
           <div className="flex flex-col items-center justify-center text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <BookMarked className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <BookMarked className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               No subject data available
             </p>
           </div>

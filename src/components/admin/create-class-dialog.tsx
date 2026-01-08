@@ -22,13 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import {
-  Plus,
-  Users2,
-  Calendar,
-  CalendarRange,
-  Loader2,
-} from "lucide-react";
+import { Plus, Users2, Calendar, CalendarRange, Loader2 } from "lucide-react";
 import { createClass } from "@/lib/actions/academic.actions";
 import { toast } from "sonner";
 
@@ -104,8 +98,8 @@ export function CreateClassDialog({ semesters }: CreateClassDialogProps) {
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <div className="flex items-center gap-3 pb-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <Users2 className="h-5 w-5 text-primary" />
+              <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+                <Users2 className="text-primary h-5 w-5" />
               </div>
               <div>
                 <DialogTitle>Create Class</DialogTitle>
@@ -121,7 +115,7 @@ export function CreateClassDialog({ semesters }: CreateClassDialogProps) {
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="flex items-center gap-2">
-                <Users2 className="h-3.5 w-3.5 text-muted-foreground" />
+                <Users2 className="text-muted-foreground h-3.5 w-3.5" />
                 Class Name
               </Label>
               <Input
@@ -132,14 +126,14 @@ export function CreateClassDialog({ semesters }: CreateClassDialogProps) {
                 disabled={loading}
                 className="h-10"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 A unique identifier for this class section
               </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="semesterId" className="flex items-center gap-2">
-                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                <Calendar className="text-muted-foreground h-3.5 w-3.5" />
                 Semester
               </Label>
               <Select name="semesterId" required disabled={loading}>
@@ -150,7 +144,7 @@ export function CreateClassDialog({ semesters }: CreateClassDialogProps) {
                   {semesters.map((semester) => (
                     <SelectItem key={semester._id} value={semester._id}>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs text-muted-foreground">
+                        <span className="text-muted-foreground font-mono text-xs">
                           {semester.courseId.departmentId.code}
                         </span>
                         <span>
@@ -165,7 +159,7 @@ export function CreateClassDialog({ semesters }: CreateClassDialogProps) {
 
             <div className="space-y-2">
               <Label htmlFor="academicYear" className="flex items-center gap-2">
-                <CalendarRange className="h-3.5 w-3.5 text-muted-foreground" />
+                <CalendarRange className="text-muted-foreground h-3.5 w-3.5" />
                 Academic Year
               </Label>
               <Select name="academicYear" required disabled={loading}>

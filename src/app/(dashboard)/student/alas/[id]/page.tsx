@@ -244,14 +244,16 @@ export default async function StudentALAPage({ params }: PageProps) {
                       <Award className="h-6 w-6 text-emerald-600" />
                     </div>
                     <div>
-                      <p className="text-muted-foreground text-sm">Your Score</p>
+                      <p className="text-muted-foreground text-sm">
+                        Your Score
+                      </p>
                       <p className="text-2xl font-bold text-emerald-600">
                         {submission.marks} / {ala.maxMarks}
                       </p>
                     </div>
                   </div>
                   {submission.feedback && (
-                    <div className="rounded-lg border bg-muted/30 p-4">
+                    <div className="bg-muted/30 rounded-lg border p-4">
                       <p className="mb-1 text-sm font-medium">Feedback</p>
                       <p className="text-muted-foreground text-sm">
                         {submission.feedback}
@@ -442,8 +444,8 @@ export default async function StudentALAPage({ params }: PageProps) {
             ) : (
               <Card>
                 <CardContent className="py-8 text-center">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                    <Lock className="h-8 w-8 text-muted-foreground" />
+                  <div className="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+                    <Lock className="text-muted-foreground h-8 w-8" />
                   </div>
                   <p className="text-muted-foreground">
                     {ala.isLocked
@@ -459,8 +461,8 @@ export default async function StudentALAPage({ params }: PageProps) {
             <Card>
               <CardHeader className="border-b">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                    <Info className="h-4 w-4 text-primary" />
+                  <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                    <Info className="text-primary h-4 w-4" />
                   </div>
                   <CardTitle>Details</CardTitle>
                 </div>
@@ -539,7 +541,8 @@ export default async function StudentALAPage({ params }: PageProps) {
                   <div>
                     <p className="text-sm font-medium">Allowed Files</p>
                     <p className="text-muted-foreground text-sm uppercase">
-                      {ala.allowedFileTypes?.join(", ") || "PDF, DOCX, PPT, ZIP"}
+                      {ala.allowedFileTypes?.join(", ") ||
+                        "PDF, DOCX, PPT, ZIP"}
                     </p>
                     <p className="text-muted-foreground mt-1 text-xs">
                       Max size:{" "}

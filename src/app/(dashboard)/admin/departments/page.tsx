@@ -39,12 +39,10 @@ export default async function DepartmentsPage() {
   };
 
   const activeDepts = departments.filter(
-    (d: { isActive: boolean }) => d.isActive
+    (d: { isActive: boolean }) => d.isActive,
   ).length;
   const inactiveDepts = departments.length - activeDepts;
-  const withHod = departments.filter(
-    (d: { hodId: unknown }) => d.hodId
-  ).length;
+  const withHod = departments.filter((d: { hodId: unknown }) => d.hodId).length;
 
   const statCards = [
     {
@@ -135,7 +133,7 @@ export default async function DepartmentsPage() {
                   {stat.badge && (
                     <Badge
                       variant="outline"
-                      className="text-xs border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                      className="border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-600"
                     >
                       {stat.badge}
                     </Badge>
@@ -149,8 +147,8 @@ export default async function DepartmentsPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <Building2 className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <Building2 className="text-primary h-4 w-4" />
               </div>
               <CardTitle>All Departments</CardTitle>
             </div>

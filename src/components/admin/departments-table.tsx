@@ -101,7 +101,9 @@ const filterConfigs: FilterConfig[] = [
 export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(null);
+  const [editDepartment, setEditDepartment] = useState<IDepartment | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [filters, setFilters] = useState<FilterValue>({
@@ -248,11 +250,11 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
   if (departments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-          <Building2 className="h-7 w-7 text-muted-foreground" />
+        <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+          <Building2 className="text-muted-foreground h-7 w-7" />
         </div>
         <h3 className="mt-4 text-lg font-medium">No departments yet</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           Create your first department to get started.
         </p>
       </div>
@@ -278,10 +280,10 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
 
         {filteredDepartments.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <Building2 className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <Building2 className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               No departments match your filters.
             </p>
           </div>
@@ -341,7 +343,9 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
                     return (
                       <TableRow
                         key={dept._id}
-                        data-state={isSelected(dept._id) ? "selected" : undefined}
+                        data-state={
+                          isSelected(dept._id) ? "selected" : undefined
+                        }
                         className="group"
                       >
                         <TableCell>
@@ -362,7 +366,9 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium">{dept.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {dept.name}
+                        </TableCell>
                         <TableCell>
                           {hod ? (
                             <div className="flex items-center gap-2">
@@ -394,7 +400,7 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
                             }
                           >
                             <span
-                              className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${
+                              className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
                                 dept.isActive ? "bg-emerald-500" : "bg-zinc-400"
                               }`}
                             />
@@ -402,7 +408,7 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                          <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
                             <Calendar className="h-3.5 w-3.5" />
                             <span className="tabular-nums">
                               {new Date(dept.createdAt).toLocaleDateString()}
@@ -415,7 +421,7 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="opacity-0 transition-opacity group-hover:opacity-100"
                               >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
@@ -423,7 +429,9 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
                                 onClick={() =>
-                                  setEditDepartment(dept as unknown as IDepartment)
+                                  setEditDepartment(
+                                    dept as unknown as IDepartment,
+                                  )
                                 }
                               >
                                 <Pencil className="mr-2 h-4 w-4" />
@@ -464,8 +472,8 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
+              <div className="bg-destructive/10 flex h-10 w-10 items-center justify-center rounded-full">
+                <AlertTriangle className="text-destructive h-5 w-5" />
               </div>
               <div>
                 <AlertDialogTitle>Delete Department</AlertDialogTitle>

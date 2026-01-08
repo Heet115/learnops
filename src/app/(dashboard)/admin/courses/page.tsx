@@ -39,14 +39,14 @@ export default async function CoursesPage() {
   };
 
   const activeCourses = courses.filter(
-    (c: { isActive: boolean }) => c.isActive
+    (c: { isActive: boolean }) => c.isActive,
   ).length;
   const inactiveCourses = courses.length - activeCourses;
   const ugCourses = courses.filter(
-    (c: { courseType?: string }) => c.courseType === "ug"
+    (c: { courseType?: string }) => c.courseType === "ug",
   ).length;
   const pgCourses = courses.filter(
-    (c: { courseType?: string }) => c.courseType === "pg"
+    (c: { courseType?: string }) => c.courseType === "pg",
   ).length;
 
   const statCards = [
@@ -135,7 +135,7 @@ export default async function CoursesPage() {
                   {stat.badge && (
                     <Badge
                       variant="outline"
-                      className="text-xs border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                      className="border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-600"
                     >
                       {stat.badge}
                     </Badge>
@@ -149,8 +149,8 @@ export default async function CoursesPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <BookOpen className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <BookOpen className="text-primary h-4 w-4" />
               </div>
               <CardTitle>All Courses</CardTitle>
             </div>

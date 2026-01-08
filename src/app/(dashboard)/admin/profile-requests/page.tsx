@@ -34,13 +34,13 @@ export default async function ProfileRequestsPage() {
   };
 
   const pendingCount = requests.filter(
-    (r: { requestStatus: string }) => r.requestStatus === "pending"
+    (r: { requestStatus: string }) => r.requestStatus === "pending",
   ).length;
   const approvedCount = requests.filter(
-    (r: { requestStatus: string }) => r.requestStatus === "approved"
+    (r: { requestStatus: string }) => r.requestStatus === "approved",
   ).length;
   const rejectedCount = requests.filter(
-    (r: { requestStatus: string }) => r.requestStatus === "rejected"
+    (r: { requestStatus: string }) => r.requestStatus === "rejected",
   ).length;
 
   const statCards = [
@@ -131,7 +131,7 @@ export default async function ProfileRequestsPage() {
                   {stat.badge && (
                     <Badge
                       variant="outline"
-                      className="text-xs border-amber-500/30 bg-amber-500/10 text-amber-600"
+                      className="border-amber-500/30 bg-amber-500/10 text-xs text-amber-600"
                     >
                       {stat.badge}
                     </Badge>
@@ -145,8 +145,8 @@ export default async function ProfileRequestsPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <FileEdit className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <FileEdit className="text-primary h-4 w-4" />
               </div>
               <CardTitle>All Requests</CardTitle>
             </div>

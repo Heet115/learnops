@@ -19,8 +19,7 @@ export default async function ProfessorNotificationSettingsPage() {
   ]);
 
   const user = {
-    name:
-      `${dbUser?.firstName || "Professor"} ${dbUser?.lastName || ""}`.trim(),
+    name: `${dbUser?.firstName || "Professor"} ${dbUser?.lastName || ""}`.trim(),
     email: dbUser?.email || "",
     avatar: dbUser?.profileImage,
   };

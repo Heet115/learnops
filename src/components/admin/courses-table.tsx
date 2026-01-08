@@ -16,7 +16,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -81,10 +80,7 @@ interface CourseWithId {
   totalSemesters?: number;
 }
 
-const courseTypeConfig: Record<
-  string,
-  { label: string; color: string }
-> = {
+const courseTypeConfig: Record<string, { label: string; color: string }> = {
   diploma: {
     label: "Diploma",
     color: "border-amber-500/30 bg-amber-500/10 text-amber-600",
@@ -298,11 +294,11 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
   if (courses.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-          <BookOpen className="h-7 w-7 text-muted-foreground" />
+        <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+          <BookOpen className="text-muted-foreground h-7 w-7" />
         </div>
         <h3 className="mt-4 text-lg font-medium">No courses yet</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           Create your first course to get started.
         </p>
       </div>
@@ -328,10 +324,10 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
 
         {filteredCourses.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <BookOpen className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <BookOpen className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               No courses match your filters.
             </p>
           </div>
@@ -419,13 +415,13 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium max-w-[200px] truncate">
+                        <TableCell className="max-w-[200px] truncate font-medium">
                           {course.name}
                         </TableCell>
                         <TableCell>
                           {dept ? (
                             <div className="flex items-center gap-1.5">
-                              <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                              <Building2 className="text-muted-foreground h-3.5 w-3.5" />
                               <Badge variant="outline" className="font-mono">
                                 {dept.code}
                               </Badge>
@@ -448,7 +444,7 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5 text-sm">
-                            <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                            <Clock className="text-muted-foreground h-3.5 w-3.5" />
                             <span className="tabular-nums">
                               {course.duration}{" "}
                               {course.duration === 1 ? "Year" : "Years"}
@@ -457,7 +453,7 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5 text-sm">
-                            <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+                            <Layers className="text-muted-foreground h-3.5 w-3.5" />
                             <span className="tabular-nums">
                               {courseData.totalSemesters || "-"}
                             </span>
@@ -473,7 +469,7 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
                             }
                           >
                             <span
-                              className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${
+                              className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
                                 course.isActive
                                   ? "bg-emerald-500"
                                   : "bg-zinc-400"
@@ -488,7 +484,7 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="opacity-0 transition-opacity group-hover:opacity-100"
                               >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
@@ -528,8 +524,8 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
+              <div className="bg-destructive/10 flex h-10 w-10 items-center justify-center rounded-full">
+                <AlertTriangle className="text-destructive h-5 w-5" />
               </div>
               <div>
                 <AlertDialogTitle>Delete Course</AlertDialogTitle>

@@ -293,11 +293,11 @@ export function StudentAssignmentsTable({
   if (students.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-          <GraduationCap className="h-7 w-7 text-muted-foreground" />
+        <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+          <GraduationCap className="text-muted-foreground h-7 w-7" />
         </div>
         <h3 className="mt-4 text-lg font-medium">No students found</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           Create students first to assign them to classes.
         </p>
       </div>
@@ -323,10 +323,10 @@ export function StudentAssignmentsTable({
 
         {filteredStudents.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <GraduationCap className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+              <GraduationCap className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-3 text-sm">
               No students match your filters.
             </p>
           </div>
@@ -399,14 +399,14 @@ export function StudentAssignmentsTable({
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5">
-                          <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Mail className="text-muted-foreground h-3.5 w-3.5" />
                           <span className="text-sm">{student.email}</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         {student.classId ? (
                           <div className="flex items-center gap-1.5">
-                            <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                            <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
                             <span>
                               {student.classId.name} (
                               {student.classId.academicYear})
@@ -419,7 +419,7 @@ export function StudentAssignmentsTable({
                       <TableCell>
                         {student.classId?.semesterId?.name ? (
                           <div className="flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                            <Calendar className="text-muted-foreground h-3.5 w-3.5" />
                             {student.classId.semesterId.name}
                           </div>
                         ) : (
@@ -429,7 +429,7 @@ export function StudentAssignmentsTable({
                       <TableCell>
                         {student.classId?.semesterId?.courseId ? (
                           <div className="flex items-center gap-1.5">
-                            <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                            <BookOpen className="text-muted-foreground h-3.5 w-3.5" />
                             <Badge variant="outline" className="font-mono">
                               {student.classId.semesterId.courseId.code}
                             </Badge>
@@ -442,7 +442,7 @@ export function StudentAssignmentsTable({
                         {student.classId?.semesterId?.courseId?.departmentId
                           ?.code ? (
                           <div className="flex items-center gap-1.5">
-                            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                            <Building2 className="text-muted-foreground h-3.5 w-3.5" />
                             {
                               student.classId.semesterId.courseId.departmentId
                                 .code
@@ -458,7 +458,7 @@ export function StudentAssignmentsTable({
                             variant="outline"
                             className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
                           >
-                            <span className="inline-block mr-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
                             Assigned
                           </Badge>
                         ) : (
@@ -466,7 +466,7 @@ export function StudentAssignmentsTable({
                             variant="outline"
                             className="border-amber-500/30 bg-amber-500/10 text-amber-600"
                           >
-                            <span className="inline-block mr-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
+                            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
                             Unassigned
                           </Badge>
                         )}
@@ -477,7 +477,7 @@ export function StudentAssignmentsTable({
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="opacity-0 transition-opacity group-hover:opacity-100"
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
@@ -487,7 +487,9 @@ export function StudentAssignmentsTable({
                               onClick={() => setEditingStudent(student)}
                             >
                               <Pencil className="mr-2 h-4 w-4" />
-                              {student.classId ? "Change Class" : "Assign Class"}
+                              {student.classId
+                                ? "Change Class"
+                                : "Assign Class"}
                             </DropdownMenuItem>
                             {student.classId && (
                               <DropdownMenuItem
@@ -544,8 +546,8 @@ export function StudentAssignmentsTable({
         <AlertDialogContent>
           <AlertDialogHeader>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
+              <div className="bg-destructive/10 flex h-10 w-10 items-center justify-center rounded-full">
+                <AlertTriangle className="text-destructive h-5 w-5" />
               </div>
               <div>
                 <AlertDialogTitle>Remove from Class</AlertDialogTitle>

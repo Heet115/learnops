@@ -128,7 +128,7 @@ export default async function HodDashboard() {
                 className={`absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full ${colorMap[stat.color].split(" ")[0]} opacity-50 transition-transform group-hover:scale-150`}
               />
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+                <CardTitle className="text-muted-foreground text-sm font-medium">
                   {stat.title}
                 </CardTitle>
                 <div
@@ -145,7 +145,7 @@ export default async function HodDashboard() {
                   {!stat.showProgress && (
                     <Badge
                       variant="outline"
-                      className="gap-1 text-xs font-normal border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                      className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-xs font-normal text-emerald-600"
                     >
                       <TrendingUp className="h-3 w-3" />
                       Active
@@ -155,7 +155,7 @@ export default async function HodDashboard() {
                 {stat.showProgress ? (
                   <Progress value={stat.progressValue} className="h-2" />
                 ) : (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {stat.description}
                   </p>
                 )}
@@ -188,10 +188,10 @@ export default async function HodDashboard() {
             <CardContent className="flex-1 pt-4">
               {overview.courses.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                    <GraduationCap className="h-6 w-6 text-muted-foreground" />
+                  <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                    <GraduationCap className="text-muted-foreground h-6 w-6" />
                   </div>
-                  <p className="mt-3 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mt-3 text-sm">
                     No courses found
                   </p>
                 </div>
@@ -201,24 +201,24 @@ export default async function HodDashboard() {
                     (course: { _id: string; name: string; code: string }) => (
                       <div
                         key={course._id}
-                        className="group/item flex items-center justify-between rounded-lg border bg-card p-3 transition-all hover:bg-accent/50 hover:shadow-sm"
+                        className="group/item bg-card hover:bg-accent/50 flex items-center justify-between rounded-lg border p-3 transition-all hover:shadow-sm"
                       >
                         <div className="flex items-center gap-3">
                           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10">
                             <GraduationCap className="h-4 w-4 text-violet-600" />
                           </div>
                           <div className="space-y-0.5">
-                            <p className="text-sm font-medium leading-none">
+                            <p className="text-sm leading-none font-medium">
                               {course.name}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               {course.code}
                             </p>
                           </div>
                         </div>
                         <Badge variant="outline">Course</Badge>
                       </div>
-                    )
+                    ),
                   )}
                 </div>
               )}
@@ -234,7 +234,9 @@ export default async function HodDashboard() {
                 </div>
                 <div>
                   <CardTitle>Classes</CardTitle>
-                  <CardDescription>Active classes in department</CardDescription>
+                  <CardDescription>
+                    Active classes in department
+                  </CardDescription>
                 </div>
               </div>
               <Button variant="ghost" size="sm" asChild>
@@ -247,10 +249,10 @@ export default async function HodDashboard() {
             <CardContent className="flex-1 pt-4">
               {overview.classes.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                    <Users className="h-6 w-6 text-muted-foreground" />
+                  <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                    <Users className="text-muted-foreground h-6 w-6" />
                   </div>
-                  <p className="mt-3 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mt-3 text-sm">
                     No classes found
                   </p>
                 </div>
@@ -268,17 +270,17 @@ export default async function HodDashboard() {
                     }) => (
                       <div
                         key={cls._id}
-                        className="group/item flex items-center justify-between rounded-lg border bg-card p-3 transition-all hover:bg-accent/50 hover:shadow-sm"
+                        className="group/item bg-card hover:bg-accent/50 flex items-center justify-between rounded-lg border p-3 transition-all hover:shadow-sm"
                       >
                         <div className="flex items-center gap-3">
                           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
                             <Users className="h-4 w-4 text-blue-600" />
                           </div>
                           <div className="space-y-0.5">
-                            <p className="text-sm font-medium leading-none">
+                            <p className="text-sm leading-none font-medium">
                               {cls.name}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               {cls.semesterId?.courseId?.code} •{" "}
                               {cls.semesterId?.name}
                             </p>
@@ -291,7 +293,7 @@ export default async function HodDashboard() {
                           {cls.academicYear}
                         </Badge>
                       </div>
-                    )
+                    ),
                   )}
                   {overview.classes.length > 5 && (
                     <div className="pt-2 text-center">

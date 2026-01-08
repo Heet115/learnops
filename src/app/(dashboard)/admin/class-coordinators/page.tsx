@@ -43,15 +43,15 @@ export default async function ClassCoordinatorsPage() {
   // Count unique professors assigned as coordinators
   const uniqueProfessors = new Set(
     coordinators.map((c: { professorId?: { _id: unknown } }) =>
-      c.professorId?._id?.toString()
-    )
+      c.professorId?._id?.toString(),
+    ),
   ).size;
 
   // Count unique classes with coordinators
   const uniqueClasses = new Set(
     coordinators.map((c: { classId?: { _id: unknown } }) =>
-      c.classId?._id?.toString()
-    )
+      c.classId?._id?.toString(),
+    ),
   ).size;
 
   // Count unique departments
@@ -61,8 +61,8 @@ export default async function ClassCoordinatorsPage() {
         classId?: {
           semesterId?: { courseId?: { departmentId?: { code: string } } };
         };
-      }) => c.classId?.semesterId?.courseId?.departmentId?.code
-    )
+      }) => c.classId?.semesterId?.courseId?.departmentId?.code,
+    ),
   ).size;
 
   const statCards = [
@@ -154,7 +154,7 @@ export default async function ClassCoordinatorsPage() {
                   {stat.badge && (
                     <Badge
                       variant="outline"
-                      className="text-xs border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                      className="border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-600"
                     >
                       {stat.badge}
                     </Badge>
@@ -168,8 +168,8 @@ export default async function ClassCoordinatorsPage() {
         <Card>
           <CardHeader className="border-b">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <Crown className="h-4 w-4 text-primary" />
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <Crown className="text-primary h-4 w-4" />
               </div>
               <CardTitle>All Class Coordinators</CardTitle>
             </div>

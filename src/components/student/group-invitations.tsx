@@ -93,7 +93,7 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
       <CardContent className="space-y-3 pt-6">
         {localInvites.map((invite) => {
           const acceptedMembers = invite.members.filter(
-            (m) => m.status === "accepted"
+            (m) => m.status === "accepted",
           );
           const deadline = new Date(invite.alaId.deadline);
           const isPastDeadline = deadline < new Date();
@@ -101,7 +101,7 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
           return (
             <div
               key={invite._id}
-              className="space-y-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50"
+              className="bg-card hover:bg-muted/50 space-y-3 rounded-lg border p-4 transition-colors"
             >
               <div className="flex items-start justify-between">
                 <div>

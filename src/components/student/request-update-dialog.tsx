@@ -23,7 +23,6 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { createProfileUpdateRequest } from "@/lib/actions/student-profile.actions";
 import {
   Loader2,
@@ -222,11 +221,11 @@ export function RequestUpdateDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-h-[90vh] p-0 sm:max-w-lg">
-        <DialogHeader className="p-6 pb-0">
+      <DialogContent className="flex max-h-[85vh] flex-col gap-0 p-0 sm:max-w-lg">
+        <DialogHeader className="shrink-0 p-6 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <FileEdit className="h-5 w-5 text-primary" />
+            <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-lg">
+              <FileEdit className="text-primary h-5 w-5" />
             </div>
             <div>
               <DialogTitle>Request Profile Update</DialogTitle>
@@ -237,10 +236,10 @@ export function RequestUpdateDialog({
             </div>
           </div>
         </DialogHeader>
-        <Separator className="mt-4" />
+        <Separator />
 
-        <form onSubmit={handleSubmit}>
-          <ScrollArea className="max-h-[50vh] px-6">
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto px-6">
             <div className="space-y-4 py-4">
               {error && (
                 <Alert variant="destructive">
@@ -283,10 +282,10 @@ export function RequestUpdateDialog({
                           </div>
 
                           {selectedFields.has(field.key) && (
-                            <div className="ml-6 space-y-1.5 rounded-lg border bg-muted/30 p-3">
+                            <div className="bg-muted/30 ml-6 space-y-1.5 rounded-lg border p-3">
                               <p className="text-muted-foreground text-xs">
                                 Current:{" "}
-                                <span className="font-medium text-foreground">
+                                <span className="text-foreground font-medium">
                                   {formatDisplayValue(
                                     field,
                                     currentProfile[
@@ -349,10 +348,10 @@ export function RequestUpdateDialog({
                 );
               })}
             </div>
-          </ScrollArea>
+          </div>
 
-          <Separator />
-          <DialogFooter className="p-6 pt-4">
+          <Separator className="shrink-0" />
+          <DialogFooter className="shrink-0 p-6 pt-4">
             <Button
               type="button"
               variant="outline"
