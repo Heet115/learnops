@@ -15,6 +15,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +37,18 @@ import {
   SimpleSortableHeader,
   PaginationControls,
 } from "@/components/ui/enhanced-data-table";
-import { MoreHorizontal, Pencil, Trash2, Power, PowerOff } from "lucide-react";
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Power,
+  PowerOff,
+  Users2,
+  Calendar,
+  BookOpen,
+  Building2,
+  CalendarRange,
+} from "lucide-react";
 import {
   deleteClass,
   bulkDeleteClasses,
@@ -211,13 +223,11 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
     });
   }, [classes, filters]);
 
-  // Sorting
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
     filteredClasses,
     "name" as keyof ClassItem,
   );
 
-  // Pagination
   const {
     paginatedData,
     currentPage,
@@ -309,8 +319,14 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
 
   if (classes.length === 0) {
     return (
-      <div className="text-muted-foreground py-8 text-center">
-        No classes found. Create your first class to get started.
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+          <Users2 className="h-7 w-7 text-muted-foreground" />
+        </div>
+        <h3 className="mt-4 text-lg font-medium">No classes yet</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Create your first class to get started.
+        </p>
       </div>
     );
   }
@@ -333,113 +349,180 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
         />
 
         {filteredClasses.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center">
-            No classes match your filters.
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <Users2 className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              No classes match your filters.
+            </p>
           </div>
         ) : (
           <>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]">
-                    <SelectAllCheckbox
-                      checked={
-                        isAllSelected
-                          ? true
-                          : isIndeterminate
-                            ? "indeterminate"
-                            : false
-                      }
-                      onCheckedChange={toggleAll}
-                    />
-                  </TableHead>
-                  <SimpleSortableHeader<ClassItem>
-                    label="Name"
-                    sortKey="name"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <TableHead>Semester</TableHead>
-                  <TableHead>Course</TableHead>
-                  <TableHead>Department</TableHead>
-                  <SimpleSortableHeader<ClassItem>
-                    label="Academic Year"
-                    sortKey="academicYear"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[70px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((classItem) => (
-                  <TableRow
-                    key={classItem._id}
-                    data-state={
-                      isSelected(classItem._id) ? "selected" : undefined
-                    }
-                  >
-                    <TableCell>
-                      <SelectRowCheckbox
-                        checked={isSelected(classItem._id)}
-                        onCheckedChange={(checked) =>
-                          toggleRow(classItem._id, checked)
+            <div className="rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="w-[50px]">
+                      <SelectAllCheckbox
+                        checked={
+                          isAllSelected
+                            ? true
+                            : isIndeterminate
+                              ? "indeterminate"
+                              : false
                         }
+                        onCheckedChange={toggleAll}
                       />
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {classItem.name}
-                    </TableCell>
-                    <TableCell>{classItem.semesterId?.name || "N/A"}</TableCell>
-                    <TableCell>
-                      {classItem.semesterId?.courseId?.name || "N/A"} (
-                      {classItem.semesterId?.courseId?.code || ""})
-                    </TableCell>
-                    <TableCell>
-                      {classItem.semesterId?.courseId?.departmentId?.code ||
-                        "N/A"}
-                    </TableCell>
-                    <TableCell>{classItem.academicYear}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={classItem.isActive ? "default" : "secondary"}
-                      >
-                        {classItem.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => setEditingClass(classItem)}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() =>
-                              handleDeleteClick(classItem._id, classItem.name)
-                            }
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+                    </TableHead>
+                    <SimpleSortableHeader<ClassItem>
+                      label="Name"
+                      sortKey="name"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <TableHead>Semester</TableHead>
+                    <TableHead>Course</TableHead>
+                    <TableHead>Department</TableHead>
+                    <SimpleSortableHeader<ClassItem>
+                      label="Academic Year"
+                      sortKey="academicYear"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.map((classItem) => (
+                    <TableRow
+                      key={classItem._id}
+                      data-state={
+                        isSelected(classItem._id) ? "selected" : undefined
+                      }
+                      className="group"
+                    >
+                      <TableCell>
+                        <SelectRowCheckbox
+                          checked={isSelected(classItem._id)}
+                          onCheckedChange={(checked) =>
+                            toggleRow(classItem._id, checked)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                            <Users2 className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <span className="font-medium">{classItem.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {classItem.semesterId?.name ? (
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-sm">
+                              {classItem.semesterId.name}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {classItem.semesterId?.courseId ? (
+                          <div className="flex items-center gap-1.5">
+                            <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                            <Badge variant="outline" className="font-mono">
+                              {classItem.semesterId.courseId.code}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {classItem.semesterId?.courseId?.departmentId ? (
+                          <div className="flex items-center gap-1.5">
+                            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-sm">
+                              {classItem.semesterId.courseId.departmentId.code}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <CalendarRange className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Badge
+                            variant="outline"
+                            className="border-violet-500/30 bg-violet-500/10 text-violet-600 font-mono"
+                          >
+                            {classItem.academicYear}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            classItem.isActive
+                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                              : "border-zinc-500/30 bg-zinc-500/10 text-zinc-600"
+                          }
+                        >
+                          <span
+                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${
+                              classItem.isActive
+                                ? "bg-emerald-500"
+                                : "bg-zinc-400"
+                            }`}
+                          />
+                          {classItem.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => setEditingClass(classItem)}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() =>
+                                handleDeleteClick(classItem._id, classItem.name)
+                              }
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
             <PaginationControls
               pageIndex={currentPage}
               pageSize={pageSize}
