@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import {
   useSimpleSort,
   useTablePagination,
@@ -36,7 +37,18 @@ import {
   PaginationControls,
 } from "@/components/ui/enhanced-data-table";
 import { reviewProfileUpdateRequest } from "@/lib/actions/student-profile.actions";
-import { Check, X, Eye, Loader2 } from "lucide-react";
+import {
+  Check,
+  X,
+  Eye,
+  Loader2,
+  User,
+  FileEdit,
+  Clock,
+  Calendar,
+  MessageSquare,
+  ArrowRight,
+} from "lucide-react";
 import { toast } from "sonner";
 
 interface RequestedChange {
@@ -70,9 +82,21 @@ interface ProfileRequestsTableProps {
 }
 
 const statusConfig = {
-  pending: { label: "Pending", variant: "outline" as const },
-  approved: { label: "Approved", variant: "default" as const },
-  rejected: { label: "Rejected", variant: "destructive" as const },
+  pending: {
+    label: "Pending",
+    className: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+    dotColor: "bg-amber-500",
+  },
+  approved: {
+    label: "Approved",
+    className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
+    dotColor: "bg-emerald-500",
+  },
+  rejected: {
+    label: "Rejected",
+    className: "border-red-500/30 bg-red-500/10 text-red-600",
+    dotColor: "bg-red-500",
+  },
 };
 
 function formatDate(dateString: string) {
@@ -99,7 +123,6 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
     return requests.filter((r) => r.requestStatus === statusFilter);
   }, [requests, statusFilter]);
 
-  // Sorting
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
     filteredRequests,
     "requestedAt" as keyof UpdateRequest,
@@ -147,8 +170,14 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
 
   if (requests.length === 0) {
     return (
-      <div className="text-muted-foreground rounded-lg border py-8 text-center">
-        No profile update requests found.
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+          <FileEdit className="h-7 w-7 text-muted-foreground" />
+        </div>
+        <h3 className="mt-4 text-lg font-medium">No requests found</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Profile update requests will appear here.
+        </p>
       </div>
     );
   }
@@ -173,79 +202,109 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
             </Select>
           </div>
           {pendingCount > 0 && (
-            <Badge variant="secondary">{pendingCount} pending</Badge>
+            <Badge
+              variant="outline"
+              className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+            >
+              <Clock className="mr-1 h-3 w-3" />
+              {pendingCount} pending
+            </Badge>
           )}
         </div>
 
-        <div className="rounded-md border">
+        {filteredRequests.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <FileEdit className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              No requests match your filter.
+            </p>
+          </div>
+        ) : (
           <>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Student</TableHead>
-                  <TableHead>Fields</TableHead>
-                  <SimpleSortableHeader<UpdateRequest>
-                    label="Requested"
-                    sortKey="requestedAt"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((request) => (
-                  <TableRow key={request._id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">
-                          {request.requestedBy.firstName}{" "}
-                          {request.requestedBy.lastName}
-                        </p>
-                        <p className="text-muted-foreground text-sm">
-                          {request.requestedBy.email}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {request.requestedChanges.map((change, idx) => (
-                          <Badge
-                            key={idx}
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {change.fieldLabel}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {formatDate(request.requestedAt)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={statusConfig[request.requestStatus].variant}
-                      >
-                        {statusConfig[request.requestStatus].label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedRequest(request)}
-                      >
-                        <Eye className="mr-1 h-4 w-4" />
-                        View
-                      </Button>
-                    </TableCell>
+            <div className="rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead>Student</TableHead>
+                    <TableHead>Fields</TableHead>
+                    <SimpleSortableHeader<UpdateRequest>
+                      label="Requested"
+                      sortKey="requestedAt"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.map((request) => (
+                    <TableRow key={request._id} className="group">
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/10">
+                            <User className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">
+                              {request.requestedBy.firstName}{" "}
+                              {request.requestedBy.lastName}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {request.requestedBy.email}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {request.requestedChanges.map((change, idx) => (
+                            <Badge
+                              key={idx}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {change.fieldLabel}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {formatDate(request.requestedAt)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={statusConfig[request.requestStatus].className}
+                        >
+                          <span
+                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${statusConfig[request.requestStatus].dotColor}`}
+                          />
+                          {statusConfig[request.requestStatus].label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedRequest(request)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Eye className="mr-1 h-4 w-4" />
+                          View
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
             <PaginationControls
               pageIndex={currentPage}
               pageSize={pageSize}
@@ -257,7 +316,7 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
               onPageSizeChange={setPageSize}
             />
           </>
-        </div>
+        )}
       </div>
 
       {/* Review Dialog */}
@@ -270,29 +329,40 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
       >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Review Profile Update Request</DialogTitle>
-            <DialogDescription>
-              {selectedRequest?.requestedBy.firstName}{" "}
-              {selectedRequest?.requestedBy.lastName} (
-              {selectedRequest?.requestedBy.email})
-            </DialogDescription>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <FileEdit className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <DialogTitle>Review Profile Update Request</DialogTitle>
+                <DialogDescription>
+                  {selectedRequest?.requestedBy.firstName}{" "}
+                  {selectedRequest?.requestedBy.lastName} (
+                  {selectedRequest?.requestedBy.email})
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
+          <Separator className="my-2" />
 
           {selectedRequest && (
             <div className="space-y-4">
               {/* Requested Changes */}
               <div className="space-y-2">
-                <Label>Requested Changes</Label>
-                <div className="divide-y rounded-md border">
+                <Label className="flex items-center gap-2">
+                  <FileEdit className="h-3.5 w-3.5 text-muted-foreground" />
+                  Requested Changes
+                </Label>
+                <div className="divide-y rounded-lg border">
                   {selectedRequest.requestedChanges.map((change, idx) => (
                     <div key={idx} className="space-y-1 p-3">
                       <p className="text-sm font-medium">{change.fieldLabel}</p>
                       <div className="flex items-center gap-2 text-sm">
-                        <span className="text-muted-foreground">
+                        <span className="text-muted-foreground rounded bg-muted px-2 py-0.5">
                           {change.currentValue || "(empty)"}
                         </span>
-                        <span>→</span>
-                        <span className="text-primary font-medium">
+                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="font-medium text-emerald-600 rounded bg-emerald-500/10 px-2 py-0.5">
                           {change.requestedValue}
                         </span>
                       </div>
@@ -303,39 +373,40 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
 
               {/* Status Info for reviewed requests */}
               {selectedRequest.requestStatus !== "pending" && (
-                <div className="bg-muted space-y-1 rounded-md p-3 text-sm">
-                  <p>
-                    <span className="text-muted-foreground">Status: </span>
+                <div className="space-y-2 rounded-lg border bg-muted/50 p-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Status:</span>
                     <Badge
-                      variant={
-                        statusConfig[selectedRequest.requestStatus].variant
-                      }
+                      variant="outline"
+                      className={statusConfig[selectedRequest.requestStatus].className}
                     >
+                      <span
+                        className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${statusConfig[selectedRequest.requestStatus].dotColor}`}
+                      />
                       {statusConfig[selectedRequest.requestStatus].label}
                     </Badge>
-                  </p>
+                  </div>
                   {selectedRequest.reviewedBy && (
-                    <p>
-                      <span className="text-muted-foreground">
-                        Reviewed by:{" "}
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <User className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-muted-foreground">Reviewed by:</span>
                       {selectedRequest.reviewedBy.firstName}{" "}
                       {selectedRequest.reviewedBy.lastName}
-                    </p>
+                    </div>
                   )}
                   {selectedRequest.reviewedAt && (
-                    <p>
-                      <span className="text-muted-foreground">
-                        Reviewed on:{" "}
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-muted-foreground">Reviewed on:</span>
                       {formatDate(selectedRequest.reviewedAt)}
-                    </p>
+                    </div>
                   )}
                   {selectedRequest.reviewComment && (
-                    <p>
-                      <span className="text-muted-foreground">Comment: </span>
-                      {selectedRequest.reviewComment}
-                    </p>
+                    <div className="flex items-start gap-2">
+                      <MessageSquare className="h-3.5 w-3.5 text-muted-foreground mt-0.5" />
+                      <span className="text-muted-foreground">Comment:</span>
+                      <span>{selectedRequest.reviewComment}</span>
+                    </div>
                   )}
                 </div>
               )}
@@ -343,7 +414,13 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
               {/* Review Form for pending requests */}
               {selectedRequest.requestStatus === "pending" && (
                 <div className="space-y-2">
-                  <Label htmlFor="comment">Comment (optional)</Label>
+                  <Label
+                    htmlFor="comment"
+                    className="flex items-center gap-2"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+                    Comment (optional)
+                  </Label>
                   <Textarea
                     id="comment"
                     placeholder="Add a comment for the student..."
@@ -356,6 +433,7 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
             </div>
           )}
 
+          <Separator className="my-2" />
           <DialogFooter>
             {selectedRequest?.requestStatus === "pending" ? (
               <>
@@ -363,6 +441,7 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
                   variant="outline"
                   onClick={() => handleReview("reject")}
                   disabled={isLoading}
+                  className="border-red-500/30 text-red-600 hover:bg-red-500/10"
                 >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
