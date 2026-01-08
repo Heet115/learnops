@@ -33,7 +33,16 @@ import {
   type ExportColumn,
 } from "@/components/ui/data-export";
 import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
-import { Clock, CheckCircle, Lock, AlertCircle } from "lucide-react";
+import {
+  Clock,
+  CheckCircle,
+  Lock,
+  AlertCircle,
+  FileText,
+  BookMarked,
+  GraduationCap,
+  Calendar,
+} from "lucide-react";
 
 interface ALAStatus {
   _id: string;
@@ -96,7 +105,7 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
         ],
       },
     ],
-    [subjectOptions, classOptions],
+    [subjectOptions, classOptions]
   );
 
   const filteredData = useMemo(() => {
@@ -125,7 +134,7 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
     filteredData,
     "deadline" as keyof ALAStatus,
-    "desc",
+    "desc"
   );
 
   // Pagination
@@ -157,13 +166,20 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
   if (data.length === 0) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Recent ALAs</CardTitle>
-          <CardDescription>
-            Latest ALA status and grading progress
-          </CardDescription>
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <FileText className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <CardTitle>Recent ALAs</CardTitle>
+              <CardDescription>
+                Latest ALA status and grading progress
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           <IllustratedEmpty
             preset="noAlas"
             title="No ALAs found"
@@ -187,12 +203,17 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Recent ALAs</CardTitle>
-          <CardDescription>
-            Latest ALA status and grading progress
-          </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between border-b">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+            <FileText className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <CardTitle>Recent ALAs</CardTitle>
+            <CardDescription>
+              Latest ALA status and grading progress
+            </CardDescription>
+          </div>
         </div>
         <DataExportButton
           data={filteredData}
@@ -201,7 +222,7 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
           formats={["csv", "excel"]}
         />
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-4">
         <DataTableFilter
           filters={filterConfigs}
           values={filters}
@@ -219,7 +240,7 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
           <>
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="bg-muted/50">
                   <SimpleSortableHeader<ALAStatus>
                     label="ALA"
                     sortKey="title"
@@ -263,53 +284,86 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
                 {paginatedData.map((ala) => (
                   <TableRow
                     key={ala._id}
-                    className="hover:bg-muted/50 transition-colors"
+                    className="group hover:bg-muted/50 transition-colors"
                   >
-                    <TableCell className="max-w-[200px] truncate font-medium">
-                      {ala.title}
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                          <FileText className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <span className="max-w-[180px] truncate font-medium">
+                          {ala.title}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{ala.subject}</Badge>
+                      <Badge
+                        variant="outline"
+                        className="border-violet-500/30 bg-violet-500/10 text-violet-600"
+                      >
+                        <BookMarked className="mr-1.5 h-3 w-3" />
+                        {ala.subject}
+                      </Badge>
                     </TableCell>
-                    <TableCell>{ala.class}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm tabular-nums">
-                      {formatDeadline(ala.deadline)}
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-sm">
+                        <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                        {ala.class}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground tabular-nums">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {formatDeadline(ala.deadline)}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {ala.isLocked ? (
-                        <Badge variant="secondary" className="gap-1">
+                        <Badge
+                          variant="outline"
+                          className="gap-1 border-muted-foreground/30 text-muted-foreground"
+                        >
                           <Lock className="h-3 w-3" />
                           Locked
                         </Badge>
                       ) : ala.isPast ? (
-                        <Badge variant="destructive" className="gap-1">
+                        <Badge
+                          variant="outline"
+                          className="gap-1 border-red-500/30 bg-red-500/10 text-red-600"
+                        >
                           <AlertCircle className="h-3 w-3" />
                           Overdue
                         </Badge>
                       ) : (
-                        <Badge variant="default" className="gap-1">
-                          <Clock className="h-3 w-3" />
+                        <Badge
+                          variant="outline"
+                          className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                        >
+                          <span className="inline-block mr-1 h-1.5 w-1.5 rounded-full bg-emerald-500" />
                           Active
                         </Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <span className="text-green-600 tabular-nums">
+                        <Badge
+                          variant="outline"
+                          className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 tabular-nums"
+                        >
                           {ala.graded}
-                        </span>
+                        </Badge>
                         <span className="text-muted-foreground">/</span>
                         <span className="tabular-nums">{ala.total}</span>
                         {ala.pending > 0 && (
                           <Badge
                             variant="outline"
-                            className="ml-2 text-orange-600"
+                            className="ml-1 border-amber-500/30 bg-amber-500/10 text-amber-600"
                           >
                             {ala.pending} pending
                           </Badge>
                         )}
                         {ala.graded === ala.total && ala.total > 0 && (
-                          <CheckCircle className="ml-1 h-4 w-4 text-green-500" />
+                          <CheckCircle className="ml-1 h-4 w-4 text-emerald-500" />
                         )}
                       </div>
                     </TableCell>

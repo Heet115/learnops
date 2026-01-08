@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { CalendarDays } from "lucide-react";
 
 interface HeatmapData {
   day: string;
@@ -40,10 +41,10 @@ export function SubmissionHeatmap({ data }: SubmissionHeatmapProps) {
   const getColor = (count: number) => {
     if (count === 0) return "bg-muted";
     const intensity = count / maxCount;
-    if (intensity < 0.25) return "bg-green-200 dark:bg-green-900";
-    if (intensity < 0.5) return "bg-green-400 dark:bg-green-700";
-    if (intensity < 0.75) return "bg-green-500 dark:bg-green-600";
-    return "bg-green-600 dark:bg-green-500";
+    if (intensity < 0.25) return "bg-emerald-200 dark:bg-emerald-900";
+    if (intensity < 0.5) return "bg-emerald-400 dark:bg-emerald-700";
+    if (intensity < 0.75) return "bg-emerald-500 dark:bg-emerald-600";
+    return "bg-emerald-600 dark:bg-emerald-500";
   };
 
   const formatHour = (hour: number) => {
@@ -56,13 +57,20 @@ export function SubmissionHeatmap({ data }: SubmissionHeatmapProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Submission Heatmap</CardTitle>
-        <CardDescription>
-          When students submit their work ({totalSubmissions} total)
-        </CardDescription>
+      <CardHeader className="border-b">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+            <CalendarDays className="h-4 w-4 text-amber-600" />
+          </div>
+          <div>
+            <CardTitle>Submission Heatmap</CardTitle>
+            <CardDescription>
+              When students submit their work ({totalSubmissions} total)
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-4">
         <div className="overflow-x-auto">
           <div className="min-w-[600px]">
             {/* Hour labels */}
@@ -85,7 +93,7 @@ export function SubmissionHeatmap({ data }: SubmissionHeatmapProps) {
             <TooltipProvider>
               {days.map((day) => (
                 <div key={day} className="mb-1 flex items-center">
-                  <div className="text-muted-foreground w-10 text-xs">
+                  <div className="text-muted-foreground w-10 text-xs font-medium">
                     {day}
                   </div>
                   <div className="flex flex-1 gap-0.5">
@@ -116,10 +124,10 @@ export function SubmissionHeatmap({ data }: SubmissionHeatmapProps) {
             <div className="mt-4 flex items-center justify-end gap-2">
               <span className="text-muted-foreground text-xs">Less</span>
               <div className="bg-muted h-3 w-3 rounded-sm" />
-              <div className="h-3 w-3 rounded-sm bg-green-200 dark:bg-green-900" />
-              <div className="h-3 w-3 rounded-sm bg-green-400 dark:bg-green-700" />
-              <div className="h-3 w-3 rounded-sm bg-green-500 dark:bg-green-600" />
-              <div className="h-3 w-3 rounded-sm bg-green-600 dark:bg-green-500" />
+              <div className="h-3 w-3 rounded-sm bg-emerald-200 dark:bg-emerald-900" />
+              <div className="h-3 w-3 rounded-sm bg-emerald-400 dark:bg-emerald-700" />
+              <div className="h-3 w-3 rounded-sm bg-emerald-500 dark:bg-emerald-600" />
+              <div className="h-3 w-3 rounded-sm bg-emerald-600 dark:bg-emerald-500" />
               <span className="text-muted-foreground text-xs">More</span>
             </div>
           </div>

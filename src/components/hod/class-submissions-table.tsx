@@ -34,6 +34,7 @@ import {
   type ExportColumn,
 } from "@/components/ui/data-export";
 import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
+import { GraduationCap, Users, Layers } from "lucide-react";
 
 interface ClassSubmission {
   name: string;
@@ -75,7 +76,7 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
         options: courseOptions,
       },
     ],
-    [courseOptions],
+    [courseOptions]
   );
 
   const filteredData = useMemo(() => {
@@ -94,7 +95,7 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
     filteredData,
     "name" as keyof ClassSubmission,
-    "asc",
+    "asc"
   );
 
   // Pagination
@@ -125,13 +126,20 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
   if (data.length === 0) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Submissions by Class</CardTitle>
-          <CardDescription>
-            Track submission progress across classes
-          </CardDescription>
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+              <GraduationCap className="h-4 w-4 text-blue-600" />
+            </div>
+            <div>
+              <CardTitle>Submissions by Class</CardTitle>
+              <CardDescription>
+                Track submission progress across classes
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           <IllustratedEmpty
             preset="noClasses"
             title="No class data available"
@@ -145,12 +153,17 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Submissions by Class</CardTitle>
-          <CardDescription>
-            Track submission progress across classes
-          </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between border-b">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+            <GraduationCap className="h-4 w-4 text-blue-600" />
+          </div>
+          <div>
+            <CardTitle>Submissions by Class</CardTitle>
+            <CardDescription>
+              Track submission progress across classes
+            </CardDescription>
+          </div>
         </div>
         <DataExportButton
           data={filteredData}
@@ -159,7 +172,7 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
           formats={["csv", "excel"]}
         />
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-4">
         <DataTableFilter
           filters={filterConfigs}
           values={filters}
@@ -177,7 +190,7 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
           <>
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="bg-muted/50">
                   <SimpleSortableHeader<ClassSubmission>
                     label="Class"
                     sortKey="name"
@@ -228,37 +241,59 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
                   return (
                     <TableRow
                       key={index}
-                      className="hover:bg-muted/50 transition-colors"
+                      className="group hover:bg-muted/50 transition-colors"
                     >
-                      <TableCell className="font-medium">{cls.name}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{cls.course}</Badge>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                            <GraduationCap className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <span className="font-medium">{cls.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className="border-violet-500/30 bg-violet-500/10 text-violet-600"
+                        >
+                          <Layers className="mr-1.5 h-3 w-3" />
+                          {cls.course}
+                        </Badge>
                         <span className="text-muted-foreground ml-2 text-xs">
                           {cls.semester}
                         </span>
                       </TableCell>
-                      <TableCell className="text-center tabular-nums">
-                        {cls.students}
+                      <TableCell className="text-center">
+                        <Badge
+                          variant="outline"
+                          className="border-blue-500/30 bg-blue-500/10 text-blue-600"
+                        >
+                          <Users className="mr-1.5 h-3 w-3" />
+                          {cls.students}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-center tabular-nums">
                         {cls.submitted}
                       </TableCell>
                       <TableCell className="text-center">
-                        <span className="text-green-600 tabular-nums">
+                        <Badge
+                          variant="outline"
+                          className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                        >
                           {cls.graded}
-                        </span>
+                        </Badge>
                         {cls.pending > 0 && (
-                          <span className="text-muted-foreground ml-1 text-xs">
-                            ({cls.pending} pending)
-                          </span>
+                          <Badge
+                            variant="outline"
+                            className="ml-1.5 border-amber-500/30 bg-amber-500/10 text-amber-600"
+                          >
+                            {cls.pending} pending
+                          </Badge>
                         )}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Progress
-                            value={progressPercent}
-                            className="h-2 w-20"
-                          />
+                          <Progress value={progressPercent} className="h-2 w-20" />
                           <span className="text-muted-foreground w-10 text-xs tabular-nums">
                             {progressPercent}%
                           </span>

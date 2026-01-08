@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TrendingUp } from "lucide-react";
 
 interface SubmissionTrendsChartProps {
   data: { date: string; submitted: number; graded: number }[];
@@ -63,13 +64,18 @@ export function SubmissionTrendsChart({ data }: SubmissionTrendsChartProps) {
   }, [filteredData]);
 
   return (
-    <Card className="pt-0">
+    <Card>
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
-        <div className="grid flex-1 gap-1">
-          <CardTitle>Submission Trends</CardTitle>
-          <CardDescription>
-            {totals.submitted} submissions, {totals.graded} graded
-          </CardDescription>
+        <div className="flex items-center gap-2 flex-1">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+            <TrendingUp className="h-4 w-4 text-blue-600" />
+          </div>
+          <div className="grid gap-1">
+            <CardTitle>Submission Trends</CardTitle>
+            <CardDescription>
+              {totals.submitted} submissions, {totals.graded} graded
+            </CardDescription>
+          </div>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger

@@ -14,6 +14,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { Users } from "lucide-react";
 
 interface ProfessorActivityChartProps {
   data: { name: string; graded: number; pending: number }[];
@@ -37,14 +38,26 @@ export function ProfessorActivityChart({ data }: ProfessorActivityChartProps) {
   if (data.length === 0) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Professor Activity</CardTitle>
-          <CardDescription>Grading performance by professor</CardDescription>
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+              <Users className="h-4 w-4 text-violet-600" />
+            </div>
+            <div>
+              <CardTitle>Professor Activity</CardTitle>
+              <CardDescription>Grading performance by professor</CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="flex h-[300px] items-center justify-center">
-          <p className="text-muted-foreground text-sm">
-            No activity data available
-          </p>
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <Users className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              No activity data available
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -52,13 +65,20 @@ export function ProfessorActivityChart({ data }: ProfessorActivityChartProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Professor Activity</CardTitle>
-        <CardDescription>
-          {totalGraded} graded, {totalPending} pending review
-        </CardDescription>
+      <CardHeader className="border-b">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+            <Users className="h-4 w-4 text-violet-600" />
+          </div>
+          <div>
+            <CardTitle>Professor Activity</CardTitle>
+            <CardDescription>
+              {totalGraded} graded, {totalPending} pending review
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-4">
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <BarChart
             data={data.slice(0, 8)}
