@@ -16,9 +16,13 @@ interface ViewTransition {
 }
 
 // Helper to call startViewTransition with proper typing
-const startViewTransition = (callback: () => void | Promise<void>): ViewTransition | undefined => {
+const startViewTransition = (
+  callback: () => void | Promise<void>,
+): ViewTransition | undefined => {
   const doc = document as Document & {
-    startViewTransition?: (callback: () => void | Promise<void>) => ViewTransition;
+    startViewTransition?: (
+      callback: () => void | Promise<void>,
+    ) => ViewTransition;
   };
   return doc.startViewTransition?.(callback);
 };
@@ -57,17 +61,12 @@ const Skiper26 = () => {
       </div>
 
       <div className="text-foreground grid content-start justify-items-center gap-6 py-20 text-center">
-        <span className="after:from-background after:to-foreground relative max-w-[12ch] text-xs uppercase leading-tight opacity-40 after:absolute after:left-1/2 after:top-full after:h-16 after:w-px after:bg-linear-to-b after:content-['']">
+        <span className="after:from-background after:to-foreground relative max-w-[12ch] text-xs leading-tight uppercase opacity-40 after:absolute after:top-full after:left-1/2 after:h-16 after:w-px after:bg-linear-to-b after:content-['']">
           Click to toggle the theme
         </span>
       </div>
 
-      <ThemeToggleButton
-        variant={variant}
-        start={start}
-        blur={blur}
-        gifUrl={gifUrl}
-      />
+      <ThemeToggleButton className="size-10" />
       <Options
         variant={variant}
         start={start}
@@ -112,7 +111,7 @@ const Options = ({
   return (
     <motion.div
       drag
-      className="top-30 border-foreground/10 bg-muted2 absolute right-1/2 flex w-[245px] translate-x-1/2 flex-col gap-3 rounded-3xl border p-3 backdrop-blur-sm lg:right-4 lg:translate-x-0"
+      className="border-foreground/10 bg-muted2 absolute top-30 right-1/2 flex w-[245px] translate-x-1/2 flex-col gap-3 rounded-3xl border p-3 backdrop-blur-sm lg:right-4 lg:translate-x-0"
     >
       <div className="flex items-center justify-between">
         <span className="size-4 cursor-grab active:cursor-grabbing">
@@ -126,7 +125,7 @@ const Options = ({
 
       <div className="flex flex-col">
         <div className="mt-1 flex justify-between py-1">
-          <p className="w-20 whitespace-nowrap text-sm opacity-50">variant :</p>
+          <p className="w-20 text-sm whitespace-nowrap opacity-50">variant :</p>
           <div className="flex flex-wrap items-center justify-end gap-1">
             <button
               onClick={() => setVariant("circle")}
@@ -187,7 +186,7 @@ const Options = ({
         </div>
 
         <div className="mt-1 flex justify-between py-1">
-          <p className="w-20 whitespace-nowrap text-sm opacity-50">blur :</p>
+          <p className="w-20 text-sm whitespace-nowrap opacity-50">blur :</p>
           <div className="flex flex-wrap items-center justify-end gap-1">
             <button
               onClick={() => setBlur(false)}
@@ -220,7 +219,7 @@ const Options = ({
           variant === "polygon" ||
           variant === "circle-blur") && (
           <div className="mt-1 flex justify-between py-1">
-            <p className="w-20 whitespace-nowrap text-sm opacity-50">start :</p>
+            <p className="w-20 text-sm whitespace-nowrap opacity-50">start :</p>
             <div className="flex flex-wrap items-center justify-end gap-1">
               {/* Show center option only for circle and circle-blur */}
               {(variant === "circle" || variant === "circle-blur") && (
@@ -606,52 +605,67 @@ export const ThemeToggleButton = ({
   variant = "circle",
   start = "center",
   blur = false,
-  gifUrl = "",
 }: {
   className?: string;
   variant?: AnimationVariant;
   start?: AnimationStart;
   blur?: boolean;
-  gifUrl?: string;
 }) => {
-  const { isDark, toggleTheme } = useThemeToggle({
-    variant,
-    start,
-    blur,
-    gifUrl,
-  });
+  const { isDark, toggleTheme } = useThemeToggle({ variant, start, blur });
 
   return (
     <button
       type="button"
       className={cn(
-        "size-10 cursor-pointer rounded-full bg-black p-0 transition-all duration-300 active:scale-95",
+        "rounded-full transition-all duration-300 active:scale-95",
+        isDark ? "bg-black text-white" : "bg-white text-black",
         className,
       )}
       onClick={toggleTheme}
       aria-label="Toggle theme"
     >
       <span className="sr-only">Toggle theme</span>
-      <svg viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <motion.g
-          animate={{ rotate: isDark ? -180 : 0 }}
-          transition={{ ease: "easeInOut", duration: 0.5 }}
-        >
-          <path
-            d="M120 67.5C149.25 67.5 172.5 90.75 172.5 120C172.5 149.25 149.25 172.5 120 172.5"
-            fill="white"
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        fill="currentColor"
+        strokeLinecap="round"
+        viewBox="0 0 32 32"
+      >
+        <clipPath id="skiper-btn-2">
+          <motion.path
+            animate={{ y: isDark ? 10 : 0, x: isDark ? -12 : 0 }}
+            transition={{ ease: "easeInOut", duration: 0.35 }}
+            d="M0-5h30a1 1 0 0 0 9 13v24H0Z"
           />
-          <path
-            d="M120 67.5C90.75 67.5 67.5 90.75 67.5 120C67.5 149.25 90.75 172.5 120 172.5"
-            fill="black"
+        </clipPath>
+        <g clipPath="url(#skiper-btn-2)">
+          <motion.circle
+            animate={{ r: isDark ? 10 : 8 }}
+            transition={{ ease: "easeInOut", duration: 0.35 }}
+            cx="16"
+            cy="16"
           />
-        </motion.g>
-        <motion.path
-          animate={{ rotate: isDark ? 180 : 0 }}
-          transition={{ ease: "easeInOut", duration: 0.5 }}
-          d="M120 3.75C55.5 3.75 3.75 55.5 3.75 120C3.75 184.5 55.5 236.25 120 236.25C184.5 236.25 236.25 184.5 236.25 120C236.25 55.5 184.5 3.75 120 3.75ZM120 214.5V172.5C90.75 172.5 67.5 149.25 67.5 120C67.5 90.75 90.75 67.5 120 67.5V25.5C172.5 25.5 214.5 67.5 214.5 120C214.5 172.5 172.5 214.5 120 214.5Z"
-          fill="white"
-        />
+          <motion.g
+            animate={{
+              rotate: isDark ? -100 : 0,
+              scale: isDark ? 0.5 : 1,
+              opacity: isDark ? 0 : 1,
+            }}
+            transition={{ ease: "easeInOut", duration: 0.35 }}
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <path d="M16 5.5v-4" />
+            <path d="M16 30.5v-4" />
+            <path d="M1.5 16h4" />
+            <path d="M26.5 16h4" />
+            <path d="m23.4 8.6 2.8-2.8" />
+            <path d="m5.7 26.3 2.9-2.9" />
+            <path d="m5.8 5.8 2.8 2.8" />
+            <path d="m23.4 23.4 2.9 2.9" />
+          </motion.g>
+        </g>
       </svg>
     </button>
   );
