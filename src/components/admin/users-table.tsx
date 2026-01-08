@@ -367,8 +367,14 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
 
   if (users.length === 0) {
     return (
-      <div className="text-muted-foreground py-8 text-center">
-        No users found. Create your first user to get started.
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+          <Users className="h-7 w-7 text-muted-foreground" />
+        </div>
+        <h3 className="mt-4 text-lg font-medium">No users yet</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Create your first user to get started.
+        </p>
       </div>
     );
   }
@@ -407,15 +413,20 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
         />
 
         {sortedData.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center">
-            No users match your filters.
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <Users className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              No users match your filters.
+            </p>
           </div>
         ) : (
           <>
-            <div className="rounded-md border">
+            <div className="rounded-lg border">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
                     <TableHead className="w-[50px]">
                       <SelectAllCheckbox
                         checked={
@@ -451,7 +462,7 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                     <TableRow
                       key={user._id}
                       data-state={isSelected(user._id) ? "selected" : undefined}
-                      className="transition-colors"
+                      className="group"
                     >
                       <TableCell>
                         <SelectRowCheckbox
@@ -488,8 +499,18 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={user.isActive ? "default" : "destructive"}
+                          variant="outline"
+                          className={
+                            user.isActive
+                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                              : "border-zinc-500/30 bg-zinc-500/10 text-zinc-600"
+                          }
                         >
+                          <span
+                            className={`mr-1.5 h-1.5 w-1.5 rounded-full ${
+                              user.isActive ? "bg-emerald-500" : "bg-zinc-400"
+                            }`}
+                          />
                           {user.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>

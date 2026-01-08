@@ -22,9 +22,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import { DatePicker } from "@/components/ui/date-time-picker";
 import { createSemester } from "@/lib/actions/academic.actions";
-import { Loader2, Plus } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  Calendar,
+  BookOpen,
+  Hash,
+  CalendarDays,
+  Info,
+} from "lucide-react";
 import { ICourse } from "@/lib/db";
 import { toast } from "sonner";
 
@@ -82,6 +91,12 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
     setIsLoading(false);
   };
 
+  const selectedCourse = courses.find(
+    (c) =>
+      (c._id as unknown as { toString(): string }).toString() ===
+      formData.courseId
+  );
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -92,9 +107,21 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Semester</DialogTitle>
-          <DialogDescription>Add a new semester to a course</DialogDescription>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+              <Calendar className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <DialogTitle>Create Semester</DialogTitle>
+              <DialogDescription>
+                Add a new semester to a course
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
+
+        <Separator />
+
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             {error && (
@@ -102,8 +129,12 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+
             <div className="space-y-2">
-              <Label htmlFor="course">Course</Label>
+              <Label htmlFor="course" className="flex items-center gap-2">
+                <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                Course
+              </Label>
               <Select
                 value={formData.courseId}
                 onValueChange={(value) =>
@@ -111,7 +142,7 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
                 }
                 disabled={isLoading}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-10">
                   <SelectValue placeholder="Select course" />
                 </SelectTrigger>
                 <SelectContent>
@@ -124,15 +155,29 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
                         course._id as unknown as { toString(): string }
                       ).toString()}
                     >
-                      {course.name} ({course.code})
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs text-muted-foreground">
+                          {course.code}
+                        </span>
+                        <span>{course.name}</span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {selectedCourse && (
+                <p className="text-xs text-muted-foreground">
+                  Selected: {selectedCourse.name}
+                </p>
+              )}
             </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Semester Name</Label>
+                <Label htmlFor="name" className="flex items-center gap-2">
+                  <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                  Semester Name
+                </Label>
                 <Input
                   id="name"
                   placeholder="e.g., Semester 1"
@@ -142,10 +187,15 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
                   }
                   required
                   disabled={isLoading}
+                  className="h-10"
                 />
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="number">Semester Number</Label>
+                <Label htmlFor="number" className="flex items-center gap-2">
+                  <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+                  Semester Number
+                </Label>
                 <Select
                   value={formData.number.toString()}
                   onValueChange={(value) =>
@@ -153,39 +203,63 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
                   }
                   disabled={isLoading}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((num) => (
                       <SelectItem key={num} value={num.toString()}>
-                        {num}
+                        <div className="flex items-center gap-2">
+                          <span className="flex h-5 w-5 items-center justify-center rounded bg-muted text-xs font-medium">
+                            {num}
+                          </span>
+                          <span>Semester {num}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <DatePicker
-                id="startDate"
-                label="Start Date (Optional)"
-                value={startDate}
-                onChange={setStartDate}
-                disabled={isLoading}
-                placeholder="Select start date"
-              />
-              <DatePicker
-                id="endDate"
-                label="End Date (Optional)"
-                value={endDate}
-                onChange={setEndDate}
-                disabled={isLoading}
-                placeholder="Select end date"
-              />
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+                Duration
+                <span className="text-xs text-muted-foreground">(Optional)</span>
+              </Label>
+              <div className="grid grid-cols-2 gap-4">
+                <DatePicker
+                  id="startDate"
+                  label=""
+                  value={startDate}
+                  onChange={setStartDate}
+                  disabled={isLoading}
+                  placeholder="Start date"
+                />
+                <DatePicker
+                  id="endDate"
+                  label=""
+                  value={endDate}
+                  onChange={setEndDate}
+                  disabled={isLoading}
+                  placeholder="End date"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2 rounded-lg border bg-muted/30 p-3">
+              <Info className="mt-0.5 h-4 w-4 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">
+                Semesters are typically auto-created when you create a course.
+                Use this form to add additional semesters if needed.
+              </p>
             </div>
           </div>
-          <DialogFooter>
+
+          <Separator />
+
+          <DialogFooter className="pt-4">
             <Button
               type="button"
               variant="outline"
@@ -201,7 +275,10 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
                   Creating...
                 </>
               ) : (
-                "Create"
+                <>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Semester
+                </>
               )}
             </Button>
           </DialogFooter>
