@@ -17,7 +17,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import {
   DataTableFilter,
   FilterConfig,
@@ -35,7 +45,18 @@ import {
   SimpleSortableHeader,
   PaginationControls,
 } from "@/components/ui/enhanced-data-table";
-import { MoreHorizontal, Pencil, Trash2, Crown } from "lucide-react";
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Crown,
+  User,
+  GraduationCap,
+  Calendar,
+  BookOpen,
+  Building2,
+  AlertTriangle,
+} from "lucide-react";
 import {
   deleteClassCoordinator,
   bulkDeleteClassCoordinators,
@@ -90,15 +111,9 @@ export function ClassCoordinatorsTable({
 }: ClassCoordinatorsTableProps) {
   const [editingCoordinator, setEditingCoordinator] =
     useState<ClassCoordinator | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<{
-    open: boolean;
-    id: string;
-    className: string;
-  }>({
-    open: false,
-    id: "",
-    className: "",
-  });
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteClassName, setDeleteClassName] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const [filters, setFilters] = useState<FilterValue>({
     search: "",
@@ -185,7 +200,6 @@ export function ClassCoordinatorsTable({
     });
   }, [coordinators, filters]);
 
-  // Sorting
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
     filteredCoordinators,
     "academicYear" as keyof ClassCoordinator,
@@ -235,27 +249,38 @@ export function ClassCoordinatorsTable({
   );
 
   const handleDeleteClick = (id: string, className: string) => {
-    setDeleteConfirm({ open: true, id, className });
+    setDeleteId(id);
+    setDeleteClassName(className);
   };
 
-  const handleDeleteConfirm = async () => {
-    const { id } = deleteConfirm;
-    setDeleteConfirm({ open: false, id: "", className: "" });
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsLoading(true);
 
-    const result = await deleteClassCoordinator(id);
+    const result = await deleteClassCoordinator(deleteId);
+
     if (result.success) {
       toast.success("Coordinator removed successfully");
+      setDeleteId(null);
+      setDeleteClassName("");
       router.refresh();
     } else {
       toast.error(result.error || "Failed to remove coordinator");
     }
+
+    setIsLoading(false);
   };
 
   if (coordinators.length === 0) {
     return (
-      <div className="text-muted-foreground py-8 text-center">
-        No class coordinators assigned yet. Assign your first coordinator to get
-        started.
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+          <Crown className="h-7 w-7 text-muted-foreground" />
+        </div>
+        <h3 className="mt-4 text-lg font-medium">No coordinators assigned</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Assign your first class coordinator to get started.
+        </p>
       </div>
     );
   }
@@ -278,121 +303,158 @@ export function ClassCoordinatorsTable({
         />
 
         {filteredCoordinators.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center">
-            No coordinators match your filters.
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <Crown className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              No coordinators match your filters.
+            </p>
           </div>
         ) : (
           <>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]">
-                    <SelectAllCheckbox
-                      checked={
-                        isAllSelected
-                          ? true
-                          : isIndeterminate
-                            ? "indeterminate"
-                            : false
-                      }
-                      onCheckedChange={toggleAll}
-                    />
-                  </TableHead>
-                  <TableHead>Class</TableHead>
-                  <TableHead>Semester</TableHead>
-                  <TableHead>Course</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Coordinator</TableHead>
-                  <SimpleSortableHeader<ClassCoordinator>
-                    label="Academic Year"
-                    sortKey="academicYear"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <TableHead className="w-[70px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((coordinator) => (
-                  <TableRow
-                    key={coordinator._id}
-                    data-state={
-                      isSelected(coordinator._id) ? "selected" : undefined
-                    }
-                  >
-                    <TableCell>
-                      <SelectRowCheckbox
-                        checked={isSelected(coordinator._id)}
-                        onCheckedChange={(checked) =>
-                          toggleRow(coordinator._id, checked)
+            <div className="rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="w-[50px]">
+                      <SelectAllCheckbox
+                        checked={
+                          isAllSelected
+                            ? true
+                            : isIndeterminate
+                              ? "indeterminate"
+                              : false
                         }
+                        onCheckedChange={toggleAll}
                       />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Crown className="h-4 w-4 text-yellow-500" />
-                        <span className="font-medium">
-                          {coordinator.classId?.name || "N/A"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {coordinator.classId?.semesterId?.name || "N/A"}
-                    </TableCell>
-                    <TableCell>
-                      {coordinator.classId?.semesterId?.courseId?.name || "N/A"}{" "}
-                      ({coordinator.classId?.semesterId?.courseId?.code || ""})
-                    </TableCell>
-                    <TableCell>
-                      {coordinator.classId?.semesterId?.courseId?.departmentId
-                        ?.code || "N/A"}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <span>
-                          {coordinator.professorId?.firstName}{" "}
-                          {coordinator.professorId?.lastName}
-                        </span>
-                        <p className="text-muted-foreground text-sm">
-                          {coordinator.professorId?.email}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>{coordinator.academicYear}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => setEditingCoordinator(coordinator)}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Change Coordinator
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() =>
-                              handleDeleteClick(
-                                coordinator._id,
-                                coordinator.classId?.name || "",
-                              )
-                            }
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Remove
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+                    </TableHead>
+                    <TableHead>Class</TableHead>
+                    <TableHead>Semester</TableHead>
+                    <TableHead>Course</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead>Coordinator</TableHead>
+                    <SimpleSortableHeader<ClassCoordinator>
+                      label="Academic Year"
+                      sortKey="academicYear"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.map((coordinator) => (
+                    <TableRow
+                      key={coordinator._id}
+                      data-state={
+                        isSelected(coordinator._id) ? "selected" : undefined
+                      }
+                      className="group"
+                    >
+                      <TableCell>
+                        <SelectRowCheckbox
+                          checked={isSelected(coordinator._id)}
+                          onCheckedChange={(checked) =>
+                            toggleRow(coordinator._id, checked)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+                            <Crown className="h-4 w-4 text-amber-600" />
+                          </div>
+                          <span className="font-medium">
+                            {coordinator.classId?.name || "N/A"}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                          {coordinator.classId?.semesterId?.name || "N/A"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Badge variant="outline" className="font-mono">
+                            {coordinator.classId?.semesterId?.courseId?.code ||
+                              "N/A"}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>
+                            {coordinator.classId?.semesterId?.courseId
+                              ?.departmentId?.code || "N/A"}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-500/10">
+                            <User className="h-3.5 w-3.5 text-violet-600" />
+                          </div>
+                          <div>
+                            <span className="font-medium">
+                              {coordinator.professorId?.firstName}{" "}
+                              {coordinator.professorId?.lastName}
+                            </span>
+                            <p className="text-xs text-muted-foreground">
+                              {coordinator.professorId?.email}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 tabular-nums">
+                          <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                          {coordinator.academicYear}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => setEditingCoordinator(coordinator)}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Change Coordinator
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() =>
+                                handleDeleteClick(
+                                  coordinator._id,
+                                  coordinator.classId?.name || "",
+                                )
+                              }
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Remove
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
             <PaginationControls
               pageIndex={currentPage}
               pageSize={pageSize}
@@ -416,17 +478,40 @@ export function ClassCoordinatorsTable({
         />
       )}
 
-      <ConfirmDialog
-        open={deleteConfirm.open}
-        onOpenChange={(open) =>
-          !open && setDeleteConfirm({ open: false, id: "", className: "" })
-        }
-        title="Remove Coordinator"
-        description={`Are you sure you want to remove the coordinator for "${deleteConfirm.className}"?`}
-        confirmText="Remove"
-        variant="destructive"
-        onConfirm={handleDeleteConfirm}
-      />
+      <AlertDialog
+        open={!!deleteId}
+        onOpenChange={() => {
+          setDeleteId(null);
+          setDeleteClassName("");
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <AlertDialogTitle>Remove Coordinator</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to remove the coordinator for &quot;
+                  {deleteClassName}&quot;?
+                </AlertDialogDescription>
+              </div>
+            </div>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isLoading}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {isLoading ? "Removing..." : "Remove"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

@@ -19,6 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import {
+  Pencil,
+  GraduationCap,
+  User,
+  CalendarDays,
+  Building2,
+} from "lucide-react";
 import { assignClassCoordinator } from "@/lib/actions/academic.actions";
 import { toast } from "sonner";
 
@@ -97,15 +105,29 @@ export function EditCoordinatorDialog({
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Change Class Coordinator</DialogTitle>
-            <DialogDescription>
-              Update the coordinator for this class
-            </DialogDescription>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Pencil className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <DialogTitle>Change Class Coordinator</DialogTitle>
+                <DialogDescription>
+                  Update the coordinator for this class
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <Separator className="my-4" />
+          <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label>Class</Label>
-              <div className="bg-muted rounded-md border px-3 py-2 text-sm">
+              <Label className="flex items-center gap-2">
+                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                Class
+              </Label>
+              <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
+                <div className="flex h-6 w-6 items-center justify-center rounded bg-amber-500/10">
+                  <Building2 className="h-3.5 w-3.5 text-amber-600" />
+                </div>
                 {coordinator.classId?.semesterId?.courseId?.departmentId?.code}{" "}
                 - {coordinator.classId?.semesterId?.courseId?.code} -{" "}
                 {coordinator.classId?.semesterId?.name} -{" "}
@@ -114,14 +136,23 @@ export function EditCoordinatorDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label>Academic Year</Label>
-              <div className="bg-muted rounded-md border px-3 py-2 text-sm">
+              <Label className="flex items-center gap-2">
+                <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+                Academic Year
+              </Label>
+              <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
+                <div className="flex h-6 w-6 items-center justify-center rounded bg-blue-500/10">
+                  <CalendarDays className="h-3.5 w-3.5 text-blue-600" />
+                </div>
                 {coordinator.academicYear}
               </div>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="professorId">New Coordinator</Label>
+              <Label htmlFor="professorId" className="flex items-center gap-2">
+                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                New Coordinator
+              </Label>
               <Select
                 name="professorId"
                 defaultValue={coordinator.professorId?._id}
@@ -132,13 +163,22 @@ export function EditCoordinatorDialog({
                 <SelectContent>
                   {professors.map((prof) => (
                     <SelectItem key={prof._id} value={prof._id}>
-                      {prof.firstName} {prof.lastName} ({prof.email})
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-500/10">
+                          <User className="h-3 w-3 text-violet-600" />
+                        </div>
+                        {prof.firstName} {prof.lastName}
+                        <span className="text-muted-foreground text-xs">
+                          ({prof.email})
+                        </span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
+          <Separator className="my-4" />
           <DialogFooter>
             <Button
               type="button"

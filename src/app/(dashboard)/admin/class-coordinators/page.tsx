@@ -10,7 +10,14 @@ import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
 import { ClassCoordinatorsTable } from "@/components/admin/class-coordinators-table";
 import { AssignCoordinatorDialog } from "@/components/admin/assign-coordinator-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Crown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Crown,
+  Users,
+  GraduationCap,
+  Building2,
+  TrendingUp,
+} from "lucide-react";
 
 export default async function ClassCoordinatorsPage() {
   const { sessionClaims } = await auth();
@@ -33,6 +40,69 @@ export default async function ClassCoordinatorsPage() {
     avatar: dbUser?.profileImage,
   };
 
+  // Count unique professors assigned as coordinators
+  const uniqueProfessors = new Set(
+    coordinators.map((c: { professorId?: { _id: unknown } }) =>
+      c.professorId?._id?.toString()
+    )
+  ).size;
+
+  // Count unique classes with coordinators
+  const uniqueClasses = new Set(
+    coordinators.map((c: { classId?: { _id: unknown } }) =>
+      c.classId?._id?.toString()
+    )
+  ).size;
+
+  // Count unique departments
+  const uniqueDepartments = new Set(
+    coordinators.map(
+      (c: {
+        classId?: {
+          semesterId?: { courseId?: { departmentId?: { code: string } } };
+        };
+      }) => c.classId?.semesterId?.courseId?.departmentId?.code
+    )
+  ).size;
+
+  const statCards = [
+    {
+      title: "Total Coordinators",
+      value: coordinators.length,
+      icon: Crown,
+      color: "blue",
+      badge: coordinators.length > 0 ? "Assigned" : null,
+    },
+    {
+      title: "Professors",
+      value: uniqueProfessors,
+      icon: Users,
+      color: "emerald",
+      badge: null,
+    },
+    {
+      title: "Classes Covered",
+      value: uniqueClasses,
+      icon: GraduationCap,
+      color: "amber",
+      badge: null,
+    },
+    {
+      title: "Departments",
+      value: uniqueDepartments,
+      icon: Building2,
+      color: "violet",
+      badge: null,
+    },
+  ];
+
+  const colorMap: Record<string, string> = {
+    blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    emerald: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    amber: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    violet: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+  };
+
   return (
     <DashboardLayout
       role="admin"
@@ -44,8 +114,14 @@ export default async function ClassCoordinatorsPage() {
     >
       <div className="space-y-6 pt-4">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">Class Coordinators</h2>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h2 className="text-2xl font-bold">Class Coordinators</h2>
+              <Badge variant="secondary" className="gap-1">
+                <TrendingUp className="h-3 w-3" />
+                {coordinators.length} total
+              </Badge>
+            </div>
             <p className="text-muted-foreground">
               Assign professors as class coordinators (CC)
             </p>
@@ -53,25 +129,52 @@ export default async function ClassCoordinatorsPage() {
           <AssignCoordinatorDialog classes={classes} professors={professors} />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Coordinators
-              </CardTitle>
-              <Crown className="text-muted-foreground h-4 w-4" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{coordinators.length}</div>
-            </CardContent>
-          </Card>
+        <div className="grid gap-4 md:grid-cols-4">
+          {statCards.map((stat) => (
+            <Card
+              key={stat.title}
+              className="group relative overflow-hidden transition-all hover:shadow-md"
+            >
+              <div
+                className={`absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full ${colorMap[stat.color].split(" ")[0]} opacity-50 transition-transform group-hover:scale-150`}
+              />
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {stat.title}
+                </CardTitle>
+                <div
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${colorMap[stat.color]}`}
+                >
+                  <stat.icon className="h-4 w-4" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold">{stat.value}</span>
+                  {stat.badge && (
+                    <Badge
+                      variant="outline"
+                      className="text-xs border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                    >
+                      {stat.badge}
+                    </Badge>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>All Class Coordinators</CardTitle>
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <Crown className="h-4 w-4 text-primary" />
+              </div>
+              <CardTitle>All Class Coordinators</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             <ClassCoordinatorsTable
               coordinators={coordinators}
               professors={professors}
