@@ -13,9 +13,9 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { AppSidebar, UserRole } from "./app-sidebar";
-import { ModeToggle } from "../mode-toggle";
+import { ModeToggle } from "../Theme/mode-toggle";
 import { NotificationBell } from "./notification-bell";
-import { ColorThemeSwitcher } from "../color-theme-switcher";
+import { ColorThemeSwitcher } from "../Theme/color-theme-switcher";
 
 interface BreadcrumbItemType {
   label: string;

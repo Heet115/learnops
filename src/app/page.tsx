@@ -13,8 +13,8 @@ import {
   CheckCircle,
   ArrowRight,
 } from "lucide-react";
-import { ColorThemeSwitcher } from "@/components/color-theme-switcher";
-import { ModeToggle } from "@/components/mode-toggle";
+import { ColorThemeSwitcher } from "@/components/Theme/color-theme-switcher";
+import { ModeToggle } from "@/components/Theme/mode-toggle";
 
 export default async function HomePage() {
   const { userId } = await auth();
