@@ -20,7 +20,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import {
+  Plus,
+  BookOpen,
+  Calendar,
+  GraduationCap,
+  User,
+  CalendarDays,
+  Building2,
+} from "lucide-react";
 import { createSubjectOffering } from "@/lib/actions/academic.actions";
 import { toast } from "sonner";
 
@@ -94,7 +103,6 @@ export function CreateSubjectOfferingDialog({
 
   const academicYears = getAcademicYearOptions();
 
-  // Filter subjects and classes based on selected semester
   const filteredSubjects = useMemo(() => {
     if (!selectedSemester) return [];
     return subjects.filter((s) => s.semesterId?._id === selectedSemester);
@@ -151,14 +159,25 @@ export function CreateSubjectOfferingDialog({
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create Subject Offering</DialogTitle>
-            <DialogDescription>
-              Assign a professor to teach a subject for a class
-            </DialogDescription>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <BookOpen className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <DialogTitle>Create Subject Offering</DialogTitle>
+                <DialogDescription>
+                  Assign a professor to teach a subject for a class
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <Separator className="my-4" />
+          <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="semesterId">Semester</Label>
+              <Label htmlFor="semesterId" className="flex items-center gap-2">
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                Semester
+              </Label>
               <Select
                 value={selectedSemester}
                 onValueChange={setSelectedSemester}
@@ -170,8 +189,11 @@ export function CreateSubjectOfferingDialog({
                 <SelectContent>
                   {semesters.map((semester) => (
                     <SelectItem key={semester._id} value={semester._id}>
-                      {semester.courseId.departmentId.code} -{" "}
-                      {semester.courseId.code} - {semester.name}
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        {semester.courseId.departmentId.code} -{" "}
+                        {semester.courseId.code} - {semester.name}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -179,7 +201,10 @@ export function CreateSubjectOfferingDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="subjectId">Subject</Label>
+              <Label htmlFor="subjectId" className="flex items-center gap-2">
+                <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                Subject
+              </Label>
               <Select name="subjectId" required disabled={!selectedSemester}>
                 <SelectTrigger>
                   <SelectValue
@@ -193,7 +218,9 @@ export function CreateSubjectOfferingDialog({
                 <SelectContent>
                   {filteredSubjects.map((subject) => (
                     <SelectItem key={subject._id} value={subject._id}>
-                      {subject.code} - {subject.name}
+                      <span className="font-mono text-xs">{subject.code}</span>
+                      <span className="mx-1">-</span>
+                      {subject.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -201,7 +228,10 @@ export function CreateSubjectOfferingDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="classId">Class</Label>
+              <Label htmlFor="classId" className="flex items-center gap-2">
+                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                Class
+              </Label>
               <Select name="classId" required disabled={!selectedSemester}>
                 <SelectTrigger>
                   <SelectValue
@@ -215,7 +245,10 @@ export function CreateSubjectOfferingDialog({
                 <SelectContent>
                   {filteredClasses.map((classItem) => (
                     <SelectItem key={classItem._id} value={classItem._id}>
-                      {classItem.name} ({classItem.academicYear})
+                      {classItem.name}{" "}
+                      <span className="text-muted-foreground">
+                        ({classItem.academicYear})
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -223,7 +256,10 @@ export function CreateSubjectOfferingDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="professorId">Professor</Label>
+              <Label htmlFor="professorId" className="flex items-center gap-2">
+                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                Professor
+              </Label>
               <Select name="professorId" required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select professor" />
@@ -231,7 +267,15 @@ export function CreateSubjectOfferingDialog({
                 <SelectContent>
                   {professors.map((prof) => (
                     <SelectItem key={prof._id} value={prof._id}>
-                      {prof.firstName} {prof.lastName} ({prof.email})
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-500/10">
+                          <User className="h-3 w-3 text-violet-600" />
+                        </div>
+                        {prof.firstName} {prof.lastName}
+                        <span className="text-muted-foreground text-xs">
+                          ({prof.email})
+                        </span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -239,7 +283,10 @@ export function CreateSubjectOfferingDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="academicYear">Academic Year</Label>
+              <Label htmlFor="academicYear" className="flex items-center gap-2">
+                <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+                Academic Year
+              </Label>
               <Select name="academicYear" required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select academic year" />
@@ -254,6 +301,7 @@ export function CreateSubjectOfferingDialog({
               </Select>
             </div>
           </div>
+          <Separator className="my-4" />
           <DialogFooter>
             <Button
               type="button"

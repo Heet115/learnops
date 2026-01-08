@@ -17,8 +17,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   DataTableFilter,
   FilterConfig,
@@ -36,7 +45,19 @@ import {
   SimpleSortableHeader,
   PaginationControls,
 } from "@/components/ui/enhanced-data-table";
-import { MoreHorizontal, Pencil, Trash2, Power, PowerOff } from "lucide-react";
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Power,
+  PowerOff,
+  BookOpen,
+  User,
+  GraduationCap,
+  Building2,
+  Calendar,
+  AlertTriangle,
+} from "lucide-react";
 import {
   deleteSubjectOffering,
   bulkDeleteSubjectOfferings,
@@ -99,13 +120,8 @@ export function SubjectOfferingsTable({
 }: SubjectOfferingsTableProps) {
   const [editingOffering, setEditingOffering] =
     useState<SubjectOffering | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<{
-    open: boolean;
-    id: string;
-  }>({
-    open: false,
-    id: "",
-  });
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const [filters, setFilters] = useState<FilterValue>({
     search: "",
@@ -225,7 +241,6 @@ export function SubjectOfferingsTable({
     });
   }, [offerings, filters]);
 
-  // Sorting
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
     filteredOfferings,
     "academicYear" as keyof SubjectOffering,
@@ -303,27 +318,33 @@ export function SubjectOfferingsTable({
     [clearSelection, router],
   );
 
-  const handleDeleteClick = (id: string) => {
-    setDeleteConfirm({ open: true, id });
-  };
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsLoading(true);
 
-  const handleDeleteConfirm = async () => {
-    const { id } = deleteConfirm;
-    setDeleteConfirm({ open: false, id: "" });
+    const result = await deleteSubjectOffering(deleteId);
 
-    const result = await deleteSubjectOffering(id);
     if (result.success) {
       toast.success("Subject offering deleted successfully");
+      setDeleteId(null);
       router.refresh();
     } else {
       toast.error(result.error || "Failed to delete subject offering");
     }
+
+    setIsLoading(false);
   };
 
   if (offerings.length === 0) {
     return (
-      <div className="text-muted-foreground py-8 text-center">
-        No subject offerings found. Create your first assignment to get started.
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+          <BookOpen className="h-7 w-7 text-muted-foreground" />
+        </div>
+        <h3 className="mt-4 text-lg font-medium">No subject offerings yet</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Create your first assignment to get started.
+        </p>
       </div>
     );
   }
@@ -346,124 +367,173 @@ export function SubjectOfferingsTable({
         />
 
         {filteredOfferings.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center">
-            No subject offerings match your filters.
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <BookOpen className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              No subject offerings match your filters.
+            </p>
           </div>
         ) : (
           <>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]">
-                    <SelectAllCheckbox
-                      checked={
-                        isAllSelected
-                          ? true
-                          : isIndeterminate
-                            ? "indeterminate"
-                            : false
-                      }
-                      onCheckedChange={toggleAll}
-                    />
-                  </TableHead>
-                  <TableHead>Subject</TableHead>
-                  <TableHead>Class</TableHead>
-                  <TableHead>Professor</TableHead>
-                  <TableHead>Semester</TableHead>
-                  <SimpleSortableHeader<SubjectOffering>
-                    label="Academic Year"
-                    sortKey="academicYear"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[70px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((offering) => (
-                  <TableRow
-                    key={offering._id}
-                    data-state={
-                      isSelected(offering._id) ? "selected" : undefined
-                    }
-                  >
-                    <TableCell>
-                      <SelectRowCheckbox
-                        checked={isSelected(offering._id)}
-                        onCheckedChange={(checked) =>
-                          toggleRow(offering._id, checked)
+            <div className="rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="w-[50px]">
+                      <SelectAllCheckbox
+                        checked={
+                          isAllSelected
+                            ? true
+                            : isIndeterminate
+                              ? "indeterminate"
+                              : false
                         }
+                        onCheckedChange={toggleAll}
                       />
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <span className="font-medium">
-                          {offering.subjectId?.code}
-                        </span>
-                        <p className="text-muted-foreground text-sm">
-                          {offering.subjectId?.name}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>{offering.classId?.name || "N/A"}</TableCell>
-                    <TableCell>
-                      <div>
-                        <span>
-                          {offering.professorId?.firstName}{" "}
-                          {offering.professorId?.lastName}
-                        </span>
-                        <p className="text-muted-foreground text-sm">
-                          {offering.professorId?.email}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <span>{offering.semesterId?.name}</span>
-                        <p className="text-muted-foreground text-sm">
-                          {offering.semesterId?.courseId?.departmentId?.code} -{" "}
-                          {offering.semesterId?.courseId?.code}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell>{offering.academicYear}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={offering.isActive ? "default" : "secondary"}
-                      >
-                        {offering.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => setEditingOffering(offering)}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => handleDeleteClick(offering._id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+                    </TableHead>
+                    <TableHead>Subject</TableHead>
+                    <TableHead>Class</TableHead>
+                    <TableHead>Professor</TableHead>
+                    <TableHead>Semester</TableHead>
+                    <SimpleSortableHeader<SubjectOffering>
+                      label="Academic Year"
+                      sortKey="academicYear"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.map((offering) => (
+                    <TableRow
+                      key={offering._id}
+                      data-state={
+                        isSelected(offering._id) ? "selected" : undefined
+                      }
+                      className="group"
+                    >
+                      <TableCell>
+                        <SelectRowCheckbox
+                          checked={isSelected(offering._id)}
+                          onCheckedChange={(checked) =>
+                            toggleRow(offering._id, checked)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                            <BookOpen className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <Badge variant="outline" className="font-mono">
+                                {offering.subjectId?.code}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {offering.subjectId?.name}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>{offering.classId?.name || "N/A"}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-500/10">
+                            <User className="h-3.5 w-3.5 text-violet-600" />
+                          </div>
+                          <div>
+                            <span className="font-medium">
+                              {offering.professorId?.firstName}{" "}
+                              {offering.professorId?.lastName}
+                            </span>
+                            <p className="text-xs text-muted-foreground">
+                              {offering.professorId?.email}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <span>{offering.semesterId?.name}</span>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Building2 className="h-3 w-3" />
+                            {offering.semesterId?.courseId?.departmentId?.code}{" "}
+                            - {offering.semesterId?.courseId?.code}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span className="tabular-nums">
+                            {offering.academicYear}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            offering.isActive
+                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                              : "border-zinc-500/30 bg-zinc-500/10 text-zinc-600"
+                          }
+                        >
+                          <span
+                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${
+                              offering.isActive
+                                ? "bg-emerald-500"
+                                : "bg-zinc-400"
+                            }`}
+                          />
+                          {offering.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => setEditingOffering(offering)}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => setDeleteId(offering._id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
             <PaginationControls
               pageIndex={currentPage}
               pageSize={pageSize}
@@ -487,17 +557,34 @@ export function SubjectOfferingsTable({
         />
       )}
 
-      <ConfirmDialog
-        open={deleteConfirm.open}
-        onOpenChange={(open) =>
-          !open && setDeleteConfirm({ open: false, id: "" })
-        }
-        title="Delete Subject Offering"
-        description="Are you sure you want to delete this subject offering? This action cannot be undone."
-        confirmText="Delete"
-        variant="destructive"
-        onConfirm={handleDeleteConfirm}
-      />
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <AlertDialogTitle>Delete Subject Offering</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this subject offering? This
+                  action cannot be undone.
+                </AlertDialogDescription>
+              </div>
+            </div>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isLoading}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {isLoading ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
