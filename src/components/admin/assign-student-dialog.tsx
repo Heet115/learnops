@@ -20,7 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserPlus } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { UserPlus, User, GraduationCap, Building2 } from "lucide-react";
 import { assignStudentToClass } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 
@@ -96,14 +97,25 @@ export function AssignStudentDialog({
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Assign Student to Class</DialogTitle>
-            <DialogDescription>
-              Select an unassigned student and assign them to a class.
-            </DialogDescription>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <UserPlus className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <DialogTitle>Assign Student to Class</DialogTitle>
+                <DialogDescription>
+                  Select an unassigned student and assign them to a class
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <Separator className="my-4" />
+          <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="studentId">Student</Label>
+              <Label htmlFor="studentId" className="flex items-center gap-2">
+                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                Student
+              </Label>
               <Select name="studentId" required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select student" />
@@ -116,7 +128,15 @@ export function AssignStudentDialog({
                   ) : (
                     unassignedStudents.map((student) => (
                       <SelectItem key={student._id} value={student._id}>
-                        {student.firstName} {student.lastName} ({student.email})
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/10">
+                            <User className="h-3 w-3 text-blue-600" />
+                          </div>
+                          {student.firstName} {student.lastName}
+                          <span className="text-muted-foreground text-xs">
+                            ({student.email})
+                          </span>
+                        </div>
                       </SelectItem>
                     ))
                   )}
@@ -125,7 +145,10 @@ export function AssignStudentDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="classId">Class</Label>
+              <Label htmlFor="classId" className="flex items-center gap-2">
+                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                Class
+              </Label>
               <Select name="classId" required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select class" />
@@ -133,16 +156,22 @@ export function AssignStudentDialog({
                 <SelectContent>
                   {classes.map((classItem) => (
                     <SelectItem key={classItem._id} value={classItem._id}>
-                      {classItem.semesterId?.courseId?.departmentId?.code} -{" "}
-                      {classItem.semesterId?.courseId?.code} -{" "}
-                      {classItem.semesterId?.name} - {classItem.name} (
-                      {classItem.academicYear})
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        {classItem.semesterId?.courseId?.departmentId?.code} -{" "}
+                        {classItem.semesterId?.courseId?.code} -{" "}
+                        {classItem.semesterId?.name} - {classItem.name}
+                        <span className="text-muted-foreground">
+                          ({classItem.academicYear})
+                        </span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
+          <Separator className="my-4" />
           <DialogFooter>
             <Button
               type="button"

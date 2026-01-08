@@ -17,8 +17,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   DataTableFilter,
   FilterConfig,
@@ -36,7 +45,18 @@ import {
   SimpleSortableHeader,
   PaginationControls,
 } from "@/components/ui/enhanced-data-table";
-import { MoreHorizontal, Pencil, UserMinus } from "lucide-react";
+import {
+  MoreHorizontal,
+  Pencil,
+  UserMinus,
+  User,
+  GraduationCap,
+  Calendar,
+  BookOpen,
+  Building2,
+  Mail,
+  AlertTriangle,
+} from "lucide-react";
 import {
   removeStudentFromClass,
   bulkRemoveStudentsFromClass,
@@ -96,15 +116,9 @@ export function StudentAssignmentsTable({
   classes,
 }: StudentAssignmentsTableProps) {
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-  const [removeConfirm, setRemoveConfirm] = useState<{
-    open: boolean;
-    id: string;
-    name: string;
-  }>({
-    open: false,
-    id: "",
-    name: "",
-  });
+  const [removeId, setRemoveId] = useState<string | null>(null);
+  const [removeName, setRemoveName] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const [filters, setFilters] = useState<FilterValue>({
     search: "",
@@ -201,7 +215,6 @@ export function StudentAssignmentsTable({
     });
   }, [students, filters]);
 
-  // Sorting
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
     filteredStudents,
     "firstName" as keyof Student,
@@ -255,26 +268,38 @@ export function StudentAssignmentsTable({
   );
 
   const handleRemoveClick = (studentId: string, studentName: string) => {
-    setRemoveConfirm({ open: true, id: studentId, name: studentName });
+    setRemoveId(studentId);
+    setRemoveName(studentName);
   };
 
-  const handleRemoveConfirm = async () => {
-    const { id } = removeConfirm;
-    setRemoveConfirm({ open: false, id: "", name: "" });
+  const handleRemove = async () => {
+    if (!removeId) return;
+    setIsLoading(true);
 
-    const result = await removeStudentFromClass(id);
+    const result = await removeStudentFromClass(removeId);
+
     if (result.success) {
       toast.success("Student removed from class");
+      setRemoveId(null);
+      setRemoveName("");
       router.refresh();
     } else {
       toast.error(result.error || "Failed to remove student");
     }
+
+    setIsLoading(false);
   };
 
   if (students.length === 0) {
     return (
-      <div className="text-muted-foreground py-8 text-center">
-        No students found. Create students first to assign them to classes.
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+          <GraduationCap className="h-7 w-7 text-muted-foreground" />
+        </div>
+        <h3 className="mt-4 text-lg font-medium">No students found</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Create students first to assign them to classes.
+        </p>
       </div>
     );
   }
@@ -297,143 +322,195 @@ export function StudentAssignmentsTable({
         />
 
         {filteredStudents.length === 0 ? (
-          <div className="text-muted-foreground py-8 text-center">
-            No students match your filters.
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <GraduationCap className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              No students match your filters.
+            </p>
           </div>
         ) : (
           <>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]">
-                    <SelectAllCheckbox
-                      checked={
-                        isAllSelected
-                          ? true
-                          : isIndeterminate
-                            ? "indeterminate"
-                            : false
-                      }
-                      onCheckedChange={toggleAll}
-                    />
-                  </TableHead>
-                  <SimpleSortableHeader<Student>
-                    label="Student"
-                    sortKey="firstName"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<Student>
-                    label="Email"
-                    sortKey="email"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <TableHead>Class</TableHead>
-                  <TableHead>Semester</TableHead>
-                  <TableHead>Course</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[70px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((student) => (
-                  <TableRow
-                    key={student._id}
-                    data-state={
-                      isSelected(student._id) ? "selected" : undefined
-                    }
-                  >
-                    <TableCell>
-                      <SelectRowCheckbox
-                        checked={isSelected(student._id)}
-                        onCheckedChange={(checked) =>
-                          toggleRow(student._id, checked)
+            <div className="rounded-lg border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableHead className="w-[50px]">
+                      <SelectAllCheckbox
+                        checked={
+                          isAllSelected
+                            ? true
+                            : isIndeterminate
+                              ? "indeterminate"
+                              : false
                         }
+                        onCheckedChange={toggleAll}
                       />
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {student.firstName} {student.lastName}
-                    </TableCell>
-                    <TableCell>{student.email}</TableCell>
-                    <TableCell>
-                      {student.classId ? (
-                        <span>
-                          {student.classId.name} ({student.classId.academicYear}
-                          )
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {student.classId?.semesterId?.name || (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {student.classId?.semesterId?.courseId ? (
-                        <span>{student.classId.semesterId.courseId.code}</span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {student.classId?.semesterId?.courseId?.departmentId
-                        ?.code || (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {student.classId ? (
-                        <Badge variant="default">Assigned</Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="border-orange-300 text-orange-600"
-                        >
-                          Unassigned
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => setEditingStudent(student)}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            {student.classId ? "Change Class" : "Assign Class"}
-                          </DropdownMenuItem>
-                          {student.classId && (
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() =>
-                                handleRemoveClick(
-                                  student._id,
-                                  `${student.firstName} ${student.lastName}`,
-                                )
-                              }
-                            >
-                              <UserMinus className="mr-2 h-4 w-4" />
-                              Remove from Class
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+                    </TableHead>
+                    <SimpleSortableHeader<Student>
+                      label="Student"
+                      sortKey="firstName"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<Student>
+                      label="Email"
+                      sortKey="email"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <TableHead>Class</TableHead>
+                    <TableHead>Semester</TableHead>
+                    <TableHead>Course</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.map((student) => (
+                    <TableRow
+                      key={student._id}
+                      data-state={
+                        isSelected(student._id) ? "selected" : undefined
+                      }
+                      className="group"
+                    >
+                      <TableCell>
+                        <SelectRowCheckbox
+                          checked={isSelected(student._id)}
+                          onCheckedChange={(checked) =>
+                            toggleRow(student._id, checked)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/10">
+                            <User className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <span className="font-medium">
+                            {student.firstName} {student.lastName}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span className="text-sm">{student.email}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {student.classId ? (
+                          <div className="flex items-center gap-1.5">
+                            <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span>
+                              {student.classId.name} (
+                              {student.classId.academicYear})
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {student.classId?.semesterId?.name ? (
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                            {student.classId.semesterId.name}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {student.classId?.semesterId?.courseId ? (
+                          <div className="flex items-center gap-1.5">
+                            <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                            <Badge variant="outline" className="font-mono">
+                              {student.classId.semesterId.courseId.code}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {student.classId?.semesterId?.courseId?.departmentId
+                          ?.code ? (
+                          <div className="flex items-center gap-1.5">
+                            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                            {
+                              student.classId.semesterId.courseId.departmentId
+                                .code
+                            }
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {student.classId ? (
+                          <Badge
+                            variant="outline"
+                            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                          >
+                            <span className="inline-block mr-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            Assigned
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+                          >
+                            <span className="inline-block mr-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
+                            Unassigned
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => setEditingStudent(student)}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              {student.classId ? "Change Class" : "Assign Class"}
+                            </DropdownMenuItem>
+                            {student.classId && (
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() =>
+                                  handleRemoveClick(
+                                    student._id,
+                                    `${student.firstName} ${student.lastName}`,
+                                  )
+                                }
+                              >
+                                <UserMinus className="mr-2 h-4 w-4" />
+                                Remove from Class
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
             <PaginationControls
               pageIndex={currentPage}
               pageSize={pageSize}
@@ -457,17 +534,39 @@ export function StudentAssignmentsTable({
         />
       )}
 
-      <ConfirmDialog
-        open={removeConfirm.open}
-        onOpenChange={(open) =>
-          !open && setRemoveConfirm({ open: false, id: "", name: "" })
-        }
-        title="Remove from Class"
-        description={`Remove ${removeConfirm.name} from their class?`}
-        confirmText="Remove"
-        variant="destructive"
-        onConfirm={handleRemoveConfirm}
-      />
+      <AlertDialog
+        open={!!removeId}
+        onOpenChange={() => {
+          setRemoveId(null);
+          setRemoveName("");
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <AlertDialogTitle>Remove from Class</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Remove {removeName} from their class?
+                </AlertDialogDescription>
+              </div>
+            </div>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemove}
+              disabled={isLoading}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {isLoading ? "Removing..." : "Remove"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

@@ -19,6 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Pencil, User, GraduationCap, Building2 } from "lucide-react";
 import { assignStudentToClass } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 
@@ -91,34 +93,60 @@ export function ChangeClassDialog({
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>
-              {student.classId ? "Change Class" : "Assign Class"}
-            </DialogTitle>
-            <DialogDescription>
-              {student.classId
-                ? `Change class for ${student.firstName} ${student.lastName}`
-                : `Assign ${student.firstName} ${student.lastName} to a class`}
-            </DialogDescription>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Pencil className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <DialogTitle>
+                  {student.classId ? "Change Class" : "Assign Class"}
+                </DialogTitle>
+                <DialogDescription>
+                  {student.classId
+                    ? `Change class for ${student.firstName} ${student.lastName}`
+                    : `Assign ${student.firstName} ${student.lastName} to a class`}
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <Separator className="my-4" />
+          <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label>Student</Label>
-              <p className="text-muted-foreground text-sm">
-                {student.firstName} {student.lastName} ({student.email})
-              </p>
+              <Label className="flex items-center gap-2">
+                <User className="h-3.5 w-3.5 text-muted-foreground" />
+                Student
+              </Label>
+              <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500/10">
+                  <User className="h-3.5 w-3.5 text-blue-600" />
+                </div>
+                {student.firstName} {student.lastName}
+                <span className="text-muted-foreground text-xs">
+                  ({student.email})
+                </span>
+              </div>
             </div>
 
             {student.classId && (
               <div className="grid gap-2">
-                <Label>Current Class</Label>
-                <p className="text-muted-foreground text-sm">
+                <Label className="flex items-center gap-2">
+                  <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                  Current Class
+                </Label>
+                <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
+                  <div className="flex h-6 w-6 items-center justify-center rounded bg-emerald-500/10">
+                    <GraduationCap className="h-3.5 w-3.5 text-emerald-600" />
+                  </div>
                   {student.classId.name}
-                </p>
+                </div>
               </div>
             )}
 
             <div className="grid gap-2">
-              <Label htmlFor="classId">New Class</Label>
+              <Label htmlFor="classId" className="flex items-center gap-2">
+                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                New Class
+              </Label>
               <Select
                 name="classId"
                 defaultValue={student.classId?._id}
@@ -130,16 +158,22 @@ export function ChangeClassDialog({
                 <SelectContent>
                   {classes.map((classItem) => (
                     <SelectItem key={classItem._id} value={classItem._id}>
-                      {classItem.semesterId?.courseId?.departmentId?.code} -{" "}
-                      {classItem.semesterId?.courseId?.code} -{" "}
-                      {classItem.semesterId?.name} - {classItem.name} (
-                      {classItem.academicYear})
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                        {classItem.semesterId?.courseId?.departmentId?.code} -{" "}
+                        {classItem.semesterId?.courseId?.code} -{" "}
+                        {classItem.semesterId?.name} - {classItem.name}
+                        <span className="text-muted-foreground">
+                          ({classItem.academicYear})
+                        </span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
+          <Separator className="my-4" />
           <DialogFooter>
             <Button
               type="button"
