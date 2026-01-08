@@ -5,7 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/Theme/theme-provider";
 import { ColorThemeProvider } from "@/components/Theme/color-theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

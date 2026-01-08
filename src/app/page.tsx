@@ -88,7 +88,7 @@ export default async function HomePage() {
             </div>
             <span className="text-xl font-bold">LearnOps</span>
           </div>
-          <div className="flex justify-center items-center gap-4">
+          <div className="flex items-center justify-center gap-4">
             <Button asChild>
               <Link href="/sign-in">
                 Sign In
