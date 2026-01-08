@@ -25,6 +25,8 @@ import {
   Calendar,
   GraduationCap,
   BookMarked,
+  TrendingUp,
+  Clock,
 } from "lucide-react";
 
 async function getHodDepartmentDetails() {
@@ -90,39 +92,52 @@ export default async function HodDepartmentPage() {
         user={user}
         breadcrumbs={[{ label: "HOD" }, { label: "Department" }]}
       >
-        <div className="flex h-64 items-center justify-center">
-          <p className="text-muted-foreground">No department assigned</p>
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+            <Building2 className="h-7 w-7 text-muted-foreground" />
+          </div>
+          <h3 className="mt-4 text-lg font-medium">No department assigned</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Contact admin to assign you to a department.
+          </p>
         </div>
       </DashboardLayout>
     );
   }
 
-  const stats = [
+  const statCards = [
     {
-      label: "Courses",
+      title: "Courses",
       value: data.courses.length,
       icon: BookOpen,
-      color: "text-blue-600",
+      color: "blue",
     },
     {
-      label: "Semesters",
+      title: "Semesters",
       value: data.semesters.length,
       icon: Calendar,
-      color: "text-purple-600",
+      color: "violet",
     },
     {
-      label: "Subjects",
+      title: "Subjects",
       value: data.subjects.length,
       icon: BookMarked,
-      color: "text-green-600",
+      color: "emerald",
     },
     {
-      label: "Classes",
+      title: "Classes",
       value: data.classes.length,
       icon: GraduationCap,
-      color: "text-orange-600",
+      color: "amber",
     },
   ];
+
+  const colorMap: Record<string, string> = {
+    blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    emerald: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    amber: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    violet: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+  };
 
   return (
     <DashboardLayout
@@ -131,114 +146,232 @@ export default async function HodDepartmentPage() {
       breadcrumbs={[{ label: "HOD" }, { label: "Department" }]}
     >
       <div className="space-y-6 pt-4">
-        <div className="flex items-center gap-4">
-          <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
-            <Building2 className="text-primary h-6 w-6" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold">{data.department.name}</h2>
-            <p className="text-muted-foreground">
-              Department Code: {data.department.code}
-            </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+              <Building2 className="h-6 w-6 text-primary" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold">{data.department.name}</h2>
+                <Badge variant="secondary" className="gap-1">
+                  <TrendingUp className="h-3 w-3" />
+                  Active
+                </Badge>
+              </div>
+              <p className="text-muted-foreground">
+                Department Code: {data.department.code}
+              </p>
+            </div>
           </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-4">
-          {stats.map((stat) => (
-            <Card key={stat.label}>
+          {statCards.map((stat) => (
+            <Card
+              key={stat.title}
+              className="group relative overflow-hidden transition-all hover:shadow-md"
+            >
+              <div
+                className={`absolute top-0 right-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full ${colorMap[stat.color].split(" ")[0]} opacity-50 transition-transform group-hover:scale-150`}
+              />
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">
-                  {stat.label}
+                  {stat.title}
                 </CardTitle>
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                <div
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${colorMap[stat.color]}`}
+                >
+                  <stat.icon className="h-4 w-4" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className={`text-2xl font-bold ${stat.color}`}>
-                  {stat.value}
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold">{stat.value}</span>
+                  <Badge
+                    variant="outline"
+                    className="text-xs border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                  >
+                    Active
+                  </Badge>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Courses</CardTitle>
-              <CardDescription>
-                Programs offered in this department
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
+        {/* Courses Card */}
+        <Card>
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                <BookOpen className="h-4 w-4 text-blue-600" />
+              </div>
+              <div>
+                <CardTitle>Courses</CardTitle>
+                <CardDescription>
+                  All courses offered in {data.department.name}
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-4">
+            {data.courses.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                  <BookOpen className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  No courses found in this department
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {data.courses.map(
                   (course: {
                     _id: string;
                     name: string;
                     code: string;
                     duration: number;
-                  }) => (
-                    <div
-                      key={course._id}
-                      className="flex items-center justify-between rounded-lg border p-3"
-                    >
-                      <div>
-                        <p className="font-medium">{course.name}</p>
-                        <p className="text-muted-foreground text-sm">
-                          {course.code}
-                        </p>
+                    isActive: boolean;
+                  }) => {
+                    const courseSemesters = data.semesters.filter(
+                      (s: { courseId: string }) =>
+                        s.courseId?.toString() === course._id?.toString()
+                    );
+                    return (
+                      <div
+                        key={course._id}
+                        className="group/item flex items-center justify-between rounded-lg border bg-card p-4 transition-all hover:bg-accent/50 hover:shadow-sm"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+                            <BookOpen className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="font-medium leading-none">
+                              {course.name}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>{course.code}</span>
+                              <span>•</span>
+                              <span>{course.duration} years</span>
+                              <span>•</span>
+                              <span>{courseSemesters.length} semesters</span>
+                            </div>
+                          </div>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className={
+                            course.isActive
+                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                              : "border-red-500/30 bg-red-500/10 text-red-600"
+                          }
+                        >
+                          <span
+                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${course.isActive ? "bg-emerald-500" : "bg-red-500"}`}
+                          />
+                          {course.isActive ? "Active" : "Inactive"}
+                        </Badge>
                       </div>
-                      <Badge variant="outline">{course.duration} years</Badge>
-                    </div>
-                  ),
-                )}
-                {data.courses.length === 0 && (
-                  <p className="text-muted-foreground text-sm">
-                    No courses found
-                  </p>
+                    );
+                  }
                 )}
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Classes</CardTitle>
-              <CardDescription>Active sections in department</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {data.classes
-                  .slice(0, 6)
-                  .map(
-                    (cls: {
-                      _id: string;
-                      name: string;
-                      academicYear: string;
-                    }) => (
+        {/* Classes Card */}
+        <Card>
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+                <GraduationCap className="h-4 w-4 text-amber-600" />
+              </div>
+              <div>
+                <CardTitle>Classes</CardTitle>
+                <CardDescription>
+                  All classes/sections in {data.department.name}
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-4">
+            {data.classes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                  <GraduationCap className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  No classes found in this department
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {data.classes.map(
+                  (cls: {
+                    _id: string;
+                    name: string;
+                    academicYear: string;
+                    semesterId: string;
+                    isActive: boolean;
+                  }) => {
+                    const semester = data.semesters.find(
+                      (s: { _id: string }) =>
+                        s._id?.toString() === cls.semesterId?.toString()
+                    );
+                    const course = semester
+                      ? data.courses.find(
+                          (c: { _id: string }) =>
+                            c._id?.toString() === semester.courseId?.toString()
+                        )
+                      : null;
+                    return (
                       <div
                         key={cls._id}
-                        className="flex items-center justify-between rounded-lg border p-3"
+                        className="group/item flex items-center justify-between rounded-lg border bg-card p-4 transition-all hover:bg-accent/50 hover:shadow-sm"
                       >
-                        <p className="font-medium">{cls.name}</p>
-                        <Badge variant="secondary">{cls.academicYear}</Badge>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
+                            <GraduationCap className="h-5 w-5 text-amber-600" />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="font-medium leading-none">
+                              {cls.name}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>{course?.code || "N/A"}</span>
+                              <span>•</span>
+                              <span>{semester?.name || "N/A"}</span>
+                              <span>•</span>
+                              <Clock className="h-3 w-3" />
+                              <span>{cls.academicYear}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className={
+                            cls.isActive
+                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                              : "border-red-500/30 bg-red-500/10 text-red-600"
+                          }
+                        >
+                          <span
+                            className={`inline-block mr-1.5 h-1.5 w-1.5 rounded-full ${cls.isActive ? "bg-emerald-500" : "bg-red-500"}`}
+                          />
+                          {cls.isActive ? "Active" : "Inactive"}
+                        </Badge>
                       </div>
-                    ),
-                  )}
-                {data.classes.length === 0 && (
-                  <p className="text-muted-foreground text-sm">
-                    No classes found
-                  </p>
-                )}
-                {data.classes.length > 6 && (
-                  <p className="text-muted-foreground text-center text-sm">
-                    +{data.classes.length - 6} more
-                  </p>
+                    );
+                  }
                 )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
