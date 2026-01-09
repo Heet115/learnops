@@ -322,8 +322,11 @@ export async function createSubmission(
       (id) => id.toString() !== student._id.toString(),
     );
 
-    // Lock the group
-    await Group.findByIdAndUpdate(group._id, { isLocked: true });
+    // Cancel any pending invitations and lock the group
+    await Group.findByIdAndUpdate(group._id, {
+      isLocked: true,
+      $pull: { members: { status: "pending" } },
+    });
   }
 
   // Create submission with status "submitted"

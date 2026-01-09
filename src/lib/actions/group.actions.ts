@@ -442,14 +442,20 @@ export async function respondToGroupInvite(groupId: string, accept: boolean) {
   return { success: true, accepted: accept };
 }
 
-// Get pending invitations for student
+// Get pending invitations for student (only invitations TO this student, not FROM)
 export async function getStudentPendingInvites() {
   const clerkId = await requireStudent();
   const { id: studentId } = await getUserDbId(clerkId!);
 
   const groups = await Group.find({
-    "members.studentId": studentId,
-    "members.status": "pending",
+    "members": {
+      $elemMatch: {
+        studentId: studentId,
+        status: "pending"
+      }
+    },
+    // Exclude groups created by this student (they sent the invite, not received)
+    createdBy: { $ne: studentId }
   })
     .populate({
       path: "alaId",
@@ -462,6 +468,7 @@ export async function getStudentPendingInvites() {
     })
     .populate("createdBy", "firstName lastName")
     .populate("members.studentId", "firstName lastName")
+    .populate("leaderId", "firstName lastName")
     .lean();
 
   // Filter to only include groups where this student's status is pending
@@ -474,6 +481,56 @@ export async function getStudentPendingInvites() {
   }));
 
   return JSON.parse(JSON.stringify(pendingGroups));
+}
+
+// Cancel a pending invite (by group creator or leader)
+export async function cancelInvite(groupId: string, studentId: string) {
+  const clerkId = await requireStudent();
+  const { id: currentUserId } = await getUserDbId(clerkId!);
+
+  const group = await Group.findById(groupId).populate("alaId");
+  if (!group) {
+    return { success: false, error: "Group not found" };
+  }
+
+  // Only creator or leader can cancel invites
+  const isCreator = group.createdBy.toString() === currentUserId;
+  const isLeader = group.leaderId?.toString() === currentUserId;
+  
+  if (!isCreator && !isLeader) {
+    return { success: false, error: "Only the group creator or leader can cancel invites" };
+  }
+
+  if (group.isLocked) {
+    return { success: false, error: "Group is locked (submission made)" };
+  }
+
+  const ala = group.alaId as unknown as {
+    isLocked: boolean;
+    deadline: Date;
+    _id: string;
+  };
+
+  if (ala.isLocked || new Date(ala.deadline) < new Date()) {
+    return { success: false, error: "Cannot cancel - deadline passed or locked" };
+  }
+
+  // Find the pending member
+  const memberIndex = group.members.findIndex(
+    (m) => m.studentId.toString() === studentId && m.status === "pending"
+  );
+
+  if (memberIndex === -1) {
+    return { success: false, error: "No pending invitation found for this student" };
+  }
+
+  // Remove the pending member
+  await Group.findByIdAndUpdate(groupId, {
+    $pull: { members: { studentId: new mongoose.Types.ObjectId(studentId), status: "pending" } }
+  });
+
+  revalidatePath(`/student/alas/${ala._id}`);
+  return { success: true };
 }
 
 // Student leaves a group

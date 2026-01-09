@@ -53,6 +53,7 @@ import {
   MoreVertical,
   UserMinus,
   ArrowRightLeft,
+  X,
 } from "lucide-react";
 import {
   getStudentGroup,
@@ -64,6 +65,7 @@ import {
   removeMemberByLeader,
   transferLeadership,
   getAvailableClassmatesForLeader,
+  cancelInvite,
 } from "@/lib/actions/group.actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -334,8 +336,8 @@ export function GroupSection({
                       <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
                       Pending
                     </Badge>
-                    {canManageMembers && (
-                      <RemoveMemberButton
+                    {(isCreator || isLeader) && !group.isLocked && canModify && (
+                      <CancelInviteButton
                         groupId={group._id}
                         memberId={member.studentId._id}
                         memberName={`${member.studentId.firstName} ${member.studentId.lastName}`}
@@ -1079,6 +1081,70 @@ function RemoveMemberButton({
           <AlertDialogCancel>Keep</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleRemove}
+            className="bg-rose-600 hover:bg-rose-700"
+          >
+            Cancel Invitation
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+// Cancel Invite Button (for creator/leader to cancel pending invites)
+function CancelInviteButton({
+  groupId,
+  memberId,
+  memberName,
+  onSuccess,
+}: {
+  groupId: string;
+  memberId: string;
+  memberName: string;
+  onSuccess: () => void;
+}) {
+  const [cancelling, setCancelling] = useState(false);
+
+  const handleCancel = async () => {
+    setCancelling(true);
+    const result = await cancelInvite(groupId, memberId);
+    if (result.success) {
+      toast.success(`Invitation to ${memberName} cancelled`);
+      onSuccess();
+    } else {
+      toast.error(result.error || "Failed to cancel invitation");
+    }
+    setCancelling(false);
+  };
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 text-rose-600 hover:bg-rose-500/10 hover:text-rose-700"
+          disabled={cancelling}
+        >
+          {cancelling ? (
+            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+          ) : (
+            <X className="mr-1 h-3 w-3" />
+          )}
+          Cancel
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Cancel Invitation?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to cancel the invitation to {memberName}? They will no longer be able to join this group.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Keep Invitation</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleCancel}
             className="bg-rose-600 hover:bg-rose-700"
           >
             Cancel Invitation
