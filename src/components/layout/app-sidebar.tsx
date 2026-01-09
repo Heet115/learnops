@@ -4,8 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import {
   Building2,
-  BookOpen,
-  Calendar,
   Users,
   GraduationCap,
   FileText,
@@ -18,10 +16,7 @@ import {
   ClipboardList,
   Clock,
   Bell,
-  Crown,
   User,
-  FileCheck,
-  History,
   Activity,
 } from "lucide-react";
 
@@ -63,59 +58,36 @@ const getNavItems = (role: UserRole) => {
         icon: Users,
       },
       {
-        title: "Departments",
-        url: "/admin/departments",
+        title: "Academic Structure",
+        url: "#",
         icon: Building2,
+        items: [
+          { title: "Departments", url: "/admin/departments" },
+          { title: "Courses", url: "/admin/courses" },
+          { title: "Semesters", url: "/admin/semesters" },
+          { title: "Subjects", url: "/admin/subjects" },
+          { title: "Classes", url: "/admin/classes" },
+        ],
       },
       {
-        title: "Courses",
-        url: "/admin/courses",
-        icon: BookOpen,
-      },
-      {
-        title: "Semesters",
-        url: "/admin/semesters",
-        icon: Calendar,
-      },
-      {
-        title: "Subjects",
-        url: "/admin/subjects",
-        icon: BookMarked,
-      },
-      {
-        title: "Classes",
-        url: "/admin/classes",
-        icon: GraduationCap,
-      },
-      {
-        title: "Subject Offerings",
-        url: "/admin/subject-offerings",
+        title: "Assignments",
+        url: "#",
         icon: ClipboardList,
+        items: [
+          { title: "Subject Offerings", url: "/admin/subject-offerings" },
+          { title: "Class Coordinators", url: "/admin/class-coordinators" },
+          { title: "Student Assignments", url: "/admin/student-assignments" },
+        ],
       },
       {
-        title: "Class Coordinators",
-        url: "/admin/class-coordinators",
-        icon: Crown,
-      },
-      {
-        title: "Student Assignments",
-        url: "/admin/student-assignments",
-        icon: Users,
-      },
-      {
-        title: "Profile Requests",
-        url: "/admin/profile-requests",
-        icon: FileCheck,
-      },
-      {
-        title: "Audit Trail",
-        url: "/admin/audit-trail",
-        icon: History,
-      },
-      {
-        title: "Settings",
-        url: "/admin/settings",
+        title: "Administration",
+        url: "#",
         icon: Settings,
+        items: [
+          { title: "Profile Requests", url: "/admin/profile-requests" },
+          { title: "Audit Trail", url: "/admin/audit-trail" },
+          { title: "Settings", url: "/admin/settings" },
+        ],
       },
     ],
     hod: [
