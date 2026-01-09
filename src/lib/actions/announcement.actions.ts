@@ -39,16 +39,22 @@ async function getUserDbId(clerkId: string) {
 }
 
 // Helper to get target name
-async function getTargetName(target: { type: string; id?: mongoose.Types.ObjectId; role?: string }) {
+async function getTargetName(target: {
+  type: string;
+  id?: mongoose.Types.ObjectId;
+  role?: string;
+}) {
   if (target.type === "all") return "All Users";
   if (target.type === "role") return `All ${target.role}s`;
-  
+
   if (!target.id) return target.type;
-  
+
   await connectDB();
-  
+
   if (target.type === "department") {
-    const dept = await Department.findById(target.id).select("name code").lean();
+    const dept = await Department.findById(target.id)
+      .select("name code")
+      .lean();
     return dept ? `${dept.name} (${dept.code})` : "Department";
   }
   if (target.type === "course") {
@@ -56,10 +62,12 @@ async function getTargetName(target: { type: string; id?: mongoose.Types.ObjectI
     return course ? `${course.name} (${course.code})` : "Course";
   }
   if (target.type === "class") {
-    const cls = await Class.findById(target.id).select("name academicYear").lean();
+    const cls = await Class.findById(target.id)
+      .select("name academicYear")
+      .lean();
     return cls ? `${cls.name} (${cls.academicYear})` : "Class";
   }
-  
+
   return target.type;
 }
 
@@ -67,14 +75,14 @@ async function getTargetName(target: { type: string; id?: mongoose.Types.ObjectI
 export async function createAnnouncement(input: CreateAnnouncementInput) {
   try {
     const { clerkId, role } = await requireAnnouncementCreator();
-    
+
     // Validate input with Zod
     const parseResult = createAnnouncementSchema.safeParse(input);
     if (!parseResult.success) {
       const errors = parseResult.error.issues.map((e) => e.message).join(", ");
       return { success: false, error: errors };
     }
-    
+
     const validated = parseResult.data;
     const { id: userId } = await getUserDbId(clerkId!);
 
@@ -160,7 +168,7 @@ export async function getAnnouncementsForUser() {
     if (!user) return [];
 
     const now = new Date();
-    
+
     // Build target conditions based on user role and assignments
     const targetConditions: Record<string, unknown>[] = [
       { "target.type": "all" },
@@ -201,7 +209,7 @@ export async function getAnnouncementsForUser() {
     // For professors: check classes they teach AND classes they coordinate
     if (role === "professor") {
       const { SubjectOffering, ClassCoordinator } = await import("@/lib/db");
-      
+
       // Get classes from subject offerings (teaching)
       const offerings = await SubjectOffering.find({
         professorId: user._id,
@@ -220,7 +228,13 @@ export async function getAnnouncementsForUser() {
       const coordinatorAssignments = await ClassCoordinator.find({
         professorId: user._id,
         isActive: true,
-        academicYear: { $in: [currentYear, `${parseInt(currentYear) - 1}-${currentYear}`, `${currentYear}-${parseInt(currentYear) + 1}`] },
+        academicYear: {
+          $in: [
+            currentYear,
+            `${parseInt(currentYear) - 1}-${currentYear}`,
+            `${currentYear}-${parseInt(currentYear) + 1}`,
+          ],
+        },
       })
         .select("classId")
         .populate({
@@ -233,16 +247,16 @@ export async function getAnnouncementsForUser() {
       // Combine class IDs from both sources
       const classIds = new Set<string>();
       const courseIds = new Set<string>();
-      
+
       // From subject offerings
       for (const offering of offerings) {
         if (offering.classId) {
-          const cls = offering.classId as unknown as { 
+          const cls = offering.classId as unknown as {
             _id: mongoose.Types.ObjectId;
             semesterId?: { courseId?: mongoose.Types.ObjectId };
           };
           classIds.add(cls._id.toString());
-          
+
           if (cls.semesterId?.courseId) {
             courseIds.add(cls.semesterId.courseId.toString());
           }
@@ -252,12 +266,12 @@ export async function getAnnouncementsForUser() {
       // From class coordinator assignments
       for (const coord of coordinatorAssignments) {
         if (coord.classId) {
-          const cls = coord.classId as unknown as { 
+          const cls = coord.classId as unknown as {
             _id: mongoose.Types.ObjectId;
             semesterId?: { courseId?: mongoose.Types.ObjectId };
           };
           classIds.add(cls._id.toString());
-          
+
           if (cls.semesterId?.courseId) {
             courseIds.add(cls.semesterId.courseId.toString());
           }
@@ -286,8 +300,10 @@ export async function getAnnouncementsForUser() {
       const courses = await Course.find({
         departmentId: user.departmentId,
         isActive: true,
-      }).select("_id").lean();
-      
+      })
+        .select("_id")
+        .lean();
+
       for (const course of courses) {
         targetConditions.push({
           "target.type": "course",
@@ -298,10 +314,17 @@ export async function getAnnouncementsForUser() {
       // Also get classes in their department
       const { Semester } = await import("@/lib/db");
       const courseIds = courses.map((c) => c._id);
-      const semesters = await Semester.find({ courseId: { $in: courseIds } }).select("_id").lean();
+      const semesters = await Semester.find({ courseId: { $in: courseIds } })
+        .select("_id")
+        .lean();
       const semesterIds = semesters.map((s) => s._id);
-      const classes = await Class.find({ semesterId: { $in: semesterIds }, isActive: true }).select("_id").lean();
-      
+      const classes = await Class.find({
+        semesterId: { $in: semesterIds },
+        isActive: true,
+      })
+        .select("_id")
+        .lean();
+
       for (const cls of classes) {
         targetConditions.push({
           "target.type": "class",
@@ -313,7 +336,9 @@ export async function getAnnouncementsForUser() {
     const query = {
       isActive: true,
       $and: [
-        { $or: [{ expiresAt: { $exists: false } }, { expiresAt: { $gt: now } }] },
+        {
+          $or: [{ expiresAt: { $exists: false } }, { expiresAt: { $gt: now } }],
+        },
         { $or: targetConditions },
       ],
     };
@@ -329,7 +354,7 @@ export async function getAnnouncementsForUser() {
       announcements.map(async (ann) => ({
         ...ann,
         targetName: await getTargetName(ann.target),
-      }))
+      })),
     );
 
     return JSON.parse(JSON.stringify(enrichedAnnouncements));
@@ -359,10 +384,13 @@ export async function getAllAnnouncements() {
       announcements.map(async (ann) => ({
         ...ann,
         targetName: await getTargetName(ann.target),
-      }))
+      })),
     );
 
-    return { success: true, data: JSON.parse(JSON.stringify(enrichedAnnouncements)) };
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(enrichedAnnouncements)),
+    };
   } catch (error) {
     console.error("Error fetching all announcements:", error);
     return { success: false, error: "Failed to fetch announcements", data: [] };
@@ -384,10 +412,13 @@ export async function getMyAnnouncements() {
       announcements.map(async (ann) => ({
         ...ann,
         targetName: await getTargetName(ann.target),
-      }))
+      })),
     );
 
-    return { success: true, data: JSON.parse(JSON.stringify(enrichedAnnouncements)) };
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(enrichedAnnouncements)),
+    };
   } catch (error) {
     console.error("Error fetching my announcements:", error);
     return { success: false, error: "Failed to fetch announcements", data: [] };
@@ -422,14 +453,14 @@ export async function updateAnnouncement(
 ) {
   try {
     const { clerkId, role } = await requireAnnouncementCreator();
-    
+
     // Validate input with Zod
     const parseResult = updateAnnouncementSchema.safeParse(input);
     if (!parseResult.success) {
       const errors = parseResult.error.issues.map((e) => e.message).join(", ");
       return { success: false, error: errors };
     }
-    
+
     const validated = parseResult.data;
     const { id: userId } = await getUserDbId(clerkId!);
 

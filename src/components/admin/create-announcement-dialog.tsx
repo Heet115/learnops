@@ -112,34 +112,39 @@ export function CreateAnnouncementDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(newOpen) => {
-      setOpen(newOpen);
-      if (!newOpen) resetForm();
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        setOpen(newOpen);
+        if (!newOpen) resetForm();
+      }}
+    >
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
           Create Announcement
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Announcement</DialogTitle>
           <DialogDescription>
             Broadcast a message to users across the system
           </DialogDescription>
         </DialogHeader>
-        
+
         {error && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title <span className="text-destructive">*</span></Label>
+            <Label htmlFor="title">
+              Title <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="title"
               value={title}
@@ -151,7 +156,9 @@ export function CreateAnnouncementDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Content <span className="text-destructive">*</span></Label>
+            <Label htmlFor="content">
+              Content <span className="text-destructive">*</span>
+            </Label>
             <Textarea
               id="content"
               value={content}
@@ -161,17 +168,22 @@ export function CreateAnnouncementDialog() {
               required
               minLength={10}
             />
-            <p className="text-xs text-muted-foreground">{content.length}/5000 characters</p>
+            <p className="text-muted-foreground text-xs">
+              {content.length}/5000 characters
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Target Audience</Label>
-              <Select value={targetType} onValueChange={(v) => {
-                setTargetType(v);
-                setTargetId("");
-                setTargetRole("");
-              }}>
+              <Select
+                value={targetType}
+                onValueChange={(v) => {
+                  setTargetType(v);
+                  setTargetId("");
+                  setTargetRole("");
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -203,7 +215,9 @@ export function CreateAnnouncementDialog() {
 
           {targetType === "role" && (
             <div className="space-y-2">
-              <Label>Select Role <span className="text-destructive">*</span></Label>
+              <Label>
+                Select Role <span className="text-destructive">*</span>
+              </Label>
               <Select value={targetRole} onValueChange={setTargetRole}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select role" />
@@ -219,7 +233,9 @@ export function CreateAnnouncementDialog() {
 
           {targetType === "department" && options && (
             <div className="space-y-2">
-              <Label>Select Department <span className="text-destructive">*</span></Label>
+              <Label>
+                Select Department <span className="text-destructive">*</span>
+              </Label>
               <Select value={targetId} onValueChange={setTargetId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select department" />
@@ -237,7 +253,9 @@ export function CreateAnnouncementDialog() {
 
           {targetType === "course" && options && (
             <div className="space-y-2">
-              <Label>Select Course <span className="text-destructive">*</span></Label>
+              <Label>
+                Select Course <span className="text-destructive">*</span>
+              </Label>
               <Select value={targetId} onValueChange={setTargetId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select course" />
@@ -255,7 +273,9 @@ export function CreateAnnouncementDialog() {
 
           {targetType === "class" && options && (
             <div className="space-y-2">
-              <Label>Select Class <span className="text-destructive">*</span></Label>
+              <Label>
+                Select Class <span className="text-destructive">*</span>
+              </Label>
               <Select value={targetId} onValueChange={setTargetId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select class" />

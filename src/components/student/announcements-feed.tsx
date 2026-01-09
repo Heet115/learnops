@@ -42,7 +42,7 @@ export function AnnouncementsFeed() {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
         </CardContent>
       </Card>
     );
@@ -52,10 +52,10 @@ export function AnnouncementsFeed() {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-            <Megaphone className="h-6 w-6 text-muted-foreground" />
+          <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+            <Megaphone className="text-muted-foreground h-6 w-6" />
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-3 text-sm">
             No announcements at this time
           </p>
         </CardContent>
@@ -80,8 +80,8 @@ export function AnnouncementsFeed() {
             <div
               key={announcement._id}
               className={cn(
-                "p-4 transition-colors hover:bg-muted/50",
-                announcement.isPinned && "bg-amber-500/5"
+                "hover:bg-muted/50 p-4 transition-colors",
+                announcement.isPinned && "bg-amber-500/5",
               )}
             >
               <div className="flex items-start justify-between gap-3">
@@ -98,10 +98,10 @@ export function AnnouncementsFeed() {
                       {announcement.priority}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                  <p className="text-muted-foreground line-clamp-2 text-sm">
                     {announcement.content}
                   </p>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <div className="text-muted-foreground flex items-center gap-3 text-xs">
                     <span className="flex items-center gap-1">
                       <User className="h-3 w-3" />
                       {announcement.createdBy.firstName}{" "}

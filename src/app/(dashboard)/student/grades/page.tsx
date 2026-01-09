@@ -27,6 +27,7 @@ import {
   BarChart3,
   TrendingDown,
   Trophy,
+  Clock,
 } from "lucide-react";
 
 const colorMap: Record<string, string> = {
@@ -75,7 +76,12 @@ async function getStudentGrades() {
       maxMarks: number;
       subjectOfferingId?: { subjectId?: { name: string; code: string } };
     };
-    const percentage = Math.round((sub.marks! / ala.maxMarks) * 100);
+    // Use adjusted marks for late submissions, otherwise use regular marks
+    const effectiveMarks =
+      sub.isLate && sub.adjustedMarks !== undefined
+        ? sub.adjustedMarks
+        : sub.marks!;
+    const percentage = Math.round((effectiveMarks / ala.maxMarks) * 100);
     return {
       _id: sub._id.toString(),
       alaId: (
@@ -85,6 +91,9 @@ async function getStudentGrades() {
       subjectCode: ala.subjectOfferingId?.subjectId?.code || "",
       subjectName: ala.subjectOfferingId?.subjectId?.name || "",
       marks: sub.marks!,
+      adjustedMarks: sub.adjustedMarks,
+      isLate: sub.isLate || false,
+      latePenaltyApplied: sub.latePenaltyApplied,
       maxMarks: ala.maxMarks,
       percentage,
       feedback: sub.feedback,
@@ -283,20 +292,38 @@ export default async function StudentGradesPage() {
                         title: string;
                         subjectCode: string;
                         marks: number;
+                        adjustedMarks?: number;
+                        isLate: boolean;
+                        latePenaltyApplied?: number;
                         maxMarks: number;
                         percentage: number;
                         gradedAt: string;
                       }) => {
                         const gradeBadge = getGradeBadge(grade.percentage);
+                        const effectiveMarks =
+                          grade.isLate && grade.adjustedMarks !== undefined
+                            ? grade.adjustedMarks
+                            : grade.marks;
                         return (
                           <TableRow key={grade._id} className="group">
                             <TableCell>
-                              <Link
-                                href={`/student/alas/${grade.alaId}`}
-                                className="font-medium hover:underline"
-                              >
-                                {grade.title}
-                              </Link>
+                              <div className="flex flex-col gap-0.5">
+                                <Link
+                                  href={`/student/alas/${grade.alaId}`}
+                                  className="font-medium hover:underline"
+                                >
+                                  {grade.title}
+                                </Link>
+                                {grade.isLate && (
+                                  <Badge
+                                    variant="outline"
+                                    className="w-fit border-orange-500/30 bg-orange-500/10 text-[10px] text-orange-600"
+                                  >
+                                    <Clock className="mr-1 h-2.5 w-2.5" />
+                                    Late
+                                  </Badge>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell>
                               <Badge
@@ -307,10 +334,22 @@ export default async function StudentGradesPage() {
                               </Badge>
                             </TableCell>
                             <TableCell className="text-center">
-                              <span className="font-medium">{grade.marks}</span>
-                              <span className="text-muted-foreground">
-                                /{grade.maxMarks}
-                              </span>
+                              <div className="flex flex-col items-center">
+                                <div>
+                                  <span className="font-medium">
+                                    {effectiveMarks}
+                                  </span>
+                                  <span className="text-muted-foreground">
+                                    /{grade.maxMarks}
+                                  </span>
+                                </div>
+                                {grade.isLate && grade.latePenaltyApplied && (
+                                  <span className="text-[10px] text-orange-600">
+                                    ({grade.marks} - {grade.latePenaltyApplied}
+                                    %)
+                                  </span>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">

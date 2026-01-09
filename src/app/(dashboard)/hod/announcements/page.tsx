@@ -3,7 +3,10 @@ import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { CreateHodAnnouncementDialog } from "@/components/hod/create-announcement-dialog";
 import { AnnouncementsPageContent } from "@/components/hod/announcements-page-content";
-import { getMyAnnouncements, getAnnouncementsForUser } from "@/lib/actions/announcement.actions";
+import {
+  getMyAnnouncements,
+  getAnnouncementsForUser,
+} from "@/lib/actions/announcement.actions";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
 import { Megaphone } from "lucide-react";
 
@@ -48,7 +51,9 @@ export default async function HodAnnouncementsPage() {
               <Megaphone className="h-5 w-5 text-violet-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Announcements</h1>
+              <h1 className="text-2xl font-bold tracking-tight">
+                Announcements
+              </h1>
               <p className="text-muted-foreground">
                 View and create announcements
               </p>

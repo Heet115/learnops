@@ -57,7 +57,7 @@ export function EditAnnouncementDialog({
       setExpiresAt(
         announcement.expiresAt
           ? new Date(announcement.expiresAt).toISOString().slice(0, 16)
-          : ""
+          : "",
       );
     }
   }, [announcement, open]);
@@ -95,9 +95,7 @@ export function EditAnnouncementDialog({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Edit Announcement</DialogTitle>
-          <DialogDescription>
-            Update the announcement details
-          </DialogDescription>
+          <DialogDescription>Update the announcement details</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">

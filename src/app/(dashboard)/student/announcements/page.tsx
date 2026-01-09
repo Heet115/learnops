@@ -33,14 +33,21 @@ export default async function StudentAnnouncementsPage() {
     avatar: dbUser?.profileImage,
   };
 
-  const pinnedCount = announcements.filter((a: { isPinned: boolean }) => a.isPinned).length;
-  const urgentCount = announcements.filter((a: { priority: string }) => a.priority === "urgent").length;
+  const pinnedCount = announcements.filter(
+    (a: { isPinned: boolean }) => a.isPinned,
+  ).length;
+  const urgentCount = announcements.filter(
+    (a: { priority: string }) => a.priority === "urgent",
+  ).length;
 
   return (
     <DashboardLayout
       role="student"
       user={user}
-      breadcrumbs={[{ label: "Student", href: "/student" }, { label: "Announcements" }]}
+      breadcrumbs={[
+        { label: "Student", href: "/student" },
+        { label: "Announcements" },
+      ]}
     >
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -49,7 +56,9 @@ export default async function StudentAnnouncementsPage() {
               <Megaphone className="h-5 w-5 text-violet-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Announcements</h1>
+              <h1 className="text-2xl font-bold tracking-tight">
+                Announcements
+              </h1>
               <p className="text-muted-foreground">
                 Stay updated with important messages
               </p>
@@ -57,12 +66,18 @@ export default async function StudentAnnouncementsPage() {
           </div>
           <div className="flex items-center gap-2">
             {urgentCount > 0 && (
-              <Badge variant="outline" className="bg-rose-500/10 text-rose-600 border-rose-500/30">
+              <Badge
+                variant="outline"
+                className="border-rose-500/30 bg-rose-500/10 text-rose-600"
+              >
                 {urgentCount} urgent
               </Badge>
             )}
             {pinnedCount > 0 && (
-              <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">
+              <Badge
+                variant="outline"
+                className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+              >
                 {pinnedCount} pinned
               </Badge>
             )}

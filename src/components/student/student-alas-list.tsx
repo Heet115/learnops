@@ -30,6 +30,7 @@ import {
   Calendar,
   Award,
   BookMarked,
+  Clock,
 } from "lucide-react";
 import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 
@@ -41,6 +42,9 @@ interface ALA {
   maxMarks: number;
   isLocked: boolean;
   isGroupSubmission: boolean;
+  allowLateSubmission?: boolean;
+  lateDeadline?: string;
+  latePenaltyPercent?: number;
   subjectOfferingId: {
     subjectId: { name: string; code: string };
     classId: { name: string };
@@ -49,7 +53,10 @@ interface ALA {
   submission?: {
     status: string;
     marks?: number;
+    adjustedMarks?: number;
     submittedAt?: string;
+    isLate?: boolean;
+    latePenaltyApplied?: number;
   };
 }
 
@@ -97,6 +104,11 @@ const statusConfig: Record<
     className: "border-amber-500/30 bg-amber-500/10 text-amber-600",
     dotColor: "bg-amber-500",
   },
+  lateWindow: {
+    label: "Late Window",
+    className: "border-orange-500/30 bg-orange-500/10 text-orange-600",
+    dotColor: "bg-orange-500",
+  },
 };
 
 export function StudentALAsList({ alas }: StudentALAsListProps) {
@@ -117,7 +129,19 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
     if (ala.submission?.status === "submitted") return "submitted";
     if (ala.submission?.status === "rejected") return "rejected";
     if (ala.isLocked) return "locked";
-    if (new Date(ala.deadline) < new Date()) return "overdue";
+
+    const now = new Date();
+    const deadline = new Date(ala.deadline);
+    const lateDeadline = ala.lateDeadline ? new Date(ala.lateDeadline) : null;
+
+    // Past main deadline
+    if (deadline < now) {
+      // Check if in late submission window
+      if (ala.allowLateSubmission && lateDeadline && lateDeadline > now) {
+        return "lateWindow";
+      }
+      return "overdue";
+    }
     return "pending";
   };
 
@@ -169,6 +193,7 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
           { label: "Graded", value: "graded" },
           { label: "Rejected", value: "rejected" },
           { label: "Overdue", value: "overdue" },
+          { label: "Late Window", value: "lateWindow" },
         ],
       },
     ],
@@ -328,9 +353,19 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
                 const status = getStatus(ala);
                 const config = statusConfig[status];
                 const deadline = formatDeadline(ala.deadline);
+                const now = new Date();
+                const deadlineDate = new Date(ala.deadline);
+                const lateDeadline = ala.lateDeadline
+                  ? new Date(ala.lateDeadline)
+                  : null;
+                const isInLateWindow =
+                  ala.allowLateSubmission &&
+                  lateDeadline &&
+                  deadlineDate < now &&
+                  lateDeadline > now;
                 const canSubmit =
                   !ala.isLocked &&
-                  new Date(ala.deadline) > new Date() &&
+                  (deadlineDate > now || isInLateWindow) &&
                   ala.submission?.status !== "submitted" &&
                   ala.submission?.status !== "graded";
 
@@ -365,13 +400,26 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
                     </TableCell>
                     <TableCell>
                       {status === "graded" ? (
-                        <Badge
-                          variant="outline"
-                          className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-                        >
-                          <Award className="mr-1.5 h-3 w-3" />
-                          {ala.submission?.marks}/{ala.maxMarks}
-                        </Badge>
+                        <div className="flex flex-col gap-0.5">
+                          <Badge
+                            variant="outline"
+                            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                          >
+                            <Award className="mr-1.5 h-3 w-3" />
+                            {ala.submission?.isLate &&
+                            ala.submission?.adjustedMarks !== undefined
+                              ? ala.submission.adjustedMarks
+                              : ala.submission?.marks}
+                            /{ala.maxMarks}
+                          </Badge>
+                          {ala.submission?.isLate &&
+                          ala.submission?.latePenaltyApplied ? (
+                            <span className="text-[10px] text-orange-600">
+                              Original: {ala.submission.marks} (-
+                              {ala.submission.latePenaltyApplied}%)
+                            </span>
+                          ) : null}
+                        </div>
                       ) : (
                         <Badge
                           variant="outline"
@@ -396,12 +444,32 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={config.className}>
-                        <span
-                          className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${config.dotColor}`}
-                        />
-                        {config.label}
-                      </Badge>
+                      <div className="flex flex-col gap-1">
+                        <Badge variant="outline" className={config.className}>
+                          <span
+                            className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${config.dotColor}`}
+                          />
+                          {config.label}
+                        </Badge>
+                        {/* Show late submission indicator for submitted/graded late submissions */}
+                        {ala.submission?.isLate && (
+                          <Badge
+                            variant="outline"
+                            className="border-orange-500/30 bg-orange-500/10 text-[10px] text-orange-600"
+                          >
+                            <Clock className="mr-1 h-2.5 w-2.5" />
+                            Late
+                          </Badge>
+                        )}
+                        {/* Show late penalty info for pending ALAs with late submission allowed */}
+                        {status === "pending" &&
+                          ala.allowLateSubmission &&
+                          ala.latePenaltyPercent && (
+                            <span className="text-muted-foreground text-[10px]">
+                              Late: -{ala.latePenaltyPercent}%
+                            </span>
+                          )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Button

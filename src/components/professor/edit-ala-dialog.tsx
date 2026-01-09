@@ -25,6 +25,7 @@ import {
   Users,
   FileType,
   HardDrive,
+  Clock,
 } from "lucide-react";
 import { updateALA } from "@/lib/actions/ala.actions";
 import { ALLOWED_FILE_TYPES } from "@/lib/validations/ala.validation";
@@ -35,6 +36,9 @@ interface ALA {
   title: string;
   description: string;
   deadline: string;
+  allowLateSubmission?: boolean;
+  lateDeadline?: string;
+  latePenaltyPercent?: number;
   maxMarks: number;
   isGroupSubmission: boolean;
   maxGroupSize?: number;
@@ -59,6 +63,12 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
   const [deadline, setDeadline] = useState<Date | undefined>(
     new Date(ala.deadline),
   );
+  const [allowLateSubmission, setAllowLateSubmission] = useState(
+    ala.allowLateSubmission || false,
+  );
+  const [lateDeadline, setLateDeadline] = useState<Date | undefined>(
+    ala.lateDeadline ? new Date(ala.lateDeadline) : undefined,
+  );
   const router = useRouter();
 
   const handleFileTypeChange = (type: string, checked: boolean) => {
@@ -78,6 +88,12 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
       deadline: deadline?.toISOString() || "",
+      allowLateSubmission,
+      lateDeadline:
+        allowLateSubmission && lateDeadline ? lateDeadline.toISOString() : null,
+      latePenaltyPercent: allowLateSubmission
+        ? Number(formData.get("latePenaltyPercent") || 0)
+        : 0,
       maxMarks: Number(formData.get("maxMarks")),
       isGroupSubmission,
       maxGroupSize: isGroupSubmission
@@ -173,6 +189,56 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
                 />
               </div>
             </div>
+
+            {/* Late Submission Section */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="edit-allowLateSubmission"
+                checked={allowLateSubmission}
+                onCheckedChange={(checked) =>
+                  setAllowLateSubmission(checked as boolean)
+                }
+              />
+              <label
+                htmlFor="edit-allowLateSubmission"
+                className="flex items-center gap-2 text-sm"
+              >
+                <Clock className="text-muted-foreground h-4 w-4" />
+                Allow late submissions
+              </label>
+            </div>
+
+            {allowLateSubmission && (
+              <div className="bg-muted/30 space-y-4 rounded-lg border p-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label>Late Deadline</Label>
+                    <DateTimePicker
+                      id="edit-lateDeadline"
+                      value={lateDeadline}
+                      onChange={setLateDeadline}
+                      placeholder="Select late deadline"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="latePenaltyPercent">Penalty (%)</Label>
+                    <Input
+                      id="latePenaltyPercent"
+                      name="latePenaltyPercent"
+                      type="number"
+                      min={0}
+                      max={100}
+                      defaultValue={ala.latePenaltyPercent || 10}
+                      placeholder="e.g., 10"
+                    />
+                  </div>
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  Late submissions will have the penalty percentage deducted
+                  from their marks.
+                </p>
+              </div>
+            )}
 
             <div className="grid gap-2">
               <Label htmlFor="maxFileSize" className="flex items-center gap-2">

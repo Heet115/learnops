@@ -32,7 +32,8 @@ export function ProfessorAnnouncementsList({
   announcements,
 }: ProfessorAnnouncementsListProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [editAnnouncement, setEditAnnouncement] = useState<AnnouncementData | null>(null);
+  const [editAnnouncement, setEditAnnouncement] =
+    useState<AnnouncementData | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
@@ -53,7 +54,7 @@ export function ProfessorAnnouncementsList({
     const result = await toggleAnnouncementPin(id);
     if (result.success) {
       toast.success(
-        result.isPinned ? "Announcement pinned" : "Announcement unpinned"
+        result.isPinned ? "Announcement pinned" : "Announcement unpinned",
       );
     } else {
       toast.error(result.error || "Failed to update");
@@ -64,8 +65,8 @@ export function ProfessorAnnouncementsList({
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-            <Megaphone className="h-6 w-6 text-muted-foreground" />
+          <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+            <Megaphone className="text-muted-foreground h-6 w-6" />
           </div>
           <p className="mt-4 font-medium">No announcements yet</p>
           <p className="text-muted-foreground text-sm">

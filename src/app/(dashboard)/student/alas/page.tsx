@@ -50,24 +50,88 @@ export default async function StudentALAsPage() {
   };
 
   const now = new Date();
+
+  // Helper to check if ALA is in late submission window
+  const isInLateWindow = (ala: {
+    deadline: string;
+    allowLateSubmission?: boolean;
+    lateDeadline?: string;
+  }) => {
+    const deadline = new Date(ala.deadline);
+    const lateDeadline = ala.lateDeadline ? new Date(ala.lateDeadline) : null;
+    return (
+      ala.allowLateSubmission &&
+      lateDeadline &&
+      deadline < now &&
+      lateDeadline > now
+    );
+  };
+
+  // Helper to check if ALA can still be submitted (including late window)
+  const canStillSubmit = (ala: {
+    deadline: string;
+    isLocked: boolean;
+    allowLateSubmission?: boolean;
+    lateDeadline?: string;
+  }) => {
+    if (ala.isLocked) return false;
+    const deadline = new Date(ala.deadline);
+    if (deadline > now) return true;
+    return isInLateWindow(ala);
+  };
+
   const pending = alas.filter(
-    (a: { submission: unknown; deadline: string; isLocked: boolean }) =>
-      !a.submission && new Date(a.deadline) > now && !a.isLocked,
+    (a: {
+      submission: unknown;
+      deadline: string;
+      isLocked: boolean;
+      allowLateSubmission?: boolean;
+      lateDeadline?: string;
+    }) => !a.submission && canStillSubmit(a),
   ).length;
   const submitted = alas.filter(
     (a: { submission?: { status: string } }) =>
       a.submission?.status === "submitted" || a.submission?.status === "graded",
   ).length;
   const overdue = alas.filter(
-    (a: { submission: unknown; deadline: string }) =>
-      !a.submission && new Date(a.deadline) < now,
+    (a: {
+      submission: unknown;
+      deadline: string;
+      allowLateSubmission?: boolean;
+      lateDeadline?: string;
+      isLocked: boolean;
+    }) => {
+      if (a.submission) return false;
+      // Not overdue if still in late window
+      if (isInLateWindow(a)) return false;
+      const deadline = new Date(a.deadline);
+      const lateDeadline = a.lateDeadline ? new Date(a.lateDeadline) : null;
+      // Overdue if past deadline (and past late deadline if applicable)
+      if (a.allowLateSubmission && lateDeadline) {
+        return lateDeadline < now;
+      }
+      return deadline < now;
+    },
   ).length;
   const dueSoon = alas.filter(
-    (a: { submission: unknown; deadline: string; isLocked: boolean }) => {
+    (a: {
+      submission: unknown;
+      deadline: string;
+      isLocked: boolean;
+      allowLateSubmission?: boolean;
+      lateDeadline?: string;
+    }) => {
       if (a.submission || a.isLocked) return false;
       const deadline = new Date(a.deadline);
       const threeDays = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-      return deadline > now && deadline <= threeDays;
+      // Due soon if main deadline is within 3 days
+      if (deadline > now && deadline <= threeDays) return true;
+      // Also due soon if in late window and late deadline is within 3 days
+      if (isInLateWindow(a)) {
+        const lateDeadline = new Date(a.lateDeadline!);
+        return lateDeadline <= threeDays;
+      }
+      return false;
     },
   ).length;
 

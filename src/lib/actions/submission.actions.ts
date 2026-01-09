@@ -76,7 +76,9 @@ export async function getStudentALAs() {
     alaId: { $in: alaIds },
     studentId: student._id,
   })
-    .select("alaId status marks submittedAt")
+    .select(
+      "alaId status marks adjustedMarks isLate latePenaltyApplied submittedAt",
+    )
     .lean();
 
   // Get submissions where student is a group member
@@ -84,7 +86,9 @@ export async function getStudentALAs() {
     alaId: { $in: alaIds },
     groupMembers: student._id,
   })
-    .select("alaId status marks submittedAt")
+    .select(
+      "alaId status marks adjustedMarks isLate latePenaltyApplied submittedAt",
+    )
     .lean();
 
   // Merge submissions - prefer own submission, fallback to group submission
@@ -153,12 +157,15 @@ export async function getALAForSubmission(alaId: string) {
     if (group) {
       hasGroup = true;
       groupId = group._id.toString();
-      
+
       // Check if student is the group leader
       isGroupLeader = group.leaderId?.toString() === student._id.toString();
-      
+
       // If no leader assigned, the group creator can submit (they become leader on submit)
-      if (!group.leaderId && group.createdBy.toString() === student._id.toString()) {
+      if (
+        !group.leaderId &&
+        group.createdBy.toString() === student._id.toString()
+      ) {
         isGroupLeader = true;
       }
 
@@ -183,9 +190,9 @@ export async function getALAForSubmission(alaId: string) {
   }
 
   return JSON.parse(
-    JSON.stringify({ 
-      ala, 
-      submission, 
+    JSON.stringify({
+      ala,
+      submission,
       studentId: student._id.toString(),
       isGroupLeader,
       hasGroup,
@@ -210,13 +217,39 @@ export async function createSubmission(
     return { success: false, error: "ALA not found" };
   }
 
-  // Check if locked or past deadline
+  // Check if locked
   if (ala.isLocked) {
     return { success: false, error: "This ALA is locked for submissions" };
   }
 
-  if (new Date(ala.deadline) < new Date()) {
-    return { success: false, error: "Deadline has passed" };
+  const now = new Date();
+  const deadline = new Date(ala.deadline);
+  const isPastDeadline = deadline < now;
+
+  // Check deadline and late submission rules
+  let isLate = false;
+  let latePenaltyApplied = 0;
+
+  if (isPastDeadline) {
+    // Check if late submissions are allowed
+    if (!ala.allowLateSubmission) {
+      return {
+        success: false,
+        error: "Deadline has passed and late submissions are not allowed",
+      };
+    }
+
+    // Check if within late deadline
+    const lateDeadline = ala.lateDeadline ? new Date(ala.lateDeadline) : null;
+    if (lateDeadline && lateDeadline < now) {
+      return {
+        success: false,
+        error: "Late submission deadline has also passed",
+      };
+    }
+
+    isLate = true;
+    latePenaltyApplied = ala.latePenaltyPercent || 0;
   }
 
   if (data.files.length === 0 && data.links.length === 0) {
@@ -251,8 +284,14 @@ export async function createSubmission(
     }
 
     // Check if student is the group leader (only leader can submit)
-    if (group.leaderId && group.leaderId.toString() !== student._id.toString()) {
-      return { success: false, error: "Only the group leader can submit for the group" };
+    if (
+      group.leaderId &&
+      group.leaderId.toString() !== student._id.toString()
+    ) {
+      return {
+        success: false,
+        error: "Only the group leader can submit for the group",
+      };
     }
 
     // If no leader is assigned, allow submission but warn
@@ -295,6 +334,8 @@ export async function createSubmission(
     files: data.files.map((f) => ({ ...f, uploadedAt: new Date() })),
     links: data.links.map((l) => ({ ...l, addedAt: new Date() })),
     status: "submitted",
+    isLate,
+    latePenaltyApplied: isLate ? latePenaltyApplied : undefined,
     submittedAt: new Date(),
   });
 
@@ -314,10 +355,17 @@ export async function createSubmission(
       filesCount: data.files.length,
       linksCount: data.links.length,
       isGroupSubmission: ala.isGroupSubmission,
+      isLate,
+      latePenaltyApplied: isLate ? latePenaltyApplied : undefined,
     },
   });
 
-  return { success: true, submission: JSON.parse(JSON.stringify(submission)) };
+  return {
+    success: true,
+    submission: JSON.parse(JSON.stringify(submission)),
+    isLate,
+    latePenaltyApplied: isLate ? latePenaltyApplied : 0,
+  };
 }
 
 // Update an existing submission
@@ -355,12 +403,21 @@ export async function updateSubmission(
     }
 
     // Check if student is the group leader
-    if (group.leaderId && group.leaderId.toString() !== student._id.toString()) {
-      return { success: false, error: "Only the group leader can edit the submission" };
+    if (
+      group.leaderId &&
+      group.leaderId.toString() !== student._id.toString()
+    ) {
+      return {
+        success: false,
+        error: "Only the group leader can edit the submission",
+      };
     }
 
     // If no leader, only the original submitter can edit
-    if (!group.leaderId && submission.studentId.toString() !== student._id.toString()) {
+    if (
+      !group.leaderId &&
+      submission.studentId.toString() !== student._id.toString()
+    ) {
       return { success: false, error: "Only the original submitter can edit" };
     }
   } else {
@@ -379,8 +436,40 @@ export async function updateSubmission(
     return { success: false, error: "This ALA is locked" };
   }
 
-  if (new Date(ala.deadline) < new Date()) {
-    return { success: false, error: "Deadline has passed" };
+  const now = new Date();
+  const deadline = new Date(ala.deadline);
+  const isPastDeadline = deadline < now;
+
+  // Check deadline and late submission rules
+  let isLate = submission.isLate || false;
+  let latePenaltyApplied = submission.latePenaltyApplied || 0;
+
+  if (isPastDeadline && !submission.isLate) {
+    // Original submission was on time, but update is late
+    if (!ala.allowLateSubmission) {
+      return {
+        success: false,
+        error: "Deadline has passed and late submissions are not allowed",
+      };
+    }
+
+    const lateDeadline = ala.lateDeadline ? new Date(ala.lateDeadline) : null;
+    if (lateDeadline && lateDeadline < now) {
+      return {
+        success: false,
+        error: "Late submission deadline has also passed",
+      };
+    }
+
+    // Mark as late since update is after deadline
+    isLate = true;
+    latePenaltyApplied = ala.latePenaltyPercent || 0;
+  } else if (isPastDeadline && submission.isLate) {
+    // Already late, check if still within late deadline
+    const lateDeadline = ala.lateDeadline ? new Date(ala.lateDeadline) : null;
+    if (lateDeadline && lateDeadline < now) {
+      return { success: false, error: "Late submission deadline has passed" };
+    }
   }
 
   if (data.files.length === 0 && data.links.length === 0) {
@@ -403,6 +492,8 @@ export async function updateSubmission(
       files: data.files.map((f) => ({ ...f, uploadedAt: new Date() })),
       links: data.links.map((l) => ({ ...l, addedAt: new Date() })),
       status: "submitted",
+      isLate,
+      latePenaltyApplied: isLate ? latePenaltyApplied : undefined,
       submittedAt: new Date(),
     },
     { new: true },
@@ -423,10 +514,17 @@ export async function updateSubmission(
       alaTitle: ala.title,
       filesCount: data.files.length,
       linksCount: data.links.length,
+      isLate,
+      latePenaltyApplied: isLate ? latePenaltyApplied : undefined,
     },
   });
 
-  return { success: true, submission: JSON.parse(JSON.stringify(updated)) };
+  return {
+    success: true,
+    submission: JSON.parse(JSON.stringify(updated)),
+    isLate,
+    latePenaltyApplied: isLate ? latePenaltyApplied : 0,
+  };
 }
 
 // Get student's submissions

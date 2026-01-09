@@ -3,7 +3,10 @@ import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { CreateProfessorAnnouncementDialog } from "@/components/professor/create-announcement-dialog";
 import { ProfessorAnnouncementsPageContent } from "@/components/professor/announcements-page-content";
-import { getMyAnnouncements, getAnnouncementsForUser } from "@/lib/actions/announcement.actions";
+import {
+  getMyAnnouncements,
+  getAnnouncementsForUser,
+} from "@/lib/actions/announcement.actions";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
 import { Megaphone } from "lucide-react";
 
@@ -39,7 +42,10 @@ export default async function ProfessorAnnouncementsPage() {
     <DashboardLayout
       role="professor"
       user={user}
-      breadcrumbs={[{ label: "Professor", href: "/professor" }, { label: "Announcements" }]}
+      breadcrumbs={[
+        { label: "Professor", href: "/professor" },
+        { label: "Announcements" },
+      ]}
     >
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -48,7 +54,9 @@ export default async function ProfessorAnnouncementsPage() {
               <Megaphone className="h-5 w-5 text-violet-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Announcements</h1>
+              <h1 className="text-2xl font-bold tracking-tight">
+                Announcements
+              </h1>
               <p className="text-muted-foreground">
                 View and create announcements
               </p>

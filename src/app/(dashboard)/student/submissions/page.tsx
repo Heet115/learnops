@@ -28,12 +28,14 @@ import {
   XCircle,
   FileText,
   ClipboardList,
+  AlertTriangle,
 } from "lucide-react";
 
 const colorMap: Record<string, string> = {
   blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
   emerald: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
   rose: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+  amber: "bg-amber-500/10 text-amber-600 border-amber-500/20",
 };
 
 export default async function StudentSubmissionsPage() {
@@ -65,6 +67,9 @@ export default async function StudentSubmissionsPage() {
   const rejected = submissions.filter(
     (s: { status: string }) => s.status === "rejected",
   ).length;
+  const lateSubmissions = submissions.filter(
+    (s: { isLate?: boolean }) => s.isLate,
+  ).length;
 
   const statCards = [
     {
@@ -85,12 +90,18 @@ export default async function StudentSubmissionsPage() {
       icon: XCircle,
       color: "rose",
     },
+    {
+      title: "Late",
+      value: lateSubmissions,
+      icon: AlertTriangle,
+      color: "amber",
+    },
   ];
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "graded":
-        return (
+  const getStatusBadge = (status: string, isLate?: boolean) => {
+    if (status === "graded") {
+      return (
+        <div className="flex items-center gap-1.5">
           <Badge
             variant="outline"
             className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
@@ -98,9 +109,21 @@ export default async function StudentSubmissionsPage() {
             <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
             Graded
           </Badge>
-        );
-      case "submitted":
-        return (
+          {isLate && (
+            <Badge
+              variant="outline"
+              className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+            >
+              <Clock className="mr-1 h-3 w-3" />
+              Late
+            </Badge>
+          )}
+        </div>
+      );
+    }
+    if (status === "submitted") {
+      return (
+        <div className="flex items-center gap-1.5">
           <Badge
             variant="outline"
             className="border-blue-500/30 bg-blue-500/10 text-blue-600"
@@ -108,25 +131,35 @@ export default async function StudentSubmissionsPage() {
             <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-blue-500" />
             Submitted
           </Badge>
-        );
-      case "rejected":
-        return (
-          <Badge
-            variant="outline"
-            className="border-rose-500/30 bg-rose-500/10 text-rose-600"
-          >
-            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-rose-500" />
-            Rejected
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="outline">
-            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-gray-500" />
-            Pending
-          </Badge>
-        );
+          {isLate && (
+            <Badge
+              variant="outline"
+              className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+            >
+              <Clock className="mr-1 h-3 w-3" />
+              Late
+            </Badge>
+          )}
+        </div>
+      );
     }
+    if (status === "rejected") {
+      return (
+        <Badge
+          variant="outline"
+          className="border-rose-500/30 bg-rose-500/10 text-rose-600"
+        >
+          <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-rose-500" />
+          Rejected
+        </Badge>
+      );
+    }
+    return (
+      <Badge variant="outline">
+        <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-gray-500" />
+        Pending
+      </Badge>
+    );
   };
 
   return (
@@ -153,7 +186,7 @@ export default async function StudentSubmissionsPage() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           {statCards.map((stat) => (
             <Card
               key={stat.title}
@@ -223,6 +256,9 @@ export default async function StudentSubmissionsPage() {
                         _id: string;
                         status: string;
                         marks?: number;
+                        adjustedMarks?: number;
+                        isLate?: boolean;
+                        latePenaltyApplied?: number;
                         submittedAt?: string;
                         alaId: {
                           _id: string;
@@ -253,12 +289,28 @@ export default async function StudentSubmissionsPage() {
                                 "-"}
                             </Badge>
                           </TableCell>
-                          <TableCell>{getStatusBadge(sub.status)}</TableCell>
+                          <TableCell>
+                            {getStatusBadge(sub.status, sub.isLate)}
+                          </TableCell>
                           <TableCell>
                             {sub.status === "graded" ? (
-                              <span className="font-medium">
-                                {sub.marks}/{sub.alaId?.maxMarks}
-                              </span>
+                              <div>
+                                {sub.isLate &&
+                                sub.adjustedMarks !== undefined ? (
+                                  <div>
+                                    <span className="font-medium">
+                                      {sub.adjustedMarks}/{sub.alaId?.maxMarks}
+                                    </span>
+                                    <p className="text-xs text-amber-600">
+                                      ({sub.marks} - {sub.latePenaltyApplied}%)
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <span className="font-medium">
+                                    {sub.marks}/{sub.alaId?.maxMarks}
+                                  </span>
+                                )}
+                              </div>
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}

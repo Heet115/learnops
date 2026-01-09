@@ -48,6 +48,7 @@ import {
   BookMarked,
   GraduationCap,
   Calendar,
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -55,6 +56,9 @@ interface Submission {
   _id: string;
   status: string;
   marks?: number;
+  adjustedMarks?: number;
+  isLate?: boolean;
+  latePenaltyApplied?: number;
   submittedAt?: string;
   gradedAt?: string;
   alaId: {
@@ -108,10 +112,29 @@ const exportColumns: ExportColumn<Submission>[] = [
   },
   { key: "status", header: "Status", accessor: (row) => row.status },
   {
+    key: "isLate",
+    header: "Late",
+    accessor: (row) => (row.isLate ? "Yes" : "No"),
+  },
+  {
     key: "marks",
     header: "Marks",
     accessor: (row) =>
       row.marks !== undefined ? `${row.marks}/${row.alaId?.maxMarks}` : "-",
+  },
+  {
+    key: "adjustedMarks",
+    header: "Adjusted Marks",
+    accessor: (row) =>
+      row.isLate && row.adjustedMarks !== undefined
+        ? `${row.adjustedMarks}/${row.alaId?.maxMarks}`
+        : "-",
+  },
+  {
+    key: "latePenalty",
+    header: "Late Penalty",
+    accessor: (row) =>
+      row.isLate && row.latePenaltyApplied ? `${row.latePenaltyApplied}%` : "-",
   },
   {
     key: "submittedAt",
@@ -301,27 +324,49 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
     status: string,
     marks?: number,
     maxMarks?: number,
+    isLate?: boolean,
+    adjustedMarks?: number,
+    latePenaltyApplied?: number,
   ) => {
     switch (status) {
       case "graded":
         return (
-          <Badge
-            variant="outline"
-            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-          >
-            <CheckCircle className="mr-1.5 h-3 w-3" />
-            {marks}/{maxMarks}
-          </Badge>
+          <div className="flex flex-col gap-0.5">
+            <Badge
+              variant="outline"
+              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+            >
+              <CheckCircle className="mr-1.5 h-3 w-3" />
+              {isLate && adjustedMarks !== undefined ? adjustedMarks : marks}/
+              {maxMarks}
+            </Badge>
+            {isLate && latePenaltyApplied && (
+              <span className="text-[10px] text-orange-600">
+                -{latePenaltyApplied}% late
+              </span>
+            )}
+          </div>
         );
       case "submitted":
         return (
-          <Badge
-            variant="outline"
-            className="border-amber-500/30 bg-amber-500/10 text-amber-600"
-          >
-            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
-            Pending
-          </Badge>
+          <div className="flex flex-col gap-0.5">
+            <Badge
+              variant="outline"
+              className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+            >
+              <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+              Pending
+            </Badge>
+            {isLate && (
+              <Badge
+                variant="outline"
+                className="border-orange-500/30 bg-orange-500/10 text-[10px] text-orange-600"
+              >
+                <Clock className="mr-1 h-2.5 w-2.5" />
+                Late
+              </Badge>
+            )}
+          </div>
         );
       case "rejected":
         return (
@@ -565,6 +610,9 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
                         sub.status,
                         sub.marks,
                         sub.alaId?.maxMarks,
+                        sub.isLate,
+                        sub.adjustedMarks,
+                        sub.latePenaltyApplied,
                       )}
                     </TableCell>
                     <TableCell>

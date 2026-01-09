@@ -21,7 +21,10 @@ export interface ISubmission extends Document {
   files: ISubmissionFile[];
   links: ISubmissionLink[];
   status: "submitted" | "graded" | "rejected";
+  isLate: boolean;
+  latePenaltyApplied?: number; // Percentage penalty applied
   marks?: number;
+  adjustedMarks?: number; // Marks after late penalty
   feedback?: string;
   rejectionReason?: string;
   gradedBy?: mongoose.Types.ObjectId;
@@ -76,7 +79,10 @@ const SubmissionSchema = new Schema<ISubmission>(
       enum: ["submitted", "graded", "rejected"],
       default: "submitted",
     },
+    isLate: { type: Boolean, default: false },
+    latePenaltyApplied: { type: Number, min: 0, max: 100 },
     marks: { type: Number, min: 0 },
+    adjustedMarks: { type: Number, min: 0 },
     feedback: { type: String },
     rejectionReason: { type: String },
     gradedBy: {
@@ -93,6 +99,7 @@ const SubmissionSchema = new Schema<ISubmission>(
 SubmissionSchema.index({ alaId: 1, studentId: 1 }, { unique: true });
 SubmissionSchema.index({ studentId: 1, status: 1 });
 SubmissionSchema.index({ alaId: 1, status: 1 });
+SubmissionSchema.index({ alaId: 1, isLate: 1 });
 
 export const Submission: Model<ISubmission> =
   mongoose.models.Submission ||

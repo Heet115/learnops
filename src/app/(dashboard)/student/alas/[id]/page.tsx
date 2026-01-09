@@ -30,6 +30,8 @@ import {
   Link as LinkIcon,
   Award,
   File,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
 import { SubmissionForm } from "@/components/student/submission-form";
 import { GroupSection } from "@/components/student/group-section";
@@ -48,6 +50,11 @@ const statusConfig: Record<
     color: "border-blue-500/30 bg-blue-500/10 text-blue-600",
     dotColor: "bg-blue-500",
   },
+  "submitted-late": {
+    label: "Submitted Late",
+    color: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+    dotColor: "bg-amber-500",
+  },
   rejected: {
     label: "Rejected - Resubmit",
     color: "border-rose-500/30 bg-rose-500/10 text-rose-600",
@@ -62,6 +69,11 @@ const statusConfig: Record<
     label: "Overdue",
     color: "border-rose-500/30 bg-rose-500/10 text-rose-600",
     dotColor: "bg-rose-500",
+  },
+  "late-allowed": {
+    label: "Late Submission Open",
+    color: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+    dotColor: "bg-amber-500",
   },
   pending: {
     label: "Not Started",
@@ -100,17 +112,32 @@ export default async function StudentALAPage({ params }: PageProps) {
     avatar: dbUser?.profileImage,
   };
 
+  const now = new Date();
   const deadline = new Date(ala.deadline);
-  const isPastDeadline = deadline < new Date();
+  const isPastDeadline = deadline < now;
+  const lateDeadline = ala.lateDeadline ? new Date(ala.lateDeadline) : null;
+  const isPastLateDeadline = lateDeadline ? lateDeadline < now : true;
+  const isInLateWindow =
+    isPastDeadline && ala.allowLateSubmission && !isPastLateDeadline;
+
+  // Can modify if:
+  // - Not locked
+  // - Not graded
+  // - Either before deadline OR in late submission window
   const canModify =
-    !ala.isLocked && !isPastDeadline && submission?.status !== "graded";
+    !ala.isLocked &&
+    submission?.status !== "graded" &&
+    (!isPastDeadline || isInLateWindow);
 
   const getStatusBadge = () => {
     let status = "pending";
     if (submission?.status === "graded") status = "graded";
+    else if (submission?.status === "submitted" && submission?.isLate)
+      status = "submitted-late";
     else if (submission?.status === "submitted") status = "submitted";
     else if (submission?.status === "rejected") status = "rejected";
     else if (ala.isLocked) status = "locked";
+    else if (isInLateWindow) status = "late-allowed";
     else if (isPastDeadline) status = "overdue";
 
     const config = statusConfig[status];
@@ -247,11 +274,35 @@ export default async function StudentALAPage({ params }: PageProps) {
                       <p className="text-muted-foreground text-sm">
                         Your Score
                       </p>
-                      <p className="text-2xl font-bold text-emerald-600">
-                        {submission.marks} / {ala.maxMarks}
-                      </p>
+                      {submission.isLate &&
+                      submission.adjustedMarks !== undefined ? (
+                        <div>
+                          <p className="text-2xl font-bold text-emerald-600">
+                            {submission.adjustedMarks} / {ala.maxMarks}
+                          </p>
+                          <p className="text-xs text-amber-600">
+                            Original: {submission.marks} (
+                            {submission.latePenaltyApplied}% late penalty
+                            applied)
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-2xl font-bold text-emerald-600">
+                          {submission.marks} / {ala.maxMarks}
+                        </p>
+                      )}
                     </div>
                   </div>
+                  {submission.isLate && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-500/10 p-3">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-amber-600" />
+                        <p className="text-sm text-amber-700">
+                          This submission was made after the deadline
+                        </p>
+                      </div>
+                    </div>
+                  )}
                   {submission.feedback && (
                     <div className="bg-muted/30 rounded-lg border p-4">
                       <p className="mb-1 text-sm font-medium">Feedback</p>
@@ -347,6 +398,8 @@ export default async function StudentALAPage({ params }: PageProps) {
                       isGroupSubmission={ala.isGroupSubmission}
                       isGroupLeader={isGroupLeader}
                       hasGroup={hasGroup}
+                      isLateSubmission={isInLateWindow}
+                      latePenaltyPercent={ala.latePenaltyPercent || 0}
                     />
                   )}
                 </CardContent>
@@ -362,6 +415,8 @@ export default async function StudentALAPage({ params }: PageProps) {
                 isGroupSubmission={ala.isGroupSubmission}
                 isGroupLeader={isGroupLeader}
                 hasGroup={hasGroup}
+                isLateSubmission={isInLateWindow}
+                latePenaltyPercent={ala.latePenaltyPercent || 0}
               />
             ) : submission?.status === "submitted" ? (
               <Card className="border-blue-200">
@@ -449,6 +504,8 @@ export default async function StudentALAPage({ params }: PageProps) {
                 isGroupSubmission={ala.isGroupSubmission}
                 isGroupLeader={isGroupLeader}
                 hasGroup={hasGroup}
+                isLateSubmission={isInLateWindow}
+                latePenaltyPercent={ala.latePenaltyPercent || 0}
               />
             ) : (
               <Card>
@@ -459,7 +516,9 @@ export default async function StudentALAPage({ params }: PageProps) {
                   <p className="text-muted-foreground">
                     {ala.isLocked
                       ? "This ALA is locked for submissions"
-                      : "The deadline has passed"}
+                      : ala.allowLateSubmission && isPastLateDeadline
+                        ? "Both the deadline and late submission deadline have passed"
+                        : "The deadline has passed"}
                   </p>
                 </CardContent>
               </Card>
@@ -496,6 +555,90 @@ export default async function StudentALAPage({ params }: PageProps) {
                     </p>
                   </div>
                 </div>
+
+                {/* Late Submission Info */}
+                {ala.allowLateSubmission && (
+                  <>
+                    <Separator />
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-amber-500/10">
+                        <Clock className="h-4 w-4 text-amber-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Late Submission</p>
+                        {lateDeadline ? (
+                          <p
+                            className={`text-sm ${isPastLateDeadline ? "text-rose-600" : "text-amber-600"}`}
+                          >
+                            Until{" "}
+                            {lateDeadline.toLocaleString("en-US", {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                              hour: "numeric",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-amber-600">Allowed</p>
+                        )}
+                        {ala.latePenaltyPercent > 0 && (
+                          <p className="mt-1 text-xs text-amber-600">
+                            {ala.latePenaltyPercent}% penalty applied
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Late Submission Warning Banner */}
+                {isInLateWindow && !submission && (
+                  <>
+                    <Separator />
+                    <div className="rounded-lg border border-amber-200 bg-amber-500/10 p-3">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-600" />
+                        <div>
+                          <p className="text-sm font-medium text-amber-700">
+                            Late Submission Period
+                          </p>
+                          <p className="text-xs text-amber-600">
+                            The deadline has passed. Submitting now will incur a{" "}
+                            {ala.latePenaltyPercent || 0}% penalty.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Show if submission was late */}
+                {submission?.isLate && (
+                  <>
+                    <Separator />
+                    <div className="rounded-lg border border-amber-200 bg-amber-500/10 p-3">
+                      <div className="flex items-start gap-2">
+                        <Clock className="mt-0.5 h-4 w-4 text-amber-600" />
+                        <div>
+                          <p className="text-sm font-medium text-amber-700">
+                            Late Submission
+                          </p>
+                          <p className="text-xs text-amber-600">
+                            This submission was made after the deadline.
+                            {submission.latePenaltyApplied > 0 && (
+                              <>
+                                {" "}
+                                A {submission.latePenaltyApplied}% penalty will
+                                be applied.
+                              </>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <Separator />
 

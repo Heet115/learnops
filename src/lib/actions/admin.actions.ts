@@ -62,7 +62,8 @@ export async function createUser(input: CreateUserInput) {
     // For students with classId, derive departmentId from class hierarchy
     let departmentId = validated.departmentId || undefined;
     if (validated.role === "student" && validated.classId && !departmentId) {
-      departmentId = (await getDepartmentIdFromClass(validated.classId)) || undefined;
+      departmentId =
+        (await getDepartmentIdFromClass(validated.classId)) || undefined;
     }
 
     const user = await User.create({

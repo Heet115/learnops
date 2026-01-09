@@ -139,6 +139,7 @@ export async function gradeSubmission(
     maxMarks: number;
     _id: string;
     title: string;
+    latePenaltyPercent?: number;
   };
   if (ala.professorId.toString() !== professorId) {
     return { success: false, error: "Unauthorized" };
@@ -155,11 +156,26 @@ export async function gradeSubmission(
     };
   }
 
+  // Calculate adjusted marks if submission was late
+  let adjustedMarks = data.marks;
+  if (
+    submission.isLate &&
+    submission.latePenaltyApplied &&
+    submission.latePenaltyApplied > 0
+  ) {
+    const penaltyAmount = (data.marks * submission.latePenaltyApplied) / 100;
+    adjustedMarks = Math.max(
+      0,
+      Math.round((data.marks - penaltyAmount) * 100) / 100,
+    );
+  }
+
   const updated = await Submission.findByIdAndUpdate(
     submissionId,
     {
       status: "graded",
       marks: data.marks,
+      adjustedMarks: submission.isLate ? adjustedMarks : data.marks,
       feedback: data.feedback || "",
       gradedBy: professorId,
       gradedAt: new Date(),
@@ -168,14 +184,15 @@ export async function gradeSubmission(
     { new: true },
   );
 
-  // Notify student about grading
+  // Notify student about grading (use adjusted marks for late submissions)
+  const finalMarks = submission.isLate ? adjustedMarks : data.marks;
   const { notifySubmissionGraded } =
     await import("@/lib/actions/notification.actions");
   await notifySubmissionGraded(
     submissionId,
     submission.studentId.toString(),
     ala.title,
-    data.marks,
+    finalMarks,
     ala.maxMarks,
   );
 
@@ -187,7 +204,7 @@ export async function gradeSubmission(
           submissionId,
           memberId.toString(),
           ala.title,
-          data.marks,
+          finalMarks,
           ala.maxMarks,
         );
       }
@@ -208,11 +225,21 @@ export async function gradeSubmission(
       alaTitle: ala.title,
       studentId: submission.studentId.toString(),
       marks: data.marks,
+      adjustedMarks: submission.isLate ? adjustedMarks : data.marks,
       maxMarks: ala.maxMarks,
+      isLate: submission.isLate,
+      latePenaltyApplied: submission.latePenaltyApplied,
     },
   });
 
-  return { success: true, submission: JSON.parse(JSON.stringify(updated)) };
+  return {
+    success: true,
+    submission: JSON.parse(JSON.stringify(updated)),
+    isLate: submission.isLate,
+    originalMarks: data.marks,
+    adjustedMarks: submission.isLate ? adjustedMarks : data.marks,
+    latePenaltyApplied: submission.latePenaltyApplied || 0,
+  };
 }
 
 // Reject a submission

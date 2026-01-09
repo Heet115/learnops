@@ -99,34 +99,39 @@ export function CreateProfessorAnnouncementDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(newOpen) => {
-      setOpen(newOpen);
-      if (!newOpen) resetForm();
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        setOpen(newOpen);
+        if (!newOpen) resetForm();
+      }}
+    >
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
           Create Announcement
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Announcement</DialogTitle>
           <DialogDescription>
             Broadcast a message to your class
           </DialogDescription>
         </DialogHeader>
-        
+
         {error && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title <span className="text-destructive">*</span></Label>
+            <Label htmlFor="title">
+              Title <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="title"
               value={title}
@@ -138,7 +143,9 @@ export function CreateProfessorAnnouncementDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Content <span className="text-destructive">*</span></Label>
+            <Label htmlFor="content">
+              Content <span className="text-destructive">*</span>
+            </Label>
             <Textarea
               id="content"
               value={content}
@@ -148,12 +155,16 @@ export function CreateProfessorAnnouncementDialog() {
               required
               minLength={10}
             />
-            <p className="text-xs text-muted-foreground">{content.length}/5000 characters</p>
+            <p className="text-muted-foreground text-xs">
+              {content.length}/5000 characters
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Select Class <span className="text-destructive">*</span></Label>
+              <Label>
+                Select Class <span className="text-destructive">*</span>
+              </Label>
               <Select value={targetId} onValueChange={setTargetId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select class" />

@@ -26,6 +26,8 @@ import {
   Users,
   BookOpen,
   Info,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
 import { GradingForm } from "@/components/professor/grading-form";
 
@@ -67,23 +69,45 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
     switch (submission.status) {
       case "graded":
         return (
-          <Badge
-            variant="outline"
-            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-          >
-            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            Graded
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+            >
+              <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Graded
+            </Badge>
+            {submission.isLate && (
+              <Badge
+                variant="outline"
+                className="border-orange-500/30 bg-orange-500/10 text-orange-600"
+              >
+                <Clock className="mr-1.5 h-3 w-3" />
+                Late Submission
+              </Badge>
+            )}
+          </div>
         );
       case "submitted":
         return (
-          <Badge
-            variant="outline"
-            className="border-amber-500/30 bg-amber-500/10 text-amber-600"
-          >
-            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
-            Pending Review
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+            >
+              <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+              Pending Review
+            </Badge>
+            {submission.isLate && (
+              <Badge
+                variant="outline"
+                className="border-orange-500/30 bg-orange-500/10 text-orange-600"
+              >
+                <Clock className="mr-1.5 h-3 w-3" />
+                Late Submission
+              </Badge>
+            )}
+          </div>
         );
       case "rejected":
         return (
@@ -279,6 +303,9 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
               currentFeedback={submission.feedback}
               currentRejectionReason={submission.rejectionReason}
               maxMarks={ala?.maxMarks || 100}
+              isLate={submission.isLate}
+              latePenaltyApplied={submission.latePenaltyApplied}
+              adjustedMarks={submission.adjustedMarks}
             />
           </div>
 
@@ -419,6 +446,48 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
                     </p>
                   </div>
                 </div>
+
+                {/* Late Submission Info */}
+                {submission.isLate && (
+                  <>
+                    <Separator />
+                    <div className="rounded-lg border border-orange-500/30 bg-orange-500/10 p-3">
+                      <div className="flex items-center gap-2 text-orange-600">
+                        <AlertTriangle className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          Late Submission
+                        </span>
+                      </div>
+                      {submission.latePenaltyApplied && (
+                        <p className="mt-1 text-xs text-orange-600">
+                          Penalty: -{submission.latePenaltyApplied}% will be
+                          applied to marks
+                        </p>
+                      )}
+                      {submission.status === "graded" &&
+                        submission.marks !== undefined && (
+                          <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                            <div>
+                              <span className="text-muted-foreground">
+                                Original:
+                              </span>{" "}
+                              <span className="font-medium">
+                                {submission.marks}/{ala?.maxMarks}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">
+                                Adjusted:
+                              </span>{" "}
+                              <span className="font-medium text-orange-600">
+                                {submission.adjustedMarks}/{ala?.maxMarks}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                    </div>
+                  </>
+                )}
 
                 {submission.gradedAt && (
                   <>

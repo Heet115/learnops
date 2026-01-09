@@ -24,6 +24,7 @@ import {
   BookOpen,
   Info,
   Settings,
+  Clock,
 } from "lucide-react";
 import { ALAResourcesSection } from "@/components/professor/ala-resources-section";
 import { GroupManagement } from "@/components/professor/group-management";
@@ -57,7 +58,15 @@ export default async function ALADetailPage({ params }: PageProps) {
   };
 
   const deadline = new Date(ala.deadline);
-  const isPastDeadline = deadline < new Date();
+  const lateDeadline = ala.lateDeadline ? new Date(ala.lateDeadline) : null;
+  const now = new Date();
+  const isPastDeadline = deadline < now;
+  const isInLateWindow =
+    ala.allowLateSubmission &&
+    lateDeadline &&
+    deadline < now &&
+    lateDeadline > now;
+  const isPastLateDeadline = lateDeadline && lateDeadline < now;
 
   const getStatus = () => {
     if (ala.isLocked)
@@ -66,7 +75,13 @@ export default async function ALADetailPage({ params }: PageProps) {
         className: "border-rose-500/30 bg-rose-500/10 text-rose-600",
         dotColor: "bg-rose-500",
       };
-    if (isPastDeadline)
+    if (isInLateWindow)
+      return {
+        label: "Late Window",
+        className: "border-orange-500/30 bg-orange-500/10 text-orange-600",
+        dotColor: "bg-orange-500",
+      };
+    if (isPastDeadline || isPastLateDeadline)
       return {
         label: "Past Due",
         className: "border-amber-500/30 bg-amber-500/10 text-amber-600",
@@ -250,6 +265,35 @@ export default async function ALADetailPage({ params }: PageProps) {
                     </p>
                   </div>
                 </div>
+
+                {/* Late Submission Info */}
+                {ala.allowLateSubmission && (
+                  <>
+                    <Separator />
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500/10">
+                        <Clock className="h-4 w-4 text-orange-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Late Submission</p>
+                        <p className="text-muted-foreground text-sm">
+                          Until{" "}
+                          {new Date(ala.lateDeadline).toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                        {ala.latePenaltyPercent && (
+                          <p className="text-xs text-orange-600">
+                            -{ala.latePenaltyPercent}% penalty
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>

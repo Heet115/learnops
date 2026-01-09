@@ -149,7 +149,8 @@ export function GroupSection({
     );
     const pendingMembers = group.members.filter((m) => m.status === "pending");
     const canBecomeLeader = !group.leaderId && !group.isLocked && canModify;
-    const canManageMembers = isLeader && !group.isLocked && canModify && groupFormation === "student";
+    const canManageMembers =
+      isLeader && !group.isLocked && canModify && groupFormation === "student";
 
     return (
       <Card>
@@ -218,8 +219,11 @@ export function GroupSection({
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
               <p className="text-sm text-amber-700">
                 <Crown className="mr-1.5 inline h-4 w-4" />
-                As the group leader, you can submit and edit the group&apos;s work
-                {groupFormation === "student" && ", invite or remove members, and transfer leadership"}.
+                As the group leader, you can submit and edit the group&apos;s
+                work
+                {groupFormation === "student" &&
+                  ", invite or remove members, and transfer leadership"}
+                .
               </p>
             </div>
           )}
@@ -292,7 +296,9 @@ export function GroupSection({
                         groupId={group._id}
                         memberId={member.studentId._id}
                         memberName={`${member.studentId.firstName} ${member.studentId.lastName}`}
-                        isCurrentLeader={group.leaderId?._id === member.studentId._id}
+                        isCurrentLeader={
+                          group.leaderId?._id === member.studentId._id
+                        }
                         onSuccess={loadGroup}
                       />
                     )}
@@ -749,7 +755,6 @@ function BecomeLeaderButton({
   );
 }
 
-
 // Invite Member Dialog (for leaders)
 function InviteMemberDialog({
   groupId,
@@ -816,7 +821,8 @@ function InviteMemberDialog({
             <div>
               <DialogTitle>Invite Members</DialogTitle>
               <DialogDescription>
-                Invite classmates to join your group ({remainingSlots} slots remaining)
+                Invite classmates to join your group ({remainingSlots} slots
+                remaining)
               </DialogDescription>
             </div>
           </div>
@@ -850,7 +856,7 @@ function InviteMemberDialog({
                 {classmates.map((classmate) => (
                   <div
                     key={classmate._id}
-                    className="flex items-center justify-between gap-3 rounded-md p-3 hover:bg-muted/50"
+                    className="hover:bg-muted/50 flex items-center justify-between gap-3 rounded-md p-3"
                   >
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
@@ -956,12 +962,16 @@ function MemberActionsMenu({
             <AlertDialogHeader>
               <AlertDialogTitle>Transfer Leadership?</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to make {memberName} the group leader? You will no longer be able to manage the group.
+                Are you sure you want to make {memberName} the group leader? You
+                will no longer be able to manage the group.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleTransfer} disabled={transferring}>
+              <AlertDialogAction
+                onClick={handleTransfer}
+                disabled={transferring}
+              >
                 {transferring ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -988,7 +998,8 @@ function MemberActionsMenu({
             <AlertDialogHeader>
               <AlertDialogTitle>Remove Member?</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to remove {memberName} from the group? They can be invited again later.
+                Are you sure you want to remove {memberName} from the group?
+                They can be invited again later.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

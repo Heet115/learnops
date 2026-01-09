@@ -36,6 +36,8 @@ import {
   ExternalLink,
   Crown,
   Users,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
 import {
   createSubmission,
@@ -79,6 +81,8 @@ interface SubmissionFormProps {
   isGroupSubmission?: boolean;
   isGroupLeader?: boolean;
   hasGroup?: boolean;
+  isLateSubmission?: boolean;
+  latePenaltyPercent?: number;
 }
 
 export function SubmissionForm({
@@ -91,6 +95,8 @@ export function SubmissionForm({
   isGroupSubmission = false,
   isGroupLeader = true,
   hasGroup = false,
+  isLateSubmission = false,
+  latePenaltyPercent = 0,
 }: SubmissionFormProps) {
   const [localFiles, setLocalFiles] = useState<LocalFile[]>([]);
   const [existingFiles, setExistingFiles] = useState<ExistingFile[]>(
@@ -289,8 +295,9 @@ export function SubmissionForm({
                   Leader-Only Submission
                 </p>
                 <p className="mt-1 text-sm text-amber-600">
-                  Only the group leader can submit and edit the group&apos;s work. 
-                  Contact your group leader to make changes or become the leader if no one is assigned.
+                  Only the group leader can submit and edit the group&apos;s
+                  work. Contact your group leader to make changes or become the
+                  leader if no one is assigned.
                 </p>
               </div>
             </div>
@@ -368,8 +375,8 @@ export function SubmissionForm({
           <div className="rounded-lg border border-dashed p-4 text-center">
             <Users className="text-muted-foreground/50 mx-auto h-8 w-8" />
             <p className="text-muted-foreground mt-2 text-sm">
-              You need to be in a group to submit this assignment. 
-              Create a group or wait to be assigned to one.
+              You need to be in a group to submit this assignment. Create a
+              group or wait to be assigned to one.
             </p>
           </div>
         </CardContent>
@@ -379,25 +386,64 @@ export function SubmissionForm({
 
   return (
     <>
-      <Card className={isResubmit ? "border-blue-200" : ""}>
+      <Card
+        className={
+          isResubmit
+            ? "border-blue-200"
+            : isLateSubmission
+              ? "border-amber-200"
+              : ""
+        }
+      >
         <CardHeader className="border-b">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
-              <File className="h-4 w-4 text-blue-600" />
+            <div
+              className={`flex h-8 w-8 items-center justify-center rounded-lg ${isLateSubmission ? "bg-amber-500/10" : "bg-blue-500/10"}`}
+            >
+              {isLateSubmission ? (
+                <Clock className="h-4 w-4 text-amber-600" />
+              ) : (
+                <File className="h-4 w-4 text-blue-600" />
+              )}
             </div>
             <div>
               <CardTitle>
-                {isResubmit ? "Modify Submission" : "Your Submission"}
+                {isLateSubmission
+                  ? "Late Submission"
+                  : isResubmit
+                    ? "Modify Submission"
+                    : "Your Submission"}
               </CardTitle>
               <CardDescription>
-                {isResubmit
-                  ? "Update your submission before the deadline"
-                  : "Add files and links, then click Submit"}
+                {isLateSubmission
+                  ? `Submit late with ${latePenaltyPercent}% penalty`
+                  : isResubmit
+                    ? "Update your submission before the deadline"
+                    : "Add files and links, then click Submit"}
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
+          {/* Late Submission Warning */}
+          {isLateSubmission && latePenaltyPercent > 0 && (
+            <div className="rounded-lg border border-amber-200 bg-amber-500/10 p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
+                <div>
+                  <p className="font-medium text-amber-700">
+                    Late Submission Warning
+                  </p>
+                  <p className="mt-1 text-sm text-amber-600">
+                    The deadline has passed. Submitting now will result in a{" "}
+                    {latePenaltyPercent}% penalty being applied to your final
+                    grade.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Files Section */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">

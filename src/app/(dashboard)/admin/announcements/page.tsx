@@ -42,7 +42,10 @@ export default async function AdminAnnouncementsPage() {
     <DashboardLayout
       role="admin"
       user={user}
-      breadcrumbs={[{ label: "Admin", href: "/admin" }, { label: "Announcements" }]}
+      breadcrumbs={[
+        { label: "Admin", href: "/admin" },
+        { label: "Announcements" },
+      ]}
     >
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -51,7 +54,9 @@ export default async function AdminAnnouncementsPage() {
               <Megaphone className="h-5 w-5 text-violet-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Announcements</h1>
+              <h1 className="text-2xl font-bold tracking-tight">
+                Announcements
+              </h1>
               <p className="text-muted-foreground">
                 Create and manage system-wide announcements
               </p>

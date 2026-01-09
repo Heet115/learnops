@@ -52,6 +52,7 @@ import {
   Award,
   BookMarked,
   GraduationCap,
+  Clock,
 } from "lucide-react";
 import {
   deleteALA,
@@ -72,6 +73,9 @@ interface ALA {
   isGroupSubmission: boolean;
   maxGroupSize?: number;
   isLocked: boolean;
+  allowLateSubmission?: boolean;
+  lateDeadline?: string;
+  latePenaltyPercent?: number;
   subjectOfferingId: {
     _id: string;
     subjectId: { name: string; code: string };
@@ -184,8 +188,20 @@ export function ALAsTable({ alas }: ALAsTableProps) {
 
   const getStatus = (ala: ALA) => {
     if (ala.isLocked) return { label: "Locked", color: "violet" };
+    const now = new Date();
     const deadline = new Date(ala.deadline);
-    if (deadline < new Date()) return { label: "Past Due", color: "amber" };
+    const lateDeadline = ala.lateDeadline ? new Date(ala.lateDeadline) : null;
+
+    // Check if in late submission window
+    if (
+      ala.allowLateSubmission &&
+      lateDeadline &&
+      deadline < now &&
+      lateDeadline > now
+    ) {
+      return { label: "Late Window", color: "orange" };
+    }
+    if (deadline < now) return { label: "Past Due", color: "amber" };
     return { label: "Active", color: "emerald" };
   };
 
@@ -347,6 +363,14 @@ export function ALAsTable({ alas }: ALAsTableProps) {
     emerald: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
     amber: "border-amber-500/30 bg-amber-500/10 text-amber-600",
     violet: "border-violet-500/30 bg-violet-500/10 text-violet-600",
+    orange: "border-orange-500/30 bg-orange-500/10 text-orange-600",
+  };
+
+  const statusDotMap: Record<string, string> = {
+    emerald: "bg-emerald-500",
+    amber: "bg-amber-500",
+    violet: "bg-violet-500",
+    orange: "bg-orange-500",
   };
 
   const formatDeadline = (deadline: string) => {
@@ -550,21 +574,23 @@ export function ALAsTable({ alas }: ALAsTableProps) {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={statusColorMap[status.color]}
-                        >
-                          <span
-                            className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
-                              status.color === "emerald"
-                                ? "bg-emerald-500"
-                                : status.color === "amber"
-                                  ? "bg-amber-500"
-                                  : "bg-violet-500"
-                            }`}
-                          />
-                          {status.label}
-                        </Badge>
+                        <div className="flex flex-col gap-1">
+                          <Badge
+                            variant="outline"
+                            className={statusColorMap[status.color]}
+                          >
+                            <span
+                              className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${statusDotMap[status.color]}`}
+                            />
+                            {status.label}
+                          </Badge>
+                          {ala.allowLateSubmission && (
+                            <span className="flex items-center gap-1 text-[10px] text-orange-600">
+                              <Clock className="h-2.5 w-2.5" />
+                              Late: -{ala.latePenaltyPercent}%
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>

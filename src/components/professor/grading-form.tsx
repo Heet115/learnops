@@ -30,6 +30,7 @@ import {
   Award,
   MessageSquare,
   AlertTriangle,
+  Clock,
 } from "lucide-react";
 import {
   gradeSubmission,
@@ -44,6 +45,9 @@ interface GradingFormProps {
   currentFeedback?: string;
   currentRejectionReason?: string;
   maxMarks: number;
+  isLate?: boolean;
+  latePenaltyApplied?: number;
+  adjustedMarks?: number;
 }
 
 export function GradingForm({
@@ -53,6 +57,9 @@ export function GradingForm({
   currentFeedback,
   currentRejectionReason,
   maxMarks,
+  isLate,
+  latePenaltyApplied,
+  adjustedMarks,
 }: GradingFormProps) {
   const [grading, setGrading] = useState(false);
   const [rejecting, setRejecting] = useState(false);
@@ -76,7 +83,13 @@ export function GradingForm({
     const result = await gradeSubmission(submissionId, { marks, feedback });
 
     if (result.success) {
-      toast.success("Submission graded successfully");
+      if (result.isLate && result.latePenaltyApplied) {
+        toast.success(
+          `Graded: ${result.originalMarks}/${maxMarks} → ${result.adjustedMarks}/${maxMarks} (after ${result.latePenaltyApplied}% late penalty)`,
+        );
+      } else {
+        toast.success("Submission graded successfully");
+      }
       router.refresh();
     } else {
       toast.error(result.error || "Failed to grade submission");
@@ -132,13 +145,23 @@ export function GradingForm({
               <Award className="h-8 w-8 text-emerald-600" />
             </div>
             <div>
-              <p className="text-muted-foreground text-sm">Score</p>
+              <p className="text-muted-foreground text-sm">
+                {isLate ? "Adjusted Score" : "Score"}
+              </p>
               <p className="text-3xl font-bold text-emerald-600">
-                {currentMarks}{" "}
+                {isLate && adjustedMarks !== undefined
+                  ? adjustedMarks
+                  : currentMarks}{" "}
                 <span className="text-muted-foreground text-lg">
                   / {maxMarks}
                 </span>
               </p>
+              {isLate && latePenaltyApplied && currentMarks !== undefined && (
+                <p className="text-sm text-orange-600">
+                  Original: {currentMarks}/{maxMarks} (-{latePenaltyApplied}%
+                  late penalty)
+                </p>
+              )}
             </div>
           </div>
           {currentFeedback && (
@@ -258,6 +281,20 @@ export function GradingForm({
         </div>
       </CardHeader>
       <CardContent>
+        {/* Late submission warning */}
+        {isLate && latePenaltyApplied && (
+          <div className="mb-4 rounded-lg border border-orange-500/30 bg-orange-500/10 p-3">
+            <div className="flex items-center gap-2 text-orange-600">
+              <Clock className="h-4 w-4" />
+              <span className="text-sm font-medium">Late Submission</span>
+            </div>
+            <p className="mt-1 text-xs text-orange-600">
+              A {latePenaltyApplied}% penalty will be automatically applied to
+              the marks you assign.
+            </p>
+          </div>
+        )}
+
         <form onSubmit={handleGrade} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">

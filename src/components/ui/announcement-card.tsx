@@ -105,7 +105,8 @@ export function AnnouncementCard({
   const priority = priorityConfig[announcement.priority];
   const PriorityIcon = priority.icon;
 
-  const isExpired = announcement.expiresAt && new Date(announcement.expiresAt) < new Date();
+  const isExpired =
+    announcement.expiresAt && new Date(announcement.expiresAt) < new Date();
 
   return (
     <>
@@ -115,12 +116,17 @@ export function AnnouncementCard({
           !announcement.isActive && "opacity-60",
           announcement.isPinned && "border-amber-500/30 bg-amber-500/5",
           announcement.priority === "urgent" && "border-rose-500/30",
-          announcement.priority === "high" && "border-amber-500/30"
+          announcement.priority === "high" && "border-amber-500/30",
         )}
       >
         {/* Priority indicator bar */}
-        <div className={cn("absolute left-0 top-0 bottom-0 w-1 rounded-l-lg", priority.bgColor)} />
-        
+        <div
+          className={cn(
+            "absolute top-0 bottom-0 left-0 w-1 rounded-l-lg",
+            priority.bgColor,
+          )}
+        />
+
         <CardHeader className="pb-2 pl-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-1">
@@ -132,7 +138,10 @@ export function AnnouncementCard({
                   {PriorityIcon && <PriorityIcon className="mr-1 h-3 w-3" />}
                   {announcement.priority}
                 </Badge>
-                <Badge variant="outline" className="bg-violet-500/10 text-violet-600 border-violet-500/30">
+                <Badge
+                  variant="outline"
+                  className="border-violet-500/30 bg-violet-500/10 text-violet-600"
+                >
                   <Target className="mr-1 h-3 w-3" />
                   {announcement.targetName || announcement.target.type}
                 </Badge>
@@ -140,16 +149,19 @@ export function AnnouncementCard({
                   <Badge variant="secondary">Inactive</Badge>
                 )}
                 {isExpired && (
-                  <Badge variant="outline" className="bg-rose-500/10 text-rose-600 border-rose-500/30">
+                  <Badge
+                    variant="outline"
+                    className="border-rose-500/30 bg-rose-500/10 text-rose-600"
+                  >
                     Expired
                   </Badge>
                 )}
               </div>
-              <h3 className="text-lg font-semibold leading-tight">
+              <h3 className="text-lg leading-tight font-semibold">
                 {announcement.title}
               </h3>
             </div>
-            
+
             {(canEdit || canDelete || canPin) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -163,7 +175,9 @@ export function AnnouncementCard({
                     View Details
                   </DropdownMenuItem>
                   {canPin && onTogglePin && (
-                    <DropdownMenuItem onClick={() => onTogglePin(announcement._id)}>
+                    <DropdownMenuItem
+                      onClick={() => onTogglePin(announcement._id)}
+                    >
                       <Pin className="mr-2 h-4 w-4" />
                       {announcement.isPinned ? "Unpin" : "Pin"}
                     </DropdownMenuItem>
@@ -189,29 +203,41 @@ export function AnnouncementCard({
             )}
           </div>
         </CardHeader>
-        
+
         <CardContent className="pl-5">
-          <p className="text-muted-foreground text-sm line-clamp-2 whitespace-pre-wrap">
+          <p className="text-muted-foreground line-clamp-2 text-sm whitespace-pre-wrap">
             {announcement.content}
           </p>
-          
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+
+          <div className="text-muted-foreground mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
             {showAuthor && (
               <span className="flex items-center gap-1">
                 <User className="h-3 w-3" />
-                {announcement.createdBy.firstName} {announcement.createdBy.lastName}
-                <Badge variant="outline" className="ml-1 px-1.5 py-0 text-[10px]">
+                {announcement.createdBy.firstName}{" "}
+                {announcement.createdBy.lastName}
+                <Badge
+                  variant="outline"
+                  className="ml-1 px-1.5 py-0 text-[10px]"
+                >
                   {announcement.createdBy.role}
                 </Badge>
               </span>
             )}
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              {formatDistanceToNow(new Date(announcement.createdAt), { addSuffix: true })}
+              {formatDistanceToNow(new Date(announcement.createdAt), {
+                addSuffix: true,
+              })}
             </span>
             {announcement.expiresAt && (
-              <span className={cn("flex items-center gap-1", isExpired && "text-rose-500")}>
-                Expires: {format(new Date(announcement.expiresAt), "MMM d, yyyy")}
+              <span
+                className={cn(
+                  "flex items-center gap-1",
+                  isExpired && "text-rose-500",
+                )}
+              >
+                Expires:{" "}
+                {format(new Date(announcement.expiresAt), "MMM d, yyyy")}
               </span>
             )}
           </div>
@@ -220,16 +246,19 @@ export function AnnouncementCard({
 
       {/* View Details Dialog */}
       <Dialog open={viewOpen} onOpenChange={setViewOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="mb-2 flex items-center gap-2">
               {announcement.isPinned && (
                 <Pin className="h-4 w-4 fill-amber-500 text-amber-500" />
               )}
               <Badge variant="outline" className={priority.color}>
                 {announcement.priority}
               </Badge>
-              <Badge variant="outline" className="bg-violet-500/10 text-violet-600 border-violet-500/30">
+              <Badge
+                variant="outline"
+                className="border-violet-500/30 bg-violet-500/10 text-violet-600"
+              >
                 {announcement.targetName || announcement.target.type}
               </Badge>
             </div>
@@ -237,30 +266,39 @@ export function AnnouncementCard({
             <DialogDescription asChild>
               <div className="flex items-center gap-3 text-sm">
                 <span>
-                  By {announcement.createdBy.firstName} {announcement.createdBy.lastName}
+                  By {announcement.createdBy.firstName}{" "}
+                  {announcement.createdBy.lastName}
                 </span>
                 <span>•</span>
-                <span>{format(new Date(announcement.createdAt), "MMM d, yyyy 'at' h:mm a")}</span>
+                <span>
+                  {format(
+                    new Date(announcement.createdAt),
+                    "MMM d, yyyy 'at' h:mm a",
+                  )}
+                </span>
               </div>
             </DialogDescription>
           </DialogHeader>
-          
+
           <Separator />
-          
+
           <div className="py-4">
-            <p className="whitespace-pre-wrap text-sm leading-relaxed">
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">
               {announcement.content}
             </p>
           </div>
-          
+
           {announcement.expiresAt && (
             <>
               <Separator />
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="text-muted-foreground flex items-center gap-2 text-sm">
                 <Clock className="h-4 w-4" />
                 <span>
                   {isExpired ? "Expired on" : "Expires on"}{" "}
-                  {format(new Date(announcement.expiresAt), "MMMM d, yyyy 'at' h:mm a")}
+                  {format(
+                    new Date(announcement.expiresAt),
+                    "MMMM d, yyyy 'at' h:mm a",
+                  )}
                 </span>
               </div>
             </>

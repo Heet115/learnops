@@ -18,8 +18,8 @@ export function StudentAnnouncementsList({
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-            <Megaphone className="h-6 w-6 text-muted-foreground" />
+          <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+            <Megaphone className="text-muted-foreground h-6 w-6" />
           </div>
           <p className="mt-4 font-medium">No announcements</p>
           <p className="text-muted-foreground text-sm">
