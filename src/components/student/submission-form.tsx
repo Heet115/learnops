@@ -34,6 +34,8 @@ import {
   Download,
   File,
   ExternalLink,
+  Crown,
+  Users,
 } from "lucide-react";
 import {
   createSubmission,
@@ -74,6 +76,9 @@ interface SubmissionFormProps {
   allowedFileTypes?: string[];
   maxFileSize?: number;
   isResubmit?: boolean;
+  isGroupSubmission?: boolean;
+  isGroupLeader?: boolean;
+  hasGroup?: boolean;
 }
 
 export function SubmissionForm({
@@ -83,6 +88,9 @@ export function SubmissionForm({
   allowedFileTypes = ["pdf", "docx", "ppt", "zip"],
   maxFileSize = 30 * 1024 * 1024,
   isResubmit = false,
+  isGroupSubmission = false,
+  isGroupLeader = true,
+  hasGroup = false,
 }: SubmissionFormProps) {
   const [localFiles, setLocalFiles] = useState<LocalFile[]>([]);
   const [existingFiles, setExistingFiles] = useState<ExistingFile[]>(
@@ -251,6 +259,123 @@ export function SubmissionForm({
   const acceptTypes = allowedFileTypes.map((t) => `.${t}`).join(",");
   const hasContent =
     localFiles.length > 0 || existingFiles.length > 0 || links.length > 0;
+
+  // For group submissions, check if student can submit/edit
+  const canSubmitOrEdit = !isGroupSubmission || isGroupLeader;
+
+  // Show message if student is in a group but not the leader
+  if (isGroupSubmission && hasGroup && !isGroupLeader) {
+    return (
+      <Card>
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+              <Users className="h-4 w-4 text-amber-600" />
+            </div>
+            <div>
+              <CardTitle>Group Submission</CardTitle>
+              <CardDescription>
+                Only the group leader can submit
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="rounded-lg border border-amber-200 bg-amber-500/10 p-4">
+            <div className="flex items-start gap-3">
+              <Crown className="mt-0.5 h-5 w-5 text-amber-600" />
+              <div>
+                <p className="font-medium text-amber-700">
+                  Leader-Only Submission
+                </p>
+                <p className="mt-1 text-sm text-amber-600">
+                  Only the group leader can submit and edit the group&apos;s work. 
+                  Contact your group leader to make changes or become the leader if no one is assigned.
+                </p>
+              </div>
+            </div>
+          </div>
+          {existingSubmission && (
+            <div className="mt-4 space-y-3">
+              <p className="text-sm font-medium">Current Submission</p>
+              {existingSubmission.files?.length > 0 && (
+                <div className="space-y-2">
+                  {existingSubmission.files.map((file, i) => (
+                    <a
+                      key={i}
+                      href={file.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between rounded-lg border bg-emerald-500/5 p-3 transition-colors hover:bg-emerald-500/10"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-500/10">
+                          <File className="h-4 w-4 text-emerald-600" />
+                        </div>
+                        <span className="text-sm">{file.name}</span>
+                      </div>
+                      <Download className="h-4 w-4 text-emerald-600" />
+                    </a>
+                  ))}
+                </div>
+              )}
+              {existingSubmission.links?.length > 0 && (
+                <div className="space-y-2">
+                  {existingSubmission.links.map((link, i) => (
+                    <a
+                      key={i}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between rounded-lg border bg-blue-500/5 p-3 transition-colors hover:bg-blue-500/10"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-500/10">
+                          <LinkIcon className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <span className="text-sm">{link.title}</span>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-blue-600" />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show message if student needs to join a group first
+  if (isGroupSubmission && !hasGroup) {
+    return (
+      <Card>
+        <CardHeader className="border-b">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+              <Users className="h-4 w-4 text-violet-600" />
+            </div>
+            <div>
+              <CardTitle>Group Required</CardTitle>
+              <CardDescription>
+                Join or create a group to submit
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="rounded-lg border border-dashed p-4 text-center">
+            <Users className="text-muted-foreground/50 mx-auto h-8 w-8" />
+            <p className="text-muted-foreground mt-2 text-sm">
+              You need to be in a group to submit this assignment. 
+              Create a group or wait to be assigned to one.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>

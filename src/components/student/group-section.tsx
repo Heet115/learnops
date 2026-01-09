@@ -36,6 +36,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Users,
   Plus,
   LogOut,
@@ -44,6 +50,9 @@ import {
   UserPlus,
   Crown,
   Lock,
+  MoreVertical,
+  UserMinus,
+  ArrowRightLeft,
 } from "lucide-react";
 import {
   getStudentGroup,
@@ -51,6 +60,10 @@ import {
   createGroupByStudent,
   leaveGroup,
   selfAssignAsLeader,
+  inviteMemberByLeader,
+  removeMemberByLeader,
+  transferLeadership,
+  getAvailableClassmatesForLeader,
 } from "@/lib/actions/group.actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -136,6 +149,7 @@ export function GroupSection({
     );
     const pendingMembers = group.members.filter((m) => m.status === "pending");
     const canBecomeLeader = !group.leaderId && !group.isLocked && canModify;
+    const canManageMembers = isLeader && !group.isLocked && canModify && groupFormation === "student";
 
     return (
       <Card>
@@ -154,15 +168,20 @@ export function GroupSection({
                 </CardDescription>
               </div>
             </div>
-            {group.isLocked && (
-              <Badge
-                variant="outline"
-                className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-              >
-                <Lock className="mr-1 h-3 w-3" />
-                Submitted
-              </Badge>
-            )}
+            <div className="flex items-center gap-2">
+              {group.isLocked && (
+                <Badge
+                  variant="outline"
+                  className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                >
+                  <Lock className="mr-1 h-3 w-3" />
+                  Submitted
+                </Badge>
+              )}
+              {canManageMembers && (
+                <InviteMemberDialog groupId={group._id} onSuccess={loadGroup} />
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
@@ -193,6 +212,17 @@ export function GroupSection({
               <BecomeLeaderButton groupId={group._id} onSuccess={loadGroup} />
             )}
           </div>
+
+          {/* Leader Info Banner */}
+          {isLeader && !group.isLocked && canModify && (
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
+              <p className="text-sm text-amber-700">
+                <Crown className="mr-1.5 inline h-4 w-4" />
+                As the group leader, you can submit and edit the group&apos;s work
+                {groupFormation === "student" && ", invite or remove members, and transfer leadership"}.
+              </p>
+            </div>
+          )}
 
           <div>
             <div className="mb-3 flex items-center gap-2">
@@ -249,13 +279,24 @@ export function GroupSection({
                       </p>
                     </div>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-                  >
-                    <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    Joined
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                    >
+                      <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      Joined
+                    </Badge>
+                    {canManageMembers && member.studentId._id !== studentId && (
+                      <MemberActionsMenu
+                        groupId={group._id}
+                        memberId={member.studentId._id}
+                        memberName={`${member.studentId.firstName} ${member.studentId.lastName}`}
+                        isCurrentLeader={group.leaderId?._id === member.studentId._id}
+                        onSuccess={loadGroup}
+                      />
+                    )}
+                  </div>
                 </div>
               ))}
               {pendingMembers.map((member) => (
@@ -279,13 +320,23 @@ export function GroupSection({
                       </p>
                     </div>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="border-amber-500/30 bg-amber-500/10 text-amber-600"
-                  >
-                    <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
-                    Pending
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+                    >
+                      <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+                      Pending
+                    </Badge>
+                    {canManageMembers && (
+                      <RemoveMemberButton
+                        groupId={group._id}
+                        memberId={member.studentId._id}
+                        memberName={`${member.studentId.firstName} ${member.studentId.lastName}`}
+                        onSuccess={loadGroup}
+                      />
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -695,5 +746,334 @@ function BecomeLeaderButton({
         </>
       )}
     </Button>
+  );
+}
+
+
+// Invite Member Dialog (for leaders)
+function InviteMemberDialog({
+  groupId,
+  onSuccess,
+}: {
+  groupId: string;
+  onSuccess: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingClassmates, setLoadingClassmates] = useState(true);
+  const [classmates, setClassmates] = useState<Student[]>([]);
+  const [remainingSlots, setRemainingSlots] = useState(0);
+
+  useEffect(() => {
+    if (!open) return;
+
+    let isMounted = true;
+
+    getAvailableClassmatesForLeader(groupId).then((result) => {
+      if (!isMounted) return;
+      if (result.success) {
+        setClassmates(result.classmates || []);
+        setRemainingSlots(result.remainingSlots || 0);
+      } else {
+        toast.error(result.error || "Failed to load classmates");
+      }
+      setLoadingClassmates(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [open, groupId]);
+
+  const handleInvite = async (studentId: string) => {
+    setLoading(true);
+    const result = await inviteMemberByLeader(groupId, studentId);
+    if (result.success) {
+      toast.success("Invitation sent!");
+      setClassmates(classmates.filter((c) => c._id !== studentId));
+      setRemainingSlots((prev) => prev - 1);
+      onSuccess();
+    } else {
+      toast.error(result.error || "Failed to invite");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <UserPlus className="mr-1.5 h-4 w-4" />
+          Invite
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[80vh] p-0">
+        <DialogHeader className="p-6 pb-0">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10">
+              <UserPlus className="h-5 w-5 text-violet-600" />
+            </div>
+            <div>
+              <DialogTitle>Invite Members</DialogTitle>
+              <DialogDescription>
+                Invite classmates to join your group ({remainingSlots} slots remaining)
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+        <Separator className="mt-4" />
+        <div className="p-6">
+          {loadingClassmates ? (
+            <div className="rounded-lg border p-8 text-center">
+              <Loader2 className="text-muted-foreground mx-auto h-6 w-6 animate-spin" />
+              <p className="text-muted-foreground mt-2 text-sm">
+                Loading classmates...
+              </p>
+            </div>
+          ) : classmates.length === 0 ? (
+            <div className="rounded-lg border border-dashed p-8 text-center">
+              <Users className="text-muted-foreground/50 mx-auto h-8 w-8" />
+              <p className="text-muted-foreground mt-2 text-sm">
+                No available classmates to invite
+              </p>
+            </div>
+          ) : remainingSlots <= 0 ? (
+            <div className="rounded-lg border border-dashed p-8 text-center">
+              <Users className="text-muted-foreground/50 mx-auto h-8 w-8" />
+              <p className="text-muted-foreground mt-2 text-sm">
+                Group is at maximum capacity
+              </p>
+            </div>
+          ) : (
+            <ScrollArea className="h-60 rounded-lg border">
+              <div className="p-1">
+                {classmates.map((classmate) => (
+                  <div
+                    key={classmate._id}
+                    className="flex items-center justify-between gap-3 rounded-md p-3 hover:bg-muted/50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-muted text-xs">
+                          {classmate.firstName[0]}
+                          {classmate.lastName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {classmate.firstName} {classmate.lastName}
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          {classmate.email}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleInvite(classmate._id)}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <UserPlus className="mr-1 h-3 w-3" />
+                          Invite
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Member Actions Menu (for leaders)
+function MemberActionsMenu({
+  groupId,
+  memberId,
+  memberName,
+  isCurrentLeader,
+  onSuccess,
+}: {
+  groupId: string;
+  memberId: string;
+  memberName: string;
+  isCurrentLeader: boolean;
+  onSuccess: () => void;
+}) {
+  const [removing, setRemoving] = useState(false);
+  const [transferring, setTransferring] = useState(false);
+
+  const handleRemove = async () => {
+    setRemoving(true);
+    const result = await removeMemberByLeader(groupId, memberId);
+    if (result.success) {
+      toast.success(`${memberName} removed from group`);
+      onSuccess();
+    } else {
+      toast.error(result.error || "Failed to remove member");
+    }
+    setRemoving(false);
+  };
+
+  const handleTransfer = async () => {
+    setTransferring(true);
+    const result = await transferLeadership(groupId, memberId);
+    if (result.success) {
+      toast.success(`Leadership transferred to ${memberName}`);
+      onSuccess();
+    } else {
+      toast.error(result.error || "Failed to transfer leadership");
+    }
+    setTransferring(false);
+  };
+
+  if (isCurrentLeader) return null;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <MoreVertical className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <ArrowRightLeft className="mr-2 h-4 w-4" />
+              Transfer Leadership
+            </DropdownMenuItem>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Transfer Leadership?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to make {memberName} the group leader? You will no longer be able to manage the group.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleTransfer} disabled={transferring}>
+                {transferring ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Transferring...
+                  </>
+                ) : (
+                  "Transfer"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <DropdownMenuItem
+              onSelect={(e) => e.preventDefault()}
+              className="text-rose-600 focus:text-rose-600"
+            >
+              <UserMinus className="mr-2 h-4 w-4" />
+              Remove from Group
+            </DropdownMenuItem>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove Member?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to remove {memberName} from the group? They can be invited again later.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleRemove}
+                disabled={removing}
+                className="bg-rose-600 hover:bg-rose-700"
+              >
+                {removing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Removing...
+                  </>
+                ) : (
+                  "Remove"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+// Remove Member Button (for pending members)
+function RemoveMemberButton({
+  groupId,
+  memberId,
+  memberName,
+  onSuccess,
+}: {
+  groupId: string;
+  memberId: string;
+  memberName: string;
+  onSuccess: () => void;
+}) {
+  const [removing, setRemoving] = useState(false);
+
+  const handleRemove = async () => {
+    setRemoving(true);
+    const result = await removeMemberByLeader(groupId, memberId);
+    if (result.success) {
+      toast.success(`Invitation to ${memberName} cancelled`);
+      onSuccess();
+    } else {
+      toast.error(result.error || "Failed to cancel invitation");
+    }
+    setRemoving(false);
+  };
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-rose-600 hover:bg-rose-500/10 hover:text-rose-700"
+          disabled={removing}
+        >
+          {removing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <UserMinus className="h-4 w-4" />
+          )}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Cancel Invitation?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to cancel the invitation to {memberName}?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Keep</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleRemove}
+            className="bg-rose-600 hover:bg-rose-700"
+          >
+            Cancel Invitation
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

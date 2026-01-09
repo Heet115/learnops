@@ -644,3 +644,268 @@ export async function removeGroupLeader(groupId: string) {
   revalidatePath(`/professor/alas/${ala._id}`);
   return { success: true, group: JSON.parse(JSON.stringify(updated)) };
 }
+
+// ============ GROUP LEADER MEMBER MANAGEMENT ============
+
+// Leader invites a new member to the group (student-formed groups only)
+export async function inviteMemberByLeader(groupId: string, studentId: string) {
+  const clerkId = await requireStudent();
+  const { id: leaderId, user } = await getUserDbId(clerkId!);
+
+  const group = await Group.findById(groupId).populate("alaId");
+  if (!group) {
+    return { success: false, error: "Group not found" };
+  }
+
+  // Verify caller is the group leader
+  if (!group.leaderId || group.leaderId.toString() !== leaderId) {
+    return { success: false, error: "Only the group leader can invite members" };
+  }
+
+  // Only allow for student-formed groups
+  if (group.createdByRole !== "student") {
+    return { success: false, error: "Cannot modify professor-assigned groups" };
+  }
+
+  if (group.isLocked) {
+    return { success: false, error: "Group is locked (submission made)" };
+  }
+
+  const ala = group.alaId as unknown as {
+    isLocked: boolean;
+    deadline: Date;
+    maxGroupSize?: number;
+    _id: string;
+  };
+
+  if (ala.isLocked || new Date(ala.deadline) < new Date()) {
+    return { success: false, error: "Cannot invite - deadline passed or locked" };
+  }
+
+  // Check max group size
+  const currentMembers = group.members.filter(
+    (m) => m.status === "accepted" || m.status === "pending"
+  );
+  if (ala.maxGroupSize && currentMembers.length >= ala.maxGroupSize) {
+    return { success: false, error: `Group cannot exceed ${ala.maxGroupSize} members` };
+  }
+
+  // Check if student is already in this group
+  const existingMember = group.members.find(
+    (m) => m.studentId.toString() === studentId
+  );
+  if (existingMember && existingMember.status !== "declined") {
+    return { success: false, error: "Student is already in this group or has a pending invite" };
+  }
+
+  // Check if student is in another group for this ALA
+  const otherGroup = await Group.findOne({
+    alaId: ala._id,
+    _id: { $ne: groupId },
+    "members.studentId": studentId,
+    "members.status": { $in: ["accepted", "pending"] },
+  });
+
+  if (otherGroup) {
+    return { success: false, error: "Student is already in another group" };
+  }
+
+  // Verify student is in the same class
+  const studentToInvite = await User.findById(studentId);
+  if (!studentToInvite || studentToInvite.classId?.toString() !== user.classId?.toString()) {
+    return { success: false, error: "Student not found or not in your class" };
+  }
+
+  // Add or update member
+  if (existingMember) {
+    // Update declined member to pending
+    await Group.findOneAndUpdate(
+      { _id: groupId, "members.studentId": studentId },
+      { $set: { "members.$.status": "pending" } }
+    );
+  } else {
+    // Add new member
+    await Group.findByIdAndUpdate(groupId, {
+      $push: {
+        members: {
+          studentId: new mongoose.Types.ObjectId(studentId),
+          status: "pending",
+        },
+      },
+    });
+  }
+
+  revalidatePath(`/student/alas/${ala._id}`);
+  return { success: true };
+}
+
+// Leader removes a member from the group (student-formed groups only)
+export async function removeMemberByLeader(groupId: string, studentId: string) {
+  const clerkId = await requireStudent();
+  const { id: leaderId } = await getUserDbId(clerkId!);
+
+  const group = await Group.findById(groupId).populate("alaId");
+  if (!group) {
+    return { success: false, error: "Group not found" };
+  }
+
+  // Verify caller is the group leader
+  if (!group.leaderId || group.leaderId.toString() !== leaderId) {
+    return { success: false, error: "Only the group leader can remove members" };
+  }
+
+  // Only allow for student-formed groups
+  if (group.createdByRole !== "student") {
+    return { success: false, error: "Cannot modify professor-assigned groups" };
+  }
+
+  if (group.isLocked) {
+    return { success: false, error: "Group is locked (submission made)" };
+  }
+
+  const ala = group.alaId as unknown as {
+    isLocked: boolean;
+    deadline: Date;
+    _id: string;
+  };
+
+  if (ala.isLocked || new Date(ala.deadline) < new Date()) {
+    return { success: false, error: "Cannot remove - deadline passed or locked" };
+  }
+
+  // Cannot remove yourself (leader)
+  if (studentId === leaderId) {
+    return { success: false, error: "Leader cannot remove themselves. Transfer leadership first or leave the group." };
+  }
+
+  // Check if student is in the group
+  const memberIndex = group.members.findIndex(
+    (m) => m.studentId.toString() === studentId
+  );
+  if (memberIndex === -1) {
+    return { success: false, error: "Student is not a member of this group" };
+  }
+
+  // Remove the member
+  await Group.findByIdAndUpdate(groupId, {
+    $pull: { members: { studentId: new mongoose.Types.ObjectId(studentId) } },
+  });
+
+  revalidatePath(`/student/alas/${ala._id}`);
+  return { success: true };
+}
+
+// Leader transfers leadership to another member
+export async function transferLeadership(groupId: string, newLeaderId: string) {
+  const clerkId = await requireStudent();
+  const { id: currentLeaderId } = await getUserDbId(clerkId!);
+
+  const group = await Group.findById(groupId).populate("alaId");
+  if (!group) {
+    return { success: false, error: "Group not found" };
+  }
+
+  // Verify caller is the current group leader
+  if (!group.leaderId || group.leaderId.toString() !== currentLeaderId) {
+    return { success: false, error: "Only the current leader can transfer leadership" };
+  }
+
+  if (group.isLocked) {
+    return { success: false, error: "Group is locked (submission made)" };
+  }
+
+  const ala = group.alaId as unknown as {
+    isLocked: boolean;
+    deadline: Date;
+    _id: string;
+  };
+
+  if (ala.isLocked || new Date(ala.deadline) < new Date()) {
+    return { success: false, error: "Cannot transfer - deadline passed or locked" };
+  }
+
+  // Verify new leader is an accepted member
+  const isMember = group.members.some(
+    (m) => m.studentId.toString() === newLeaderId && m.status === "accepted"
+  );
+  if (!isMember) {
+    return { success: false, error: "New leader must be an accepted member of the group" };
+  }
+
+  const updated = await Group.findByIdAndUpdate(
+    groupId,
+    { leaderId: new mongoose.Types.ObjectId(newLeaderId) },
+    { new: true }
+  )
+    .populate("members.studentId", "firstName lastName email")
+    .populate("leaderId", "firstName lastName email");
+
+  revalidatePath(`/student/alas/${ala._id}`);
+  return { success: true, group: JSON.parse(JSON.stringify(updated)) };
+}
+
+// Get available classmates for leader to invite
+export async function getAvailableClassmatesForLeader(groupId: string) {
+  const clerkId = await requireStudent();
+  const { id: leaderId, user } = await getUserDbId(clerkId!);
+
+  const group = await Group.findById(groupId).populate("alaId");
+  if (!group) {
+    return { success: false, error: "Group not found" };
+  }
+
+  // Verify caller is the group leader
+  if (!group.leaderId || group.leaderId.toString() !== leaderId) {
+    return { success: false, error: "Only the group leader can view available classmates" };
+  }
+
+  if (!user.classId) {
+    return { success: false, error: "You are not assigned to a class" };
+  }
+
+  const ala = group.alaId as unknown as {
+    _id: string;
+    maxGroupSize?: number;
+  };
+
+  // Get classmates
+  const classmates = await User.find({
+    classId: user.classId,
+    role: "student",
+    isActive: true,
+    _id: { $ne: leaderId },
+  })
+    .select("_id firstName lastName email")
+    .sort({ firstName: 1 })
+    .lean();
+
+  // Get students already in groups for this ALA
+  const groups = await Group.find({ alaId: ala._id });
+  const takenStudentIds = new Set<string>();
+  groups.forEach((g) => {
+    g.members.forEach((m) => {
+      if (m.status !== "declined") {
+        takenStudentIds.add(m.studentId.toString());
+      }
+    });
+  });
+
+  // Filter out taken students
+  const availableClassmates = classmates.filter(
+    (c) => !takenStudentIds.has(c._id.toString())
+  );
+
+  // Calculate remaining slots
+  const currentMembers = group.members.filter(
+    (m) => m.status === "accepted" || m.status === "pending"
+  );
+  const remainingSlots = ala.maxGroupSize 
+    ? ala.maxGroupSize - currentMembers.length 
+    : 10; // Default max if not specified
+
+  return {
+    success: true,
+    classmates: JSON.parse(JSON.stringify(availableClassmates)),
+    remainingSlots,
+  };
+}

@@ -138,6 +138,9 @@ export async function getALAForSubmission(alaId: string) {
   }
 
   let submission = null;
+  let isGroupLeader = false;
+  let hasGroup = false;
+  let groupId = null;
 
   // For group submissions, check if student is in a group and get group's submission
   if (ala.isGroupSubmission) {
@@ -148,6 +151,17 @@ export async function getALAForSubmission(alaId: string) {
     });
 
     if (group) {
+      hasGroup = true;
+      groupId = group._id.toString();
+      
+      // Check if student is the group leader
+      isGroupLeader = group.leaderId?.toString() === student._id.toString();
+      
+      // If no leader assigned, the group creator can submit (they become leader on submit)
+      if (!group.leaderId && group.createdBy.toString() === student._id.toString()) {
+        isGroupLeader = true;
+      }
+
       // Look for any submission from group members
       const groupMemberIds = group.members
         .filter((m: { status: string }) => m.status === "accepted")
@@ -169,7 +183,14 @@ export async function getALAForSubmission(alaId: string) {
   }
 
   return JSON.parse(
-    JSON.stringify({ ala, submission, studentId: student._id.toString() }),
+    JSON.stringify({ 
+      ala, 
+      submission, 
+      studentId: student._id.toString(),
+      isGroupLeader,
+      hasGroup,
+      groupId,
+    }),
   );
 }
 
@@ -217,7 +238,7 @@ export async function createSubmission(
 
   let groupMembers: mongoose.Types.ObjectId[] = [];
 
-  // For group submissions, verify student is in a group
+  // For group submissions, verify student is in a group and is the leader
   if (ala.isGroupSubmission) {
     const group = await Group.findOne({
       alaId,
@@ -227,6 +248,17 @@ export async function createSubmission(
 
     if (!group) {
       return { success: false, error: "You must be in a group to submit" };
+    }
+
+    // Check if student is the group leader (only leader can submit)
+    if (group.leaderId && group.leaderId.toString() !== student._id.toString()) {
+      return { success: false, error: "Only the group leader can submit for the group" };
+    }
+
+    // If no leader is assigned, allow submission but warn
+    if (!group.leaderId) {
+      // Allow submission but the submitter becomes the de-facto leader
+      await Group.findByIdAndUpdate(group._id, { leaderId: student._id });
     }
 
     // Check if any group member already has a submission
@@ -305,25 +337,42 @@ export async function updateSubmission(
     return { success: false, error: "Submission not found" };
   }
 
-  // Check access
-  const hasAccess =
-    submission.studentId.toString() === student._id.toString() ||
-    submission.groupMembers?.some(
-      (m) => m.toString() === student._id.toString(),
-    );
+  const ala = await ALA.findById(submission.alaId);
+  if (!ala) {
+    return { success: false, error: "ALA not found" };
+  }
 
-  if (!hasAccess) {
-    return { success: false, error: "Unauthorized" };
+  // For group submissions, only the leader can edit
+  if (ala.isGroupSubmission) {
+    const group = await Group.findOne({
+      alaId: submission.alaId,
+      "members.studentId": student._id,
+      "members.status": "accepted",
+    });
+
+    if (!group) {
+      return { success: false, error: "You are not a member of this group" };
+    }
+
+    // Check if student is the group leader
+    if (group.leaderId && group.leaderId.toString() !== student._id.toString()) {
+      return { success: false, error: "Only the group leader can edit the submission" };
+    }
+
+    // If no leader, only the original submitter can edit
+    if (!group.leaderId && submission.studentId.toString() !== student._id.toString()) {
+      return { success: false, error: "Only the original submitter can edit" };
+    }
+  } else {
+    // For individual submissions, only the submitter can edit
+    if (submission.studentId.toString() !== student._id.toString()) {
+      return { success: false, error: "Unauthorized" };
+    }
   }
 
   // Check if can modify
   if (submission.status === "graded") {
     return { success: false, error: "Cannot modify graded submission" };
-  }
-
-  const ala = await ALA.findById(submission.alaId);
-  if (!ala) {
-    return { success: false, error: "ALA not found" };
   }
 
   if (ala.isLocked) {

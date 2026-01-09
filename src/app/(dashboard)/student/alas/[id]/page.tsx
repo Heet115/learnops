@@ -92,7 +92,7 @@ export default async function StudentALAPage({ params }: PageProps) {
     notFound();
   }
 
-  const { ala, submission, studentId } = data;
+  const { ala, submission, studentId, isGroupLeader, hasGroup } = data;
 
   const user = {
     name: `${dbUser?.firstName || "Student"} ${dbUser?.lastName || ""}`.trim(),
@@ -344,6 +344,9 @@ export default async function StudentALAPage({ params }: PageProps) {
                       submission={submission}
                       allowedFileTypes={ala.allowedFileTypes}
                       maxFileSize={ala.maxFileSize}
+                      isGroupSubmission={ala.isGroupSubmission}
+                      isGroupLeader={isGroupLeader}
+                      hasGroup={hasGroup}
                     />
                   )}
                 </CardContent>
@@ -356,6 +359,9 @@ export default async function StudentALAPage({ params }: PageProps) {
                 allowedFileTypes={ala.allowedFileTypes}
                 maxFileSize={ala.maxFileSize}
                 isResubmit={true}
+                isGroupSubmission={ala.isGroupSubmission}
+                isGroupLeader={isGroupLeader}
+                hasGroup={hasGroup}
               />
             ) : submission?.status === "submitted" ? (
               <Card className="border-blue-200">
@@ -440,6 +446,9 @@ export default async function StudentALAPage({ params }: PageProps) {
                 submission={submission}
                 allowedFileTypes={ala.allowedFileTypes}
                 maxFileSize={ala.maxFileSize}
+                isGroupSubmission={ala.isGroupSubmission}
+                isGroupLeader={isGroupLeader}
+                hasGroup={hasGroup}
               />
             ) : (
               <Card>
