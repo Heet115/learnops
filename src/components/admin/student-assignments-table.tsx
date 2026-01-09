@@ -31,8 +31,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 import {
   BulkActionsBar,
   SelectAllCheckbox,
@@ -89,6 +90,14 @@ interface Student {
   };
 }
 
+interface SortableStudent extends Student {
+  className: string;
+  semesterName: string;
+  courseCode: string;
+  departmentCode: string;
+  statusLabel: string;
+}
+
 interface ClassItem {
   _id: string;
   name: string;
@@ -120,11 +129,21 @@ export function StudentAssignmentsTable({
   const [removeName, setRemoveName] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    class: "",
-    department: "",
-    assignmentStatus: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "admin-student-assignments-filters",
+    defaultFilters: {
+      search: "",
+      class: "",
+      department: "",
+      assignmentStatus: "",
+    },
   });
 
   const { classOptions, departmentOptions } = useMemo(() => {
@@ -215,9 +234,20 @@ export function StudentAssignmentsTable({
     });
   }, [students, filters]);
 
+  const studentsWithSortFields = useMemo(() => {
+    return filteredStudents.map((s) => ({
+      ...s,
+      className: s.classId?.name || "",
+      semesterName: s.classId?.semesterId?.name || "",
+      courseCode: s.classId?.semesterId?.courseId?.code || "",
+      departmentCode: s.classId?.semesterId?.courseId?.departmentId?.code || "",
+      statusLabel: s.classId ? "Assigned" : "Unassigned",
+    }));
+  }, [filteredStudents]);
+
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
-    filteredStudents,
-    "firstName" as keyof Student,
+    studentsWithSortFields,
+    "firstName" as keyof (typeof studentsWithSortFields)[0],
   );
 
   const {
@@ -307,11 +337,21 @@ export function StudentAssignmentsTable({
   return (
     <>
       <div className="space-y-4">
-        <DataTableFilter
-          filters={filterConfigs}
-          values={filters}
-          onChange={setFilters}
-        />
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1">
+            <DataTableFilter
+              filters={filterConfigs}
+              values={filters}
+              onChange={setFilters}
+            />
+          </div>
+          <SaveFiltersButton
+            hasActiveFilters={hasActiveFilters}
+            hasSavedFilters={hasSavedFilters}
+            onSave={saveFilters}
+            onReset={resetFilters}
+          />
+        </div>
 
         <BulkActionsBar
           selectedCount={selectedCount}
@@ -348,25 +388,55 @@ export function StudentAssignmentsTable({
                         onCheckedChange={toggleAll}
                       />
                     </TableHead>
-                    <SimpleSortableHeader<Student>
+                    <SimpleSortableHeader<SortableStudent>
                       label="Student"
                       sortKey="firstName"
                       currentSortKey={sortKey}
                       sortDirection={sortDirection}
                       onSort={handleSort}
                     />
-                    <SimpleSortableHeader<Student>
+                    <SimpleSortableHeader<SortableStudent>
                       label="Email"
                       sortKey="email"
                       currentSortKey={sortKey}
                       sortDirection={sortDirection}
                       onSort={handleSort}
                     />
-                    <TableHead>Class</TableHead>
-                    <TableHead>Semester</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Status</TableHead>
+                    <SimpleSortableHeader<SortableStudent>
+                      label="Class"
+                      sortKey="className"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableStudent>
+                      label="Semester"
+                      sortKey="semesterName"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableStudent>
+                      label="Course"
+                      sortKey="courseCode"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableStudent>
+                      label="Department"
+                      sortKey="departmentCode"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableStudent>
+                      label="Status"
+                      sortKey="statusLabel"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>

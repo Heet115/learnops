@@ -31,8 +31,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 import {
   BulkActionsBar,
   SelectAllCheckbox,
@@ -102,6 +103,14 @@ interface SubjectOffering {
   };
 }
 
+interface SortableSubjectOffering extends SubjectOffering {
+  subjectCode: string;
+  className: string;
+  professorName: string;
+  semesterName: string;
+  statusLabel: string;
+}
+
 interface Professor {
   _id: string;
   firstName: string;
@@ -123,12 +132,22 @@ export function SubjectOfferingsTable({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    professor: "",
-    department: "",
-    academicYear: "",
-    status: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "admin-subject-offerings-filters",
+    defaultFilters: {
+      search: "",
+      professor: "",
+      department: "",
+      academicYear: "",
+      status: "",
+    },
   });
 
   const { professorOptions, departmentOptions, yearOptions } = useMemo(() => {
@@ -241,9 +260,21 @@ export function SubjectOfferingsTable({
     });
   }, [offerings, filters]);
 
+  const offeringsWithSortFields = useMemo(() => {
+    return filteredOfferings.map((off) => ({
+      ...off,
+      subjectCode: off.subjectId?.code || "",
+      className: off.classId?.name || "",
+      professorName:
+        `${off.professorId?.firstName || ""} ${off.professorId?.lastName || ""}`.trim(),
+      semesterName: off.semesterId?.name || "",
+      statusLabel: off.isActive ? "Active" : "Inactive",
+    }));
+  }, [filteredOfferings]);
+
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
-    filteredOfferings,
-    "academicYear" as keyof SubjectOffering,
+    offeringsWithSortFields,
+    "academicYear" as keyof (typeof offeringsWithSortFields)[0],
   );
 
   const {
@@ -352,11 +383,21 @@ export function SubjectOfferingsTable({
   return (
     <>
       <div className="space-y-4">
-        <DataTableFilter
-          filters={filterConfigs}
-          values={filters}
-          onChange={setFilters}
-        />
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1">
+            <DataTableFilter
+              filters={filterConfigs}
+              values={filters}
+              onChange={setFilters}
+            />
+          </div>
+          <SaveFiltersButton
+            hasActiveFilters={hasActiveFilters}
+            hasSavedFilters={hasSavedFilters}
+            onSave={saveFilters}
+            onReset={resetFilters}
+          />
+        </div>
 
         <BulkActionsBar
           selectedCount={selectedCount}
@@ -393,18 +434,48 @@ export function SubjectOfferingsTable({
                         onCheckedChange={toggleAll}
                       />
                     </TableHead>
-                    <TableHead>Subject</TableHead>
-                    <TableHead>Class</TableHead>
-                    <TableHead>Professor</TableHead>
-                    <TableHead>Semester</TableHead>
-                    <SimpleSortableHeader<SubjectOffering>
+                    <SimpleSortableHeader<SortableSubjectOffering>
+                      label="Subject"
+                      sortKey="subjectCode"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableSubjectOffering>
+                      label="Class"
+                      sortKey="className"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableSubjectOffering>
+                      label="Professor"
+                      sortKey="professorName"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableSubjectOffering>
+                      label="Semester"
+                      sortKey="semesterName"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableSubjectOffering>
                       label="Academic Year"
                       sortKey="academicYear"
                       currentSortKey={sortKey}
                       sortDirection={sortDirection}
                       onSort={handleSort}
                     />
-                    <TableHead>Status</TableHead>
+                    <SimpleSortableHeader<SortableSubjectOffering>
+                      label="Status"
+                      sortKey="statusLabel"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>

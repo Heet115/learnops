@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { format } from "date-fns";
 import {
   Table,
@@ -17,8 +16,9 @@ import { UserAvatar } from "@/components/ui/user-avatar";
 import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 import {
   useTablePagination,
   PaginationControls,
@@ -280,9 +280,16 @@ export function ActivityLog({
   showExport = true,
   pageSize = 10,
 }: ActivityLogProps) {
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    entityType: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "activity-log-filters",
+    defaultFilters: { search: "", entityType: "" },
   });
 
   const filteredActivities = activities.filter((activity) => {
@@ -322,7 +329,7 @@ export function ActivityLog({
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-4">
+        <CardContent>
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
               <ScrollText className="text-muted-foreground h-7 w-7" />
@@ -361,13 +368,23 @@ export function ActivityLog({
           )}
         </div>
       </CardHeader>
-      <CardContent className="pt-4">
+      <CardContent>
         <div className="space-y-4">
-          <DataTableFilter
-            filters={filterConfigs}
-            values={filters}
-            onChange={setFilters}
-          />
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex-1">
+              <DataTableFilter
+                filters={filterConfigs}
+                values={filters}
+                onChange={setFilters}
+              />
+            </div>
+            <SaveFiltersButton
+              hasActiveFilters={hasActiveFilters}
+              hasSavedFilters={hasSavedFilters}
+              onSave={saveFilters}
+              onReset={resetFilters}
+            />
+          </div>
 
           {filteredActivities.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">

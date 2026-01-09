@@ -70,7 +70,7 @@ export function SubmissionHeatmap({ data }: SubmissionHeatmapProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-4">
+      <CardContent>
         <div className="overflow-x-auto">
           <div className="min-w-[600px]">
             {/* Hour labels */}

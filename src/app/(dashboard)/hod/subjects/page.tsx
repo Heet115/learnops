@@ -17,24 +17,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import {
-  BookMarked,
-  Layers,
-  Award,
-  Users,
-  TrendingUp,
-  Hash,
-  Calendar,
-} from "lucide-react";
+import { HodSubjectsTable } from "@/components/hod/hod-subjects-table";
+import { BookMarked, Layers, Award, Users, TrendingUp } from "lucide-react";
 
 async function getHodSubjects() {
   const { userId } = await auth();
@@ -154,7 +139,7 @@ export default async function HodSubjectsPage() {
       user={user}
       breadcrumbs={[{ label: "HOD" }, { label: "Subjects" }]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -212,115 +197,8 @@ export default async function HodSubjectsPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-4">
-            {subjects.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
-                  <BookMarked className="text-muted-foreground h-7 w-7" />
-                </div>
-                <h3 className="mt-4 text-lg font-medium">No subjects found</h3>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  No subjects are available in your department yet.
-                </p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead>Code</TableHead>
-                    <TableHead>Subject Name</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Semester</TableHead>
-                    <TableHead className="text-center">Credits</TableHead>
-                    <TableHead className="text-center">Offerings</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {subjects.map(
-                    (sub: {
-                      _id: string;
-                      name: string;
-                      code: string;
-                      credits: number;
-                      offeringCount: number;
-                      semesterId?: {
-                        name: string;
-                        number: number;
-                        courseId?: { name: string; code: string };
-                      };
-                    }) => (
-                      <TableRow key={sub._id} className="group">
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
-                              <Hash className="h-3.5 w-3.5 text-blue-600" />
-                            </div>
-                            <Badge
-                              variant="outline"
-                              className="border-blue-500/30 bg-blue-500/10 font-mono text-blue-600"
-                            >
-                              {sub.code}
-                            </Badge>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-0.5">
-                            <p className="leading-none font-medium">
-                              {sub.name}
-                            </p>
-                            <p className="text-muted-foreground text-xs">
-                              Subject
-                            </p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className="border-violet-500/30 bg-violet-500/10 text-violet-600"
-                          >
-                            <Layers className="mr-1.5 h-3 w-3" />
-                            {sub.semesterId?.courseId?.code || "N/A"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
-                            <Calendar className="h-3.5 w-3.5" />
-                            {sub.semesterId?.name || "N/A"}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge
-                            variant="outline"
-                            className="border-amber-500/30 bg-amber-500/10 text-amber-600"
-                          >
-                            <Award className="mr-1.5 h-3 w-3" />
-                            {sub.credits}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {sub.offeringCount > 0 ? (
-                            <Badge
-                              variant="outline"
-                              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-                            >
-                              <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                              {sub.offeringCount}
-                            </Badge>
-                          ) : (
-                            <Badge
-                              variant="outline"
-                              className="border-muted-foreground/30 text-muted-foreground"
-                            >
-                              0
-                            </Badge>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ),
-                  )}
-                </TableBody>
-              </Table>
-            )}
+          <CardContent>
+            <HodSubjectsTable subjects={subjects} />
           </CardContent>
         </Card>
       </div>

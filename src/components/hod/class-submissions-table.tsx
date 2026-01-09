@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -12,7 +12,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
@@ -21,8 +20,9 @@ import { Progress } from "@/components/ui/progress";
 import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 import {
   useSimpleSort,
   useTablePagination,
@@ -46,14 +46,25 @@ interface ClassSubmission {
   pending: number;
 }
 
+interface SortableClassSubmission extends ClassSubmission {
+  progressPercent: number;
+}
+
 interface ClassSubmissionsTableProps {
   data: ClassSubmission[];
 }
 
 export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    course: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "hod-class-submissions-filters",
+    defaultFilters: { search: "", course: "" },
   });
 
   const courseOptions = useMemo(() => {
@@ -91,10 +102,18 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
     });
   }, [data, filters]);
 
+  const dataWithSortFields = useMemo(() => {
+    return filteredData.map((cls) => ({
+      ...cls,
+      progressPercent:
+        cls.submitted > 0 ? Math.round((cls.graded / cls.submitted) * 100) : 0,
+    }));
+  }, [filteredData]);
+
   // Sorting
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
-    filteredData,
-    "name" as keyof ClassSubmission,
+    dataWithSortFields,
+    "name" as keyof (typeof dataWithSortFields)[0],
     "asc",
   );
 
@@ -139,7 +158,7 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-4">
+        <CardContent>
           <IllustratedEmpty
             preset="noClasses"
             title="No class data available"
@@ -172,12 +191,22 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
           formats={["csv", "excel"]}
         />
       </CardHeader>
-      <CardContent className="space-y-4 pt-4">
-        <DataTableFilter
-          filters={filterConfigs}
-          values={filters}
-          onChange={setFilters}
-        />
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1">
+            <DataTableFilter
+              filters={filterConfigs}
+              values={filters}
+              onChange={setFilters}
+            />
+          </div>
+          <SaveFiltersButton
+            hasActiveFilters={hasActiveFilters}
+            hasSavedFilters={hasSavedFilters}
+            onSave={saveFilters}
+            onReset={resetFilters}
+          />
+        </div>
 
         {filteredData.length === 0 ? (
           <IllustratedEmpty
@@ -191,21 +220,21 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <SimpleSortableHeader<ClassSubmission>
+                  <SimpleSortableHeader<SortableClassSubmission>
                     label="Class"
                     sortKey="name"
                     currentSortKey={sortKey}
                     sortDirection={sortDirection}
                     onSort={handleSort}
                   />
-                  <SimpleSortableHeader<ClassSubmission>
+                  <SimpleSortableHeader<SortableClassSubmission>
                     label="Course"
                     sortKey="course"
                     currentSortKey={sortKey}
                     sortDirection={sortDirection}
                     onSort={handleSort}
                   />
-                  <SimpleSortableHeader<ClassSubmission>
+                  <SimpleSortableHeader<SortableClassSubmission>
                     label="Students"
                     sortKey="students"
                     currentSortKey={sortKey}
@@ -213,7 +242,7 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
                     onSort={handleSort}
                     className="text-center"
                   />
-                  <SimpleSortableHeader<ClassSubmission>
+                  <SimpleSortableHeader<SortableClassSubmission>
                     label="Submitted"
                     sortKey="submitted"
                     currentSortKey={sortKey}
@@ -221,7 +250,7 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
                     onSort={handleSort}
                     className="text-center"
                   />
-                  <SimpleSortableHeader<ClassSubmission>
+                  <SimpleSortableHeader<SortableClassSubmission>
                     label="Graded"
                     sortKey="graded"
                     currentSortKey={sortKey}
@@ -229,15 +258,17 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
                     onSort={handleSort}
                     className="text-center"
                   />
-                  <TableHead>Progress</TableHead>
+                  <SimpleSortableHeader<SortableClassSubmission>
+                    label="Progress"
+                    sortKey="progressPercent"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedData.map((cls, index) => {
-                  const progressPercent =
-                    cls.submitted > 0
-                      ? Math.round((cls.graded / cls.submitted) * 100)
-                      : 0;
                   return (
                     <TableRow
                       key={index}
@@ -294,11 +325,11 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Progress
-                            value={progressPercent}
+                            value={cls.progressPercent}
                             className="h-2 w-20"
                           />
                           <span className="text-muted-foreground w-10 text-xs tabular-nums">
-                            {progressPercent}%
+                            {cls.progressPercent}%
                           </span>
                         </div>
                       </TableCell>

@@ -1,33 +1,37 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
 import {
+  useSimpleSort,
   useTablePagination,
+  SimpleSortableHeader,
   PaginationControls,
 } from "@/components/ui/enhanced-data-table";
-import { IllustratedEmpty } from "@/components/ui/illustrated-empty";
 import {
-  Calendar,
   FileText,
   ArrowRight,
-  CheckCircle,
-  XCircle,
+  Users,
+  Calendar,
+  Award,
+  BookMarked,
 } from "lucide-react";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 
 interface ALA {
   _id: string;
@@ -49,65 +53,83 @@ interface ALA {
   };
 }
 
+interface SortableALA extends ALA {
+  subjectCode: string;
+  type: string;
+  statusLabel: string;
+}
+
 interface StudentALAsListProps {
   alas: ALA[];
 }
 
+const statusConfig: Record<
+  string,
+  { label: string; className: string; dotColor: string }
+> = {
+  graded: {
+    label: "Graded",
+    className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
+    dotColor: "bg-emerald-500",
+  },
+  submitted: {
+    label: "Submitted",
+    className: "border-blue-500/30 bg-blue-500/10 text-blue-600",
+    dotColor: "bg-blue-500",
+  },
+  rejected: {
+    label: "Rejected",
+    className: "border-rose-500/30 bg-rose-500/10 text-rose-600",
+    dotColor: "bg-rose-500",
+  },
+  locked: {
+    label: "Locked",
+    className: "border-slate-500/30 bg-slate-500/10 text-slate-600",
+    dotColor: "bg-slate-500",
+  },
+  overdue: {
+    label: "Overdue",
+    className: "border-rose-500/30 bg-rose-500/10 text-rose-600",
+    dotColor: "bg-rose-500",
+  },
+  pending: {
+    label: "Pending",
+    className: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+    dotColor: "bg-amber-500",
+  },
+};
+
 export function StudentALAsList({ alas }: StudentALAsListProps) {
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    subject: "",
-    status: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "student-alas-filters",
+    defaultFilters: { search: "", subject: "", status: "" },
   });
 
   const getStatus = (ala: ALA) => {
-    if (ala.submission?.status === "graded") {
-      return {
-        label: "Graded",
-        className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
-        dotColor: "bg-emerald-500",
-        key: "graded",
-      };
-    }
-    if (ala.submission?.status === "submitted") {
-      return {
-        label: "Submitted",
-        className: "border-blue-500/30 bg-blue-500/10 text-blue-600",
-        dotColor: "bg-blue-500",
-        key: "submitted",
-      };
-    }
-    if (ala.submission?.status === "rejected") {
-      return {
-        label: "Rejected",
-        className: "border-rose-500/30 bg-rose-500/10 text-rose-600",
-        dotColor: "bg-rose-500",
-        key: "rejected",
-      };
-    }
-    if (ala.isLocked) {
-      return {
-        label: "Locked",
-        className: "border-gray-500/30 bg-gray-500/10 text-gray-600",
-        dotColor: "bg-gray-500",
-        key: "locked",
-      };
-    }
-    if (new Date(ala.deadline) < new Date()) {
-      return {
-        label: "Overdue",
-        className: "border-rose-500/30 bg-rose-500/10 text-rose-600",
-        dotColor: "bg-rose-500",
-        key: "overdue",
-      };
-    }
-    return {
-      label: "Pending",
-      className: "border-amber-500/30 bg-amber-500/10 text-amber-600",
-      dotColor: "bg-amber-500",
-      key: "pending",
-    };
+    if (ala.submission?.status === "graded") return "graded";
+    if (ala.submission?.status === "submitted") return "submitted";
+    if (ala.submission?.status === "rejected") return "rejected";
+    if (ala.isLocked) return "locked";
+    if (new Date(ala.deadline) < new Date()) return "overdue";
+    return "pending";
   };
+
+  // Transform ALAs to include sortable fields
+  const sortableALAs: SortableALA[] = useMemo(() => {
+    return alas.map((ala) => ({
+      ...ala,
+      subjectCode: ala.subjectOfferingId?.subjectId?.code || "",
+      type: ala.isGroupSubmission ? "Group" : "Individual",
+      statusLabel: statusConfig[getStatus(ala)]?.label || "Pending",
+    }));
+  }, [alas]);
 
   const subjectOptions = useMemo(() => {
     const subjects = new Map<string, { label: string; value: string }>();
@@ -154,7 +176,7 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
   );
 
   const filteredALAs = useMemo(() => {
-    return alas.filter((ala) => {
+    return sortableALAs.filter((ala) => {
       const search = (filters.search as string)?.toLowerCase() || "";
       const subject = filters.subject as string;
       const statusFilter = filters.status as string;
@@ -169,14 +191,20 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
 
       if (statusFilter && statusFilter !== "all") {
         const status = getStatus(ala);
-        if (status.key !== statusFilter) return false;
+        if (status !== statusFilter) return false;
       }
 
       return true;
     });
-  }, [alas, filters]);
+  }, [sortableALAs, filters]);
 
-  // Pagination
+  // Sorting
+  const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
+    filteredALAs,
+    "deadline" as keyof SortableALA,
+    "desc",
+  );
+
   const {
     paginatedData,
     currentPage,
@@ -184,7 +212,7 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
     totalPages,
     setCurrentPage,
     setPageSize,
-  } = useTablePagination(filteredALAs, 6);
+  } = useTablePagination(sortedData, 10);
 
   const formatDeadline = (deadline: string) => {
     const date = new Date(deadline);
@@ -199,155 +227,205 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
       minute: "2-digit",
     });
 
-    if (days < 0) return { text: formatted, urgent: true, label: "Overdue" };
-    if (days === 0)
-      return { text: formatted, urgent: true, label: "Due today" };
-    if (days === 1)
-      return { text: formatted, urgent: true, label: "Due tomorrow" };
-    if (days <= 3)
-      return { text: formatted, urgent: true, label: `${days} days left` };
-    return { text: formatted, urgent: false, label: `${days} days left` };
+    if (days < 0) return { text: formatted, urgent: true };
+    if (days <= 3) return { text: formatted, urgent: true };
+    return { text: formatted, urgent: false };
   };
 
   if (alas.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-8">
-          <IllustratedEmpty
-            preset="noAlas"
-            title="No ALAs assigned yet"
-            description="Check back later or contact your professor."
-            size="sm"
-          />
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
+          <FileText className="text-muted-foreground h-7 w-7" />
+        </div>
+        <h3 className="mt-4 text-lg font-medium">No ALAs assigned yet</h3>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Check back later or contact your professor.
+        </p>
+      </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <DataTableFilter
-        filters={filterConfigs}
-        values={filters}
-        onChange={setFilters}
-      />
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex-1">
+          <DataTableFilter
+            filters={filterConfigs}
+            values={filters}
+            onChange={setFilters}
+          />
+        </div>
+        <SaveFiltersButton
+          hasActiveFilters={hasActiveFilters}
+          hasSavedFilters={hasSavedFilters}
+          onSave={saveFilters}
+          onReset={resetFilters}
+        />
+      </div>
 
       {filteredALAs.length === 0 ? (
-        <Card>
-          <CardContent className="py-8">
-            <IllustratedEmpty
-              preset="noResults"
-              title="No ALAs match your filters"
-              description="Try adjusting your search or filter criteria."
-              size="sm"
-            />
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+            <FileText className="text-muted-foreground h-6 w-6" />
+          </div>
+          <p className="text-muted-foreground mt-3 text-sm">
+            No ALAs match your filters.
+          </p>
+        </div>
       ) : (
         <>
-          {paginatedData.map((ala) => {
-            const status = getStatus(ala);
-            const deadline = formatDeadline(ala.deadline);
-            const canSubmit =
-              !ala.isLocked &&
-              new Date(ala.deadline) > new Date() &&
-              ala.submission?.status !== "submitted" &&
-              ala.submission?.status !== "graded";
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <SimpleSortableHeader<SortableALA>
+                  label="Title"
+                  sortKey="title"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <SimpleSortableHeader<SortableALA>
+                  label="Subject"
+                  sortKey="subjectCode"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <SimpleSortableHeader<SortableALA>
+                  label="Deadline"
+                  sortKey="deadline"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <SimpleSortableHeader<SortableALA>
+                  label="Marks"
+                  sortKey="maxMarks"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <SimpleSortableHeader<SortableALA>
+                  label="Type"
+                  sortKey="type"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <SimpleSortableHeader<SortableALA>
+                  label="Status"
+                  sortKey="statusLabel"
+                  currentSortKey={sortKey}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <TableHead className="w-[100px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedData.map((ala) => {
+                const status = getStatus(ala);
+                const config = statusConfig[status];
+                const deadline = formatDeadline(ala.deadline);
+                const canSubmit =
+                  !ala.isLocked &&
+                  new Date(ala.deadline) > new Date() &&
+                  ala.submission?.status !== "submitted" &&
+                  ala.submission?.status !== "graded";
 
-            return (
-              <Card
-                key={ala._id}
-                className="group transition-all hover:shadow-md"
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <CardTitle className="text-lg">{ala.title}</CardTitle>
-                      <CardDescription>
-                        {ala.subjectOfferingId?.subjectId?.code} -{" "}
-                        {ala.subjectOfferingId?.subjectId?.name}
-                      </CardDescription>
-                    </div>
-                    <Badge variant="outline" className={status.className}>
-                      <span
-                        className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${status.dotColor}`}
-                      />
-                      {status.label}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4 line-clamp-2 text-sm">
-                    {ala.description}
-                  </p>
-
-                  <div className="text-muted-foreground mb-4 flex flex-wrap items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      <span
-                        className={
-                          deadline.urgent ? "font-medium text-rose-600" : ""
-                        }
-                      >
-                        {deadline.text}
-                      </span>
-                      {deadline.urgent && (
-                        <span className="font-medium text-rose-600">
-                          ({deadline.label})
+                return (
+                  <TableRow key={ala._id} className="group">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                          <FileText className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <span className="max-w-[180px] truncate font-medium">
+                          {ala.title}
                         </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <FileText className="h-4 w-4" />
-                      <span>{ala.maxMarks} marks</span>
-                    </div>
-                    {ala.isGroupSubmission && (
+                      </div>
+                    </TableCell>
+                    <TableCell>
                       <Badge
                         variant="outline"
-                        className="border-violet-500/30 bg-violet-500/10 text-xs text-violet-600"
+                        className="border-violet-500/30 bg-violet-500/10 text-violet-600"
                       >
-                        Group
+                        <BookMarked className="mr-1.5 h-3 w-3" />
+                        {ala.subjectOfferingId?.subjectId?.code || "-"}
                       </Badge>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm">
-                      {ala.submission?.status === "graded" && (
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-emerald-500" />
-                          <span className="font-medium text-emerald-600">
-                            Score: {ala.submission.marks}/{ala.maxMarks}
-                          </span>
-                        </div>
+                    </TableCell>
+                    <TableCell>
+                      <div
+                        className={`flex items-center gap-1.5 text-sm tabular-nums ${deadline.urgent ? "font-medium text-rose-600" : "text-muted-foreground"}`}
+                      >
+                        <Calendar className="h-3.5 w-3.5" />
+                        {deadline.text}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {status === "graded" ? (
+                        <Badge
+                          variant="outline"
+                          className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                        >
+                          <Award className="mr-1.5 h-3 w-3" />
+                          {ala.submission?.marks}/{ala.maxMarks}
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+                        >
+                          <Award className="mr-1.5 h-3 w-3" />
+                          {ala.maxMarks}
+                        </Badge>
                       )}
-                      {ala.submission?.status === "rejected" && (
-                        <div className="flex items-center gap-2 text-rose-600">
-                          <XCircle className="h-4 w-4" />
-                          <span>Resubmission required</span>
-                        </div>
+                    </TableCell>
+                    <TableCell>
+                      {ala.isGroupSubmission ? (
+                        <Badge
+                          variant="outline"
+                          className="gap-1 border-blue-500/30 bg-blue-500/10 text-blue-600"
+                        >
+                          <Users className="h-3 w-3" />
+                          Group
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline">Individual</Badge>
                       )}
-                    </div>
-                    <Button
-                      asChild
-                      variant={canSubmit ? "default" : "outline"}
-                      size="sm"
-                    >
-                      <Link href={`/student/alas/${ala._id}`}>
-                        {canSubmit ? "Submit" : "View"}
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={config.className}>
+                        <span
+                          className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${config.dotColor}`}
+                        />
+                        {config.label}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        asChild
+                        variant={canSubmit ? "default" : "outline"}
+                        size="sm"
+                        className="opacity-0 transition-opacity group-hover:opacity-100"
+                      >
+                        <Link href={`/student/alas/${ala._id}`}>
+                          {canSubmit ? "Submit" : "View"}
+                          <ArrowRight className="ml-1 h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
           <PaginationControls
             pageIndex={currentPage}
             pageSize={pageSize}
             pageCount={totalPages}
-            totalItems={filteredALAs.length}
+            totalItems={sortedData.length}
             canPreviousPage={currentPage > 0}
             canNextPage={currentPage < totalPages - 1}
             onPageChange={setCurrentPage}

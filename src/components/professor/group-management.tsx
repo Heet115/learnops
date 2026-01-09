@@ -157,7 +157,7 @@ export function GroupManagement({ alaId, maxGroupSize }: GroupManagementProps) {
           />
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 pt-4">
+      <CardContent className="space-y-4">
         {groups.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">

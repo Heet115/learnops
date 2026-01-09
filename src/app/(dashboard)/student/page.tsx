@@ -128,7 +128,7 @@ export default async function StudentDashboard() {
       user={user}
       breadcrumbs={[{ label: "Student" }, { label: "Dashboard" }]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         {/* Welcome Section */}
         <FadeIn>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

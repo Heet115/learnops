@@ -97,7 +97,7 @@ export default async function StudentAssignmentsPage() {
         { label: "Student Assignments" },
       ]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -159,7 +159,7 @@ export default async function StudentAssignmentsPage() {
               <CardTitle>All Students</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent>
             <StudentAssignmentsTable students={students} classes={classes} />
           </CardContent>
         </Card>

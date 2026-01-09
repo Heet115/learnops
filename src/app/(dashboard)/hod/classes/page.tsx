@@ -17,22 +17,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { HodClassesTable } from "@/components/hod/hod-classes-table";
 import {
   GraduationCap,
   Users,
   BookOpen,
   Calendar,
   TrendingUp,
-  Layers,
 } from "lucide-react";
 
 async function getHodClasses() {
@@ -157,7 +149,7 @@ export default async function HodClassesPage() {
       user={user}
       breadcrumbs={[{ label: "HOD" }, { label: "Classes" }]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -215,106 +207,8 @@ export default async function HodClassesPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-4">
-            {classes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
-                  <GraduationCap className="text-muted-foreground h-7 w-7" />
-                </div>
-                <h3 className="mt-4 text-lg font-medium">No classes found</h3>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  No classes are available in your department yet.
-                </p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead>Class Name</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Semester</TableHead>
-                    <TableHead>Academic Year</TableHead>
-                    <TableHead className="text-center">Students</TableHead>
-                    <TableHead className="text-center">Subjects</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {classes.map(
-                    (cls: {
-                      _id: string;
-                      name: string;
-                      academicYear: string;
-                      studentCount: number;
-                      subjectCount: number;
-                      semesterId?: {
-                        name: string;
-                        number: number;
-                        courseId?: { name: string; code: string };
-                      };
-                    }) => (
-                      <TableRow key={cls._id} className="group">
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
-                              <GraduationCap className="h-4 w-4 text-blue-600" />
-                            </div>
-                            <div className="space-y-0.5">
-                              <p className="leading-none font-medium">
-                                {cls.name}
-                              </p>
-                              <p className="text-muted-foreground text-xs">
-                                Section
-                              </p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className="border-violet-500/30 bg-violet-500/10 text-violet-600"
-                          >
-                            <Layers className="mr-1.5 h-3 w-3" />
-                            {cls.semesterId?.courseId?.code || "N/A"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-sm">
-                            {cls.semesterId?.name || "N/A"}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className="border-amber-500/30 bg-amber-500/10 text-amber-600"
-                          >
-                            <Calendar className="mr-1.5 h-3 w-3" />
-                            {cls.academicYear}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge
-                            variant="outline"
-                            className="border-blue-500/30 bg-blue-500/10 text-blue-600"
-                          >
-                            <Users className="mr-1.5 h-3 w-3" />
-                            {cls.studentCount}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge
-                            variant="outline"
-                            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-                          >
-                            <BookOpen className="mr-1.5 h-3 w-3" />
-                            {cls.subjectCount}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ),
-                  )}
-                </TableBody>
-              </Table>
-            )}
+          <CardContent>
+            <HodClassesTable classes={classes} />
           </CardContent>
         </Card>
       </div>

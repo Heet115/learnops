@@ -32,8 +32,9 @@ import {
 import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 import {
   BulkActionsBar,
   SelectAllCheckbox,
@@ -106,10 +107,16 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    status: "",
-    hasHod: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "admin-departments-filters",
+    defaultFilters: { search: "", status: "", hasHod: "" },
   });
 
   const filteredDepartments = useMemo(() => {
@@ -264,11 +271,21 @@ export function DepartmentsTable({ departments, hods }: DepartmentsTableProps) {
   return (
     <>
       <div className="space-y-4">
-        <DataTableFilter
-          filters={filterConfigs}
-          values={filters}
-          onChange={setFilters}
-        />
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1">
+            <DataTableFilter
+              filters={filterConfigs}
+              values={filters}
+              onChange={setFilters}
+            />
+          </div>
+          <SaveFiltersButton
+            hasActiveFilters={hasActiveFilters}
+            hasSavedFilters={hasSavedFilters}
+            onSave={saveFilters}
+            onReset={resetFilters}
+          />
+        </div>
 
         <BulkActionsBar
           selectedCount={selectedCount}

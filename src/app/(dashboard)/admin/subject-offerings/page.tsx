@@ -104,7 +104,7 @@ export default async function SubjectOfferingsPage() {
         { label: "Subject Offerings" },
       ]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -171,7 +171,7 @@ export default async function SubjectOfferingsPage() {
               <CardTitle>All Subject Offerings</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent>
             <SubjectOfferingsTable
               offerings={offerings}
               professors={professors}

@@ -114,7 +114,7 @@ export default async function AdminDashboard() {
       user={user}
       breadcrumbs={[{ label: "Dashboard" }]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         {/* Welcome Section */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
@@ -202,7 +202,7 @@ export default async function AdminDashboard() {
                 </Link>
               </Button>
             </CardHeader>
-            <CardContent className="flex-1 pt-4">
+            <CardContent className="flex-1">
               {recentUsers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">

@@ -37,7 +37,7 @@ export default async function StudentTimelinePage() {
         { label: "Timeline" },
       ]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <FadeIn>
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10">

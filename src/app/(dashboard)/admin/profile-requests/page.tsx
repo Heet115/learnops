@@ -90,7 +90,7 @@ export default async function ProfileRequestsPage() {
         { label: "Profile Requests" },
       ]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -151,7 +151,7 @@ export default async function ProfileRequestsPage() {
               <CardTitle>All Requests</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent>
             <ProfileRequestsTable requests={requests} />
           </CardContent>
         </Card>

@@ -31,7 +31,6 @@ import {
 import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
 import {
   BulkActionsBar,
@@ -45,7 +44,8 @@ import {
   DataExportButton,
   type ExportColumn,
 } from "@/components/ui/data-export";
-import { FilterPresetsDropdown } from "@/components/ui/filter-presets";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 import {
   useTableSort,
   useTablePagination,
@@ -175,22 +175,21 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
     "deactivate" | "reactivate" | "delete" | null
   >(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    role: "",
-    status: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "admin-users-filters",
+    defaultFilters: { search: "", role: "", status: "" },
   });
   const [profileDialogUser, setProfileDialogUser] = useState<IUser | null>(
     null,
   );
   const [editDialogUser, setEditDialogUser] = useState<IUser | null>(null);
-
-  // Check if any filters are active
-  const hasActiveFilters = useMemo(() => {
-    return Object.entries(filters).some(
-      ([, v]) => v && v !== "" && v !== "all",
-    );
-  }, [filters]);
 
   // Filter users
   const filteredUsers = useMemo(() => {
@@ -392,11 +391,11 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
             onChange={setFilters}
           />
           <div className="flex items-center gap-2">
-            <FilterPresetsDropdown
-              tableId="admin-users"
-              currentFilters={filters}
-              onApplyPreset={setFilters}
+            <SaveFiltersButton
               hasActiveFilters={hasActiveFilters}
+              hasSavedFilters={hasSavedFilters}
+              onSave={saveFilters}
+              onReset={resetFilters}
             />
             <DataExportButton
               data={sortedData}

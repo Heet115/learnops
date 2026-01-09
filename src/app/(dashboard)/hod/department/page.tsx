@@ -145,7 +145,7 @@ export default async function HodDepartmentPage() {
       user={user}
       breadcrumbs={[{ label: "HOD" }, { label: "Department" }]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
@@ -215,7 +215,7 @@ export default async function HodDepartmentPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent>
             {data.courses.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
@@ -298,7 +298,7 @@ export default async function HodDepartmentPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent>
             {data.classes.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">

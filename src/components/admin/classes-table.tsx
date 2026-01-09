@@ -23,8 +23,9 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 import {
   BulkActionsBar,
   SelectAllCheckbox,
@@ -76,6 +77,11 @@ interface ClassItem {
       };
     };
   };
+  // Computed fields for sorting
+  semesterName: string;
+  courseCode: string;
+  departmentCode: string;
+  statusLabel: string;
 }
 
 interface Semester {
@@ -110,12 +116,22 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
     name: "",
   });
   const router = useRouter();
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    semester: "",
-    department: "",
-    academicYear: "",
-    status: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "admin-classes-filters",
+    defaultFilters: {
+      search: "",
+      semester: "",
+      department: "",
+      academicYear: "",
+      status: "",
+    },
   });
 
   const { semesterOptions, departmentOptions, yearOptions } = useMemo(() => {
@@ -223,9 +239,19 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
     });
   }, [classes, filters]);
 
+  const classesWithSortFields = useMemo(() => {
+    return filteredClasses.map((cls) => ({
+      ...cls,
+      semesterName: cls.semesterId?.name || "",
+      courseCode: cls.semesterId?.courseId?.code || "",
+      departmentCode: cls.semesterId?.courseId?.departmentId?.code || "",
+      statusLabel: cls.isActive ? "Active" : "Inactive",
+    }));
+  }, [filteredClasses]);
+
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
-    filteredClasses,
-    "name" as keyof ClassItem,
+    classesWithSortFields,
+    "name" as keyof (typeof classesWithSortFields)[0],
   );
 
   const {
@@ -334,11 +360,21 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
   return (
     <>
       <div className="space-y-4">
-        <DataTableFilter
-          filters={filterConfigs}
-          values={filters}
-          onChange={setFilters}
-        />
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1">
+            <DataTableFilter
+              filters={filterConfigs}
+              values={filters}
+              onChange={setFilters}
+            />
+          </div>
+          <SaveFiltersButton
+            hasActiveFilters={hasActiveFilters}
+            hasSavedFilters={hasSavedFilters}
+            onSave={saveFilters}
+            onReset={resetFilters}
+          />
+        </div>
 
         <BulkActionsBar
           selectedCount={selectedCount}
@@ -382,9 +418,27 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
                       sortDirection={sortDirection}
                       onSort={handleSort}
                     />
-                    <TableHead>Semester</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Department</TableHead>
+                    <SimpleSortableHeader<ClassItem>
+                      label="Semester"
+                      sortKey="semesterName"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<ClassItem>
+                      label="Course"
+                      sortKey="courseCode"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<ClassItem>
+                      label="Department"
+                      sortKey="departmentCode"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
                     <SimpleSortableHeader<ClassItem>
                       label="Academic Year"
                       sortKey="academicYear"
@@ -392,7 +446,13 @@ export function ClassesTable({ classes, semesters }: ClassesTableProps) {
                       sortDirection={sortDirection}
                       onSort={handleSort}
                     />
-                    <TableHead>Status</TableHead>
+                    <SimpleSortableHeader<ClassItem>
+                      label="Status"
+                      sortKey="statusLabel"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>

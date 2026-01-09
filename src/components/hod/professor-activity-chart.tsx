@@ -80,7 +80,7 @@ export function ProfessorActivityChart({ data }: ProfessorActivityChartProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-4">
+      <CardContent>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <BarChart
             data={data.slice(0, 8)}

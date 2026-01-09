@@ -23,8 +23,9 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 import {
   BulkActionsBar,
   SelectAllCheckbox,
@@ -79,6 +80,13 @@ interface Subject {
   };
 }
 
+interface SortableSubject extends Subject {
+  semesterName: string;
+  courseCode: string;
+  departmentCode: string;
+  statusLabel: string;
+}
+
 interface Semester {
   _id: string;
   name: string;
@@ -111,11 +119,16 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
     name: "",
   });
   const router = useRouter();
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    semester: "",
-    department: "",
-    status: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "admin-subjects-filters",
+    defaultFilters: { search: "", semester: "", department: "", status: "" },
   });
 
   const { semesterOptions, departmentOptions } = useMemo(() => {
@@ -210,9 +223,19 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
     });
   }, [subjects, filters]);
 
+  const subjectsWithSortFields = useMemo(() => {
+    return filteredSubjects.map((sub) => ({
+      ...sub,
+      semesterName: sub.semesterId?.name || "",
+      courseCode: sub.semesterId?.courseId?.code || "",
+      departmentCode: sub.semesterId?.courseId?.departmentId?.code || "",
+      statusLabel: sub.isActive ? "Active" : "Inactive",
+    }));
+  }, [filteredSubjects]);
+
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
-    filteredSubjects,
-    "code" as keyof Subject,
+    subjectsWithSortFields,
+    "code" as keyof (typeof subjectsWithSortFields)[0],
   );
 
   const {
@@ -321,11 +344,21 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
   return (
     <>
       <div className="space-y-4">
-        <DataTableFilter
-          filters={filterConfigs}
-          values={filters}
-          onChange={setFilters}
-        />
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1">
+            <DataTableFilter
+              filters={filterConfigs}
+              values={filters}
+              onChange={setFilters}
+            />
+          </div>
+          <SaveFiltersButton
+            hasActiveFilters={hasActiveFilters}
+            hasSavedFilters={hasSavedFilters}
+            onSave={saveFilters}
+            onReset={resetFilters}
+          />
+        </div>
 
         <BulkActionsBar
           selectedCount={selectedCount}
@@ -362,31 +395,55 @@ export function SubjectsTable({ subjects, semesters }: SubjectsTableProps) {
                         onCheckedChange={toggleAll}
                       />
                     </TableHead>
-                    <SimpleSortableHeader<Subject>
+                    <SimpleSortableHeader<SortableSubject>
                       label="Code"
                       sortKey="code"
                       currentSortKey={sortKey}
                       sortDirection={sortDirection}
                       onSort={handleSort}
                     />
-                    <SimpleSortableHeader<Subject>
+                    <SimpleSortableHeader<SortableSubject>
                       label="Name"
                       sortKey="name"
                       currentSortKey={sortKey}
                       sortDirection={sortDirection}
                       onSort={handleSort}
                     />
-                    <TableHead>Semester</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Department</TableHead>
-                    <SimpleSortableHeader<Subject>
+                    <SimpleSortableHeader<SortableSubject>
+                      label="Semester"
+                      sortKey="semesterName"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableSubject>
+                      label="Course"
+                      sortKey="courseCode"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableSubject>
+                      label="Department"
+                      sortKey="departmentCode"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableSubject>
                       label="Credits"
                       sortKey="credits"
                       currentSortKey={sortKey}
                       sortDirection={sortDirection}
                       onSort={handleSort}
                     />
-                    <TableHead>Status</TableHead>
+                    <SimpleSortableHeader<SortableSubject>
+                      label="Status"
+                      sortKey="statusLabel"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>

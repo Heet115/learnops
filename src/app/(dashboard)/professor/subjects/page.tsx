@@ -142,7 +142,7 @@ export default async function ProfessorSubjectsPage() {
       user={user}
       breadcrumbs={[{ label: "Professor" }, { label: "My Subjects" }]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">

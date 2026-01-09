@@ -192,7 +192,7 @@ export default async function ProfessorStudentsPage() {
       user={user}
       breadcrumbs={[{ label: "Professor" }, { label: "Students" }]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3">

@@ -91,7 +91,7 @@ export default async function SubjectsPage() {
       user={user}
       breadcrumbs={[{ label: "Admin", href: "/admin" }, { label: "Subjects" }]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -153,7 +153,7 @@ export default async function SubjectsPage() {
               <CardTitle>All Subjects</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent>
             <SubjectsTable subjects={subjects} semesters={semesters} />
           </CardContent>
         </Card>

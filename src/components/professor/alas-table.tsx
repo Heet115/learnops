@@ -24,8 +24,9 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 import {
   BulkActionsBar,
   SelectAllCheckbox,
@@ -80,6 +81,13 @@ interface ALA {
   };
 }
 
+interface SortableALA extends ALA {
+  subjectCode: string;
+  className: string;
+  type: string;
+  statusLabel: string;
+}
+
 interface ALAsTableProps {
   alas: ALA[];
 }
@@ -96,12 +104,22 @@ export function ALAsTable({ alas }: ALAsTableProps) {
     title: "",
   });
   const router = useRouter();
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    subject: "",
-    class: "",
-    status: "",
-    type: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "professor-alas-filters",
+    defaultFilters: {
+      search: "",
+      subject: "",
+      class: "",
+      status: "",
+      type: "",
+    },
   });
 
   const { subjectOptions, classOptions } = useMemo(() => {
@@ -209,10 +227,20 @@ export function ALAsTable({ alas }: ALAsTableProps) {
     });
   }, [alas, filters]);
 
+  const alasWithSortFields = useMemo((): SortableALA[] => {
+    return filteredALAs.map((ala) => ({
+      ...ala,
+      subjectCode: ala.subjectOfferingId?.subjectId?.code || "",
+      className: ala.subjectOfferingId?.classId?.name || "",
+      type: ala.isGroupSubmission ? "Group" : "Individual",
+      statusLabel: getStatus(ala).label,
+    }));
+  }, [filteredALAs]);
+
   // Sorting
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
-    filteredALAs,
-    "deadline" as keyof ALA,
+    alasWithSortFields,
+    "deadline" as keyof SortableALA,
     "desc",
   );
 
@@ -349,11 +377,21 @@ export function ALAsTable({ alas }: ALAsTableProps) {
   return (
     <>
       <div className="space-y-4">
-        <DataTableFilter
-          filters={filterConfigs}
-          values={filters}
-          onChange={setFilters}
-        />
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1">
+            <DataTableFilter
+              filters={filterConfigs}
+              values={filters}
+              onChange={setFilters}
+            />
+          </div>
+          <SaveFiltersButton
+            hasActiveFilters={hasActiveFilters}
+            hasSavedFilters={hasSavedFilters}
+            onSave={saveFilters}
+            onReset={resetFilters}
+          />
+        </div>
 
         <BulkActionsBar
           selectedCount={selectedCount}
@@ -389,31 +427,55 @@ export function ALAsTable({ alas }: ALAsTableProps) {
                       onCheckedChange={toggleAll}
                     />
                   </TableHead>
-                  <SimpleSortableHeader<ALA>
+                  <SimpleSortableHeader<SortableALA>
                     label="Title"
                     sortKey="title"
                     currentSortKey={sortKey}
                     sortDirection={sortDirection}
                     onSort={handleSort}
                   />
-                  <TableHead>Subject</TableHead>
-                  <TableHead>Class</TableHead>
-                  <SimpleSortableHeader<ALA>
+                  <SimpleSortableHeader<SortableALA>
+                    label="Subject"
+                    sortKey="subjectCode"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <SimpleSortableHeader<SortableALA>
+                    label="Class"
+                    sortKey="className"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <SimpleSortableHeader<SortableALA>
                     label="Deadline"
                     sortKey="deadline"
                     currentSortKey={sortKey}
                     sortDirection={sortDirection}
                     onSort={handleSort}
                   />
-                  <SimpleSortableHeader<ALA>
+                  <SimpleSortableHeader<SortableALA>
                     label="Marks"
                     sortKey="maxMarks"
                     currentSortKey={sortKey}
                     sortDirection={sortDirection}
                     onSort={handleSort}
                   />
-                  <TableHead>Type</TableHead>
-                  <TableHead>Status</TableHead>
+                  <SimpleSortableHeader<SortableALA>
+                    label="Type"
+                    sortKey="type"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <SimpleSortableHeader<SortableALA>
+                    label="Status"
+                    sortKey="statusLabel"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
                   <TableHead className="w-[70px]"></TableHead>
                 </TableRow>
               </TableHeader>

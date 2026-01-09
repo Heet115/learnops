@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -12,7 +12,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
@@ -20,8 +19,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 import {
   useSimpleSort,
   useTablePagination,
@@ -57,16 +57,25 @@ interface ALAStatus {
   total: number;
 }
 
+interface SortableALAStatus extends ALAStatus {
+  statusLabel: string;
+}
+
 interface ALAStatusTableProps {
   data: ALAStatus[];
 }
 
 export function ALAStatusTable({ data }: ALAStatusTableProps) {
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    subject: "",
-    class: "",
-    status: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "hod-ala-status-filters",
+    defaultFilters: { search: "", subject: "", class: "", status: "" },
   });
 
   const { subjectOptions, classOptions } = useMemo(() => {
@@ -129,10 +138,17 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
     });
   }, [data, filters]);
 
+  const dataWithSortFields = useMemo(() => {
+    return filteredData.map((ala) => ({
+      ...ala,
+      statusLabel: ala.isLocked ? "Locked" : ala.isPast ? "Overdue" : "Active",
+    }));
+  }, [filteredData]);
+
   // Sorting
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
-    filteredData,
-    "deadline" as keyof ALAStatus,
+    dataWithSortFields,
+    "deadline" as keyof (typeof dataWithSortFields)[0],
     "desc",
   );
 
@@ -178,7 +194,7 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-4">
+        <CardContent>
           <IllustratedEmpty
             preset="noAlas"
             title="No ALAs found"
@@ -221,12 +237,22 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
           formats={["csv", "excel"]}
         />
       </CardHeader>
-      <CardContent className="space-y-4 pt-4">
-        <DataTableFilter
-          filters={filterConfigs}
-          values={filters}
-          onChange={setFilters}
-        />
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1">
+            <DataTableFilter
+              filters={filterConfigs}
+              values={filters}
+              onChange={setFilters}
+            />
+          </div>
+          <SaveFiltersButton
+            hasActiveFilters={hasActiveFilters}
+            hasSavedFilters={hasSavedFilters}
+            onSave={saveFilters}
+            onReset={resetFilters}
+          />
+        </div>
 
         {filteredData.length === 0 ? (
           <IllustratedEmpty
@@ -240,36 +266,42 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <SimpleSortableHeader<ALAStatus>
+                  <SimpleSortableHeader<SortableALAStatus>
                     label="ALA"
                     sortKey="title"
                     currentSortKey={sortKey}
                     sortDirection={sortDirection}
                     onSort={handleSort}
                   />
-                  <SimpleSortableHeader<ALAStatus>
+                  <SimpleSortableHeader<SortableALAStatus>
                     label="Subject"
                     sortKey="subject"
                     currentSortKey={sortKey}
                     sortDirection={sortDirection}
                     onSort={handleSort}
                   />
-                  <SimpleSortableHeader<ALAStatus>
+                  <SimpleSortableHeader<SortableALAStatus>
                     label="Class"
                     sortKey="class"
                     currentSortKey={sortKey}
                     sortDirection={sortDirection}
                     onSort={handleSort}
                   />
-                  <SimpleSortableHeader<ALAStatus>
+                  <SimpleSortableHeader<SortableALAStatus>
                     label="Deadline"
                     sortKey="deadline"
                     currentSortKey={sortKey}
                     sortDirection={sortDirection}
                     onSort={handleSort}
                   />
-                  <TableHead>Status</TableHead>
-                  <SimpleSortableHeader<ALAStatus>
+                  <SimpleSortableHeader<SortableALAStatus>
+                    label="Status"
+                    sortKey="statusLabel"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <SimpleSortableHeader<SortableALAStatus>
                     label="Progress"
                     sortKey="graded"
                     currentSortKey={sortKey}

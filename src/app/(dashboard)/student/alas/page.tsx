@@ -6,9 +6,21 @@ import { getStudentALAs } from "@/lib/actions/submission.actions";
 import { getStudentPendingInvites } from "@/lib/actions/group.actions";
 import { StudentALAsList } from "@/components/student/student-alas-list";
 import { GroupInvitations } from "@/components/student/group-invitations";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  TrendingUp,
+} from "lucide-react";
 
 const colorMap: Record<string, string> = {
   blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
@@ -95,13 +107,14 @@ export default async function StudentALAsPage() {
         { label: "My ALAs" },
       ]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
               <h2 className="text-2xl font-bold">My ALAs</h2>
-              <Badge variant="secondary" className="text-sm">
-                {alas.length} Total
+              <Badge variant="secondary" className="gap-1">
+                <TrendingUp className="h-3 w-3" />
+                {alas.length} total
               </Badge>
             </div>
             <p className="text-muted-foreground">
@@ -124,13 +137,15 @@ export default async function StudentALAsPage() {
                   {stat.title}
                 </CardTitle>
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg border ${colorMap[stat.color]}`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg ${colorMap[stat.color]}`}
                 >
                   <stat.icon className="h-4 w-4" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold">{stat.value}</span>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -138,7 +153,24 @@ export default async function StudentALAsPage() {
 
         <GroupInvitations invitations={pendingInvites} />
 
-        <StudentALAsList alas={alas} />
+        <Card>
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                <FileText className="text-primary h-4 w-4" />
+              </div>
+              <div>
+                <CardTitle>All ALAs</CardTitle>
+                <CardDescription>
+                  View your assignments and submit work
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <StudentALAsList alas={alas} />
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );

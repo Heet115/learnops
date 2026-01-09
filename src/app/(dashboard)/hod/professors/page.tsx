@@ -10,24 +10,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Users,
-  BookOpen,
-  Clock,
-  CheckCircle2,
-  TrendingUp,
-  Mail,
-} from "lucide-react";
+import { HodProfessorsTable } from "@/components/hod/hod-professors-table";
+import { Users, BookOpen, Clock, CheckCircle2, TrendingUp } from "lucide-react";
 
 async function getHodProfessors() {
   const { userId } = await auth();
@@ -150,7 +135,7 @@ export default async function HodProfessorsPage() {
       user={user}
       breadcrumbs={[{ label: "HOD" }, { label: "Professors" }]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -208,116 +193,8 @@ export default async function HodProfessorsPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-4">
-            {professors.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="bg-muted flex h-14 w-14 items-center justify-center rounded-full">
-                  <Users className="text-muted-foreground h-7 w-7" />
-                </div>
-                <h3 className="mt-4 text-lg font-medium">
-                  No professors found
-                </h3>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  No professors are assigned to your department yet.
-                </p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead>Professor</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead className="text-center">Subjects</TableHead>
-                    <TableHead className="text-center">ALAs</TableHead>
-                    <TableHead className="text-center">Pending</TableHead>
-                    <TableHead className="text-center">Graded</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {professors.map(
-                    (prof: {
-                      _id: string;
-                      firstName: string;
-                      lastName: string;
-                      email: string;
-                      profileImage?: string;
-                      subjects: number;
-                      alas: number;
-                      pending: number;
-                      graded: number;
-                    }) => (
-                      <TableRow key={prof._id} className="group">
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-9 w-9 border">
-                              <AvatarImage src={prof.profileImage} />
-                              <AvatarFallback className="bg-blue-500/10 text-sm font-medium text-blue-600">
-                                {prof.firstName[0]}
-                                {prof.lastName[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="space-y-0.5">
-                              <p className="leading-none font-medium">
-                                {prof.firstName} {prof.lastName}
-                              </p>
-                              <p className="text-muted-foreground text-xs">
-                                Professor
-                              </p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-muted-foreground flex items-center gap-2">
-                            <Mail className="h-3.5 w-3.5" />
-                            <span className="text-sm">{prof.email}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge
-                            variant="outline"
-                            className="border-violet-500/30 bg-violet-500/10 text-violet-600"
-                          >
-                            {prof.subjects}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge
-                            variant="outline"
-                            className="border-blue-500/30 bg-blue-500/10 text-blue-600"
-                          >
-                            {prof.alas}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {prof.pending > 0 ? (
-                            <Badge
-                              variant="outline"
-                              className="border-amber-500/30 bg-amber-500/10 text-amber-600"
-                            >
-                              <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
-                              {prof.pending}
-                            </Badge>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">
-                              0
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge
-                            variant="outline"
-                            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-                          >
-                            <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                            {prof.graded}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ),
-                  )}
-                </TableBody>
-              </Table>
-            )}
+          <CardContent>
+            <HodProfessorsTable professors={professors} />
           </CardContent>
         </Card>
       </div>

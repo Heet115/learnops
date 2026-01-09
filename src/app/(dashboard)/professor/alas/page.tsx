@@ -93,7 +93,7 @@ export default async function ProfessorALAsPage() {
         { label: "ALAs" },
       ]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -152,7 +152,7 @@ export default async function ProfessorALAsPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent>
             <ALAsTable alas={alas} />
           </CardContent>
         </Card>

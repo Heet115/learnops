@@ -31,8 +31,9 @@ import {
 import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 import {
   BulkActionsBar,
   SelectAllCheckbox,
@@ -78,6 +79,9 @@ interface CourseWithId {
   departmentId?: IDepartment;
   courseType?: string;
   totalSemesters?: number;
+  // Computed fields for sorting
+  departmentCode: string;
+  statusLabel: string;
 }
 
 const courseTypeConfig: Record<string, { label: string; color: string }> = {
@@ -100,11 +104,16 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    department: "",
-    courseType: "",
-    status: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "admin-courses-filters",
+    defaultFilters: { search: "", department: "", courseType: "", status: "" },
   });
 
   const filterConfigs: FilterConfig[] = useMemo(
@@ -189,10 +198,21 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
   }, [courses, filters]);
 
   const coursesWithId = useMemo(() => {
-    return filteredCourses.map((course) => ({
-      ...course,
-      _id: (course._id as unknown as { toString(): string }).toString(),
-    })) as CourseWithId[];
+    return filteredCourses.map((course) => {
+      const dept = course.departmentId as unknown as IDepartment | undefined;
+      const courseData = course as unknown as {
+        courseType?: string;
+        totalSemesters?: number;
+      };
+      return {
+        ...course,
+        _id: (course._id as unknown as { toString(): string }).toString(),
+        departmentCode: dept?.code || "",
+        courseType: courseData.courseType || "",
+        totalSemesters: courseData.totalSemesters || 0,
+        statusLabel: course.isActive ? "Active" : "Inactive",
+      };
+    }) as CourseWithId[];
   }, [filteredCourses]);
 
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
@@ -308,11 +328,21 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
   return (
     <>
       <div className="space-y-4">
-        <DataTableFilter
-          filters={filterConfigs}
-          values={filters}
-          onChange={setFilters}
-        />
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1">
+            <DataTableFilter
+              filters={filterConfigs}
+              values={filters}
+              onChange={setFilters}
+            />
+          </div>
+          <SaveFiltersButton
+            hasActiveFilters={hasActiveFilters}
+            hasSavedFilters={hasSavedFilters}
+            onSave={saveFilters}
+            onReset={resetFilters}
+          />
+        </div>
 
         <BulkActionsBar
           selectedCount={selectedCount}
@@ -363,8 +393,20 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
                       sortDirection={sortDirection}
                       onSort={handleSort}
                     />
-                    <TableHead>Department</TableHead>
-                    <TableHead>Type</TableHead>
+                    <SimpleSortableHeader<CourseWithId>
+                      label="Department"
+                      sortKey="departmentCode"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<CourseWithId>
+                      label="Type"
+                      sortKey="courseType"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
                     <SimpleSortableHeader<CourseWithId>
                       label="Duration"
                       sortKey="duration"
@@ -372,8 +414,20 @@ export function CoursesTable({ courses, departments }: CoursesTableProps) {
                       sortDirection={sortDirection}
                       onSort={handleSort}
                     />
-                    <TableHead>Semesters</TableHead>
-                    <TableHead>Status</TableHead>
+                    <SimpleSortableHeader<CourseWithId>
+                      label="Semesters"
+                      sortKey="totalSemesters"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<CourseWithId>
+                      label="Status"
+                      sortKey="statusLabel"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>

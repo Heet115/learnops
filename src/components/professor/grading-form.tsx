@@ -126,7 +126,7 @@ export function GradingForm({
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 pt-4">
+        <CardContent className="space-y-4">
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-emerald-500/10">
               <Award className="h-8 w-8 text-emerald-600" />
@@ -223,7 +223,7 @@ export function GradingForm({
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-4">
+        <CardContent>
           <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
             <div className="mb-2 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-red-600" />
@@ -257,7 +257,7 @@ export function GradingForm({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-4">
+      <CardContent>
         <form onSubmit={handleGrade} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">

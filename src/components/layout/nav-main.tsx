@@ -61,7 +61,11 @@ export function NavMain({
           const isActive = isGroupActive(item);
 
           return (
-            <Collapsible key={item.title} defaultOpen={isActive} className="group/collapsible">
+            <Collapsible
+              key={item.title}
+              defaultOpen={isActive}
+              className="group/collapsible"
+            >
               <SidebarMenuItem>
                 {hasSubItems ? (
                   <CollapsibleTrigger asChild>

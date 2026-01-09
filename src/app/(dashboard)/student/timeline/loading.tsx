@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function TimelineLoading() {
   return (
-    <div className="space-y-6 pt-4">
+    <div className="space-y-6">
       <div>
         <Skeleton className="h-8 w-56" />
         <Skeleton className="mt-2 h-4 w-80" />

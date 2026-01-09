@@ -31,8 +31,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 import {
   BulkActionsBar,
   SelectAllCheckbox,
@@ -93,6 +94,14 @@ interface ClassCoordinator {
   };
 }
 
+interface SortableClassCoordinator extends ClassCoordinator {
+  className: string;
+  semesterName: string;
+  courseCode: string;
+  departmentCode: string;
+  coordinatorName: string;
+}
+
 interface Professor {
   _id: string;
   firstName: string;
@@ -115,10 +124,16 @@ export function ClassCoordinatorsTable({
   const [deleteClassName, setDeleteClassName] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    department: "",
-    academicYear: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "admin-class-coordinators-filters",
+    defaultFilters: { search: "", department: "", academicYear: "" },
   });
 
   const { departmentOptions, yearOptions } = useMemo(() => {
@@ -200,9 +215,21 @@ export function ClassCoordinatorsTable({
     });
   }, [coordinators, filters]);
 
+  const coordinatorsWithSortFields = useMemo(() => {
+    return filteredCoordinators.map((c) => ({
+      ...c,
+      className: c.classId?.name || "",
+      semesterName: c.classId?.semesterId?.name || "",
+      courseCode: c.classId?.semesterId?.courseId?.code || "",
+      departmentCode: c.classId?.semesterId?.courseId?.departmentId?.code || "",
+      coordinatorName:
+        `${c.professorId?.firstName || ""} ${c.professorId?.lastName || ""}`.trim(),
+    }));
+  }, [filteredCoordinators]);
+
   const { sortedData, sortKey, sortDirection, handleSort } = useSimpleSort(
-    filteredCoordinators,
-    "academicYear" as keyof ClassCoordinator,
+    coordinatorsWithSortFields,
+    "academicYear" as keyof (typeof coordinatorsWithSortFields)[0],
     "desc",
   );
 
@@ -288,11 +315,21 @@ export function ClassCoordinatorsTable({
   return (
     <>
       <div className="space-y-4">
-        <DataTableFilter
-          filters={filterConfigs}
-          values={filters}
-          onChange={setFilters}
-        />
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1">
+            <DataTableFilter
+              filters={filterConfigs}
+              values={filters}
+              onChange={setFilters}
+            />
+          </div>
+          <SaveFiltersButton
+            hasActiveFilters={hasActiveFilters}
+            hasSavedFilters={hasSavedFilters}
+            onSave={saveFilters}
+            onReset={resetFilters}
+          />
+        </div>
 
         <BulkActionsBar
           selectedCount={selectedCount}
@@ -329,12 +366,42 @@ export function ClassCoordinatorsTable({
                         onCheckedChange={toggleAll}
                       />
                     </TableHead>
-                    <TableHead>Class</TableHead>
-                    <TableHead>Semester</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Coordinator</TableHead>
-                    <SimpleSortableHeader<ClassCoordinator>
+                    <SimpleSortableHeader<SortableClassCoordinator>
+                      label="Class"
+                      sortKey="className"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableClassCoordinator>
+                      label="Semester"
+                      sortKey="semesterName"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableClassCoordinator>
+                      label="Course"
+                      sortKey="courseCode"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableClassCoordinator>
+                      label="Department"
+                      sortKey="departmentCode"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableClassCoordinator>
+                      label="Coordinator"
+                      sortKey="coordinatorName"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SimpleSortableHeader<SortableClassCoordinator>
                       label="Academic Year"
                       sortKey="academicYear"
                       currentSortKey={sortKey}

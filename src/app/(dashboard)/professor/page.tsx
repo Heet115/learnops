@@ -105,7 +105,7 @@ export default async function ProfessorDashboard() {
       user={user}
       breadcrumbs={[{ label: "Professor" }, { label: "Dashboard" }]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         {/* Welcome Section */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">

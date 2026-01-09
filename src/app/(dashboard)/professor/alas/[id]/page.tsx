@@ -91,7 +91,7 @@ export default async function ALADetailPage({ params }: PageProps) {
         { label: ala.title },
       ]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/professor/alas">

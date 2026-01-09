@@ -44,7 +44,7 @@ export default async function ProfessorNotificationSettingsPage() {
       user={user}
       breadcrumbs={[{ label: "Professor" }, { label: "Notification Settings" }]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold">Notification Settings</h2>
           <p className="text-muted-foreground">

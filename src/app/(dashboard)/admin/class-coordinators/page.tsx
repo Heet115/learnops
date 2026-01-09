@@ -112,7 +112,7 @@ export default async function ClassCoordinatorsPage() {
         { label: "Class Coordinators" },
       ]}
     >
-      <div className="space-y-6 pt-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -174,7 +174,7 @@ export default async function ClassCoordinatorsPage() {
               <CardTitle>All Class Coordinators</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent>
             <ClassCoordinatorsTable
               coordinators={coordinators}
               professors={professors}

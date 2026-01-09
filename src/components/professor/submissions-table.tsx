@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import {
   Table,
@@ -15,7 +15,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   DataTableFilter,
   FilterConfig,
-  FilterValue,
 } from "@/components/ui/data-table-filter";
 import {
   BulkActionsBar,
@@ -27,7 +26,8 @@ import {
   DataExportButton,
   type ExportColumn,
 } from "@/components/ui/data-export";
-import { FilterPresetsDropdown } from "@/components/ui/filter-presets";
+import { SaveFiltersButton } from "@/components/ui/save-filters-button";
+import { usePersistedFilters } from "@/hooks/use-persisted-filters";
 import {
   useTableSort,
   useTablePagination,
@@ -158,11 +158,16 @@ const tableColumns: ColumnDef<Submission>[] = [
 ];
 
 export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
-  const [filters, setFilters] = useState<FilterValue>({
-    search: "",
-    subject: "",
-    class: "",
-    status: "",
+  const {
+    filters,
+    setFilters,
+    saveFilters,
+    resetFilters,
+    hasActiveFilters,
+    hasSavedFilters,
+  } = usePersistedFilters({
+    storageKey: "professor-submissions-filters",
+    defaultFilters: { search: "", subject: "", class: "", status: "" },
   });
 
   const { subjectOptions, classOptions } = useMemo(() => {
@@ -215,13 +220,6 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
     ],
     [subjectOptions, classOptions],
   );
-
-  // Check if any filters are active
-  const hasActiveFilters = useMemo(() => {
-    return Object.entries(filters).some(
-      ([, v]) => v && v !== "" && v !== "all",
-    );
-  }, [filters]);
 
   const filteredSubmissions = useMemo(() => {
     return submissions.filter((sub) => {
@@ -390,11 +388,11 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
           onChange={setFilters}
         />
         <div className="flex items-center gap-2">
-          <FilterPresetsDropdown
-            tableId="professor-submissions"
-            currentFilters={filters}
-            onApplyPreset={setFilters}
+          <SaveFiltersButton
             hasActiveFilters={hasActiveFilters}
+            hasSavedFilters={hasSavedFilters}
+            onSave={saveFilters}
+            onReset={resetFilters}
           />
           <DataExportButton
             data={sortedData}
