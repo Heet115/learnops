@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { connectDB, User, NotificationPreferences } from "@/lib/db";
+import type { NotificationType } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -10,6 +11,9 @@ const updatePreferencesSchema = z.object({
   deadlineReminder: z.boolean().optional(),
   submissionGraded: z.boolean().optional(),
   submissionRejected: z.boolean().optional(),
+  groupInvite: z.boolean().optional(),
+  groupUpdates: z.boolean().optional(),
+  announcements: z.boolean().optional(),
   systemNotifications: z.boolean().optional(),
   inApp: z.boolean().optional(),
   deadlineReminderHours: z.number().min(1).max(72).optional(),
@@ -78,12 +82,7 @@ export async function updateNotificationPreferences(
 // Check if user should receive a specific notification type
 export async function shouldNotify(
   userId: string,
-  type:
-    | "new_ala"
-    | "deadline_reminder"
-    | "submission_graded"
-    | "submission_rejected"
-    | "system",
+  type: NotificationType
 ): Promise<boolean> {
   await connectDB();
 
@@ -128,6 +127,13 @@ export async function shouldNotify(
       return preferences.submissionGraded;
     case "submission_rejected":
       return preferences.submissionRejected;
+    case "group_invite":
+      return preferences.groupInvite;
+    case "group_joined":
+    case "group_left":
+      return preferences.groupUpdates;
+    case "announcement":
+      return preferences.announcements;
     case "system":
       return preferences.systemNotifications;
     default:

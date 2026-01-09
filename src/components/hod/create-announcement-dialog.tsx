@@ -22,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import {
@@ -32,7 +31,6 @@ import {
 
 interface TargetOptions {
   departments: Array<{ _id: string; name: string; code: string }>;
-  courses: Array<{ _id: string; name: string; code: string }>;
   classes: Array<{ _id: string; name: string; academicYear: string }>;
 }
 
@@ -47,7 +45,6 @@ export function CreateHodAnnouncementDialog() {
   const [targetType, setTargetType] = useState<string>("department");
   const [targetId, setTargetId] = useState<string>("");
   const [priority, setPriority] = useState<string>("normal");
-  const [isPinned, setIsPinned] = useState(false);
   const [expiresAt, setExpiresAt] = useState("");
 
   useEffect(() => {
@@ -70,7 +67,6 @@ export function CreateHodAnnouncementDialog() {
     setTargetType("department");
     setTargetId("");
     setPriority("normal");
-    setIsPinned(false);
     setExpiresAt("");
     setError(null);
   };
@@ -78,22 +74,22 @@ export function CreateHodAnnouncementDialog() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setLoading(true);
 
-    const target: { type: string; id?: string } = { type: targetType };
-    if (["department", "course", "class"].includes(targetType)) {
-      target.id = targetId;
+    if (!targetId) {
+      setError("Please select a target");
+      return;
     }
+
+    setLoading(true);
 
     const result = await createAnnouncement({
       title,
       content,
-      target: target as {
-        type: "department" | "course" | "class";
-        id?: string;
+      target: {
+        type: targetType as "department" | "class",
+        id: targetId,
       },
       priority: priority as "low" | "normal" | "high" | "urgent",
-      isPinned,
       expiresAt: expiresAt || undefined,
     });
 
@@ -154,7 +150,7 @@ export function CreateHodAnnouncementDialog() {
 
           <div className="space-y-2">
             <Label htmlFor="content">
-              Content <span className="text-destructive">*</span>
+              Message <span className="text-destructive">*</span>
             </Label>
             <Textarea
               id="content"
@@ -166,7 +162,7 @@ export function CreateHodAnnouncementDialog() {
               minLength={10}
             />
             <p className="text-muted-foreground text-xs">
-              {content.length}/5000 characters
+              {content.length}/2000 characters
             </p>
           </div>
 
@@ -185,7 +181,6 @@ export function CreateHodAnnouncementDialog() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="department">Entire Department</SelectItem>
-                  <SelectItem value="course">Specific Course</SelectItem>
                   <SelectItem value="class">Specific Class</SelectItem>
                 </SelectContent>
               </Select>
@@ -229,26 +224,6 @@ export function CreateHodAnnouncementDialog() {
               </div>
             )}
 
-          {targetType === "course" && options && (
-            <div className="space-y-2">
-              <Label>
-                Select Course <span className="text-destructive">*</span>
-              </Label>
-              <Select value={targetId} onValueChange={setTargetId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select course" />
-                </SelectTrigger>
-                <SelectContent>
-                  {options.courses.map((course) => (
-                    <SelectItem key={course._id} value={course._id}>
-                      {course.name} ({course.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
           {targetType === "class" && options && (
             <div className="space-y-2">
               <Label>
@@ -277,15 +252,6 @@ export function CreateHodAnnouncementDialog() {
               value={expiresAt}
               onChange={(e) => setExpiresAt(e.target.value)}
             />
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="pinned"
-              checked={isPinned}
-              onCheckedChange={setIsPinned}
-            />
-            <Label htmlFor="pinned">Pin announcement</Label>
           </div>
 
           <DialogFooter>

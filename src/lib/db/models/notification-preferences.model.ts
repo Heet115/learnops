@@ -7,6 +7,9 @@ export interface INotificationPreferences extends Document {
   deadlineReminder: boolean;
   submissionGraded: boolean;
   submissionRejected: boolean;
+  groupInvite: boolean;
+  groupUpdates: boolean;
+  announcements: boolean;
   systemNotifications: boolean;
   // Delivery preferences
   inApp: boolean;
@@ -42,6 +45,18 @@ const NotificationPreferencesSchema = new Schema<INotificationPreferences>(
       default: true,
     },
     submissionRejected: {
+      type: Boolean,
+      default: true,
+    },
+    groupInvite: {
+      type: Boolean,
+      default: true,
+    },
+    groupUpdates: {
+      type: Boolean,
+      default: true,
+    },
+    announcements: {
       type: Boolean,
       default: true,
     },

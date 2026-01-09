@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { format, formatDistanceToNow } from "date-fns";
 import {
-  Pin,
+  Eye,
+  EyeOff,
   Trash2,
   MoreHorizontal,
   Pencil,
-  Eye,
   Clock,
   User,
   Target,
@@ -36,15 +36,12 @@ import { cn } from "@/lib/utils";
 export interface AnnouncementData {
   _id: string;
   title: string;
-  content: string;
+  message: string;
   priority: "low" | "normal" | "high" | "urgent";
-  isPinned: boolean;
+  isPublished: boolean;
   isActive: boolean;
-  target: {
-    type: string;
-    id?: string;
-    role?: string;
-  };
+  targetType: string;
+  targetId?: string;
   targetName?: string;
   createdBy: {
     _id?: string;
@@ -53,18 +50,20 @@ export interface AnnouncementData {
     role: string;
     email?: string;
   };
+  createdByRole: string;
   createdAt: string;
   expiresAt?: string;
+  publishAt?: string;
 }
 
 interface AnnouncementCardProps {
   announcement: AnnouncementData;
   canEdit?: boolean;
   canDelete?: boolean;
-  canPin?: boolean;
+  canTogglePublish?: boolean;
   onEdit?: (announcement: AnnouncementData) => void;
   onDelete?: (id: string) => void;
-  onTogglePin?: (id: string) => void;
+  onTogglePublish?: (id: string) => void;
   showAuthor?: boolean;
 }
 
@@ -95,10 +94,10 @@ export function AnnouncementCard({
   announcement,
   canEdit = false,
   canDelete = false,
-  canPin = false,
+  canTogglePublish = false,
   onEdit,
   onDelete,
-  onTogglePin,
+  onTogglePublish,
   showAuthor = true,
 }: AnnouncementCardProps) {
   const [viewOpen, setViewOpen] = useState(false);
@@ -114,7 +113,7 @@ export function AnnouncementCard({
         className={cn(
           "relative transition-all hover:shadow-md",
           !announcement.isActive && "opacity-60",
-          announcement.isPinned && "border-amber-500/30 bg-amber-500/5",
+          !announcement.isPublished && "border-dashed border-muted-foreground/30",
           announcement.priority === "urgent" && "border-rose-500/30",
           announcement.priority === "high" && "border-amber-500/30",
         )}
@@ -131,8 +130,11 @@ export function AnnouncementCard({
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                {announcement.isPinned && (
-                  <Pin className="h-4 w-4 fill-amber-500 text-amber-500" />
+                {!announcement.isPublished && (
+                  <Badge variant="secondary" className="gap-1">
+                    <EyeOff className="h-3 w-3" />
+                    Draft
+                  </Badge>
                 )}
                 <Badge variant="outline" className={priority.color}>
                   {PriorityIcon && <PriorityIcon className="mr-1 h-3 w-3" />}
@@ -143,7 +145,7 @@ export function AnnouncementCard({
                   className="border-violet-500/30 bg-violet-500/10 text-violet-600"
                 >
                   <Target className="mr-1 h-3 w-3" />
-                  {announcement.targetName || announcement.target.type}
+                  {announcement.targetName || announcement.targetType}
                 </Badge>
                 {!announcement.isActive && (
                   <Badge variant="secondary">Inactive</Badge>
@@ -162,7 +164,7 @@ export function AnnouncementCard({
               </h3>
             </div>
 
-            {(canEdit || canDelete || canPin) && (
+            {(canEdit || canDelete || canTogglePublish) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -174,12 +176,21 @@ export function AnnouncementCard({
                     <Eye className="mr-2 h-4 w-4" />
                     View Details
                   </DropdownMenuItem>
-                  {canPin && onTogglePin && (
+                  {canTogglePublish && onTogglePublish && (
                     <DropdownMenuItem
-                      onClick={() => onTogglePin(announcement._id)}
+                      onClick={() => onTogglePublish(announcement._id)}
                     >
-                      <Pin className="mr-2 h-4 w-4" />
-                      {announcement.isPinned ? "Unpin" : "Pin"}
+                      {announcement.isPublished ? (
+                        <>
+                          <EyeOff className="mr-2 h-4 w-4" />
+                          Unpublish
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="mr-2 h-4 w-4" />
+                          Publish
+                        </>
+                      )}
                     </DropdownMenuItem>
                   )}
                   {canEdit && onEdit && (
@@ -206,7 +217,7 @@ export function AnnouncementCard({
 
         <CardContent className="pl-5">
           <p className="text-muted-foreground line-clamp-2 text-sm whitespace-pre-wrap">
-            {announcement.content}
+            {announcement.message}
           </p>
 
           <div className="text-muted-foreground mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
@@ -219,7 +230,7 @@ export function AnnouncementCard({
                   variant="outline"
                   className="ml-1 px-1.5 py-0 text-[10px]"
                 >
-                  {announcement.createdBy.role}
+                  {announcement.createdByRole}
                 </Badge>
               </span>
             )}
@@ -249,8 +260,11 @@ export function AnnouncementCard({
         <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <div className="mb-2 flex items-center gap-2">
-              {announcement.isPinned && (
-                <Pin className="h-4 w-4 fill-amber-500 text-amber-500" />
+              {!announcement.isPublished && (
+                <Badge variant="secondary" className="gap-1">
+                  <EyeOff className="h-3 w-3" />
+                  Draft
+                </Badge>
               )}
               <Badge variant="outline" className={priority.color}>
                 {announcement.priority}
@@ -259,7 +273,7 @@ export function AnnouncementCard({
                 variant="outline"
                 className="border-violet-500/30 bg-violet-500/10 text-violet-600"
               >
-                {announcement.targetName || announcement.target.type}
+                {announcement.targetName || announcement.targetType}
               </Badge>
             </div>
             <DialogTitle className="text-xl">{announcement.title}</DialogTitle>
@@ -284,7 +298,7 @@ export function AnnouncementCard({
 
           <div className="py-4">
             <p className="text-sm leading-relaxed whitespace-pre-wrap">
-              {announcement.content}
+              {announcement.message}
             </p>
           </div>
 

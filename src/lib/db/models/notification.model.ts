@@ -1,18 +1,25 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+export type NotificationType =
+  | "new_ala"
+  | "deadline_reminder"
+  | "submission_graded"
+  | "submission_rejected"
+  | "group_invite"
+  | "group_joined"
+  | "group_left"
+  | "announcement"
+  | "system";
+
 export interface INotification extends Document {
   _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
-  type:
-    | "new_ala"
-    | "deadline_reminder"
-    | "submission_graded"
-    | "submission_rejected"
-    | "system";
+  type: NotificationType;
   title: string;
   message: string;
   relatedId?: mongoose.Types.ObjectId;
-  relatedType?: "ala" | "submission";
+  relatedType?: "ala" | "submission" | "group" | "announcement";
+  metadata?: Record<string, unknown>;
   isRead: boolean;
   createdAt: Date;
 }
@@ -32,6 +39,10 @@ const NotificationSchema = new Schema<INotification>(
         "deadline_reminder",
         "submission_graded",
         "submission_rejected",
+        "group_invite",
+        "group_joined",
+        "group_left",
+        "announcement",
         "system",
       ],
       required: true,
@@ -48,11 +59,13 @@ const NotificationSchema = new Schema<INotification>(
     },
     relatedId: {
       type: Schema.Types.ObjectId,
-      refPath: "relatedType",
     },
     relatedType: {
       type: String,
-      enum: ["ala", "submission"],
+      enum: ["ala", "submission", "group", "announcement"],
+    },
+    metadata: {
+      type: Schema.Types.Mixed,
     },
     isRead: {
       type: Boolean,
@@ -66,6 +79,7 @@ const NotificationSchema = new Schema<INotification>(
 
 // Compound index for efficient queries
 NotificationSchema.index({ userId: 1, isRead: 1, createdAt: -1 });
+NotificationSchema.index({ userId: 1, createdAt: -1 });
 
 export const Notification =
   mongoose.models.Notification ||

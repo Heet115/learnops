@@ -38,7 +38,7 @@ export function StudentAnnouncementsList({
           announcement={announcement}
           canEdit={false}
           canDelete={false}
-          canPin={false}
+          canTogglePublish={false}
           showAuthor
         />
       ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,24 +43,34 @@ export function EditAnnouncementDialog({
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [priority, setPriority] = useState<string>("normal");
-  const [isPinned, setIsPinned] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const [expiresAt, setExpiresAt] = useState("");
 
-  useEffect(() => {
-    if (announcement && open) {
-      setTitle(announcement.title);
-      setContent(announcement.content);
-      setPriority(announcement.priority);
-      setIsPinned(announcement.isPinned);
-      setIsActive(announcement.isActive);
-      setExpiresAt(
-        announcement.expiresAt
-          ? new Date(announcement.expiresAt).toISOString().slice(0, 16)
-          : "",
-      );
+  // Initialize form values when announcement changes
+  const initialValues = useMemo(() => {
+    if (!announcement) return null;
+    return {
+      title: announcement.title,
+      content: announcement.message,
+      priority: announcement.priority,
+      isActive: announcement.isActive,
+      expiresAt: announcement.expiresAt
+        ? new Date(announcement.expiresAt).toISOString().slice(0, 16)
+        : "",
+    };
+  }, [announcement]);
+
+  // Reset form when dialog opens with new announcement
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen && initialValues) {
+      setTitle(initialValues.title);
+      setContent(initialValues.content);
+      setPriority(initialValues.priority);
+      setIsActive(initialValues.isActive);
+      setExpiresAt(initialValues.expiresAt);
     }
-  }, [announcement, open]);
+    onOpenChange(newOpen);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +82,6 @@ export function EditAnnouncementDialog({
       title,
       content,
       priority: priority as "low" | "normal" | "high" | "urgent",
-      isPinned,
       isActive,
       expiresAt: expiresAt || null,
     });
@@ -91,7 +100,7 @@ export function EditAnnouncementDialog({
   if (!announcement) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Edit Announcement</DialogTitle>
@@ -110,7 +119,7 @@ export function EditAnnouncementDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-content">Content</Label>
+            <Label htmlFor="edit-content">Message</Label>
             <Textarea
               id="edit-content"
               value={content}
@@ -148,23 +157,13 @@ export function EditAnnouncementDialog({
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="edit-pinned"
-                checked={isPinned}
-                onCheckedChange={setIsPinned}
-              />
-              <Label htmlFor="edit-pinned">Pin announcement</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="edit-active"
-                checked={isActive}
-                onCheckedChange={setIsActive}
-              />
-              <Label htmlFor="edit-active">Active</Label>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="edit-active"
+              checked={isActive}
+              onCheckedChange={setIsActive}
+            />
+            <Label htmlFor="edit-active">Active</Label>
           </div>
 
           <DialogFooter>

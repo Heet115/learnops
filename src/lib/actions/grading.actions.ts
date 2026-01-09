@@ -184,32 +184,15 @@ export async function gradeSubmission(
     { new: true },
   );
 
-  // Notify student about grading (use adjusted marks for late submissions)
-  const finalMarks = submission.isLate ? adjustedMarks : data.marks;
-  const { notifySubmissionGraded } =
-    await import("@/lib/actions/notification.actions");
+  // Notify student and all group members about grading
+  const { notifySubmissionGraded } = await import("@/lib/actions/notification.actions");
   await notifySubmissionGraded(
     submissionId,
-    submission.studentId.toString(),
     ala.title,
-    finalMarks,
+    data.marks,
     ala.maxMarks,
+    submission.isLate ? adjustedMarks : undefined
   );
-
-  // Also notify group members if it's a group submission
-  if (submission.groupMembers && submission.groupMembers.length > 0) {
-    for (const memberId of submission.groupMembers) {
-      if (memberId.toString() !== submission.studentId.toString()) {
-        await notifySubmissionGraded(
-          submissionId,
-          memberId.toString(),
-          ala.title,
-          finalMarks,
-          ala.maxMarks,
-        );
-      }
-    }
-  }
 
   revalidatePath("/professor/submissions");
   revalidatePath(`/professor/submissions/${submissionId}`);
@@ -280,29 +263,9 @@ export async function rejectSubmission(submissionId: string, reason: string) {
     { new: true },
   );
 
-  // Notify student about rejection
-  const { notifySubmissionRejected } =
-    await import("@/lib/actions/notification.actions");
-  await notifySubmissionRejected(
-    submissionId,
-    submission.studentId.toString(),
-    ala.title,
-    reason,
-  );
-
-  // Also notify group members if it's a group submission
-  if (submission.groupMembers && submission.groupMembers.length > 0) {
-    for (const memberId of submission.groupMembers) {
-      if (memberId.toString() !== submission.studentId.toString()) {
-        await notifySubmissionRejected(
-          submissionId,
-          memberId.toString(),
-          ala.title,
-          reason,
-        );
-      }
-    }
-  }
+  // Notify student and all group members about rejection
+  const { notifySubmissionRejected } = await import("@/lib/actions/notification.actions");
+  await notifySubmissionRejected(submissionId, ala.title, reason);
 
   revalidatePath("/professor/submissions");
   revalidatePath(`/professor/submissions/${submissionId}`);

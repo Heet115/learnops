@@ -13,6 +13,10 @@ import {
   Settings,
   Wifi,
   WifiOff,
+  Users,
+  UserPlus,
+  UserMinus,
+  Megaphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +48,10 @@ type NotificationType =
   | "deadline_reminder"
   | "submission_graded"
   | "submission_rejected"
+  | "group_invite"
+  | "group_joined"
+  | "group_left"
+  | "announcement"
   | "system";
 
 interface Notification {
@@ -52,7 +60,7 @@ interface Notification {
   title: string;
   message: string;
   relatedId?: string;
-  relatedType?: "ala" | "submission";
+  relatedType?: "ala" | "submission" | "group" | "announcement";
   isRead: boolean;
   createdAt: string;
 }
@@ -90,9 +98,9 @@ export function NotificationBell({ role }: NotificationBellProps) {
   // Load initial notifications
   useEffect(() => {
     if (!initialLoaded) {
-      getNotifications(20).then((notifs) => {
-        // Cast to ensure type compatibility
-        const typedNotifs = notifs as Notification[];
+      getNotifications(20).then((result) => {
+        // Extract notifications array from result
+        const typedNotifs = result.notifications as Notification[];
         setNotifications(typedNotifs);
         setInitialLoaded(true);
       });
@@ -146,6 +154,14 @@ export function NotificationBell({ role }: NotificationBellProps) {
         return <Award className="h-4 w-4 text-green-500" />;
       case "submission_rejected":
         return <XCircle className="h-4 w-4 text-red-500" />;
+      case "group_invite":
+        return <UserPlus className="h-4 w-4 text-violet-500" />;
+      case "group_joined":
+        return <Users className="h-4 w-4 text-emerald-500" />;
+      case "group_left":
+        return <UserMinus className="h-4 w-4 text-amber-500" />;
+      case "announcement":
+        return <Megaphone className="h-4 w-4 text-indigo-500" />;
       default:
         return <Bell className="h-4 w-4 text-gray-500" />;
     }
@@ -163,6 +179,13 @@ export function NotificationBell({ role }: NotificationBellProps) {
       return role === "student"
         ? `/student/submissions`
         : `/professor/submissions/${notification.relatedId}`;
+    }
+    if (notification.relatedType === "group") {
+      // Group notifications link to the ALA page where the group is
+      return role === "student" ? `/student/alas` : null;
+    }
+    if (notification.relatedType === "announcement") {
+      return role === "student" ? `/student/announcements` : null;
     }
     return null;
   };

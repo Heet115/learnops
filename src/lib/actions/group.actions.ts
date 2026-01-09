@@ -307,7 +307,7 @@ export async function createGroupByStudent(
   data: { name: string; inviteIds: string[] },
 ) {
   const clerkId = await requireStudent();
-  const { id: studentId } = await getUserDbId(clerkId!);
+  const { id: studentId, user: creator } = await getUserDbId(clerkId!);
 
   const ala = await ALA.findById(alaId);
   if (!ala) {
@@ -383,6 +383,19 @@ export async function createGroupByStudent(
     members,
   });
 
+  // Send notifications to invited students
+  const { notifyGroupInvite } = await import("@/lib/actions/notification.actions");
+  const inviterName = `${creator.firstName} ${creator.lastName}`;
+  for (const invitedId of data.inviteIds) {
+    await notifyGroupInvite(
+      group._id.toString(),
+      invitedId,
+      data.name,
+      inviterName,
+      ala.title
+    );
+  }
+
   revalidatePath(`/student/alas/${alaId}`);
   return { success: true, group: JSON.parse(JSON.stringify(group)) };
 }
@@ -390,7 +403,7 @@ export async function createGroupByStudent(
 // Student responds to group invitation
 export async function respondToGroupInvite(groupId: string, accept: boolean) {
   const clerkId = await requireStudent();
-  const { id: studentId } = await getUserDbId(clerkId!);
+  const { id: studentId, user: student } = await getUserDbId(clerkId!);
 
   const group = await Group.findById(groupId).populate("alaId");
   if (!group) {
@@ -433,6 +446,11 @@ export async function respondToGroupInvite(groupId: string, accept: boolean) {
 
     group.members[memberIndex].status = "accepted";
     group.members[memberIndex].joinedAt = new Date();
+
+    // Notify other group members that someone joined
+    const { notifyGroupJoined } = await import("@/lib/actions/notification.actions");
+    const studentName = `${student.firstName} ${student.lastName}`;
+    await notifyGroupJoined(groupId, studentName, studentId);
   } else {
     group.members[memberIndex].status = "declined";
   }
@@ -536,7 +554,7 @@ export async function cancelInvite(groupId: string, studentId: string) {
 // Student leaves a group
 export async function leaveGroup(groupId: string) {
   const clerkId = await requireStudent();
-  const { id: studentId } = await getUserDbId(clerkId!);
+  const { id: studentId, user: student } = await getUserDbId(clerkId!);
 
   const group = await Group.findById(groupId).populate("alaId");
   if (!group) {
@@ -559,11 +577,17 @@ export async function leaveGroup(groupId: string) {
     return { success: false, error: "Cannot leave - group has submitted" };
   }
 
+  const studentName = `${student.firstName} ${student.lastName}`;
+
   // Check if student is the creator
   if (group.createdBy.toString() === studentId) {
     // If creator leaves, delete the group
     await Group.findByIdAndDelete(groupId);
   } else {
+    // Notify other group members that someone left
+    const { notifyGroupLeft } = await import("@/lib/actions/notification.actions");
+    await notifyGroupLeft(groupId, studentName, studentId);
+
     // Remove student from group
     await Group.findByIdAndUpdate(groupId, {
       $pull: { members: { studentId } },
@@ -806,6 +830,18 @@ export async function inviteMemberByLeader(groupId: string, studentId: string) {
       },
     });
   }
+
+  // Send notification to invited student
+  const { notifyGroupInvite } = await import("@/lib/actions/notification.actions");
+  const alaDoc = await ALA.findById(ala._id);
+  const inviterName = `${user.firstName} ${user.lastName}`;
+  await notifyGroupInvite(
+    groupId,
+    studentId,
+    group.name,
+    inviterName,
+    alaDoc?.title || "ALA"
+  );
 
   revalidatePath(`/student/alas/${ala._id}`);
   return { success: true };

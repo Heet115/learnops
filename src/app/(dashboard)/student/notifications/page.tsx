@@ -12,15 +12,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Bell, FileText, Clock, Award, XCircle, Inbox } from "lucide-react";
+import {
+  Bell,
+  FileText,
+  Clock,
+  Award,
+  XCircle,
+  Inbox,
+  Users,
+  UserPlus,
+  UserMinus,
+  Megaphone,
+  Settings,
+} from "lucide-react";
 import { NotificationActions } from "@/components/student/notification-actions";
-
-const colorMap: Record<string, string> = {
-  blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  amber: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  emerald: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  rose: "bg-rose-500/10 text-rose-600 border-rose-500/20",
-};
+import { Button } from "@/components/ui/button";
 
 export default async function StudentNotificationsPage() {
   const { sessionClaims } = await auth();
@@ -30,10 +36,12 @@ export default async function StudentNotificationsPage() {
     redirect("/unauthorized");
   }
 
-  const [dbUser, notifications] = await Promise.all([
+  const [dbUser, notificationsResult] = await Promise.all([
     getCurrentUserFromDB(),
     getNotifications(50),
   ]);
+
+  const notifications = notificationsResult.notifications;
 
   const user = {
     name: `${dbUser?.firstName || "Student"} ${dbUser?.lastName || ""}`.trim(),
@@ -51,6 +59,14 @@ export default async function StudentNotificationsPage() {
         return { icon: Award, color: "emerald" };
       case "submission_rejected":
         return { icon: XCircle, color: "rose" };
+      case "group_invite":
+        return { icon: UserPlus, color: "violet" };
+      case "group_joined":
+        return { icon: Users, color: "emerald" };
+      case "group_left":
+        return { icon: UserMinus, color: "amber" };
+      case "announcement":
+        return { icon: Megaphone, color: "indigo" };
       default:
         return { icon: Bell, color: "blue" };
     }
@@ -82,6 +98,30 @@ export default async function StudentNotificationsPage() {
           className: "border-rose-500/30 bg-rose-500/10 text-rose-600",
           dotColor: "bg-rose-500",
         };
+      case "group_invite":
+        return {
+          label: "Group Invite",
+          className: "border-violet-500/30 bg-violet-500/10 text-violet-600",
+          dotColor: "bg-violet-500",
+        };
+      case "group_joined":
+        return {
+          label: "Group Update",
+          className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
+          dotColor: "bg-emerald-500",
+        };
+      case "group_left":
+        return {
+          label: "Group Update",
+          className: "border-amber-500/30 bg-amber-500/10 text-amber-600",
+          dotColor: "bg-amber-500",
+        };
+      case "announcement":
+        return {
+          label: "Announcement",
+          className: "border-indigo-500/30 bg-indigo-500/10 text-indigo-600",
+          dotColor: "bg-indigo-500",
+        };
       default:
         return {
           label: "System",
@@ -112,8 +152,27 @@ export default async function StudentNotificationsPage() {
     if (notification.relatedType === "submission") {
       return `/student/submissions`;
     }
+    if (notification.relatedType === "group") {
+      return `/student/alas`;
+    }
+    if (notification.relatedType === "announcement") {
+      return `/student/announcements`;
+    }
     return null;
   };
+
+  const colorMap: Record<string, string> = {
+    blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    amber: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    emerald: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    rose: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+    violet: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+    indigo: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20",
+  };
+
+  const unreadCount = notifications.filter(
+    (n: { isRead: boolean }) => !n.isRead
+  ).length;
 
   return (
     <DashboardLayout
@@ -134,7 +193,18 @@ export default async function StudentNotificationsPage() {
               </p>
             </div>
           </div>
-          <NotificationActions />
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <Badge variant="secondary">{unreadCount} unread</Badge>
+            )}
+            <NotificationActions />
+            <Link href="/student/notifications/settings">
+              <Button variant="outline" size="sm">
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <Card>

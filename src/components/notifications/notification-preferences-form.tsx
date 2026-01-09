@@ -31,6 +31,9 @@ interface NotificationPreferencesFormProps {
     deadlineReminder: boolean;
     submissionGraded: boolean;
     submissionRejected: boolean;
+    groupInvite: boolean;
+    groupUpdates: boolean;
+    announcements: boolean;
     systemNotifications: boolean;
     inApp: boolean;
     deadlineReminderHours: number;
@@ -142,6 +145,54 @@ export function NotificationPreferencesForm({
               id="submissionRejected"
               checked={formData.submissionRejected}
               onCheckedChange={() => handleToggle("submissionRejected")}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="groupInvite">Group Invitations</Label>
+              <p className="text-muted-foreground text-sm">
+                When someone invites you to join a group
+              </p>
+            </div>
+            <Switch
+              id="groupInvite"
+              checked={formData.groupInvite}
+              onCheckedChange={() => handleToggle("groupInvite")}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="groupUpdates">Group Updates</Label>
+              <p className="text-muted-foreground text-sm">
+                When members join or leave your group
+              </p>
+            </div>
+            <Switch
+              id="groupUpdates"
+              checked={formData.groupUpdates}
+              onCheckedChange={() => handleToggle("groupUpdates")}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="announcements">Announcements</Label>
+              <p className="text-muted-foreground text-sm">
+                Important announcements from professors and admins
+              </p>
+            </div>
+            <Switch
+              id="announcements"
+              checked={formData.announcements}
+              onCheckedChange={() => handleToggle("announcements")}
             />
           </div>
 

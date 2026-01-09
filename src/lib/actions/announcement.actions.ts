@@ -25,10 +25,10 @@ async function requireAnnouncementCreator() {
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!role || !["admin", "hod", "professor"].includes(role)) {
     throw new Error(
-      "Unauthorized: Only admin, HOD, or professor can create announcements",
+      "Unauthorized: Only admin, HOD, or professor can create announcements"
     );
   }
-  return { clerkId: userId, role };
+  return { clerkId: userId, role: role as "admin" | "hod" | "professor" };
 }
 
 async function getUserDbId(clerkId: string) {
@@ -38,37 +38,45 @@ async function getUserDbId(clerkId: string) {
   return { id: user._id.toString(), user };
 }
 
-// Helper to get target name
-async function getTargetName(target: {
-  type: string;
-  id?: mongoose.Types.ObjectId;
-  role?: string;
-}) {
-  if (target.type === "all") return "All Users";
-  if (target.type === "role") return `All ${target.role}s`;
+// Helper to get target name for display
+async function getTargetName(
+  targetType: string,
+  targetId?: mongoose.Types.ObjectId
+): Promise<string> {
+  if (targetType === "all") return "All Users";
 
-  if (!target.id) return target.type;
+  if (!targetId) return targetType;
 
   await connectDB();
 
-  if (target.type === "department") {
-    const dept = await Department.findById(target.id)
+  if (targetType === "department") {
+    const dept = await Department.findById(targetId)
       .select("name code")
       .lean();
     return dept ? `${dept.name} (${dept.code})` : "Department";
   }
-  if (target.type === "course") {
-    const course = await Course.findById(target.id).select("name code").lean();
-    return course ? `${course.name} (${course.code})` : "Course";
-  }
-  if (target.type === "class") {
-    const cls = await Class.findById(target.id)
+  if (targetType === "class") {
+    const cls = await Class.findById(targetId)
       .select("name academicYear")
       .lean();
     return cls ? `${cls.name} (${cls.academicYear})` : "Class";
   }
+  if (targetType === "subject_offering") {
+    const { SubjectOffering } = await import("@/lib/db");
+    const offering = await SubjectOffering.findById(targetId)
+      .populate("subjectId", "name code")
+      .lean();
+    if (offering && offering.subjectId) {
+      const subject = offering.subjectId as unknown as {
+        name: string;
+        code: string;
+      };
+      return `${subject.name} (${subject.code})`;
+    }
+    return "Subject Offering";
+  }
 
-  return target.type;
+  return targetType;
 }
 
 // Create announcement
@@ -86,13 +94,11 @@ export async function createAnnouncement(input: CreateAnnouncementInput) {
     const validated = parseResult.data;
     const { id: userId } = await getUserDbId(clerkId!);
 
+    const targetType = validated.target.type;
+
     // Validate target based on role
     if (role === "professor") {
-      // Professors can only target their classes
-      if (
-        validated.target.type === "all" ||
-        validated.target.type === "department"
-      ) {
+      if (targetType === "all" || targetType === "department") {
         return {
           success: false,
           error: "Professors can only create announcements for their classes",
@@ -101,8 +107,7 @@ export async function createAnnouncement(input: CreateAnnouncementInput) {
     }
 
     if (role === "hod") {
-      // HODs can target their department or classes within it
-      if (validated.target.type === "all") {
+      if (targetType === "all") {
         return {
           success: false,
           error: "HODs can only create announcements for their department",
@@ -112,17 +117,16 @@ export async function createAnnouncement(input: CreateAnnouncementInput) {
 
     const announcementData: Record<string, unknown> = {
       title: validated.title,
-      content: validated.content,
+      message: validated.content, // Map content -> message (model field)
       createdBy: userId,
-      target: {
-        type: validated.target.type,
-        id: validated.target.id
-          ? new mongoose.Types.ObjectId(validated.target.id)
-          : undefined,
-        role: validated.target.role,
-      },
+      createdByRole: role,
+      targetType: targetType,
+      targetId: validated.target.id
+        ? new mongoose.Types.ObjectId(validated.target.id)
+        : undefined,
       priority: validated.priority,
-      isPinned: validated.isPinned,
+      isPublished: true,
+      isActive: true,
     };
 
     if (validated.expiresAt) {
@@ -138,7 +142,8 @@ export async function createAnnouncement(input: CreateAnnouncementInput) {
       details: {
         type: "announcement",
         title: validated.title,
-        target: validated.target,
+        targetType: targetType,
+        targetId: validated.target.id,
       },
     });
 
@@ -171,37 +176,37 @@ export async function getAnnouncementsForUser() {
 
     // Build target conditions based on user role and assignments
     const targetConditions: Record<string, unknown>[] = [
-      { "target.type": "all" },
-      { "target.type": "role", "target.role": role },
+      { targetType: "all" },
     ];
 
     // Department-based targeting
     if (user.departmentId) {
       targetConditions.push({
-        "target.type": "department",
-        "target.id": user.departmentId,
+        targetType: "department",
+        targetId: user.departmentId,
       });
     }
 
-    // For students: check their class and course
+    // For students: check their class
     if (role === "student" && user.classId) {
       targetConditions.push({
-        "target.type": "class",
-        "target.id": user.classId,
+        targetType: "class",
+        targetId: user.classId,
       });
 
-      // Get course from class -> semester -> course
-      const classDoc = await Class.findById(user.classId).populate({
-        path: "semesterId",
-        select: "courseId",
-      });
-      if (classDoc?.semesterId) {
-        const semester = classDoc.semesterId as unknown as {
-          courseId: mongoose.Types.ObjectId;
-        };
+      // Also check subject offerings for this student's class
+      const { SubjectOffering } = await import("@/lib/db");
+      const offerings = await SubjectOffering.find({
+        classId: user.classId,
+        isActive: true,
+      })
+        .select("_id")
+        .lean();
+
+      for (const offering of offerings) {
         targetConditions.push({
-          "target.type": "course",
-          "target.id": semester.courseId,
+          targetType: "subject_offering",
+          targetId: offering._id,
         });
       }
     }
@@ -216,11 +221,6 @@ export async function getAnnouncementsForUser() {
         isActive: true,
       })
         .select("classId")
-        .populate({
-          path: "classId",
-          select: "semesterId",
-          populate: { path: "semesterId", select: "courseId" },
-        })
         .lean();
 
       // Get classes from class coordinator assignments
@@ -237,65 +237,33 @@ export async function getAnnouncementsForUser() {
         },
       })
         .select("classId")
-        .populate({
-          path: "classId",
-          select: "semesterId",
-          populate: { path: "semesterId", select: "courseId" },
-        })
         .lean();
 
       // Combine class IDs from both sources
       const classIds = new Set<string>();
-      const courseIds = new Set<string>();
 
-      // From subject offerings
       for (const offering of offerings) {
         if (offering.classId) {
-          const cls = offering.classId as unknown as {
-            _id: mongoose.Types.ObjectId;
-            semesterId?: { courseId?: mongoose.Types.ObjectId };
-          };
-          classIds.add(cls._id.toString());
-
-          if (cls.semesterId?.courseId) {
-            courseIds.add(cls.semesterId.courseId.toString());
-          }
+          classIds.add(offering.classId.toString());
         }
       }
 
-      // From class coordinator assignments
       for (const coord of coordinatorAssignments) {
         if (coord.classId) {
-          const cls = coord.classId as unknown as {
-            _id: mongoose.Types.ObjectId;
-            semesterId?: { courseId?: mongoose.Types.ObjectId };
-          };
-          classIds.add(cls._id.toString());
-
-          if (cls.semesterId?.courseId) {
-            courseIds.add(cls.semesterId.courseId.toString());
-          }
+          classIds.add(coord.classId.toString());
         }
       }
 
       // Add class targeting
       for (const classId of classIds) {
         targetConditions.push({
-          "target.type": "class",
-          "target.id": new mongoose.Types.ObjectId(classId),
-        });
-      }
-
-      // Add course targeting
-      for (const courseId of courseIds) {
-        targetConditions.push({
-          "target.type": "course",
-          "target.id": new mongoose.Types.ObjectId(courseId),
+          targetType: "class",
+          targetId: new mongoose.Types.ObjectId(classId),
         });
       }
     }
 
-    // For HODs: they already have departmentId, also add courses in their department
+    // For HODs: they already have departmentId, also add classes in their department
     if (role === "hod" && user.departmentId) {
       const courses = await Course.find({
         departmentId: user.departmentId,
@@ -304,14 +272,7 @@ export async function getAnnouncementsForUser() {
         .select("_id")
         .lean();
 
-      for (const course of courses) {
-        targetConditions.push({
-          "target.type": "course",
-          "target.id": course._id,
-        });
-      }
-
-      // Also get classes in their department
+      // Get classes in their department
       const { Semester } = await import("@/lib/db");
       const courseIds = courses.map((c) => c._id);
       const semesters = await Semester.find({ courseId: { $in: courseIds } })
@@ -327,15 +288,22 @@ export async function getAnnouncementsForUser() {
 
       for (const cls of classes) {
         targetConditions.push({
-          "target.type": "class",
-          "target.id": cls._id,
+          targetType: "class",
+          targetId: cls._id,
         });
       }
     }
 
     const query = {
       isActive: true,
+      isPublished: true,
       $and: [
+        {
+          $or: [
+            { publishAt: { $exists: false } },
+            { publishAt: { $lte: now } },
+          ],
+        },
         {
           $or: [{ expiresAt: { $exists: false } }, { expiresAt: { $gt: now } }],
         },
@@ -345,7 +313,7 @@ export async function getAnnouncementsForUser() {
 
     const announcements = await Announcement.find(query)
       .populate("createdBy", "firstName lastName role")
-      .sort({ isPinned: -1, createdAt: -1 })
+      .sort({ priority: -1, createdAt: -1 })
       .limit(50)
       .lean();
 
@@ -353,8 +321,8 @@ export async function getAnnouncementsForUser() {
     const enrichedAnnouncements = await Promise.all(
       announcements.map(async (ann) => ({
         ...ann,
-        targetName: await getTargetName(ann.target),
-      })),
+        targetName: await getTargetName(ann.targetType, ann.targetId),
+      }))
     );
 
     return JSON.parse(JSON.stringify(enrichedAnnouncements));
@@ -383,8 +351,8 @@ export async function getAllAnnouncements() {
     const enrichedAnnouncements = await Promise.all(
       announcements.map(async (ann) => ({
         ...ann,
-        targetName: await getTargetName(ann.target),
-      })),
+        targetName: await getTargetName(ann.targetType, ann.targetId),
+      }))
     );
 
     return {
@@ -411,8 +379,8 @@ export async function getMyAnnouncements() {
     const enrichedAnnouncements = await Promise.all(
       announcements.map(async (ann) => ({
         ...ann,
-        targetName: await getTargetName(ann.target),
-      })),
+        targetName: await getTargetName(ann.targetType, ann.targetId),
+      }))
     );
 
     return {
@@ -440,7 +408,7 @@ export async function getAnnouncementById(id: string) {
 
   const enriched = {
     ...announcement,
-    targetName: await getTargetName(announcement.target),
+    targetName: await getTargetName(announcement.targetType, announcement.targetId),
   };
 
   return JSON.parse(JSON.stringify(enriched));
@@ -449,7 +417,7 @@ export async function getAnnouncementById(id: string) {
 // Update announcement
 export async function updateAnnouncement(
   id: string,
-  input: UpdateAnnouncementInput,
+  input: UpdateAnnouncementInput
 ) {
   try {
     const { clerkId, role } = await requireAnnouncementCreator();
@@ -474,18 +442,24 @@ export async function updateAnnouncement(
       return { success: false, error: "Unauthorized" };
     }
 
-    const updateData: Record<string, unknown> = { ...validated };
+    const updateData: Record<string, unknown> = {};
+
+    if (validated.title) updateData.title = validated.title;
+    if (validated.content) updateData.message = validated.content;
+    if (validated.priority) updateData.priority = validated.priority;
+    if (validated.isActive !== undefined) updateData.isActive = validated.isActive;
+
     if (validated.expiresAt) {
       updateData.expiresAt = new Date(validated.expiresAt);
     } else if (validated.expiresAt === null) {
       updateData.$unset = { expiresAt: 1 };
-      delete updateData.expiresAt;
     }
-    if (validated.target?.id) {
-      updateData.target = {
-        ...validated.target,
-        id: new mongoose.Types.ObjectId(validated.target.id),
-      };
+
+    if (validated.target) {
+      updateData.targetType = validated.target.type;
+      if (validated.target.id) {
+        updateData.targetId = new mongoose.Types.ObjectId(validated.target.id);
+      }
     }
 
     const updated = await Announcement.findByIdAndUpdate(id, updateData, {
@@ -505,136 +479,189 @@ export async function updateAnnouncement(
 
 // Delete announcement
 export async function deleteAnnouncement(id: string) {
-  const { clerkId, role } = await requireAnnouncementCreator();
-  const { id: userId } = await getUserDbId(clerkId!);
+  try {
+    const { clerkId, role } = await requireAnnouncementCreator();
+    const { id: userId } = await getUserDbId(clerkId!);
 
-  const announcement = await Announcement.findById(id);
-  if (!announcement) {
-    return { success: false, error: "Announcement not found" };
+    const announcement = await Announcement.findById(id);
+    if (!announcement) {
+      return { success: false, error: "Announcement not found" };
+    }
+
+    // Only creator or admin can delete
+    if (announcement.createdBy.toString() !== userId && role !== "admin") {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    await Announcement.findByIdAndDelete(id);
+
+    revalidatePath("/admin/announcements");
+    revalidatePath("/hod/announcements");
+    revalidatePath("/professor/announcements");
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting announcement:", error);
+    return { success: false, error: "Failed to delete announcement" };
   }
-
-  // Only creator or admin can delete
-  if (announcement.createdBy.toString() !== userId && role !== "admin") {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  await Announcement.findByIdAndDelete(id);
-
-  revalidatePath("/admin/announcements");
-  revalidatePath("/hod/announcements");
-  revalidatePath("/professor/announcements");
-  return { success: true };
 }
 
-// Toggle pin status
-export async function toggleAnnouncementPin(id: string) {
-  const { clerkId, role } = await requireAnnouncementCreator();
-  const { id: userId } = await getUserDbId(clerkId!);
+// Toggle publish status
+export async function toggleAnnouncementPublish(id: string) {
+  try {
+    const { clerkId, role } = await requireAnnouncementCreator();
+    const { id: userId } = await getUserDbId(clerkId!);
 
-  const announcement = await Announcement.findById(id);
-  if (!announcement) {
-    return { success: false, error: "Announcement not found" };
+    const announcement = await Announcement.findById(id);
+    if (!announcement) {
+      return { success: false, error: "Announcement not found" };
+    }
+
+    if (announcement.createdBy.toString() !== userId && role !== "admin") {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const updated = await Announcement.findByIdAndUpdate(
+      id,
+      { isPublished: !announcement.isPublished },
+      { new: true }
+    );
+
+    revalidatePath("/admin/announcements");
+    return { success: true, isPublished: updated?.isPublished };
+  } catch (error) {
+    console.error("Error toggling announcement publish:", error);
+    return { success: false, error: "Failed to toggle publish status" };
   }
-
-  if (announcement.createdBy.toString() !== userId && role !== "admin") {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  const updated = await Announcement.findByIdAndUpdate(
-    id,
-    { isPinned: !announcement.isPinned },
-    { new: true },
-  );
-
-  revalidatePath("/admin/announcements");
-  return { success: true, isPinned: updated?.isPinned };
 }
 
 // Get target options for announcement form
 export async function getAnnouncementTargetOptions() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (!role || !["admin", "hod", "professor"].includes(role)) {
-    return { success: false, error: "Unauthorized" };
+  try {
+    const { sessionClaims, userId } = await auth();
+    const role = (sessionClaims?.metadata as { role?: string })?.role;
+    if (!role || !["admin", "hod", "professor"].includes(role)) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    await connectDB();
+    const user = await User.findOne({ clerkId: userId, isActive: true });
+    if (!user) return { success: false, error: "User not found" };
+
+    const options: {
+      departments: Array<{ _id: string; name: string; code: string }>;
+      classes: Array<{ _id: string; name: string; academicYear: string }>;
+      subjectOfferings: Array<{
+        _id: string;
+        subjectName: string;
+        className: string;
+      }>;
+    } = {
+      departments: [],
+      classes: [],
+      subjectOfferings: [],
+    };
+
+    if (role === "admin") {
+      // Admin can target anything
+      const depts = await Department.find({ isActive: true })
+        .select("_id name code")
+        .lean();
+      options.departments = JSON.parse(JSON.stringify(depts));
+
+      const classes = await Class.find({ isActive: true })
+        .select("_id name academicYear")
+        .lean();
+      options.classes = JSON.parse(JSON.stringify(classes));
+    } else if (role === "hod" && user.departmentId) {
+      // HOD can target their department and its classes
+      const depts = await Department.find({
+        _id: user.departmentId,
+        isActive: true,
+      })
+        .select("_id name code")
+        .lean();
+      options.departments = JSON.parse(JSON.stringify(depts));
+
+      const courses = await Course.find({
+        departmentId: user.departmentId,
+        isActive: true,
+      })
+        .select("_id")
+        .lean();
+
+      // Get classes through courses -> semesters
+      const { Semester } = await import("@/lib/db");
+      const courseIds = courses.map((c) => c._id);
+      const semesters = await Semester.find({
+        courseId: { $in: courseIds },
+      }).select("_id");
+      const semesterIds = semesters.map((s) => s._id);
+      const classes = await Class.find({
+        semesterId: { $in: semesterIds },
+        isActive: true,
+      })
+        .select("_id name academicYear")
+        .lean();
+      options.classes = JSON.parse(JSON.stringify(classes));
+    } else if (role === "professor") {
+      // Professor can only target their assigned classes and subject offerings
+      const { SubjectOffering } = await import("@/lib/db");
+      const offerings = await SubjectOffering.find({
+        professorId: user._id,
+        isActive: true,
+      })
+        .populate("classId", "name academicYear")
+        .populate("subjectId", "name code")
+        .lean();
+
+      const classIds = new Set<string>();
+      const subjectOfferingsList: Array<{
+        _id: string;
+        subjectName: string;
+        className: string;
+      }> = [];
+
+      for (const offering of offerings) {
+        if (offering.classId) {
+          const cls = offering.classId as unknown as {
+            _id: mongoose.Types.ObjectId;
+            name: string;
+            academicYear: string;
+          };
+          classIds.add(cls._id.toString());
+        }
+
+        if (offering.subjectId && offering.classId) {
+          const subject = offering.subjectId as unknown as {
+            name: string;
+            code: string;
+          };
+          const cls = offering.classId as unknown as { name: string };
+          subjectOfferingsList.push({
+            _id: offering._id.toString(),
+            subjectName: `${subject.name} (${subject.code})`,
+            className: cls.name,
+          });
+        }
+      }
+
+      const classes = await Class.find({
+        _id: { $in: Array.from(classIds) },
+        isActive: true,
+      })
+        .select("_id name academicYear")
+        .lean();
+      options.classes = JSON.parse(JSON.stringify(classes));
+      options.subjectOfferings = subjectOfferingsList;
+    }
+
+    return {
+      success: true,
+      options: JSON.parse(JSON.stringify(options)),
+      userRole: role,
+    };
+  } catch (error) {
+    console.error("Error fetching target options:", error);
+    return { success: false, error: "Failed to fetch target options" };
   }
-
-  await connectDB();
-  const user = await User.findOne({ clerkId: userId, isActive: true });
-  if (!user) return { success: false, error: "User not found" };
-
-  const options: {
-    departments: Array<{ _id: string; name: string; code: string }>;
-    courses: Array<{ _id: string; name: string; code: string }>;
-    classes: Array<{ _id: string; name: string; academicYear: string }>;
-  } = {
-    departments: [],
-    courses: [],
-    classes: [],
-  };
-
-  if (role === "admin") {
-    // Admin can target anything
-    const depts = await Department.find({ isActive: true })
-      .select("_id name code")
-      .lean();
-    options.departments = JSON.parse(JSON.stringify(depts));
-    const courses = await Course.find({ isActive: true })
-      .select("_id name code")
-      .lean();
-    options.courses = JSON.parse(JSON.stringify(courses));
-    const classes = await Class.find({ isActive: true })
-      .select("_id name academicYear")
-      .lean();
-    options.classes = JSON.parse(JSON.stringify(classes));
-  } else if (role === "hod" && user.departmentId) {
-    // HOD can target their department and its classes
-    const depts = await Department.find({
-      _id: user.departmentId,
-      isActive: true,
-    })
-      .select("_id name code")
-      .lean();
-    options.departments = JSON.parse(JSON.stringify(depts));
-    const courses = await Course.find({
-      departmentId: user.departmentId,
-      isActive: true,
-    })
-      .select("_id name code")
-      .lean();
-    options.courses = JSON.parse(JSON.stringify(courses));
-    // Get classes through courses -> semesters
-    const { Semester } = await import("@/lib/db");
-    const courseIds = courses.map((c) => c._id);
-    const semesters = await Semester.find({
-      courseId: { $in: courseIds },
-    }).select("_id");
-    const semesterIds = semesters.map((s) => s._id);
-    const classes = await Class.find({
-      semesterId: { $in: semesterIds },
-      isActive: true,
-    })
-      .select("_id name academicYear")
-      .lean();
-    options.classes = JSON.parse(JSON.stringify(classes));
-  } else if (role === "professor") {
-    // Professor can only target their assigned classes
-    const { SubjectOffering } = await import("@/lib/db");
-    const offerings = await SubjectOffering.find({
-      professorId: user._id,
-      isActive: true,
-    })
-      .select("classId")
-      .lean();
-    const classIds = [...new Set(offerings.map((o) => o.classId.toString()))];
-    const classes = await Class.find({ _id: { $in: classIds }, isActive: true })
-      .select("_id name academicYear")
-      .lean();
-    options.classes = JSON.parse(JSON.stringify(classes));
-  }
-
-  return {
-    success: true,
-    options: JSON.parse(JSON.stringify(options)),
-    userRole: role,
-  };
 }

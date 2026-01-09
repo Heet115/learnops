@@ -22,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import {
@@ -32,8 +31,12 @@ import {
 
 interface TargetOptions {
   departments: Array<{ _id: string; name: string; code: string }>;
-  courses: Array<{ _id: string; name: string; code: string }>;
   classes: Array<{ _id: string; name: string; academicYear: string }>;
+  subjectOfferings?: Array<{
+    _id: string;
+    subjectName: string;
+    className: string;
+  }>;
 }
 
 export function CreateAnnouncementDialog() {
@@ -46,9 +49,7 @@ export function CreateAnnouncementDialog() {
   const [content, setContent] = useState("");
   const [targetType, setTargetType] = useState<string>("all");
   const [targetId, setTargetId] = useState<string>("");
-  const [targetRole, setTargetRole] = useState<string>("");
   const [priority, setPriority] = useState<string>("normal");
-  const [isPinned, setIsPinned] = useState(false);
   const [expiresAt, setExpiresAt] = useState("");
 
   useEffect(() => {
@@ -66,9 +67,7 @@ export function CreateAnnouncementDialog() {
     setContent("");
     setTargetType("all");
     setTargetId("");
-    setTargetRole("");
     setPriority("normal");
-    setIsPinned(false);
     setExpiresAt("");
     setError(null);
   };
@@ -78,12 +77,15 @@ export function CreateAnnouncementDialog() {
     setError(null);
     setLoading(true);
 
-    const target: { type: string; id?: string; role?: string } = {
+    const target: { type: string; id?: string } = {
       type: targetType,
     };
-    if (targetType === "role") {
-      target.role = targetRole as "student" | "professor" | "hod";
-    } else if (["department", "course", "class"].includes(targetType)) {
+    if (["department", "class", "subject_offering"].includes(targetType)) {
+      if (!targetId) {
+        setError("Please select a target");
+        setLoading(false);
+        return;
+      }
       target.id = targetId;
     }
 
@@ -91,12 +93,10 @@ export function CreateAnnouncementDialog() {
       title,
       content,
       target: target as {
-        type: "all" | "department" | "course" | "class" | "role";
+        type: "all" | "department" | "class" | "subject_offering";
         id?: string;
-        role?: "student" | "professor" | "hod";
       },
       priority: priority as "low" | "normal" | "high" | "urgent",
-      isPinned,
       expiresAt: expiresAt || undefined,
     });
 
@@ -157,7 +157,7 @@ export function CreateAnnouncementDialog() {
 
           <div className="space-y-2">
             <Label htmlFor="content">
-              Content <span className="text-destructive">*</span>
+              Message <span className="text-destructive">*</span>
             </Label>
             <Textarea
               id="content"
@@ -169,7 +169,7 @@ export function CreateAnnouncementDialog() {
               minLength={10}
             />
             <p className="text-muted-foreground text-xs">
-              {content.length}/5000 characters
+              {content.length}/2000 characters
             </p>
           </div>
 
@@ -181,7 +181,6 @@ export function CreateAnnouncementDialog() {
                 onValueChange={(v) => {
                   setTargetType(v);
                   setTargetId("");
-                  setTargetRole("");
                 }}
               >
                 <SelectTrigger>
@@ -189,9 +188,7 @@ export function CreateAnnouncementDialog() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Users</SelectItem>
-                  <SelectItem value="role">By Role</SelectItem>
                   <SelectItem value="department">Department</SelectItem>
-                  <SelectItem value="course">Course</SelectItem>
                   <SelectItem value="class">Class</SelectItem>
                 </SelectContent>
               </Select>
@@ -213,24 +210,6 @@ export function CreateAnnouncementDialog() {
             </div>
           </div>
 
-          {targetType === "role" && (
-            <div className="space-y-2">
-              <Label>
-                Select Role <span className="text-destructive">*</span>
-              </Label>
-              <Select value={targetRole} onValueChange={setTargetRole}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="student">Students</SelectItem>
-                  <SelectItem value="professor">Professors</SelectItem>
-                  <SelectItem value="hod">HODs</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
           {targetType === "department" && options && (
             <div className="space-y-2">
               <Label>
@@ -244,26 +223,6 @@ export function CreateAnnouncementDialog() {
                   {options.departments.map((dept) => (
                     <SelectItem key={dept._id} value={dept._id}>
                       {dept.name} ({dept.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {targetType === "course" && options && (
-            <div className="space-y-2">
-              <Label>
-                Select Course <span className="text-destructive">*</span>
-              </Label>
-              <Select value={targetId} onValueChange={setTargetId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select course" />
-                </SelectTrigger>
-                <SelectContent>
-                  {options.courses.map((course) => (
-                    <SelectItem key={course._id} value={course._id}>
-                      {course.name} ({course.code})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -299,17 +258,6 @@ export function CreateAnnouncementDialog() {
               value={expiresAt}
               onChange={(e) => setExpiresAt(e.target.value)}
             />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="pinned"
-                checked={isPinned}
-                onCheckedChange={setIsPinned}
-              />
-              <Label htmlFor="pinned">Pin announcement</Label>
-            </div>
           </div>
 
           <DialogFooter>

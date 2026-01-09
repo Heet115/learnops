@@ -1,51 +1,25 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
-export type AnnouncementPriority = "low" | "normal" | "high" | "urgent";
-export type AnnouncementTargetType =
-  | "all"
-  | "department"
-  | "course"
-  | "class"
-  | "role";
-
-export interface IAnnouncementTarget {
-  type: AnnouncementTargetType;
-  id?: mongoose.Types.ObjectId; // For department, course, class
-  role?: "student" | "professor" | "hod"; // For role-based targeting
-}
-
 export interface IAnnouncement extends Document {
   _id: mongoose.Types.ObjectId;
   title: string;
-  content: string;
+  message: string;
   createdBy: mongoose.Types.ObjectId;
-  target: IAnnouncementTarget;
-  priority: AnnouncementPriority;
-  isPinned: boolean;
+  createdByRole: "admin" | "hod" | "professor";
+  // Target audience
+  targetType: "all" | "department" | "class" | "subject_offering";
+  targetId?: mongoose.Types.ObjectId; // departmentId, classId, or subjectOfferingId
+  // Priority
+  priority: "low" | "normal" | "high" | "urgent";
+  // Scheduling
+  publishAt?: Date;
   expiresAt?: Date;
+  // Status
+  isPublished: boolean;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
-
-const AnnouncementTargetSchema = new Schema<IAnnouncementTarget>(
-  {
-    type: {
-      type: String,
-      enum: ["all", "department", "course", "class", "role"],
-      required: true,
-    },
-    id: {
-      type: Schema.Types.ObjectId,
-      refPath: "target.type",
-    },
-    role: {
-      type: String,
-      enum: ["student", "professor", "hod"],
-    },
-  },
-  { _id: false },
-);
 
 const AnnouncementSchema = new Schema<IAnnouncement>(
   {
@@ -55,46 +29,59 @@ const AnnouncementSchema = new Schema<IAnnouncement>(
       trim: true,
       maxlength: 200,
     },
-    content: {
+    message: {
       type: String,
       required: true,
-      maxlength: 5000,
+      trim: true,
+      maxlength: 2000,
     },
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    target: {
-      type: AnnouncementTargetSchema,
+    createdByRole: {
+      type: String,
+      enum: ["admin", "hod", "professor"],
       required: true,
+    },
+    targetType: {
+      type: String,
+      enum: ["all", "department", "class", "subject_offering"],
+      required: true,
+    },
+    targetId: {
+      type: Schema.Types.ObjectId,
     },
     priority: {
       type: String,
       enum: ["low", "normal", "high", "urgent"],
       default: "normal",
     },
-    isPinned: {
-      type: Boolean,
-      default: false,
+    publishAt: {
+      type: Date,
     },
     expiresAt: {
       type: Date,
+    },
+    isPublished: {
+      type: Boolean,
+      default: true,
     },
     isActive: {
       type: Boolean,
       default: true,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  },
 );
 
 // Indexes
-AnnouncementSchema.index({ createdAt: -1 });
-AnnouncementSchema.index({ "target.type": 1, "target.id": 1 });
-AnnouncementSchema.index({ "target.role": 1 });
-AnnouncementSchema.index({ isPinned: -1, createdAt: -1 });
-AnnouncementSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+AnnouncementSchema.index({ targetType: 1, targetId: 1, isActive: 1 });
+AnnouncementSchema.index({ createdBy: 1, createdAt: -1 });
+AnnouncementSchema.index({ isPublished: 1, publishAt: 1 });
 
 export const Announcement: Model<IAnnouncement> =
   mongoose.models.Announcement ||

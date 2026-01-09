@@ -24,7 +24,6 @@ import {
   Check,
   X,
   Loader2,
-  Calendar,
   BookOpen,
   Clock,
   UserPlus,

@@ -266,9 +266,6 @@ export function SubmissionForm({
   const hasContent =
     localFiles.length > 0 || existingFiles.length > 0 || links.length > 0;
 
-  // For group submissions, check if student can submit/edit
-  const canSubmitOrEdit = !isGroupSubmission || isGroupLeader;
-
   // Show message if student is in a group but not the leader
   if (isGroupSubmission && hasGroup && !isGroupLeader) {
     return (

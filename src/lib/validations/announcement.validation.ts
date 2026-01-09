@@ -1,9 +1,8 @@
 import { z } from "zod";
 
 export const announcementTargetSchema = z.object({
-  type: z.enum(["all", "department", "course", "class", "role"]),
+  type: z.enum(["all", "department", "class", "subject_offering"]),
   id: z.string().optional(),
-  role: z.enum(["student", "professor", "hod"]).optional(),
 });
 
 export const createAnnouncementSchema = z.object({
@@ -11,19 +10,17 @@ export const createAnnouncementSchema = z.object({
   content: z
     .string()
     .min(10, "Content must be at least 10 characters")
-    .max(5000),
+    .max(2000),
   target: announcementTargetSchema,
   priority: z.enum(["low", "normal", "high", "urgent"]).default("normal"),
-  isPinned: z.coerce.boolean().default(false),
   expiresAt: z.string().optional(),
 });
 
 export const updateAnnouncementSchema = z.object({
   title: z.string().min(3).max(200).optional(),
-  content: z.string().min(10).max(5000).optional(),
+  content: z.string().min(10).max(2000).optional(),
   target: announcementTargetSchema.optional(),
   priority: z.enum(["low", "normal", "high", "urgent"]).optional(),
-  isPinned: z.coerce.boolean().optional(),
   expiresAt: z.string().optional().nullable(),
   isActive: z.boolean().optional(),
 });

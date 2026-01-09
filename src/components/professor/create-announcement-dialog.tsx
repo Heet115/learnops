@@ -22,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import {
@@ -32,6 +31,11 @@ import {
 
 interface TargetOptions {
   classes: Array<{ _id: string; name: string; academicYear: string }>;
+  subjectOfferings?: Array<{
+    _id: string;
+    subjectName: string;
+    className: string;
+  }>;
 }
 
 export function CreateProfessorAnnouncementDialog() {
@@ -42,9 +46,9 @@ export function CreateProfessorAnnouncementDialog() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [targetType, setTargetType] = useState<string>("class");
   const [targetId, setTargetId] = useState<string>("");
   const [priority, setPriority] = useState<string>("normal");
-  const [isPinned, setIsPinned] = useState(false);
   const [expiresAt, setExpiresAt] = useState("");
 
   useEffect(() => {
@@ -60,9 +64,9 @@ export function CreateProfessorAnnouncementDialog() {
   const resetForm = () => {
     setTitle("");
     setContent("");
+    setTargetType("class");
     setTargetId("");
     setPriority("normal");
-    setIsPinned(false);
     setExpiresAt("");
     setError(null);
   };
@@ -72,7 +76,7 @@ export function CreateProfessorAnnouncementDialog() {
     setError(null);
 
     if (!targetId) {
-      setError("Please select a class");
+      setError("Please select a target");
       return;
     }
 
@@ -81,9 +85,11 @@ export function CreateProfessorAnnouncementDialog() {
     const result = await createAnnouncement({
       title,
       content,
-      target: { type: "class", id: targetId },
+      target: {
+        type: targetType as "class" | "subject_offering",
+        id: targetId,
+      },
       priority: priority as "low" | "normal" | "high" | "urgent",
-      isPinned,
       expiresAt: expiresAt || undefined,
     });
 
@@ -97,6 +103,9 @@ export function CreateProfessorAnnouncementDialog() {
       setError(result.error || "Failed to create announcement");
     }
   };
+
+  const hasSubjectOfferings =
+    options?.subjectOfferings && options.subjectOfferings.length > 0;
 
   return (
     <Dialog
@@ -116,7 +125,7 @@ export function CreateProfessorAnnouncementDialog() {
         <DialogHeader>
           <DialogTitle>Create Announcement</DialogTitle>
           <DialogDescription>
-            Broadcast a message to your class
+            Broadcast a message to your class or subject
           </DialogDescription>
         </DialogHeader>
 
@@ -144,7 +153,7 @@ export function CreateProfessorAnnouncementDialog() {
 
           <div className="space-y-2">
             <Label htmlFor="content">
-              Content <span className="text-destructive">*</span>
+              Message <span className="text-destructive">*</span>
             </Label>
             <Textarea
               id="content"
@@ -156,25 +165,28 @@ export function CreateProfessorAnnouncementDialog() {
               minLength={10}
             />
             <p className="text-muted-foreground text-xs">
-              {content.length}/5000 characters
+              {content.length}/2000 characters
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>
-                Select Class <span className="text-destructive">*</span>
-              </Label>
-              <Select value={targetId} onValueChange={setTargetId}>
+              <Label>Target Audience</Label>
+              <Select
+                value={targetType}
+                onValueChange={(v) => {
+                  setTargetType(v);
+                  setTargetId("");
+                }}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select class" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {options?.classes.map((cls) => (
-                    <SelectItem key={cls._id} value={cls._id}>
-                      {cls.name} ({cls.academicYear})
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="class">Class</SelectItem>
+                  {hasSubjectOfferings && (
+                    <SelectItem value="subject_offering">Subject</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -195,6 +207,46 @@ export function CreateProfessorAnnouncementDialog() {
             </div>
           </div>
 
+          {targetType === "class" && options && (
+            <div className="space-y-2">
+              <Label>
+                Select Class <span className="text-destructive">*</span>
+              </Label>
+              <Select value={targetId} onValueChange={setTargetId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select class" />
+                </SelectTrigger>
+                <SelectContent>
+                  {options.classes.map((cls) => (
+                    <SelectItem key={cls._id} value={cls._id}>
+                      {cls.name} ({cls.academicYear})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {targetType === "subject_offering" && options?.subjectOfferings && (
+            <div className="space-y-2">
+              <Label>
+                Select Subject <span className="text-destructive">*</span>
+              </Label>
+              <Select value={targetId} onValueChange={setTargetId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select subject" />
+                </SelectTrigger>
+                <SelectContent>
+                  {options.subjectOfferings.map((offering) => (
+                    <SelectItem key={offering._id} value={offering._id}>
+                      {offering.subjectName} - {offering.className}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="expiresAt">Expires At (Optional)</Label>
             <Input
@@ -203,15 +255,6 @@ export function CreateProfessorAnnouncementDialog() {
               value={expiresAt}
               onChange={(e) => setExpiresAt(e.target.value)}
             />
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="pinned"
-              checked={isPinned}
-              onCheckedChange={setIsPinned}
-            />
-            <Label htmlFor="pinned">Pin announcement</Label>
           </div>
 
           <DialogFooter>

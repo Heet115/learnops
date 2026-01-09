@@ -21,7 +21,7 @@ import {
 import { EditAnnouncementDialog } from "@/components/ui/edit-announcement-dialog";
 import {
   deleteAnnouncement,
-  toggleAnnouncementPin,
+  toggleAnnouncementPublish,
 } from "@/lib/actions/announcement.actions";
 
 interface AnnouncementsListProps {
@@ -48,11 +48,11 @@ export function AnnouncementsList({ announcements }: AnnouncementsListProps) {
     }
   };
 
-  const handleTogglePin = async (id: string) => {
-    const result = await toggleAnnouncementPin(id);
+  const handleTogglePublish = async (id: string) => {
+    const result = await toggleAnnouncementPublish(id);
     if (result.success) {
       toast.success(
-        result.isPinned ? "Announcement pinned" : "Announcement unpinned",
+        result.isPublished ? "Announcement published" : "Announcement unpublished"
       );
     } else {
       toast.error(result.error || "Failed to update");
@@ -84,10 +84,10 @@ export function AnnouncementsList({ announcements }: AnnouncementsListProps) {
             announcement={announcement}
             canEdit
             canDelete
-            canPin
+            canTogglePublish
             onEdit={setEditAnnouncement}
             onDelete={setDeleteId}
-            onTogglePin={handleTogglePin}
+            onTogglePublish={handleTogglePublish}
             showAuthor
           />
         ))}

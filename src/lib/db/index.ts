@@ -49,10 +49,5 @@ export type {
   RequestStatus,
 } from "./models/profile-update-request.model";
 export type { INotificationPreferences } from "./models/notification-preferences.model";
-
-export type {
-  IAnnouncement,
-  IAnnouncementTarget,
-  AnnouncementPriority,
-  AnnouncementTargetType,
-} from "./models/announcement.model";
+export type { IAnnouncement } from "./models/announcement.model";
+export type { NotificationType } from "./models/notification.model";

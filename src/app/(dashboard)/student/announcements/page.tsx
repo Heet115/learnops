@@ -33,11 +33,11 @@ export default async function StudentAnnouncementsPage() {
     avatar: dbUser?.profileImage,
   };
 
-  const pinnedCount = announcements.filter(
-    (a: { isPinned: boolean }) => a.isPinned,
-  ).length;
   const urgentCount = announcements.filter(
-    (a: { priority: string }) => a.priority === "urgent",
+    (a: { priority: string }) => a.priority === "urgent"
+  ).length;
+  const highPriorityCount = announcements.filter(
+    (a: { priority: string }) => a.priority === "high"
   ).length;
 
   return (
@@ -73,12 +73,12 @@ export default async function StudentAnnouncementsPage() {
                 {urgentCount} urgent
               </Badge>
             )}
-            {pinnedCount > 0 && (
+            {highPriorityCount > 0 && (
               <Badge
                 variant="outline"
                 className="border-amber-500/30 bg-amber-500/10 text-amber-600"
               >
-                {pinnedCount} pinned
+                {highPriorityCount} high priority
               </Badge>
             )}
             <Badge variant="secondary">{announcements.length} total</Badge>

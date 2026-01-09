@@ -1028,69 +1028,6 @@ function MemberActionsMenu({
   );
 }
 
-// Remove Member Button (for pending members)
-function RemoveMemberButton({
-  groupId,
-  memberId,
-  memberName,
-  onSuccess,
-}: {
-  groupId: string;
-  memberId: string;
-  memberName: string;
-  onSuccess: () => void;
-}) {
-  const [removing, setRemoving] = useState(false);
-
-  const handleRemove = async () => {
-    setRemoving(true);
-    const result = await removeMemberByLeader(groupId, memberId);
-    if (result.success) {
-      toast.success(`Invitation to ${memberName} cancelled`);
-      onSuccess();
-    } else {
-      toast.error(result.error || "Failed to cancel invitation");
-    }
-    setRemoving(false);
-  };
-
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-rose-600 hover:bg-rose-500/10 hover:text-rose-700"
-          disabled={removing}
-        >
-          {removing ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <UserMinus className="h-4 w-4" />
-          )}
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Cancel Invitation?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to cancel the invitation to {memberName}?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Keep</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleRemove}
-            className="bg-rose-600 hover:bg-rose-700"
-          >
-            Cancel Invitation
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-}
-
 // Cancel Invite Button (for creator/leader to cancel pending invites)
 function CancelInviteButton({
   groupId,

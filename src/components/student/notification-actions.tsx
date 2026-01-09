@@ -2,10 +2,20 @@
 
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCheck } from "lucide-react";
-import { markAllAsRead } from "@/lib/actions/notification.actions";
+import { CheckCheck, Trash2 } from "lucide-react";
+import {
+  markAllAsRead,
+  deleteAllRead,
+} from "@/lib/actions/notification.actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
 
 export function NotificationActions() {
   const [isPending, startTransition] = useTransition();
@@ -21,15 +31,37 @@ export function NotificationActions() {
     });
   };
 
+  const handleClearRead = () => {
+    startTransition(async () => {
+      const result = await deleteAllRead();
+      if (result.success) {
+        toast.success(`Cleared ${result.count || 0} read notifications`);
+        router.refresh();
+      }
+    });
+  };
+
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={handleMarkAllRead}
-      disabled={isPending}
-    >
-      <CheckCheck className="mr-2 h-4 w-4" />
-      Mark all as read
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" disabled={isPending}>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={handleMarkAllRead} disabled={isPending}>
+          <CheckCheck className="mr-2 h-4 w-4" />
+          Mark all as read
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={handleClearRead}
+          disabled={isPending}
+          className="text-destructive focus:text-destructive"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Clear read notifications
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
