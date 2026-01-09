@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { useCallback, useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
+import { Button } from "../button";
 
 // View Transitions API type
 interface ViewTransition {
@@ -614,10 +615,11 @@ export const ThemeToggleButton = ({
   const { isDark, toggleTheme } = useThemeToggle({ variant, start, blur });
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
       className={cn(
-        "rounded-full transition-all duration-300 active:scale-95",
+        "transition-all duration-300 active:scale-95",
         isDark ? "bg-black text-white" : "bg-white text-black",
         className,
       )}
@@ -630,44 +632,57 @@ export const ThemeToggleButton = ({
         aria-hidden="true"
         fill="currentColor"
         strokeLinecap="round"
-        viewBox="0 0 32 32"
+        strokeLinejoin="round"
+        viewBox="0 0 24 24"
+        className="size-5"
       >
-        <clipPath id="skiper-btn-2">
-          <motion.path
-            animate={{ y: isDark ? 10 : 0, x: isDark ? -12 : 0 }}
-            transition={{ ease: "easeInOut", duration: 0.35 }}
-            d="M0-5h30a1 1 0 0 0 9 13v24H0Z"
-          />
-        </clipPath>
-        <g clipPath="url(#skiper-btn-2)">
-          <motion.circle
-            animate={{ r: isDark ? 10 : 8 }}
-            transition={{ ease: "easeInOut", duration: 0.35 }}
-            cx="16"
-            cy="16"
-          />
-          <motion.g
-            animate={{
-              rotate: isDark ? -100 : 0,
-              scale: isDark ? 0.5 : 1,
-              opacity: isDark ? 0 : 1,
-            }}
-            transition={{ ease: "easeInOut", duration: 0.35 }}
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <path d="M16 5.5v-4" />
-            <path d="M16 30.5v-4" />
-            <path d="M1.5 16h4" />
-            <path d="M26.5 16h4" />
-            <path d="m23.4 8.6 2.8-2.8" />
-            <path d="m5.7 26.3 2.9-2.9" />
-            <path d="m5.8 5.8 2.8 2.8" />
-            <path d="m23.4 23.4 2.9 2.9" />
-          </motion.g>
-        </g>
+        <defs>
+          <mask id="moon-mask">
+            <rect x="0" y="0" width="100%" height="100%" fill="white" />
+            <motion.circle
+              animate={{
+                cx: isDark ? 17 : 28,
+                cy: isDark ? 7 : -2,
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              r="6"
+              fill="black"
+            />
+          </mask>
+        </defs>
+        <motion.circle
+          animate={{
+            scale: isDark ? 1.4 : 1,
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          cx="12"
+          cy="12"
+          r="5"
+          mask="url(#moon-mask)"
+        />
+        <motion.g
+          animate={{
+            rotate: isDark ? 45 : 0,
+            scale: isDark ? 0 : 1,
+            opacity: isDark ? 0 : 1,
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          stroke="currentColor"
+          strokeWidth="2"
+          fill="none"
+          style={{ transformOrigin: "center" }}
+        >
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </motion.g>
       </svg>
-    </button>
+    </Button>
   );
 };
 
