@@ -11,6 +11,7 @@ export interface IGroup extends Document {
   name: string;
   createdBy: mongoose.Types.ObjectId;
   createdByRole: "professor" | "student";
+  leaderId?: mongoose.Types.ObjectId; // Group leader
   members: IGroupMember[];
   isLocked: boolean;
   createdAt: Date;
@@ -51,6 +52,10 @@ const GroupSchema = new Schema<IGroup>(
       type: String,
       enum: ["professor", "student"],
       required: true,
+    },
+    leaderId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
     members: { type: [GroupMemberSchema], default: [] },
     isLocked: { type: Boolean, default: false },

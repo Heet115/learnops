@@ -13,6 +13,10 @@ export interface IALA extends Document {
   subjectOfferingId: mongoose.Types.ObjectId;
   professorId: mongoose.Types.ObjectId;
   deadline: Date;
+  // Late submission support
+  allowLateSubmission: boolean;
+  lateDeadline?: Date;
+  latePenaltyPercent?: number; // Percentage deducted from marks
   maxMarks: number;
   isGroupSubmission: boolean;
   groupFormation?: "student" | "professor";
@@ -51,6 +55,10 @@ const ALASchema = new Schema<IALA>(
       required: true,
     },
     deadline: { type: Date, required: true },
+    // Late submission support
+    allowLateSubmission: { type: Boolean, default: false },
+    lateDeadline: { type: Date },
+    latePenaltyPercent: { type: Number, min: 0, max: 100, default: 0 },
     maxMarks: { type: Number, required: true, min: 1 },
     isGroupSubmission: { type: Boolean, default: false },
     groupFormation: {

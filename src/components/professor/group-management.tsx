@@ -34,6 +34,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Users,
   Plus,
   Trash2,
@@ -42,12 +48,15 @@ import {
   Lock,
   UserPlus,
   Check,
+  Crown,
 } from "lucide-react";
 import {
   getStudentsForGroupAssignment,
   createGroupByProfessor,
   updateGroupByProfessor,
   deleteGroupByProfessor,
+  assignGroupLeader,
+  removeGroupLeader,
 } from "@/lib/actions/group.actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -69,6 +78,7 @@ interface Group {
   _id: string;
   name: string;
   members: GroupMember[];
+  leaderId?: Student;
   isLocked: boolean;
 }
 
@@ -398,6 +408,7 @@ function GroupCard({
 }) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [assigningLeader, setAssigningLeader] = useState(false);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -411,11 +422,38 @@ function GroupCard({
     setDeleting(false);
   };
 
+  const handleAssignLeader = async (studentId: string) => {
+    setAssigningLeader(true);
+    const result = await assignGroupLeader(group._id, studentId);
+    if (result.success) {
+      toast.success("Group leader assigned");
+      onUpdate();
+    } else {
+      toast.error(result.error || "Failed to assign leader");
+    }
+    setAssigningLeader(false);
+  };
+
+  const handleRemoveLeader = async () => {
+    setAssigningLeader(true);
+    const result = await removeGroupLeader(group._id);
+    if (result.success) {
+      toast.success("Group leader removed");
+      onUpdate();
+    } else {
+      toast.error(result.error || "Failed to remove leader");
+    }
+    setAssigningLeader(false);
+  };
+
   // Available students = unassigned + current group members
   const currentMemberIds = group.members.map((m) => m.studentId._id);
   const availableStudents = allStudents.filter(
     (s) => !assignedIds.includes(s._id) || currentMemberIds.includes(s._id),
   );
+
+  // Get accepted members for leader assignment
+  const acceptedMembers = group.members.filter((m) => m.status === "accepted");
 
   return (
     <div className="bg-card rounded-lg border p-4 transition-all hover:shadow-sm">
@@ -469,6 +507,53 @@ function GroupCard({
           </div>
         )}
       </div>
+
+      {/* Leader Section */}
+      <div className="mb-3 flex items-center gap-2">
+        <Crown className="h-4 w-4 text-amber-500" />
+        <span className="text-sm text-muted-foreground">Leader:</span>
+        {group.leaderId ? (
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-600">
+              {group.leaderId.firstName} {group.leaderId.lastName}
+            </Badge>
+            {!group.isLocked && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-xs"
+                onClick={handleRemoveLeader}
+                disabled={assigningLeader}
+              >
+                Remove
+              </Button>
+            )}
+          </div>
+        ) : (
+          !group.isLocked && acceptedMembers.length > 0 ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-6 px-2 text-xs" disabled={assigningLeader}>
+                  {assigningLeader ? "Assigning..." : "Assign Leader"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {acceptedMembers.map((member) => (
+                  <DropdownMenuItem
+                    key={member.studentId._id}
+                    onClick={() => handleAssignLeader(member.studentId._id)}
+                  >
+                    {member.studentId.firstName} {member.studentId.lastName}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <span className="text-sm text-muted-foreground italic">Not assigned</span>
+          )
+        )}
+      </div>
+
       <div className="space-y-1">
         {group.members.map((member) => (
           <div
@@ -477,6 +562,9 @@ function GroupCard({
           >
             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             {member.studentId.firstName} {member.studentId.lastName}
+            {group.leaderId && group.leaderId._id === member.studentId._id && (
+              <Crown className="h-3 w-3 text-amber-500" />
+            )}
           </div>
         ))}
       </div>

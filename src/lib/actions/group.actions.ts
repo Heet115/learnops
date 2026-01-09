@@ -528,8 +528,115 @@ export async function getALAGroups(alaId: string) {
   const groups = await Group.find({ alaId })
     .populate("members.studentId", "firstName lastName email")
     .populate("createdBy", "firstName lastName")
+    .populate("leaderId", "firstName lastName email")
     .sort({ createdAt: 1 })
     .lean();
 
   return { success: true, groups: JSON.parse(JSON.stringify(groups)) };
+}
+
+// ============ GROUP LEADER ACTIONS ============
+
+// Professor assigns a group leader
+export async function assignGroupLeader(groupId: string, studentId: string) {
+  const clerkId = await requireProfessor();
+  const { id: professorId } = await getUserDbId(clerkId!);
+
+  const group = await Group.findById(groupId).populate("alaId");
+  if (!group) {
+    return { success: false, error: "Group not found" };
+  }
+
+  const ala = group.alaId as unknown as {
+    professorId: { toString: () => string };
+    _id: string;
+  };
+  if (ala.professorId.toString() !== professorId) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  // Verify student is an accepted member of the group
+  const isMember = group.members.some(
+    (m) => m.studentId.toString() === studentId && m.status === "accepted"
+  );
+  if (!isMember) {
+    return { success: false, error: "Student is not an accepted member of this group" };
+  }
+
+  const updated = await Group.findByIdAndUpdate(
+    groupId,
+    { leaderId: new mongoose.Types.ObjectId(studentId) },
+    { new: true }
+  )
+    .populate("members.studentId", "firstName lastName email")
+    .populate("leaderId", "firstName lastName email");
+
+  revalidatePath(`/professor/alas/${ala._id}`);
+  return { success: true, group: JSON.parse(JSON.stringify(updated)) };
+}
+
+// Student self-assigns as leader (if allowed and no leader exists)
+export async function selfAssignAsLeader(groupId: string) {
+  const clerkId = await requireStudent();
+  const { id: studentId } = await getUserDbId(clerkId!);
+
+  const group = await Group.findById(groupId).populate("alaId");
+  if (!group) {
+    return { success: false, error: "Group not found" };
+  }
+
+  // Check if student is an accepted member
+  const isMember = group.members.some(
+    (m) => m.studentId.toString() === studentId && m.status === "accepted"
+  );
+  if (!isMember) {
+    return { success: false, error: "You are not a member of this group" };
+  }
+
+  // Only allow if no leader is assigned yet
+  if (group.leaderId) {
+    return { success: false, error: "Group already has a leader" };
+  }
+
+  const ala = group.alaId as unknown as { _id: string };
+
+  const updated = await Group.findByIdAndUpdate(
+    groupId,
+    { leaderId: new mongoose.Types.ObjectId(studentId) },
+    { new: true }
+  )
+    .populate("members.studentId", "firstName lastName email")
+    .populate("leaderId", "firstName lastName email");
+
+  revalidatePath(`/student/alas/${ala._id}`);
+  return { success: true, group: JSON.parse(JSON.stringify(updated)) };
+}
+
+// Remove group leader (professor only)
+export async function removeGroupLeader(groupId: string) {
+  const clerkId = await requireProfessor();
+  const { id: professorId } = await getUserDbId(clerkId!);
+
+  const group = await Group.findById(groupId).populate("alaId");
+  if (!group) {
+    return { success: false, error: "Group not found" };
+  }
+
+  const ala = group.alaId as unknown as {
+    professorId: { toString: () => string };
+    _id: string;
+  };
+  if (ala.professorId.toString() !== professorId) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const updated = await Group.findByIdAndUpdate(
+    groupId,
+    { $unset: { leaderId: 1 } },
+    { new: true }
+  )
+    .populate("members.studentId", "firstName lastName email");
+
+  revalidatePath(`/professor/alas/${ala._id}`);
+  return { success: true, group: JSON.parse(JSON.stringify(updated)) };
 }

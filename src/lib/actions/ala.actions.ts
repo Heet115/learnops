@@ -106,6 +106,10 @@ export async function createALA(input: CreateALAInput) {
       ...validated,
       professorId,
       deadline: new Date(validated.deadline),
+      // Late submission support
+      allowLateSubmission: validated.allowLateSubmission || false,
+      lateDeadline: validated.lateDeadline ? new Date(validated.lateDeadline) : undefined,
+      latePenaltyPercent: validated.allowLateSubmission ? validated.latePenaltyPercent : undefined,
       maxFileSize: validated.maxFileSize * 1024 * 1024, // Convert MB to bytes
       groupFormation: validated.isGroupSubmission
         ? validated.groupFormation
@@ -200,6 +204,14 @@ export async function updateALA(id: string, input: UpdateALAInput) {
     if (validated.isGroupSubmission === false) {
       updateData.maxGroupSize = undefined;
     }
+    // Late submission support
+    if (validated.allowLateSubmission === false) {
+      updateData.lateDeadline = undefined;
+      updateData.latePenaltyPercent = undefined;
+    }
+    if (validated.lateDeadline) {
+      updateData.lateDeadline = new Date(validated.lateDeadline);
+    }
 
     const ala = await ALA.findByIdAndUpdate(id, updateData, { new: true });
 
@@ -232,7 +244,15 @@ export async function deleteALA(id: string) {
     return { success: false, error: "ALA not found or unauthorized" };
   }
 
-  // TODO: Check for submissions before deleting
+  // Check for submissions before deleting
+  const { Submission } = await import("@/lib/db");
+  const submissionsCount = await Submission.countDocuments({ alaId: id });
+  if (submissionsCount > 0) {
+    return {
+      success: false,
+      error: `Cannot delete ALA with ${submissionsCount} existing submission(s). Please delete submissions first.`,
+    };
+  }
 
   // Delete all document resources from Cloudinary
   if (ala.resources && ala.resources.length > 0) {

@@ -7,6 +7,10 @@ export const createALASchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters"),
   subjectOfferingId: z.string().min(1, "Subject offering is required"),
   deadline: z.string().min(1, "Deadline is required"),
+  // Late submission support
+  allowLateSubmission: z.coerce.boolean().default(false),
+  lateDeadline: z.string().optional(),
+  latePenaltyPercent: z.coerce.number().min(0).max(100).default(0),
   maxMarks: z.coerce.number().min(1, "Max marks must be at least 1").max(100),
   isGroupSubmission: z.coerce.boolean().default(false),
   groupFormation: z.enum(["student", "professor"]).optional(),
@@ -22,6 +26,10 @@ export const updateALASchema = z.object({
   title: z.string().min(3).max(200).optional(),
   description: z.string().min(10).optional(),
   deadline: z.string().optional(),
+  // Late submission support
+  allowLateSubmission: z.coerce.boolean().optional(),
+  lateDeadline: z.string().optional().nullable(),
+  latePenaltyPercent: z.coerce.number().min(0).max(100).optional(),
   maxMarks: z.coerce.number().min(1).max(100).optional(),
   isGroupSubmission: z.coerce.boolean().optional(),
   groupFormation: z.enum(["student", "professor"]).optional().nullable(),

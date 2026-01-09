@@ -50,6 +50,7 @@ import {
   getClassmatesForInvite,
   createGroupByStudent,
   leaveGroup,
+  selfAssignAsLeader,
 } from "@/lib/actions/group.actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -72,6 +73,7 @@ interface Group {
   name: string;
   createdBy: { _id: string; firstName: string; lastName: string };
   createdByRole: string;
+  leaderId?: { _id: string; firstName: string; lastName: string };
   members: GroupMember[];
   isLocked: boolean;
 }
@@ -128,10 +130,12 @@ export function GroupSection({
   // Student has a group
   if (group) {
     const isCreator = group.createdBy._id === studentId;
+    const isLeader = group.leaderId?._id === studentId;
     const acceptedMembers = group.members.filter(
       (m) => m.status === "accepted",
     );
     const pendingMembers = group.members.filter((m) => m.status === "pending");
+    const canBecomeLeader = !group.leaderId && !group.isLocked && canModify;
 
     return (
       <Card>
@@ -162,6 +166,29 @@ export function GroupSection({
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-6">
+          {/* Leader Section */}
+          <div className="flex items-center justify-between rounded-lg border bg-amber-500/5 p-3">
+            <div className="flex items-center gap-2">
+              <Crown className="h-4 w-4 text-amber-500" />
+              <span className="text-sm font-medium">Group Leader:</span>
+              {group.leaderId ? (
+                <span className="text-sm">
+                  {group.leaderId.firstName} {group.leaderId.lastName}
+                  {isLeader && (
+                    <Badge variant="outline" className="ml-2 border-amber-500/30 bg-amber-500/10 px-1.5 py-0 text-[10px] text-amber-600">
+                      You
+                    </Badge>
+                  )}
+                </span>
+              ) : (
+                <span className="text-sm text-muted-foreground italic">Not assigned</span>
+              )}
+            </div>
+            {canBecomeLeader && (
+              <BecomeLeaderButton groupId={group._id} onSuccess={loadGroup} />
+            )}
+          </div>
+
           <div>
             <div className="mb-3 flex items-center gap-2">
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-500/10">
@@ -198,8 +225,16 @@ export function GroupSection({
                             You
                           </Badge>
                         )}
-                        {member.studentId._id === group.createdBy._id && (
+                        {group.leaderId && member.studentId._id === group.leaderId._id && (
                           <Crown className="h-3.5 w-3.5 text-amber-500" />
+                        )}
+                        {member.studentId._id === group.createdBy._id && !group.leaderId && (
+                          <Badge
+                            variant="outline"
+                            className="border-violet-500/30 bg-violet-500/10 px-1.5 py-0 text-[10px] text-violet-600"
+                          >
+                            Creator
+                          </Badge>
                         )}
                       </div>
                       <p className="text-muted-foreground text-xs">
@@ -608,5 +643,50 @@ function LeaveGroupButton({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+// Become Leader Button
+function BecomeLeaderButton({
+  groupId,
+  onSuccess,
+}: {
+  groupId: string;
+  onSuccess: () => void;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  const handleBecomeLeader = async () => {
+    setLoading(true);
+    const result = await selfAssignAsLeader(groupId);
+    if (result.success) {
+      toast.success("You are now the group leader!");
+      onSuccess();
+    } else {
+      toast.error(result.error || "Failed to become leader");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handleBecomeLeader}
+      disabled={loading}
+      className="border-amber-500/30 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20"
+    >
+      {loading ? (
+        <>
+          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+          Assigning...
+        </>
+      ) : (
+        <>
+          <Crown className="mr-1 h-3 w-3" />
+          Become Leader
+        </>
+      )}
+    </Button>
   );
 }

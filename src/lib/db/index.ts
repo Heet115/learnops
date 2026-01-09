@@ -15,6 +15,7 @@ export { Activity } from "./models/activity.model";
 export { StudentProfile } from "./models/student-profile.model";
 export { ProfileUpdateRequest } from "./models/profile-update-request.model";
 export { NotificationPreferences } from "./models/notification-preferences.model";
+export { Announcement } from "./models/announcement.model";
 export type { IUser, UserRole } from "./models/user.model";
 export type { IDepartment } from "./models/department.model";
 export type { ICourse, CourseType } from "./models/course.model";
@@ -48,3 +49,10 @@ export type {
   RequestStatus,
 } from "./models/profile-update-request.model";
 export type { INotificationPreferences } from "./models/notification-preferences.model";
+
+export type {
+  IAnnouncement,
+  IAnnouncementTarget,
+  AnnouncementPriority,
+  AnnouncementTargetType,
+} from "./models/announcement.model";

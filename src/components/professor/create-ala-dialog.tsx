@@ -61,6 +61,8 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
   );
   const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(["pdf"]);
   const [deadline, setDeadline] = useState<Date | undefined>(undefined);
+  const [allowLateSubmission, setAllowLateSubmission] = useState(false);
+  const [lateDeadline, setLateDeadline] = useState<Date | undefined>(undefined);
   const router = useRouter();
 
   const handleFileTypeChange = (type: string, checked: boolean) => {
@@ -81,6 +83,9 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
       description: formData.get("description") as string,
       subjectOfferingId: formData.get("subjectOfferingId") as string,
       deadline: deadline?.toISOString() || "",
+      allowLateSubmission,
+      lateDeadline: allowLateSubmission && lateDeadline ? lateDeadline.toISOString() : undefined,
+      latePenaltyPercent: allowLateSubmission ? Number(formData.get("latePenaltyPercent") || 0) : 0,
       maxMarks: Number(formData.get("maxMarks")),
       isGroupSubmission,
       groupFormation: isGroupSubmission ? groupFormation : undefined,
@@ -100,6 +105,8 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
       setGroupFormation("student");
       setSelectedFileTypes(["pdf"]);
       setDeadline(undefined);
+      setAllowLateSubmission(false);
+      setLateDeadline(undefined);
       router.refresh();
     } else {
       toast.error(result.error || "Failed to create ALA");
@@ -221,6 +228,55 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
                 />
               </div>
             </div>
+
+            {/* Late Submission Section */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="allowLateSubmission"
+                checked={allowLateSubmission}
+                onCheckedChange={(checked) =>
+                  setAllowLateSubmission(checked as boolean)
+                }
+              />
+              <label
+                htmlFor="allowLateSubmission"
+                className="flex items-center gap-2 text-sm"
+              >
+                <Calendar className="text-muted-foreground h-4 w-4" />
+                Allow late submissions
+              </label>
+            </div>
+
+            {allowLateSubmission && (
+              <div className="bg-muted/30 space-y-4 rounded-lg border p-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label>Late Deadline</Label>
+                    <DateTimePicker
+                      id="lateDeadline"
+                      value={lateDeadline}
+                      onChange={setLateDeadline}
+                      placeholder="Select late deadline"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="latePenaltyPercent">Penalty (%)</Label>
+                    <Input
+                      id="latePenaltyPercent"
+                      name="latePenaltyPercent"
+                      type="number"
+                      min={0}
+                      max={100}
+                      defaultValue={10}
+                      placeholder="e.g., 10"
+                    />
+                  </div>
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  Late submissions will have the penalty percentage deducted from their marks.
+                </p>
+              </div>
+            )}
 
             <div className="grid gap-2">
               <Label htmlFor="maxFileSize" className="flex items-center gap-2">

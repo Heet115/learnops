@@ -442,7 +442,15 @@ export async function deleteSubject(id: string) {
   await requireAdmin();
   await connectDB();
 
-  // TODO: Check for subject offerings before deleting
+  // Check for subject offerings before deleting
+  const offeringsCount = await SubjectOffering.countDocuments({ subjectId: id });
+  if (offeringsCount > 0) {
+    return {
+      success: false,
+      error: `Cannot delete subject with ${offeringsCount} existing subject offering(s)`,
+    };
+  }
+
   await Subject.findByIdAndDelete(id);
   revalidatePath("/admin/subjects");
   return { success: true, error: null };
@@ -634,7 +642,16 @@ export async function deleteSubjectOffering(id: string) {
   await requireAdmin();
   await connectDB();
 
-  // TODO: Check for ALAs before deleting
+  // Check for ALAs before deleting
+  const { ALA } = await import("@/lib/db");
+  const alasCount = await ALA.countDocuments({ subjectOfferingId: id, isActive: true });
+  if (alasCount > 0) {
+    return {
+      success: false,
+      error: `Cannot delete subject offering with ${alasCount} existing ALA(s)`,
+    };
+  }
+
   await SubjectOffering.findByIdAndDelete(id);
   revalidatePath("/admin/subject-offerings");
   return { success: true, error: null };
