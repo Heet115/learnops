@@ -1,8 +1,24 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { connectDB, User, IUser } from "@/lib/db";
+import { connectDB, User, IUser, Class, Semester, Course } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+
+// Helper to get departmentId from classId by traversing the hierarchy
+async function getDepartmentIdFromClass(
+  classId: string,
+): Promise<string | null> {
+  const classDoc = await Class.findById(classId).lean();
+  if (!classDoc) return null;
+
+  const semester = await Semester.findById(classDoc.semesterId).lean();
+  if (!semester) return null;
+
+  const course = await Course.findById(semester.courseId).lean();
+  if (!course) return null;
+
+  return course.departmentId?.toString() || null;
+}
 
 export async function getCurrentUserFromDB(): Promise<IUser | null> {
   const { userId } = await auth();
@@ -47,7 +63,10 @@ export async function updateUserClass(
 ): Promise<IUser | null> {
   await connectDB();
 
-  const user = await User.findByIdAndUpdate(userId, { classId }, { new: true });
+  const departmentId = await getDepartmentIdFromClass(classId);
+  const updateData = departmentId ? { classId, departmentId } : { classId };
+
+  const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
 
   revalidatePath("/admin/users");
   revalidatePath("/admin/student-assignments");
@@ -61,7 +80,15 @@ export async function assignStudentToClass(
   await connectDB();
 
   try {
-    const updateData = classId ? { classId } : { $unset: { classId: 1 } };
+    let updateData: Record<string, unknown>;
+
+    if (classId) {
+      const departmentId = await getDepartmentIdFromClass(classId);
+      updateData = departmentId ? { classId, departmentId } : { classId };
+    } else {
+      updateData = { $unset: { classId: 1, departmentId: 1 } };
+    }
+
     const student = await User.findByIdAndUpdate(studentId, updateData, {
       new: true,
     });
@@ -81,9 +108,12 @@ export async function bulkAssignStudentsToClass(
   await connectDB();
 
   try {
+    const departmentId = await getDepartmentIdFromClass(classId);
+    const updateData = departmentId ? { classId, departmentId } : { classId };
+
     await User.updateMany(
       { _id: { $in: studentIds }, role: "student" },
-      { classId },
+      updateData,
     );
 
     revalidatePath("/admin/student-assignments");
@@ -100,7 +130,7 @@ export async function removeStudentFromClass(studentId: string) {
   try {
     const student = await User.findByIdAndUpdate(
       studentId,
-      { $unset: { classId: 1 } },
+      { $unset: { classId: 1, departmentId: 1 } },
       { new: true },
     );
 
@@ -188,7 +218,7 @@ export async function bulkRemoveStudentsFromClass(studentIds: string[]) {
   try {
     const result = await User.updateMany(
       { _id: { $in: studentIds }, role: "student" },
-      { $unset: { classId: 1 } },
+      { $unset: { classId: 1, departmentId: 1 } },
     );
 
     revalidatePath("/admin/student-assignments");

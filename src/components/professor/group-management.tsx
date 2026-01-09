@@ -511,10 +511,13 @@ function GroupCard({
       {/* Leader Section */}
       <div className="mb-3 flex items-center gap-2">
         <Crown className="h-4 w-4 text-amber-500" />
-        <span className="text-sm text-muted-foreground">Leader:</span>
+        <span className="text-muted-foreground text-sm">Leader:</span>
         {group.leaderId ? (
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-600">
+            <Badge
+              variant="outline"
+              className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+            >
               {group.leaderId.firstName} {group.leaderId.lastName}
             </Badge>
             {!group.isLocked && (
@@ -529,28 +532,33 @@ function GroupCard({
               </Button>
             )}
           </div>
+        ) : !group.isLocked && acceptedMembers.length > 0 ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 px-2 text-xs"
+                disabled={assigningLeader}
+              >
+                {assigningLeader ? "Assigning..." : "Assign Leader"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {acceptedMembers.map((member) => (
+                <DropdownMenuItem
+                  key={member.studentId._id}
+                  onClick={() => handleAssignLeader(member.studentId._id)}
+                >
+                  {member.studentId.firstName} {member.studentId.lastName}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         ) : (
-          !group.isLocked && acceptedMembers.length > 0 ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-6 px-2 text-xs" disabled={assigningLeader}>
-                  {assigningLeader ? "Assigning..." : "Assign Leader"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {acceptedMembers.map((member) => (
-                  <DropdownMenuItem
-                    key={member.studentId._id}
-                    onClick={() => handleAssignLeader(member.studentId._id)}
-                  >
-                    {member.studentId.firstName} {member.studentId.lastName}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <span className="text-sm text-muted-foreground italic">Not assigned</span>
-          )
+          <span className="text-muted-foreground text-sm italic">
+            Not assigned
+          </span>
         )}
       </div>
 

@@ -1,7 +1,12 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export type AnnouncementPriority = "low" | "normal" | "high" | "urgent";
-export type AnnouncementTargetType = "all" | "department" | "course" | "class" | "role";
+export type AnnouncementTargetType =
+  | "all"
+  | "department"
+  | "course"
+  | "class"
+  | "role";
 
 export interface IAnnouncementTarget {
   type: AnnouncementTargetType;
@@ -39,7 +44,7 @@ const AnnouncementTargetSchema = new Schema<IAnnouncementTarget>(
       enum: ["student", "professor", "hod"],
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const AnnouncementSchema = new Schema<IAnnouncement>(
@@ -81,7 +86,7 @@ const AnnouncementSchema = new Schema<IAnnouncement>(
       default: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Indexes

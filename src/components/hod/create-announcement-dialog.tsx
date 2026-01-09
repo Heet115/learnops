@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import {
   createAnnouncement,
@@ -38,8 +39,9 @@ interface TargetOptions {
 export function CreateHodAnnouncementDialog() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [options, setOptions] = useState<TargetOptions | null>(null);
-  
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [targetType, setTargetType] = useState<string>("department");
@@ -70,10 +72,12 @@ export function CreateHodAnnouncementDialog() {
     setPriority("normal");
     setIsPinned(false);
     setExpiresAt("");
+    setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setLoading(true);
 
     const target: { type: string; id?: string } = { type: targetType };
@@ -84,7 +88,10 @@ export function CreateHodAnnouncementDialog() {
     const result = await createAnnouncement({
       title,
       content,
-      target: target as { type: "department" | "course" | "class"; id?: string },
+      target: target as {
+        type: "department" | "course" | "class";
+        id?: string;
+      },
       priority: priority as "low" | "normal" | "high" | "urgent",
       isPinned,
       expiresAt: expiresAt || undefined,
@@ -97,53 +104,70 @@ export function CreateHodAnnouncementDialog() {
       setOpen(false);
       resetForm();
     } else {
-      toast.error(result.error || "Failed to create announcement");
+      setError(result.error || "Failed to create announcement");
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      setOpen(newOpen);
+      if (!newOpen) resetForm();
+    }}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Create Announcement
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Announcement</DialogTitle>
           <DialogDescription>
             Broadcast a message to your department
           </DialogDescription>
         </DialogHeader>
+        
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">Title <span className="text-destructive">*</span></Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Announcement title"
+              placeholder="Announcement title (min 3 characters)"
               required
+              minLength={3}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Content</Label>
+            <Label htmlFor="content">Content <span className="text-destructive">*</span></Label>
             <Textarea
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Write your announcement..."
+              placeholder="Write your announcement... (min 10 characters)"
               rows={4}
               required
+              minLength={10}
             />
+            <p className="text-xs text-muted-foreground">{content.length}/5000 characters</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Target Audience</Label>
-              <Select value={targetType} onValueChange={setTargetType}>
+              <Select value={targetType} onValueChange={(v) => {
+                setTargetType(v);
+                setTargetId("");
+              }}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -173,7 +197,7 @@ export function CreateHodAnnouncementDialog() {
 
           {targetType === "department" && options && options.departments.length > 0 && (
             <div className="space-y-2">
-              <Label>Department</Label>
+              <Label>Department <span className="text-destructive">*</span></Label>
               <Select value={targetId} onValueChange={setTargetId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select department" />
@@ -191,7 +215,7 @@ export function CreateHodAnnouncementDialog() {
 
           {targetType === "course" && options && (
             <div className="space-y-2">
-              <Label>Select Course</Label>
+              <Label>Select Course <span className="text-destructive">*</span></Label>
               <Select value={targetId} onValueChange={setTargetId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select course" />
@@ -209,7 +233,7 @@ export function CreateHodAnnouncementDialog() {
 
           {targetType === "class" && options && (
             <div className="space-y-2">
-              <Label>Select Class</Label>
+              <Label>Select Class <span className="text-destructive">*</span></Label>
               <Select value={targetId} onValueChange={setTargetId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select class" />
@@ -236,16 +260,31 @@ export function CreateHodAnnouncementDialog() {
           </div>
 
           <div className="flex items-center space-x-2">
-            <Switch id="pinned" checked={isPinned} onCheckedChange={setIsPinned} />
+            <Switch
+              id="pinned"
+              checked={isPinned}
+              onCheckedChange={setIsPinned}
+            />
             <Label htmlFor="pinned">Pin announcement</Label>
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Create"}
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create"
+              )}
             </Button>
           </DialogFooter>
         </form>

@@ -1,17 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { format } from "date-fns";
-import { Pin, Trash2, MoreHorizontal, Megaphone } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Megaphone } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,19 +14,25 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import {
+  AnnouncementCard,
+  type AnnouncementData,
+} from "@/components/ui/announcement-card";
+import { EditAnnouncementDialog } from "@/components/ui/edit-announcement-dialog";
 import {
   deleteAnnouncement,
   toggleAnnouncementPin,
 } from "@/lib/actions/announcement.actions";
-import type { IAnnouncement } from "@/lib/db";
 
 interface ProfessorAnnouncementsListProps {
-  announcements: IAnnouncement[];
+  announcements: AnnouncementData[];
 }
 
-export function ProfessorAnnouncementsList({ announcements }: ProfessorAnnouncementsListProps) {
+export function ProfessorAnnouncementsList({
+  announcements,
+}: ProfessorAnnouncementsListProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [editAnnouncement, setEditAnnouncement] = useState<AnnouncementData | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
@@ -44,7 +41,7 @@ export function ProfessorAnnouncementsList({ announcements }: ProfessorAnnouncem
     const result = await deleteAnnouncement(deleteId);
     setLoading(false);
     setDeleteId(null);
-    
+
     if (result.success) {
       toast.success("Announcement deleted");
     } else {
@@ -55,18 +52,11 @@ export function ProfessorAnnouncementsList({ announcements }: ProfessorAnnouncem
   const handleTogglePin = async (id: string) => {
     const result = await toggleAnnouncementPin(id);
     if (result.success) {
-      toast.success(result.isPinned ? "Announcement pinned" : "Announcement unpinned");
+      toast.success(
+        result.isPinned ? "Announcement pinned" : "Announcement unpinned"
+      );
     } else {
       toast.error(result.error || "Failed to update");
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "urgent": return "bg-red-500";
-      case "high": return "bg-orange-500";
-      case "normal": return "bg-blue-500";
-      default: return "bg-gray-500";
     }
   };
 
@@ -74,9 +64,11 @@ export function ProfessorAnnouncementsList({ announcements }: ProfessorAnnouncem
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <Megaphone className="h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No announcements yet</p>
-          <p className="text-sm text-muted-foreground">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            <Megaphone className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="mt-4 font-medium">No announcements yet</p>
+          <p className="text-muted-foreground text-sm">
             Create your first announcement for your classes
           </p>
         </CardContent>
@@ -88,72 +80,33 @@ export function ProfessorAnnouncementsList({ announcements }: ProfessorAnnouncem
     <>
       <div className="space-y-4">
         {announcements.map((announcement) => (
-          <Card
-            key={announcement._id.toString()}
-            className={cn("relative", !announcement.isActive && "opacity-60")}
-          >
-            {announcement.isPinned && (
-              <div className="absolute top-2 right-2">
-                <Pin className="h-4 w-4 text-primary fill-primary" />
-              </div>
-            )}
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge className={getPriorityColor(announcement.priority)}>
-                      {announcement.priority}
-                    </Badge>
-                    <Badge variant="outline">Class</Badge>
-                  </div>
-                  <h3 className="font-semibold text-lg">{announcement.title}</h3>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleTogglePin(announcement._id.toString())}>
-                      <Pin className="h-4 w-4 mr-2" />
-                      {announcement.isPinned ? "Unpin" : "Pin"}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="text-destructive"
-                      onClick={() => setDeleteId(announcement._id.toString())}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap mb-4">
-                {announcement.content}
-              </p>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Created by you</span>
-                <div className="flex items-center gap-4">
-                  {announcement.expiresAt && (
-                    <span>Expires: {format(new Date(announcement.expiresAt), "MMM d, yyyy")}</span>
-                  )}
-                  <span>{format(new Date(announcement.createdAt), "MMM d, yyyy h:mm a")}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <AnnouncementCard
+            key={announcement._id}
+            announcement={announcement}
+            canEdit
+            canDelete
+            canPin
+            onEdit={setEditAnnouncement}
+            onDelete={setDeleteId}
+            onTogglePin={handleTogglePin}
+            showAuthor={false}
+          />
         ))}
       </div>
+
+      <EditAnnouncementDialog
+        announcement={editAnnouncement}
+        open={!!editAnnouncement}
+        onOpenChange={(open) => !open && setEditAnnouncement(null)}
+      />
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Announcement</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this announcement? This action cannot be undone.
+              Are you sure you want to delete this announcement? This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

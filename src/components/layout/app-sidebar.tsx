@@ -17,7 +17,8 @@ import {
   Clock,
   Bell,
   User,
-  Activity,
+  Calendar,
+  Megaphone,
 } from "lucide-react";
 
 import { NavMain } from "@/components/layout/nav-main";
@@ -80,6 +81,11 @@ const getNavItems = (role: UserRole) => {
         ],
       },
       {
+        title: "Announcements",
+        url: "/admin/announcements",
+        icon: Megaphone,
+      },
+      {
         title: "Administration",
         url: "#",
         icon: Settings,
@@ -98,28 +104,24 @@ const getNavItems = (role: UserRole) => {
       },
       {
         title: "Department",
-        url: "/hod/department",
+        url: "#",
         icon: Building2,
-      },
-      {
-        title: "Professors",
-        url: "/hod/professors",
-        icon: Users,
-      },
-      {
-        title: "Classes",
-        url: "/hod/classes",
-        icon: GraduationCap,
-      },
-      {
-        title: "Subjects",
-        url: "/hod/subjects",
-        icon: BookMarked,
+        items: [
+          { title: "Overview", url: "/hod/department" },
+          { title: "Professors", url: "/hod/professors" },
+          { title: "Classes", url: "/hod/classes" },
+          { title: "Subjects", url: "/hod/subjects" },
+        ],
       },
       {
         title: "Analytics",
         url: "/hod/analytics",
         icon: BarChart3,
+      },
+      {
+        title: "Announcements",
+        url: "/hod/announcements",
+        icon: Megaphone,
       },
     ],
     professor: [
@@ -129,24 +131,25 @@ const getNavItems = (role: UserRole) => {
         icon: LayoutDashboard,
       },
       {
-        title: "My Subjects",
-        url: "/professor/subjects",
+        title: "Teaching",
+        url: "#",
         icon: BookMarked,
+        items: [
+          { title: "My Subjects", url: "/professor/subjects" },
+          { title: "ALAs", url: "/professor/alas" },
+          { title: "Submissions", url: "/professor/submissions" },
+          { title: "Students", url: "/professor/students" },
+        ],
       },
       {
-        title: "ALAs",
-        url: "/professor/alas",
-        icon: FileText,
+        title: "Calendar",
+        url: "/professor/calendar",
+        icon: Calendar,
       },
       {
-        title: "Submissions",
-        url: "/professor/submissions",
-        icon: ClipboardList,
-      },
-      {
-        title: "Students",
-        url: "/professor/students",
-        icon: GraduationCap,
+        title: "Announcements",
+        url: "/professor/announcements",
+        icon: Megaphone,
       },
     ],
     student: [
@@ -161,24 +164,24 @@ const getNavItems = (role: UserRole) => {
         icon: User,
       },
       {
-        title: "My ALAs",
-        url: "/student/alas",
+        title: "Academics",
+        url: "#",
         icon: FileText,
+        items: [
+          { title: "My ALAs", url: "/student/alas" },
+          { title: "Submissions", url: "/student/submissions" },
+          { title: "Grades", url: "/student/grades" },
+        ],
       },
       {
-        title: "Submissions",
-        url: "/student/submissions",
-        icon: ClipboardList,
-      },
-      {
-        title: "Deadlines",
-        url: "/student/deadlines",
+        title: "Schedule",
+        url: "#",
         icon: Clock,
-      },
-      {
-        title: "Grades",
-        url: "/student/grades",
-        icon: BarChart3,
+        items: [
+          { title: "Deadlines", url: "/student/deadlines" },
+          { title: "Calendar", url: "/student/calendar" },
+          { title: "Timeline", url: "/student/timeline" },
+        ],
       },
       {
         title: "Notifications",
@@ -186,9 +189,9 @@ const getNavItems = (role: UserRole) => {
         icon: Bell,
       },
       {
-        title: "Timeline",
-        url: "/student/timeline",
-        icon: Activity,
+        title: "Announcements",
+        url: "/student/announcements",
+        icon: Megaphone,
       },
     ],
   };

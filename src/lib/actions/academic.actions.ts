@@ -443,7 +443,9 @@ export async function deleteSubject(id: string) {
   await connectDB();
 
   // Check for subject offerings before deleting
-  const offeringsCount = await SubjectOffering.countDocuments({ subjectId: id });
+  const offeringsCount = await SubjectOffering.countDocuments({
+    subjectId: id,
+  });
   if (offeringsCount > 0) {
     return {
       success: false,
@@ -644,7 +646,10 @@ export async function deleteSubjectOffering(id: string) {
 
   // Check for ALAs before deleting
   const { ALA } = await import("@/lib/db");
-  const alasCount = await ALA.countDocuments({ subjectOfferingId: id, isActive: true });
+  const alasCount = await ALA.countDocuments({
+    subjectOfferingId: id,
+    isActive: true,
+  });
   if (alasCount > 0) {
     return {
       success: false,

@@ -8,7 +8,10 @@ export const announcementTargetSchema = z.object({
 
 export const createAnnouncementSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters").max(200),
-  content: z.string().min(10, "Content must be at least 10 characters").max(5000),
+  content: z
+    .string()
+    .min(10, "Content must be at least 10 characters")
+    .max(5000),
   target: announcementTargetSchema,
   priority: z.enum(["low", "normal", "high", "urgent"]).default("normal"),
   isPinned: z.coerce.boolean().default(false),

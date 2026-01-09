@@ -57,6 +57,7 @@ export async function getStudentsForGroupAssignment(alaId: string) {
   // Get existing groups for this ALA
   const groups = await Group.find({ alaId })
     .populate("members.studentId", "firstName lastName email")
+    .populate("leaderId", "firstName lastName")
     .lean();
 
   // Get assigned student IDs
@@ -243,6 +244,7 @@ export async function getStudentGroup(alaId: string) {
   })
     .populate("members.studentId", "firstName lastName email")
     .populate("createdBy", "firstName lastName")
+    .populate("leaderId", "firstName lastName")
     .lean();
 
   return group ? JSON.parse(JSON.stringify(group)) : null;
@@ -557,16 +559,19 @@ export async function assignGroupLeader(groupId: string, studentId: string) {
 
   // Verify student is an accepted member of the group
   const isMember = group.members.some(
-    (m) => m.studentId.toString() === studentId && m.status === "accepted"
+    (m) => m.studentId.toString() === studentId && m.status === "accepted",
   );
   if (!isMember) {
-    return { success: false, error: "Student is not an accepted member of this group" };
+    return {
+      success: false,
+      error: "Student is not an accepted member of this group",
+    };
   }
 
   const updated = await Group.findByIdAndUpdate(
     groupId,
     { leaderId: new mongoose.Types.ObjectId(studentId) },
-    { new: true }
+    { new: true },
   )
     .populate("members.studentId", "firstName lastName email")
     .populate("leaderId", "firstName lastName email");
@@ -587,7 +592,7 @@ export async function selfAssignAsLeader(groupId: string) {
 
   // Check if student is an accepted member
   const isMember = group.members.some(
-    (m) => m.studentId.toString() === studentId && m.status === "accepted"
+    (m) => m.studentId.toString() === studentId && m.status === "accepted",
   );
   if (!isMember) {
     return { success: false, error: "You are not a member of this group" };
@@ -603,7 +608,7 @@ export async function selfAssignAsLeader(groupId: string) {
   const updated = await Group.findByIdAndUpdate(
     groupId,
     { leaderId: new mongoose.Types.ObjectId(studentId) },
-    { new: true }
+    { new: true },
   )
     .populate("members.studentId", "firstName lastName email")
     .populate("leaderId", "firstName lastName email");
@@ -633,9 +638,8 @@ export async function removeGroupLeader(groupId: string) {
   const updated = await Group.findByIdAndUpdate(
     groupId,
     { $unset: { leaderId: 1 } },
-    { new: true }
-  )
-    .populate("members.studentId", "firstName lastName email");
+    { new: true },
+  ).populate("members.studentId", "firstName lastName email");
 
   revalidatePath(`/professor/alas/${ala._id}`);
   return { success: true, group: JSON.parse(JSON.stringify(updated)) };

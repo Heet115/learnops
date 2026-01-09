@@ -1,13 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import {
-  connectDB,
-  User,
-  ALA,
-  Submission,
-  SubjectOffering,
-} from "@/lib/db";
+import { connectDB, User, ALA, Submission, SubjectOffering } from "@/lib/db";
 
 export interface CalendarEvent {
   id: string;
@@ -27,7 +21,7 @@ export interface CalendarEvent {
 // Get calendar events for student
 export async function getStudentCalendarEvents(
   startDate: string,
-  endDate: string
+  endDate: string,
 ): Promise<CalendarEvent[]> {
   const { sessionClaims, userId } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
@@ -56,7 +50,7 @@ export async function getStudentCalendarEvents(
         subjectName: (o.subjectId as { name: string }).name,
         subjectCode: (o.subjectId as { code: string }).code,
       },
-    ])
+    ]),
   );
 
   // Get ALAs with deadlines in range (including late deadlines)
@@ -77,7 +71,7 @@ export async function getStudentCalendarEvents(
   }).lean();
 
   const submissionMap = new Map(
-    submissions.map((s) => [s.alaId.toString(), s])
+    submissions.map((s) => [s.alaId.toString(), s]),
   );
 
   const events: CalendarEvent[] = [];
@@ -99,7 +93,10 @@ export async function getStudentCalendarEvents(
       } else {
         status = "submitted";
         // Check if submitted late
-        if (submission.submittedAt && new Date(submission.submittedAt) > deadline) {
+        if (
+          submission.submittedAt &&
+          new Date(submission.submittedAt) > deadline
+        ) {
           status = "late";
         }
       }
@@ -128,7 +125,12 @@ export async function getStudentCalendarEvents(
     }
 
     // Add late deadline event if exists
-    if (lateDeadline && lateDeadline >= start && lateDeadline <= end && ala.allowLateSubmission) {
+    if (
+      lateDeadline &&
+      lateDeadline >= start &&
+      lateDeadline <= end &&
+      ala.allowLateSubmission
+    ) {
       events.push({
         id: `${ala._id}-late-deadline`,
         title: `${ala.title} (Late)`,
@@ -149,7 +151,7 @@ export async function getStudentCalendarEvents(
 // Get calendar events for professor
 export async function getProfessorCalendarEvents(
   startDate: string,
-  endDate: string
+  endDate: string,
 ): Promise<CalendarEvent[]> {
   const { sessionClaims, userId } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
@@ -208,7 +210,12 @@ export async function getProfessorCalendarEvents(
     }
 
     // Add late deadline event
-    if (lateDeadline && lateDeadline >= start && lateDeadline <= end && ala.allowLateSubmission) {
+    if (
+      lateDeadline &&
+      lateDeadline >= start &&
+      lateDeadline <= end &&
+      ala.allowLateSubmission
+    ) {
       events.push({
         id: `${ala._id}-late-deadline`,
         title: `${ala.title} (Late Deadline)`,
@@ -244,12 +251,12 @@ export async function getCalendarSummary(month: number, year: number) {
   if (role === "student") {
     events = await getStudentCalendarEvents(
       startDate.toISOString(),
-      endDate.toISOString()
+      endDate.toISOString(),
     );
   } else if (role === "professor") {
     events = await getProfessorCalendarEvents(
       startDate.toISOString(),
-      endDate.toISOString()
+      endDate.toISOString(),
     );
   }
 
@@ -281,7 +288,7 @@ export async function getUpcomingDeadlines(days: number = 7) {
 
   const events = await getStudentCalendarEvents(
     now.toISOString(),
-    endDate.toISOString()
+    endDate.toISOString(),
   );
 
   // Filter to only deadlines and sort by date

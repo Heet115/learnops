@@ -108,8 +108,12 @@ export async function createALA(input: CreateALAInput) {
       deadline: new Date(validated.deadline),
       // Late submission support
       allowLateSubmission: validated.allowLateSubmission || false,
-      lateDeadline: validated.lateDeadline ? new Date(validated.lateDeadline) : undefined,
-      latePenaltyPercent: validated.allowLateSubmission ? validated.latePenaltyPercent : undefined,
+      lateDeadline: validated.lateDeadline
+        ? new Date(validated.lateDeadline)
+        : undefined,
+      latePenaltyPercent: validated.allowLateSubmission
+        ? validated.latePenaltyPercent
+        : undefined,
       maxFileSize: validated.maxFileSize * 1024 * 1024, // Convert MB to bytes
       groupFormation: validated.isGroupSubmission
         ? validated.groupFormation

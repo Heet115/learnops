@@ -84,8 +84,13 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
       subjectOfferingId: formData.get("subjectOfferingId") as string,
       deadline: deadline?.toISOString() || "",
       allowLateSubmission,
-      lateDeadline: allowLateSubmission && lateDeadline ? lateDeadline.toISOString() : undefined,
-      latePenaltyPercent: allowLateSubmission ? Number(formData.get("latePenaltyPercent") || 0) : 0,
+      lateDeadline:
+        allowLateSubmission && lateDeadline
+          ? lateDeadline.toISOString()
+          : undefined,
+      latePenaltyPercent: allowLateSubmission
+        ? Number(formData.get("latePenaltyPercent") || 0)
+        : 0,
       maxMarks: Number(formData.get("maxMarks")),
       isGroupSubmission,
       groupFormation: isGroupSubmission ? groupFormation : undefined,
@@ -273,7 +278,8 @@ export function CreateALADialog({ offerings }: CreateALADialogProps) {
                   </div>
                 </div>
                 <p className="text-muted-foreground text-xs">
-                  Late submissions will have the penalty percentage deducted from their marks.
+                  Late submissions will have the penalty percentage deducted
+                  from their marks.
                 </p>
               </div>
             )}

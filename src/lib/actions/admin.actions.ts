@@ -1,7 +1,7 @@
 "use server";
 
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { connectDB, User } from "@/lib/db";
+import { connectDB, User, Class, Semester, Course } from "@/lib/db";
 import {
   createUserSchema,
   updateUserSchema,
@@ -19,6 +19,22 @@ async function requireAdmin() {
   if (role !== "admin") {
     throw new Error("Unauthorized: Admin access required");
   }
+}
+
+// Helper to get departmentId from classId by traversing the hierarchy
+async function getDepartmentIdFromClass(
+  classId: string,
+): Promise<string | null> {
+  const classDoc = await Class.findById(classId).lean();
+  if (!classDoc) return null;
+
+  const semester = await Semester.findById(classDoc.semesterId).lean();
+  if (!semester) return null;
+
+  const course = await Course.findById(semester.courseId).lean();
+  if (!course) return null;
+
+  return course.departmentId?.toString() || null;
 }
 
 // Create a new user via Clerk + MongoDB
@@ -43,13 +59,19 @@ export async function createUser(input: CreateUserInput) {
     // Connect to DB and create user
     await connectDB();
 
+    // For students with classId, derive departmentId from class hierarchy
+    let departmentId = validated.departmentId || undefined;
+    if (validated.role === "student" && validated.classId && !departmentId) {
+      departmentId = (await getDepartmentIdFromClass(validated.classId)) || undefined;
+    }
+
     const user = await User.create({
       clerkId: clerkUser.id,
       email: validated.email,
       firstName: validated.firstName,
       lastName: validated.lastName,
       role: validated.role,
-      departmentId: validated.departmentId || undefined,
+      departmentId,
       classId: validated.classId || undefined,
       profileImage: clerkUser.imageUrl,
       isActive: true,

@@ -2,47 +2,45 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { AnnouncementsList } from "@/components/admin/announcements-list";
-import { CreateAnnouncementDialog } from "@/components/admin/create-announcement-dialog";
+import { StudentAnnouncementsList } from "@/components/student/announcements-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { getAllAnnouncements } from "@/lib/actions/announcement.actions";
+import { getAnnouncementsForUser } from "@/lib/actions/announcement.actions";
 import { getCurrentUserFromDB } from "@/lib/actions/user.actions";
-import { Megaphone, AlertCircle } from "lucide-react";
+import { Megaphone } from "lucide-react";
 
 export const metadata = {
-  title: "Announcements | Admin | LearnOps",
-  description: "Manage system announcements",
+  title: "Announcements | Student | LearnOps",
+  description: "View announcements from your professors and administration",
 };
 
-export default async function AdminAnnouncementsPage() {
+export default async function StudentAnnouncementsPage() {
   const { sessionClaims } = await auth();
   const role = (sessionClaims?.metadata as { role?: string })?.role;
 
-  if (role !== "admin") {
+  if (role !== "student") {
     redirect("/unauthorized");
   }
 
-  const [result, dbUser] = await Promise.all([
-    getAllAnnouncements(),
+  const [announcements, dbUser] = await Promise.all([
+    getAnnouncementsForUser(),
     getCurrentUserFromDB(),
   ]);
 
   const user = {
-    name: `${dbUser?.firstName || "Admin"} ${dbUser?.lastName || ""}`.trim(),
+    name: `${dbUser?.firstName || "Student"} ${dbUser?.lastName || ""}`.trim(),
     email: dbUser?.email || "",
     avatar: dbUser?.profileImage,
   };
 
-  const announcements = result.success ? result.data : [];
-  const error = !result.success ? result.error : null;
+  const pinnedCount = announcements.filter((a: { isPinned: boolean }) => a.isPinned).length;
+  const urgentCount = announcements.filter((a: { priority: string }) => a.priority === "urgent").length;
 
   return (
     <DashboardLayout
-      role="admin"
+      role="student"
       user={user}
-      breadcrumbs={[{ label: "Admin", href: "/admin" }, { label: "Announcements" }]}
+      breadcrumbs={[{ label: "Student", href: "/student" }, { label: "Announcements" }]}
     >
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -53,26 +51,27 @@ export default async function AdminAnnouncementsPage() {
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Announcements</h1>
               <p className="text-muted-foreground">
-                Create and manage system-wide announcements
+                Stay updated with important messages
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {urgentCount > 0 && (
+              <Badge variant="outline" className="bg-rose-500/10 text-rose-600 border-rose-500/30">
+                {urgentCount} urgent
+              </Badge>
+            )}
+            {pinnedCount > 0 && (
+              <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">
+                {pinnedCount} pinned
+              </Badge>
+            )}
             <Badge variant="secondary">{announcements.length} total</Badge>
-            <CreateAnnouncementDialog />
           </div>
         </div>
 
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
         <Suspense fallback={<AnnouncementsSkeleton />}>
-          <AnnouncementsList announcements={announcements} />
+          <StudentAnnouncementsList announcements={announcements} />
         </Suspense>
       </div>
     </DashboardLayout>

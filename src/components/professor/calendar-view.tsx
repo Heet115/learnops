@@ -14,8 +14,18 @@ import Link from "next/link";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 export function ProfessorCalendarView() {
@@ -32,10 +42,10 @@ export function ProfessorCalendarView() {
       setLoading(true);
       const startDate = new Date(year, month, 1);
       const endDate = new Date(year, month + 1, 0, 23, 59, 59);
-      
+
       const data = await getProfessorCalendarEvents(
         startDate.toISOString(),
-        endDate.toISOString()
+        endDate.toISOString(),
       );
       setEvents(data);
       setLoading(false);
@@ -64,20 +74,23 @@ export function ProfessorCalendarView() {
   };
 
   // Group events by date
-  const eventsByDate = events.reduce((acc, event) => {
-    const dateKey = event.date.split("T")[0];
-    if (!acc[dateKey]) acc[dateKey] = [];
-    acc[dateKey].push(event);
-    return acc;
-  }, {} as Record<string, CalendarEvent[]>);
+  const eventsByDate = events.reduce(
+    (acc, event) => {
+      const dateKey = event.date.split("T")[0];
+      if (!acc[dateKey]) acc[dateKey] = [];
+      acc[dateKey].push(event);
+      return acc;
+    },
+    {} as Record<string, CalendarEvent[]>,
+  );
 
   const selectedEvents = selectedDate ? eventsByDate[selectedDate] || [] : [];
 
   const renderCalendarDays = () => {
     const days = [];
-    
+
     for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(<div key={`empty-${i}`} className="h-24 bg-muted/30" />);
+      days.push(<div key={`empty-${i}`} className="bg-muted/30 h-24" />);
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -91,15 +104,17 @@ export function ProfessorCalendarView() {
           key={day}
           onClick={() => setSelectedDate(dateStr)}
           className={cn(
-            "h-24 p-1 text-left border border-border/50 transition-colors hover:bg-accent/50",
+            "border-border/50 hover:bg-accent/50 h-24 border p-1 text-left transition-colors",
             isToday && "bg-primary/10",
-            isSelected && "ring-2 ring-primary"
+            isSelected && "ring-primary ring-2",
           )}
         >
-          <div className={cn(
-            "text-sm font-medium mb-1",
-            isToday && "text-primary font-bold"
-          )}>
+          <div
+            className={cn(
+              "mb-1 text-sm font-medium",
+              isToday && "text-primary font-bold",
+            )}
+          >
             {day}
           </div>
           <div className="space-y-0.5 overflow-hidden">
@@ -107,8 +122,10 @@ export function ProfessorCalendarView() {
               <div
                 key={event.id}
                 className={cn(
-                  "text-xs px-1 py-0.5 rounded truncate text-white",
-                  event.type === "late_deadline" ? "bg-orange-500" : "bg-primary"
+                  "truncate rounded px-1 py-0.5 text-xs text-white",
+                  event.type === "late_deadline"
+                    ? "bg-orange-500"
+                    : "bg-primary",
                 )}
                 title={`${event.title} - ${event.className}`}
               >
@@ -116,12 +133,12 @@ export function ProfessorCalendarView() {
               </div>
             ))}
             {dayEvents.length > 3 && (
-              <div className="text-xs text-muted-foreground px-1">
+              <div className="text-muted-foreground px-1 text-xs">
                 +{dayEvents.length - 3} more
               </div>
             )}
           </div>
-        </button>
+        </button>,
       );
     }
 
@@ -148,24 +165,25 @@ export function ProfessorCalendarView() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-7 mb-1">
+          <div className="mb-1 grid grid-cols-7">
             {DAYS.map((day) => (
               <div
                 key={day}
-                className="text-center text-sm font-medium text-muted-foreground py-2"
+                className="text-muted-foreground py-2 text-center text-sm font-medium"
               >
                 {day}
               </div>
             ))}
           </div>
           <div className="grid grid-cols-7">
-            {loading ? (
-              Array.from({ length: 35 }).map((_, i) => (
-                <div key={i} className="h-24 bg-muted/30 animate-pulse border border-border/50" />
-              ))
-            ) : (
-              renderCalendarDays()
-            )}
+            {loading
+              ? Array.from({ length: 35 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-muted/30 border-border/50 h-24 animate-pulse border"
+                  />
+                ))
+              : renderCalendarDays()}
           </div>
         </CardContent>
       </Card>
@@ -174,11 +192,14 @@ export function ProfessorCalendarView() {
         <CardHeader>
           <CardTitle className="text-lg">
             {selectedDate
-              ? new Date(selectedDate + "T00:00:00").toLocaleDateString("en-US", {
-                  weekday: "long",
-                  month: "long",
-                  day: "numeric",
-                })
+              ? new Date(selectedDate + "T00:00:00").toLocaleDateString(
+                  "en-US",
+                  {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                  },
+                )
               : "Select a date"}
           </CardTitle>
         </CardHeader>
@@ -199,18 +220,18 @@ export function ProfessorCalendarView() {
                   href={`/professor/alas/${event.alaId}`}
                   className="block"
                 >
-                  <div className="p-3 rounded-lg border hover:bg-accent/50 transition-colors">
+                  <div className="hover:bg-accent/50 rounded-lg border p-3 transition-colors">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{event.title}</p>
-                        <p className="text-sm text-muted-foreground">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium">{event.title}</p>
+                        <p className="text-muted-foreground text-sm">
                           {event.subjectCode} - {event.subjectName}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           {event.className}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          <Clock className="inline h-3 w-3 mr-1" />
+                        <p className="text-muted-foreground mt-1 text-xs">
+                          <Clock className="mr-1 inline h-3 w-3" />
                           {new Date(event.date).toLocaleTimeString("en-US", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -218,10 +239,13 @@ export function ProfessorCalendarView() {
                         </p>
                       </div>
                       <Badge
-                        variant={event.type === "late_deadline" ? "outline" : "default"}
+                        variant={
+                          event.type === "late_deadline" ? "outline" : "default"
+                        }
                         className={cn(
                           "text-xs",
-                          event.type === "late_deadline" && "border-orange-500 text-orange-500"
+                          event.type === "late_deadline" &&
+                            "border-orange-500 text-orange-500",
                         )}
                       >
                         {event.type === "late_deadline" ? "Late" : "Deadline"}
@@ -233,15 +257,15 @@ export function ProfessorCalendarView() {
             </div>
           )}
 
-          <div className="mt-6 pt-4 border-t">
-            <p className="text-sm font-medium mb-2">Legend</p>
+          <div className="mt-6 border-t pt-4">
+            <p className="mb-2 text-sm font-medium">Legend</p>
             <div className="flex gap-4 text-xs">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-primary" />
+                <div className="bg-primary h-3 w-3 rounded" />
                 <span>Deadline</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded bg-orange-500" />
+                <div className="h-3 w-3 rounded bg-orange-500" />
                 <span>Late Deadline</span>
               </div>
             </div>

@@ -175,13 +175,18 @@ export function GroupSection({
                 <span className="text-sm">
                   {group.leaderId.firstName} {group.leaderId.lastName}
                   {isLeader && (
-                    <Badge variant="outline" className="ml-2 border-amber-500/30 bg-amber-500/10 px-1.5 py-0 text-[10px] text-amber-600">
+                    <Badge
+                      variant="outline"
+                      className="ml-2 border-amber-500/30 bg-amber-500/10 px-1.5 py-0 text-[10px] text-amber-600"
+                    >
                       You
                     </Badge>
                   )}
                 </span>
               ) : (
-                <span className="text-sm text-muted-foreground italic">Not assigned</span>
+                <span className="text-muted-foreground text-sm italic">
+                  Not assigned
+                </span>
               )}
             </div>
             {canBecomeLeader && (
@@ -225,17 +230,19 @@ export function GroupSection({
                             You
                           </Badge>
                         )}
-                        {group.leaderId && member.studentId._id === group.leaderId._id && (
-                          <Crown className="h-3.5 w-3.5 text-amber-500" />
-                        )}
-                        {member.studentId._id === group.createdBy._id && !group.leaderId && (
-                          <Badge
-                            variant="outline"
-                            className="border-violet-500/30 bg-violet-500/10 px-1.5 py-0 text-[10px] text-violet-600"
-                          >
-                            Creator
-                          </Badge>
-                        )}
+                        {group.leaderId &&
+                          member.studentId._id === group.leaderId._id && (
+                            <Crown className="h-3.5 w-3.5 text-amber-500" />
+                          )}
+                        {member.studentId._id === group.createdBy._id &&
+                          !group.leaderId && (
+                            <Badge
+                              variant="outline"
+                              className="border-violet-500/30 bg-violet-500/10 px-1.5 py-0 text-[10px] text-violet-600"
+                            >
+                              Creator
+                            </Badge>
+                          )}
                       </div>
                       <p className="text-muted-foreground text-xs">
                         {member.studentId.email}
