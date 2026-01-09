@@ -207,6 +207,7 @@ export async function updateALA(id: string, input: UpdateALAInput) {
     }
     if (validated.isGroupSubmission === false) {
       updateData.maxGroupSize = undefined;
+      updateData.groupFormation = undefined;
     }
     // Late submission support
     if (validated.allowLateSubmission === false) {
@@ -215,6 +216,16 @@ export async function updateALA(id: string, input: UpdateALAInput) {
     }
     if (validated.lateDeadline) {
       updateData.lateDeadline = new Date(validated.lateDeadline);
+    }
+    // Handle null values for optional fields
+    if (validated.groupFormation === null) {
+      updateData.groupFormation = undefined;
+    }
+    if (validated.maxGroupSize === null) {
+      updateData.maxGroupSize = undefined;
+    }
+    if (validated.lateDeadline === null) {
+      updateData.lateDeadline = undefined;
     }
 
     const ala = await ALA.findByIdAndUpdate(id, updateData, { new: true });

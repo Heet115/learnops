@@ -41,6 +41,7 @@ interface ALA {
   latePenaltyPercent?: number;
   maxMarks: number;
   isGroupSubmission: boolean;
+  groupFormation?: "student" | "professor";
   maxGroupSize?: number;
   allowedFileTypes?: string[];
   maxFileSize?: number;
@@ -56,6 +57,9 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
   const [loading, setLoading] = useState(false);
   const [isGroupSubmission, setIsGroupSubmission] = useState(
     ala.isGroupSubmission,
+  );
+  const [groupFormation, setGroupFormation] = useState<"student" | "professor">(
+    ala.groupFormation || "student",
   );
   const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(
     ala.allowedFileTypes || ["pdf"],
@@ -96,6 +100,7 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
         : 0,
       maxMarks: Number(formData.get("maxMarks")),
       isGroupSubmission,
+      groupFormation: isGroupSubmission ? groupFormation : null,
       maxGroupSize: isGroupSubmission
         ? Number(formData.get("maxGroupSize"))
         : null,
@@ -302,7 +307,40 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
             </div>
 
             {isGroupSubmission && (
-              <div className="bg-muted/30 rounded-lg border p-4">
+              <div className="bg-muted/30 space-y-4 rounded-lg border p-4">
+                <div className="grid gap-2">
+                  <Label>Group Formation</Label>
+                  <div className="flex gap-4">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="edit-formation-student"
+                        name="groupFormation"
+                        value="student"
+                        checked={groupFormation === "student"}
+                        onChange={() => setGroupFormation("student")}
+                        className="h-4 w-4"
+                      />
+                      <label htmlFor="edit-formation-student" className="text-sm">
+                        Students form groups
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="edit-formation-professor"
+                        name="groupFormation"
+                        value="professor"
+                        checked={groupFormation === "professor"}
+                        onChange={() => setGroupFormation("professor")}
+                        className="h-4 w-4"
+                      />
+                      <label htmlFor="edit-formation-professor" className="text-sm">
+                        Professor assigns groups
+                      </label>
+                    </div>
+                  </div>
+                </div>
                 <div className="grid gap-2">
                   <Label htmlFor="maxGroupSize">Max Group Size</Label>
                   <Input
