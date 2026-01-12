@@ -336,14 +336,16 @@ export function GroupSection({
                       <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
                       Pending
                     </Badge>
-                    {(isCreator || isLeader) && !group.isLocked && canModify && (
-                      <CancelInviteButton
-                        groupId={group._id}
-                        memberId={member.studentId._id}
-                        memberName={`${member.studentId.firstName} ${member.studentId.lastName}`}
-                        onSuccess={loadGroup}
-                      />
-                    )}
+                    {(isCreator || isLeader) &&
+                      !group.isLocked &&
+                      canModify && (
+                        <CancelInviteButton
+                          groupId={group._id}
+                          memberId={member.studentId._id}
+                          memberName={`${member.studentId.firstName} ${member.studentId.lastName}`}
+                          onSuccess={loadGroup}
+                        />
+                      )}
                   </div>
                 </div>
               ))}
@@ -1075,7 +1077,8 @@ function CancelInviteButton({
         <AlertDialogHeader>
           <AlertDialogTitle>Cancel Invitation?</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to cancel the invitation to {memberName}? They will no longer be able to join this group.
+            Are you sure you want to cancel the invitation to {memberName}? They
+            will no longer be able to join this group.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

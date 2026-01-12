@@ -72,10 +72,10 @@ export default async function StudentProfilePage() {
       ]}
     >
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold">My Profile</h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-xl font-bold sm:text-2xl">My Profile</h2>
               {pendingRequests > 0 && (
                 <Badge
                   variant="outline"
@@ -86,7 +86,7 @@ export default async function StudentProfilePage() {
                 </Badge>
               )}
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm sm:text-base">
               View your profile information. Contact admin to request changes.
             </p>
           </div>

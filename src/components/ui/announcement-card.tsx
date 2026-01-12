@@ -113,7 +113,8 @@ export function AnnouncementCard({
         className={cn(
           "relative transition-all hover:shadow-md",
           !announcement.isActive && "opacity-60",
-          !announcement.isPublished && "border-dashed border-muted-foreground/30",
+          !announcement.isPublished &&
+            "border-muted-foreground/30 border-dashed",
           announcement.priority === "urgent" && "border-rose-500/30",
           announcement.priority === "high" && "border-amber-500/30",
         )}

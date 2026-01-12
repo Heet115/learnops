@@ -474,164 +474,170 @@ export function SubmissionsTable({ submissions }: SubmissionsTableProps) {
         />
       ) : (
         <>
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="w-[50px]">
-                  <SelectAllCheckbox
-                    checked={
-                      isAllSelected
-                        ? true
-                        : isIndeterminate
-                          ? "indeterminate"
-                          : false
-                    }
-                    onCheckedChange={toggleAll}
-                  />
-                </TableHead>
-                <TableHead>
-                  {renderSortableHeader("student", "Student")}
-                </TableHead>
-                <TableHead>{renderSortableHeader("ala", "ALA")}</TableHead>
-                <TableHead>
-                  {renderSortableHeader("subject", "Subject")}
-                </TableHead>
-                <TableHead>{renderSortableHeader("class", "Class")}</TableHead>
-                <TableHead>
-                  {renderSortableHeader("submittedAt", "Submitted")}
-                </TableHead>
-                <TableHead>
-                  {renderSortableHeader("status", "Status")}
-                </TableHead>
-                <TableHead className="w-[80px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedData.map((sub) => {
-                const isGroup =
-                  sub.alaId?.isGroupSubmission &&
-                  sub.groupMembers &&
-                  sub.groupMembers.length > 0;
-                const allMembers = isGroup
-                  ? [sub.studentId, ...(sub.groupMembers || [])]
-                  : [sub.studentId];
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="w-[50px] min-w-[50px]">
+                    <SelectAllCheckbox
+                      checked={
+                        isAllSelected
+                          ? true
+                          : isIndeterminate
+                            ? "indeterminate"
+                            : false
+                      }
+                      onCheckedChange={toggleAll}
+                    />
+                  </TableHead>
+                  <TableHead className="min-w-[180px]">
+                    {renderSortableHeader("student", "Student")}
+                  </TableHead>
+                  <TableHead className="min-w-[140px]">
+                    {renderSortableHeader("ala", "ALA")}
+                  </TableHead>
+                  <TableHead className="min-w-[100px]">
+                    {renderSortableHeader("subject", "Subject")}
+                  </TableHead>
+                  <TableHead className="min-w-[100px]">
+                    {renderSortableHeader("class", "Class")}
+                  </TableHead>
+                  <TableHead className="min-w-[130px]">
+                    {renderSortableHeader("submittedAt", "Submitted")}
+                  </TableHead>
+                  <TableHead className="min-w-[100px]">
+                    {renderSortableHeader("status", "Status")}
+                  </TableHead>
+                  <TableHead className="w-[80px] min-w-[80px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((sub) => {
+                  const isGroup =
+                    sub.alaId?.isGroupSubmission &&
+                    sub.groupMembers &&
+                    sub.groupMembers.length > 0;
+                  const allMembers = isGroup
+                    ? [sub.studentId, ...(sub.groupMembers || [])]
+                    : [sub.studentId];
 
-                return (
-                  <TableRow
-                    key={sub._id}
-                    className="group"
-                    data-state={isSelected(sub._id) ? "selected" : undefined}
-                  >
-                    <TableCell>
-                      <SelectRowCheckbox
-                        checked={isSelected(sub._id)}
-                        onCheckedChange={(checked) =>
-                          toggleRow(sub._id, checked)
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <UserAvatar
-                          name={`${sub.studentId?.firstName} ${sub.studentId?.lastName}`}
-                          size="sm"
+                  return (
+                    <TableRow
+                      key={sub._id}
+                      className="group"
+                      data-state={isSelected(sub._id) ? "selected" : undefined}
+                    >
+                      <TableCell>
+                        <SelectRowCheckbox
+                          checked={isSelected(sub._id)}
+                          onCheckedChange={(checked) =>
+                            toggleRow(sub._id, checked)
+                          }
                         />
-                        <div>
-                          {isGroup ? (
-                            <>
-                              <div className="mb-0.5 flex items-center gap-1">
-                                <Users className="h-3 w-3 text-blue-600" />
-                                <span className="text-xs font-medium text-blue-600">
-                                  Group ({allMembers.length})
-                                </span>
-                              </div>
-                              <p className="text-sm font-medium">
-                                {sub.studentId?.firstName}{" "}
-                                {sub.studentId?.lastName}
-                              </p>
-                            </>
-                          ) : (
-                            <>
-                              <p className="font-medium">
-                                {sub.studentId?.firstName}{" "}
-                                {sub.studentId?.lastName}
-                              </p>
-                              <p className="text-muted-foreground text-xs">
-                                {sub.studentId?.email}
-                              </p>
-                            </>
-                          )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <UserAvatar
+                            name={`${sub.studentId?.firstName} ${sub.studentId?.lastName}`}
+                            size="sm"
+                          />
+                          <div>
+                            {isGroup ? (
+                              <>
+                                <div className="mb-0.5 flex items-center gap-1">
+                                  <Users className="h-3 w-3 text-blue-600" />
+                                  <span className="text-xs font-medium text-blue-600">
+                                    Group ({allMembers.length})
+                                  </span>
+                                </div>
+                                <p className="text-sm font-medium">
+                                  {sub.studentId?.firstName}{" "}
+                                  {sub.studentId?.lastName}
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="font-medium">
+                                  {sub.studentId?.firstName}{" "}
+                                  {sub.studentId?.lastName}
+                                </p>
+                                <p className="text-muted-foreground text-xs">
+                                  {sub.studentId?.email}
+                                </p>
+                              </>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10">
-                          <FileText className="h-3.5 w-3.5 text-blue-600" />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10">
+                            <FileText className="h-3.5 w-3.5 text-blue-600" />
+                          </div>
+                          <span className="max-w-[140px] truncate text-sm">
+                            {sub.alaId?.title || "Unknown"}
+                          </span>
                         </div>
-                        <span className="max-w-[140px] truncate text-sm">
-                          {sub.alaId?.title || "Unknown"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className="border-violet-500/30 bg-violet-500/10 text-violet-600"
-                      >
-                        <BookMarked className="mr-1.5 h-3 w-3" />
-                        {sub.alaId?.subjectOfferingId?.subjectId?.code || "-"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 text-sm">
-                        <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
-                        {sub.alaId?.subjectOfferingId?.classId?.name || "-"}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-muted-foreground flex items-center gap-1.5 text-sm tabular-nums">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {sub.submittedAt
-                          ? new Date(sub.submittedAt).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                                hour: "numeric",
-                                minute: "2-digit",
-                              },
-                            )
-                          : "-"}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(
-                        sub.status,
-                        sub.marks,
-                        sub.alaId?.maxMarks,
-                        sub.isLate,
-                        sub.adjustedMarks,
-                        sub.latePenaltyApplied,
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="opacity-0 group-hover:opacity-100"
-                        asChild
-                      >
-                        <Link href={`/professor/submissions/${sub._id}`}>
-                          <Eye className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className="border-violet-500/30 bg-violet-500/10 text-violet-600"
+                        >
+                          <BookMarked className="mr-1.5 h-3 w-3" />
+                          {sub.alaId?.subjectOfferingId?.subjectId?.code || "-"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 text-sm">
+                          <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
+                          {sub.alaId?.subjectOfferingId?.classId?.name || "-"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-muted-foreground flex items-center gap-1.5 text-sm tabular-nums">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {sub.submittedAt
+                            ? new Date(sub.submittedAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "numeric",
+                                  minute: "2-digit",
+                                },
+                              )
+                            : "-"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(
+                          sub.status,
+                          sub.marks,
+                          sub.alaId?.maxMarks,
+                          sub.isLate,
+                          sub.adjustedMarks,
+                          sub.latePenaltyApplied,
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="opacity-0 group-hover:opacity-100"
+                          asChild
+                        >
+                          <Link href={`/professor/submissions/${sub._id}`}>
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
 
           <PaginationControls
             pageIndex={pagination.pageIndex}

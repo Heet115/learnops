@@ -384,13 +384,15 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
   return (
     <>
       <div className="space-y-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <DataTableFilter
-            filters={filterConfigs}
-            values={filters}
-            onChange={setFilters}
-          />
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <DataTableFilter
+              filters={filterConfigs}
+              values={filters}
+              onChange={setFilters}
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
             <SaveFiltersButton
               hasActiveFilters={hasActiveFilters}
               hasSavedFilters={hasSavedFilters}
@@ -425,7 +427,7 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
           </div>
         ) : (
           <>
-            <div className="rounded-lg border">
+            <div className="overflow-x-auto rounded-lg border">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50 hover:bg-muted/50">
@@ -441,19 +443,19 @@ export function UsersTable({ users, courses = [] }: UsersTableProps) {
                         onCheckedChange={toggleAll}
                       />
                     </TableHead>
-                    <TableHead>
+                    <TableHead className="min-w-[180px]">
                       {renderSortableHeader("name", "User")}
                     </TableHead>
-                    <TableHead>
+                    <TableHead className="min-w-[200px]">
                       {renderSortableHeader("email", "Email")}
                     </TableHead>
-                    <TableHead>
+                    <TableHead className="min-w-[100px]">
                       {renderSortableHeader("role", "Role")}
                     </TableHead>
-                    <TableHead>
+                    <TableHead className="min-w-[100px]">
                       {renderSortableHeader("status", "Status")}
                     </TableHead>
-                    <TableHead>
+                    <TableHead className="min-w-[100px]">
                       {renderSortableHeader("createdAt", "Created")}
                     </TableHead>
                     <TableHead className="w-[50px]"></TableHead>

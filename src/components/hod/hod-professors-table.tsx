@@ -124,7 +124,7 @@ export function HodProfessorsTable({ professors }: HodProfessorsTableProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <div className="flex-1">
           <DataTableFilter
             filters={filterConfigs}
@@ -151,129 +151,133 @@ export function HodProfessorsTable({ professors }: HodProfessorsTableProps) {
         </div>
       ) : (
         <>
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <SimpleSortableHeader
-                  label="Professor"
-                  sortKey="fullName"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader
-                  label="Email"
-                  sortKey="email"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader
-                  label="Subjects"
-                  sortKey="subjects"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  className="text-center"
-                />
-                <SimpleSortableHeader
-                  label="ALAs"
-                  sortKey="alas"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  className="text-center"
-                />
-                <SimpleSortableHeader
-                  label="Pending"
-                  sortKey="pending"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  className="text-center"
-                />
-                <SimpleSortableHeader
-                  label="Graded"
-                  sortKey="graded"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  className="text-center"
-                />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedData.map((prof) => (
-                <TableRow key={prof._id} className="group">
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9 border">
-                        <AvatarImage src={prof.profileImage} />
-                        <AvatarFallback className="bg-blue-500/10 text-sm font-medium text-blue-600">
-                          {prof.firstName[0]}
-                          {prof.lastName[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="space-y-0.5">
-                        <p className="leading-none font-medium">
-                          {prof.firstName} {prof.lastName}
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          Professor
-                        </p>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <SimpleSortableHeader
+                    label="Professor"
+                    sortKey="fullName"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[180px]"
+                  />
+                  <SimpleSortableHeader
+                    label="Email"
+                    sortKey="email"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[180px]"
+                  />
+                  <SimpleSortableHeader
+                    label="Subjects"
+                    sortKey="subjects"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[90px] text-center"
+                  />
+                  <SimpleSortableHeader
+                    label="ALAs"
+                    sortKey="alas"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[80px] text-center"
+                  />
+                  <SimpleSortableHeader
+                    label="Pending"
+                    sortKey="pending"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[90px] text-center"
+                  />
+                  <SimpleSortableHeader
+                    label="Graded"
+                    sortKey="graded"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[90px] text-center"
+                  />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((prof) => (
+                  <TableRow key={prof._id} className="group">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9 border">
+                          <AvatarImage src={prof.profileImage} />
+                          <AvatarFallback className="bg-blue-500/10 text-sm font-medium text-blue-600">
+                            {prof.firstName[0]}
+                            {prof.lastName[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="space-y-0.5">
+                          <p className="leading-none font-medium">
+                            {prof.firstName} {prof.lastName}
+                          </p>
+                          <p className="text-muted-foreground text-xs">
+                            Professor
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-muted-foreground flex items-center gap-2">
-                      <Mail className="h-3.5 w-3.5" />
-                      <span className="text-sm">{prof.email}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge
-                      variant="outline"
-                      className="border-violet-500/30 bg-violet-500/10 text-violet-600"
-                    >
-                      <BookOpen className="mr-1.5 h-3 w-3" />
-                      {prof.subjects}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge
-                      variant="outline"
-                      className="border-blue-500/30 bg-blue-500/10 text-blue-600"
-                    >
-                      <FileText className="mr-1.5 h-3 w-3" />
-                      {prof.alas}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {prof.pending > 0 ? (
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-muted-foreground flex items-center gap-2">
+                        <Mail className="h-3.5 w-3.5" />
+                        <span className="text-sm">{prof.email}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
                       <Badge
                         variant="outline"
-                        className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+                        className="border-violet-500/30 bg-violet-500/10 text-violet-600"
                       >
-                        <Clock className="mr-1.5 h-3 w-3" />
-                        {prof.pending}
+                        <BookOpen className="mr-1.5 h-3 w-3" />
+                        {prof.subjects}
                       </Badge>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">0</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge
-                      variant="outline"
-                      className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-                    >
-                      <CheckCircle2 className="mr-1.5 h-3 w-3" />
-                      {prof.graded}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge
+                        variant="outline"
+                        className="border-blue-500/30 bg-blue-500/10 text-blue-600"
+                      >
+                        <FileText className="mr-1.5 h-3 w-3" />
+                        {prof.alas}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {prof.pending > 0 ? (
+                        <Badge
+                          variant="outline"
+                          className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+                        >
+                          <Clock className="mr-1.5 h-3 w-3" />
+                          {prof.pending}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">0</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge
+                        variant="outline"
+                        className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                      >
+                        <CheckCircle2 className="mr-1.5 h-3 w-3" />
+                        {prof.graded}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
           <PaginationControls
             pageIndex={currentPage}
             pageSize={pageSize}

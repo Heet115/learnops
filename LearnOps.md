@@ -1,6 +1,7 @@
 # LearnOps - Complete Features & Functionality
 
 ## 1. Authentication & Authorization
+
 - Clerk-based authentication (admin-only user creation)
 - Role-based access control (RBAC): Admin, HOD, Professor, Student
 - Session management with role metadata
@@ -12,6 +13,7 @@
 ## 2. Admin Features
 
 ### User Management
+
 - Create users (all roles) via Clerk + MongoDB sync
 - Update user details and roles
 - Deactivate/reactivate users (soft delete with Clerk ban)
@@ -21,6 +23,7 @@
 - Recent users list
 
 ### Academic Structure Management
+
 - Departments: CRUD with HOD assignment
 - Courses: CRUD with auto-generated semesters (diploma/UG/PG types)
 - Semesters: CRUD with date ranges
@@ -31,6 +34,7 @@
 - Bulk operations for all entities (delete, toggle status)
 
 ### Student Management
+
 - Student profile creation with detailed info (identity, contact, academic, address)
 - Assign students to classes
 - Change student class assignments
@@ -39,11 +43,13 @@
 - Notify students on request status
 
 ### Audit Trail
+
 - Activity logging for all actions (26+ action types)
 - View audit logs with filtering
 - Entity-specific activity timeline
 
 ### Admin Dashboard
+
 - Total users count (students, professors, HODs)
 - Academic stats (departments, courses, subjects, classes)
 - Activity stats (ALAs, submissions)
@@ -52,12 +58,14 @@
 ## 3. HOD Features
 
 ### Department Oversight
+
 - View department structure
 - Monitor classes and subjects
 - Track professors in department
 - View courses and classes in department
 
 ### Analytics Dashboard
+
 - Submission trends (30-day chart with submitted/graded)
 - Professor activity/grading stats (graded vs pending per professor)
 - Submissions by class (students, submitted, graded, pending)
@@ -66,6 +74,7 @@
 - ALA status overview (upcoming deadlines, submission counts)
 
 ### HOD Dashboard Stats
+
 - Professor count in department
 - Subject count
 - Pending submissions
@@ -74,6 +83,7 @@
 ## 4. Professor Features
 
 ### ALA (Active Learning Activity) Management
+
 - Create ALAs with:
   - Title, description, deadline
   - Max marks, file type restrictions
@@ -91,6 +101,7 @@
 - Auto-notify students when ALA created
 
 ### Submission Management
+
 - View all submissions (filter by status: all/submitted/graded/rejected)
 - View submissions per ALA
 - Grade submissions with marks and feedback
@@ -100,6 +111,7 @@
 - Download submissions as ZIP
 
 ### Group Management (for group ALAs)
+
 - Create groups and assign students (professor-formed)
 - Assign group leaders
 - Update/delete groups
@@ -107,9 +119,11 @@
 - Lock groups after submission
 
 ### Student View
+
 - View students in assigned classes
 
 ### Professor Dashboard
+
 - Active ALAs count
 - Student count in classes
 - Pending submissions count
@@ -118,6 +132,7 @@
 - Assigned subjects list
 
 ### Calendar View
+
 - View ALAs by date range
 - Deadline events
 - Late deadline events
@@ -126,12 +141,14 @@
 ## 5. Student Features
 
 ### Dashboard
+
 - View assigned ALAs with deadlines
 - Submission status tracking (pending, due soon, submitted, overdue)
 - Upcoming deadlines view (next 7 days)
 - Recent grades list
 
 ### Submissions
+
 - Submit files (PDF, DOCX, PPT, ZIP - max 30MB)
 - Submit links with titles
 - Update submissions before deadline
@@ -141,6 +158,7 @@
 - Submission status: submitted → graded/rejected
 
 ### Group Collaboration
+
 - Create groups (student-formed) with name
 - Invite classmates to group
 - Accept/decline group invitations
@@ -151,6 +169,7 @@
 - Only leader can submit for group
 
 ### Profile
+
 - View personal profile (read-only)
 - View detailed student profile (identity, contact, academic, address)
 - Request profile updates (allowed fields only)
@@ -158,11 +177,13 @@
 - View review comments
 
 ### Grades
+
 - View all grades with subject info
 - Grade history with timestamps
 - See late penalty applied
 
 ### Calendar View
+
 - View deadlines by date range
 - Deadline events with status (pending/submitted/graded/overdue/late)
 - Late deadline events
@@ -171,9 +192,11 @@
 - Upcoming deadlines (next N days)
 
 ### Timeline/Activity
+
 - Activity timeline view
 
 ## 6. Notification System
+
 - Real-time notifications via SSE (Server-Sent Events)
 - Notification types (9 types):
   - `new_ala` - New ALA posted
@@ -193,6 +216,7 @@
 - Push notifications to connected users
 
 ## 7. Announcement System
+
 - Role-based creation (admin, HOD, professor)
 - Targeted delivery:
   - All users
@@ -208,6 +232,7 @@
 - Announcements feed for students
 
 ## 8. File Management
+
 - Cloudinary integration for file storage
 - File upload with type validation (PDF, DOCX, PPT, PPTX, ZIP)
 - File size limits (30MB max)
@@ -217,6 +242,7 @@
 - Secure URL storage in database
 
 ## 9. Activity Logging & Audit Trail
+
 - Comprehensive audit trail (26+ action types)
 - Tracks: user actions, entity changes
 - Entity types: user, department, course, semester, subject, class, subject_offering, ALA, submission, group
@@ -226,6 +252,7 @@
 - User attribution for all actions
 
 ## 10. UI/UX Features
+
 - Dark/light mode toggle
 - Responsive sidebar navigation
 - Role-based navigation menus
@@ -244,6 +271,7 @@
 - Switch components for toggles
 
 ## 11. API Routes
+
 - `POST /api/upload` - File upload to Cloudinary
 - `DELETE /api/upload` - File deletion from Cloudinary
 - `GET /api/notifications/stream` - SSE real-time notifications
@@ -251,6 +279,7 @@
 - `POST /api/cron/deadline-reminders` - Scheduled deadline reminders
 
 ## 12. Data Models (17 collections)
+
 - User (admin, hod, professor, student roles)
 - Department (with HOD assignment)
 - Course (diploma/UG/PG types)
@@ -270,6 +299,7 @@
 - Announcement (targeted, scheduled, priority)
 
 ## 13. Security & Access Control
+
 - Server-side RBAC enforcement
 - Middleware route protection
 - Clerk webhook verification

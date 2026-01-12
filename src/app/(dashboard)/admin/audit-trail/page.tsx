@@ -100,22 +100,22 @@ export default async function AuditTrailPage() {
       ]}
     >
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-bold">Audit Trail</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-xl font-bold sm:text-2xl">Audit Trail</h2>
               <Badge variant="secondary" className="gap-1">
                 <TrendingUp className="h-3 w-3" />
                 {auditData.pagination.total} total
               </Badge>
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm sm:text-base">
               Track all administrative actions in the system
             </p>
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {statCards.map((stat) => (
             <Card
               key={stat.title}

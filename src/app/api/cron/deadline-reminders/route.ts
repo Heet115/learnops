@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { createDeadlineReminders, publishScheduledAnnouncements } from "@/lib/actions/notification.actions";
+import {
+  createDeadlineReminders,
+  publishScheduledAnnouncements,
+} from "@/lib/actions/notification.actions";
 
 // This endpoint can be called by a cron service (e.g., Vercel Cron, external cron)
 // to send deadline reminders to students and publish scheduled announcements

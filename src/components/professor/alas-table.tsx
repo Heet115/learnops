@@ -401,7 +401,7 @@ export function ALAsTable({ alas }: ALAsTableProps) {
   return (
     <>
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <div className="flex-1">
             <DataTableFilter
               filters={filterConfigs}
@@ -436,219 +436,237 @@ export function ALAsTable({ alas }: ALAsTableProps) {
           </div>
         ) : (
           <>
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="w-[50px]">
-                    <SelectAllCheckbox
-                      checked={
-                        isAllSelected
-                          ? true
-                          : isIndeterminate
-                            ? "indeterminate"
-                            : false
-                      }
-                      onCheckedChange={toggleAll}
-                    />
-                  </TableHead>
-                  <SimpleSortableHeader<SortableALA>
-                    label="Title"
-                    sortKey="title"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<SortableALA>
-                    label="Subject"
-                    sortKey="subjectCode"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<SortableALA>
-                    label="Class"
-                    sortKey="className"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<SortableALA>
-                    label="Deadline"
-                    sortKey="deadline"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<SortableALA>
-                    label="Marks"
-                    sortKey="maxMarks"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<SortableALA>
-                    label="Type"
-                    sortKey="type"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<SortableALA>
-                    label="Status"
-                    sortKey="statusLabel"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <TableHead className="w-[70px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((ala) => {
-                  const status = getStatus(ala);
-                  return (
-                    <TableRow
-                      key={ala._id}
-                      className="group"
-                      data-state={isSelected(ala._id) ? "selected" : undefined}
-                    >
-                      <TableCell>
-                        <SelectRowCheckbox
-                          checked={isSelected(ala._id)}
-                          onCheckedChange={(checked) =>
-                            toggleRow(ala._id, checked)
-                          }
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
-                            <FileText className="h-4 w-4 text-blue-600" />
-                          </div>
-                          <span className="max-w-[180px] truncate font-medium">
-                            {ala.title}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="border-violet-500/30 bg-violet-500/10 text-violet-600"
-                        >
-                          <BookMarked className="mr-1.5 h-3 w-3" />
-                          {ala.subjectOfferingId?.subjectId?.code || "-"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1.5 text-sm">
-                          <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
-                          {ala.subjectOfferingId?.classId?.name || "-"}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-muted-foreground flex items-center gap-1.5 text-sm tabular-nums">
-                          <Calendar className="h-3.5 w-3.5" />
-                          {formatDeadline(ala.deadline)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="border-amber-500/30 bg-amber-500/10 text-amber-600"
-                        >
-                          <Award className="mr-1.5 h-3 w-3" />
-                          {ala.maxMarks}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {ala.isGroupSubmission ? (
-                          <Badge
-                            variant="outline"
-                            className="gap-1 border-blue-500/30 bg-blue-500/10 text-blue-600"
-                          >
-                            <Users className="h-3 w-3" />
-                            Group ({ala.maxGroupSize})
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline">Individual</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <Badge
-                            variant="outline"
-                            className={statusColorMap[status.color]}
-                          >
-                            <span
-                              className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${statusDotMap[status.color]}`}
-                            />
-                            {status.label}
-                          </Badge>
-                          {ala.allowLateSubmission && (
-                            <span className="flex items-center gap-1 text-[10px] text-orange-600">
-                              <Clock className="h-2.5 w-2.5" />
-                              Late: -{ala.latePenaltyPercent}%
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="w-[50px] min-w-[50px]">
+                      <SelectAllCheckbox
+                        checked={
+                          isAllSelected
+                            ? true
+                            : isIndeterminate
+                              ? "indeterminate"
+                              : false
+                        }
+                        onCheckedChange={toggleAll}
+                      />
+                    </TableHead>
+                    <TableHead className="min-w-[180px]">
+                      <SimpleSortableHeader<SortableALA>
+                        label="Title"
+                        sortKey="title"
+                        currentSortKey={sortKey}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                    <TableHead className="min-w-[100px]">
+                      <SimpleSortableHeader<SortableALA>
+                        label="Subject"
+                        sortKey="subjectCode"
+                        currentSortKey={sortKey}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                    <TableHead className="min-w-[100px]">
+                      <SimpleSortableHeader<SortableALA>
+                        label="Class"
+                        sortKey="className"
+                        currentSortKey={sortKey}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                    <TableHead className="min-w-[150px]">
+                      <SimpleSortableHeader<SortableALA>
+                        label="Deadline"
+                        sortKey="deadline"
+                        currentSortKey={sortKey}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                    <TableHead className="min-w-[80px]">
+                      <SimpleSortableHeader<SortableALA>
+                        label="Marks"
+                        sortKey="maxMarks"
+                        currentSortKey={sortKey}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                    <TableHead className="min-w-[100px]">
+                      <SimpleSortableHeader<SortableALA>
+                        label="Type"
+                        sortKey="type"
+                        currentSortKey={sortKey}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                    <TableHead className="min-w-[100px]">
+                      <SimpleSortableHeader<SortableALA>
+                        label="Status"
+                        sortKey="statusLabel"
+                        currentSortKey={sortKey}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                      />
+                    </TableHead>
+                    <TableHead className="w-[70px] min-w-[70px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.map((ala) => {
+                    const status = getStatus(ala);
+                    return (
+                      <TableRow
+                        key={ala._id}
+                        className="group"
+                        data-state={
+                          isSelected(ala._id) ? "selected" : undefined
+                        }
+                      >
+                        <TableCell>
+                          <SelectRowCheckbox
+                            checked={isSelected(ala._id)}
+                            onCheckedChange={(checked) =>
+                              toggleRow(ala._id, checked)
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                              <FileText className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <span className="max-w-[180px] truncate font-medium">
+                              {ala.title}
                             </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className="border-violet-500/30 bg-violet-500/10 text-violet-600"
+                          >
+                            <BookMarked className="mr-1.5 h-3 w-3" />
+                            {ala.subjectOfferingId?.subjectId?.code || "-"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5 text-sm">
+                            <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
+                            {ala.subjectOfferingId?.classId?.name || "-"}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-muted-foreground flex items-center gap-1.5 text-sm tabular-nums">
+                            <Calendar className="h-3.5 w-3.5" />
+                            {formatDeadline(ala.deadline)}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+                          >
+                            <Award className="mr-1.5 h-3 w-3" />
+                            {ala.maxMarks}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {ala.isGroupSubmission ? (
+                            <Badge
+                              variant="outline"
+                              className="gap-1 border-blue-500/30 bg-blue-500/10 text-blue-600"
+                            >
+                              <Users className="h-3 w-3" />
+                              Group ({ala.maxGroupSize})
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline">Individual</Badge>
                           )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="opacity-0 group-hover:opacity-100"
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <Badge
+                              variant="outline"
+                              className={statusColorMap[status.color]}
                             >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <Link href={`/professor/alas/${ala._id}`}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Details
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setEditingALA(ala)}
-                            >
-                              <Pencil className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleToggleLock(ala._id)}
-                            >
-                              {ala.isLocked ? (
-                                <>
-                                  <Unlock className="mr-2 h-4 w-4" />
-                                  Unlock
-                                </>
-                              ) : (
-                                <>
-                                  <Lock className="mr-2 h-4 w-4" />
-                                  Lock
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() =>
-                                handleDeleteClick(ala._id, ala.title)
-                              }
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                              <span
+                                className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${statusDotMap[status.color]}`}
+                              />
+                              {status.label}
+                            </Badge>
+                            {ala.allowLateSubmission && (
+                              <span className="flex items-center gap-1 text-[10px] text-orange-600">
+                                <Clock className="h-2.5 w-2.5" />
+                                Late: -{ala.latePenaltyPercent}%
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem asChild>
+                                <Link href={`/professor/alas/${ala._id}`}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View Details
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => setEditingALA(ala)}
+                              >
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleToggleLock(ala._id)}
+                              >
+                                {ala.isLocked ? (
+                                  <>
+                                    <Unlock className="mr-2 h-4 w-4" />
+                                    Unlock
+                                  </>
+                                ) : (
+                                  <>
+                                    <Lock className="mr-2 h-4 w-4" />
+                                    Lock
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() =>
+                                  handleDeleteClick(ala._id, ala.title)
+                                }
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
             <PaginationControls
               pageIndex={currentPage}
               pageSize={pageSize}

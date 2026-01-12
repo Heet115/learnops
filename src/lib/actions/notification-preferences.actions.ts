@@ -82,7 +82,7 @@ export async function updateNotificationPreferences(
 // Check if user should receive a specific notification type
 export async function shouldNotify(
   userId: string,
-  type: NotificationType
+  type: NotificationType,
 ): Promise<boolean> {
   await connectDB();
 

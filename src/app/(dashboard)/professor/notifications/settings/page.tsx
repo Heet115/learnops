@@ -46,8 +46,10 @@ export default async function ProfessorNotificationSettingsPage() {
     >
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold">Notification Settings</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-xl font-bold sm:text-2xl">
+            Notification Settings
+          </h2>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Customize how and when you receive notifications
           </p>
         </div>

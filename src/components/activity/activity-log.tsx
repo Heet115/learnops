@@ -370,7 +370,7 @@ export function ActivityLog({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <div className="flex-1">
               <DataTableFilter
                 filters={filterConfigs}
@@ -397,15 +397,15 @@ export function ActivityLog({
             </div>
           ) : (
             <>
-              <div className="rounded-lg border">
+              <div className="overflow-x-auto rounded-lg border">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50 hover:bg-muted/50">
-                      <TableHead>User</TableHead>
-                      <TableHead>Action</TableHead>
-                      <TableHead>Entity</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="w-[50px]" />
+                      <TableHead className="min-w-[200px]">User</TableHead>
+                      <TableHead className="min-w-[120px]">Action</TableHead>
+                      <TableHead className="min-w-[100px]">Entity</TableHead>
+                      <TableHead className="min-w-[140px]">Date</TableHead>
+                      <TableHead className="w-[50px] min-w-[50px]" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>

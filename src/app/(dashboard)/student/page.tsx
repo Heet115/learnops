@@ -133,13 +133,13 @@ export default async function StudentDashboard() {
         <FadeIn>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-bold tracking-tight">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
                   Welcome back, {dbUser?.firstName || "Student"}
                 </h2>
                 <Sparkles className="h-5 w-5 text-yellow-500" />
               </div>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm sm:text-base">
                 Track your assignments, submissions, and grades
               </p>
             </div>
@@ -153,7 +153,7 @@ export default async function StudentDashboard() {
         </FadeIn>
 
         {/* Stats Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {statCards.map((stat, index) => (
             <SlideUp key={stat.title} delay={index * 75}>
               <Card

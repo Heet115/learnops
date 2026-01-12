@@ -163,19 +163,21 @@ export default async function StudentDeadlinesPage() {
       breadcrumbs={[{ label: "Student" }, { label: "Deadlines" }]}
     >
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold">Deadlines</h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-xl font-bold sm:text-2xl">Deadlines</h2>
               <Badge variant="secondary" className="text-sm">
                 {deadlines.upcoming.length + deadlines.overdue.length} Active
               </Badge>
             </div>
-            <p className="text-muted-foreground">Track your ALA deadlines</p>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Track your ALA deadlines
+            </p>
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 md:grid-cols-3">
           {statCards.map((stat) => (
             <Card
               key={stat.title}

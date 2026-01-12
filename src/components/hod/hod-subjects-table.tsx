@@ -146,7 +146,7 @@ export function HodSubjectsTable({ subjects }: HodSubjectsTableProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <div className="flex-1">
           <DataTableFilter
             filters={filterConfigs}
@@ -173,123 +173,129 @@ export function HodSubjectsTable({ subjects }: HodSubjectsTableProps) {
         </div>
       ) : (
         <>
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <SimpleSortableHeader
-                  label="Code"
-                  sortKey="code"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader
-                  label="Subject Name"
-                  sortKey="name"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader
-                  label="Course"
-                  sortKey="courseCode"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader
-                  label="Semester"
-                  sortKey="semesterName"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader
-                  label="Credits"
-                  sortKey="credits"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  className="text-center"
-                />
-                <SimpleSortableHeader
-                  label="Offerings"
-                  sortKey="offeringCount"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  className="text-center"
-                />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedData.map((sub) => (
-                <TableRow key={sub._id} className="group">
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
-                        <Hash className="h-3.5 w-3.5 text-blue-600" />
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className="border-blue-500/30 bg-blue-500/10 font-mono text-blue-600"
-                      >
-                        {sub.code}
-                      </Badge>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-0.5">
-                      <p className="leading-none font-medium">{sub.name}</p>
-                      <p className="text-muted-foreground text-xs">Subject</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className="border-violet-500/30 bg-violet-500/10 text-violet-600"
-                    >
-                      <Layers className="mr-1.5 h-3 w-3" />
-                      {sub.semesterId?.courseId?.code || "N/A"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
-                      <Calendar className="h-3.5 w-3.5" />
-                      {sub.semesterId?.name || "N/A"}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge
-                      variant="outline"
-                      className="border-amber-500/30 bg-amber-500/10 text-amber-600"
-                    >
-                      <Award className="mr-1.5 h-3 w-3" />
-                      {sub.credits}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {sub.offeringCount > 0 ? (
-                      <Badge
-                        variant="outline"
-                        className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-                      >
-                        <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                        {sub.offeringCount}
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="border-muted-foreground/30 text-muted-foreground"
-                      >
-                        0
-                      </Badge>
-                    )}
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <SimpleSortableHeader
+                    label="Code"
+                    sortKey="code"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[120px]"
+                  />
+                  <SimpleSortableHeader
+                    label="Subject Name"
+                    sortKey="name"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[180px]"
+                  />
+                  <SimpleSortableHeader
+                    label="Course"
+                    sortKey="courseCode"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[100px]"
+                  />
+                  <SimpleSortableHeader
+                    label="Semester"
+                    sortKey="semesterName"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[100px]"
+                  />
+                  <SimpleSortableHeader
+                    label="Credits"
+                    sortKey="credits"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[80px] text-center"
+                  />
+                  <SimpleSortableHeader
+                    label="Offerings"
+                    sortKey="offeringCount"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[90px] text-center"
+                  />
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((sub) => (
+                  <TableRow key={sub._id} className="group">
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                          <Hash className="h-3.5 w-3.5 text-blue-600" />
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className="border-blue-500/30 bg-blue-500/10 font-mono text-blue-600"
+                        >
+                          {sub.code}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-0.5">
+                        <p className="leading-none font-medium">{sub.name}</p>
+                        <p className="text-muted-foreground text-xs">Subject</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className="border-violet-500/30 bg-violet-500/10 text-violet-600"
+                      >
+                        <Layers className="mr-1.5 h-3 w-3" />
+                        {sub.semesterId?.courseId?.code || "N/A"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {sub.semesterId?.name || "N/A"}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge
+                        variant="outline"
+                        className="border-amber-500/30 bg-amber-500/10 text-amber-600"
+                      >
+                        <Award className="mr-1.5 h-3 w-3" />
+                        {sub.credits}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {sub.offeringCount > 0 ? (
+                        <Badge
+                          variant="outline"
+                          className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                        >
+                          <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          {sub.offeringCount}
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className="border-muted-foreground/30 text-muted-foreground"
+                        >
+                          0
+                        </Badge>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
           <PaginationControls
             pageIndex={currentPage}
             pageSize={pageSize}

@@ -52,7 +52,9 @@ export function AnnouncementsList({ announcements }: AnnouncementsListProps) {
     const result = await toggleAnnouncementPublish(id);
     if (result.success) {
       toast.success(
-        result.isPublished ? "Announcement published" : "Announcement unpublished"
+        result.isPublished
+          ? "Announcement published"
+          : "Announcement unpublished",
       );
     } else {
       toast.error(result.error || "Failed to update");

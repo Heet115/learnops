@@ -171,7 +171,7 @@ export default async function StudentNotificationsPage() {
   };
 
   const unreadCount = notifications.filter(
-    (n: { isRead: boolean }) => !n.isRead
+    (n: { isRead: boolean }) => !n.isRead,
   ).length;
 
   return (
@@ -181,19 +181,19 @@ export default async function StudentNotificationsPage() {
       breadcrumbs={[{ label: "Student" }, { label: "Notifications" }]}
     >
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10">
               <Bell className="h-5 w-5 text-violet-600" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Notifications</h2>
-              <p className="text-muted-foreground">
+              <h2 className="text-xl font-bold sm:text-2xl">Notifications</h2>
+              <p className="text-muted-foreground text-sm sm:text-base">
                 Stay updated with your ALAs and submissions
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {unreadCount > 0 && (
               <Badge variant="secondary">{unreadCount} unread</Badge>
             )}

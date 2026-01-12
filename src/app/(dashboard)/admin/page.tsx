@@ -119,16 +119,16 @@ export default async function AdminDashboard() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-bold tracking-tight">
+              <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
                 Welcome back, {dbUser?.firstName || "Admin"}
               </h2>
               <Sparkles className="h-5 w-5 text-yellow-500" />
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm sm:text-base">
               Here&apos;s what&apos;s happening in your institution
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {quickActions.map((action) => (
               <Button key={action.label} variant="outline" size="sm" asChild>
                 <Link href={action.href}>
@@ -141,7 +141,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {statCards.map((stat) => (
             <Card
               key={stat.title}
@@ -161,8 +161,8 @@ export default async function AdminDashboard() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-1">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold tabular-nums">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <span className="text-2xl font-bold tabular-nums sm:text-3xl">
                     {stat.value}
                   </span>
                   <Badge
@@ -173,7 +173,7 @@ export default async function AdminDashboard() {
                     Active
                   </Badge>
                 </div>
-                <p className="text-muted-foreground text-xs">
+                <p className="text-muted-foreground line-clamp-1 text-xs">
                   {stat.description}
                 </p>
               </CardContent>
@@ -185,14 +185,18 @@ export default async function AdminDashboard() {
         <div className="grid gap-4 lg:grid-cols-2">
           {/* Recent Users */}
           <Card className="flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between border-b">
+            <CardHeader className="flex flex-col gap-3 border-b sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
                   <Users className="text-primary h-4 w-4" />
                 </div>
                 <div>
-                  <CardTitle>Recent Users</CardTitle>
-                  <CardDescription>Newly created accounts</CardDescription>
+                  <CardTitle className="text-base sm:text-lg">
+                    Recent Users
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
+                    Newly created accounts
+                  </CardDescription>
                 </div>
               </div>
               <Button variant="ghost" size="sm" asChild>
@@ -226,7 +230,7 @@ export default async function AdminDashboard() {
                     }) => (
                       <div
                         key={u._id}
-                        className="group/item bg-card hover:bg-accent/50 flex items-center justify-between rounded-lg border p-3 transition-all hover:shadow-sm"
+                        className="group/item bg-card hover:bg-accent/50 flex flex-col gap-2 rounded-lg border p-3 transition-all hover:shadow-sm sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="flex items-center gap-3">
                           <UserAvatar
@@ -234,16 +238,16 @@ export default async function AdminDashboard() {
                             image={u.profileImage}
                             size="sm"
                           />
-                          <div className="space-y-0.5">
-                            <p className="text-sm leading-none font-medium">
+                          <div className="min-w-0 space-y-0.5">
+                            <p className="truncate text-sm leading-none font-medium">
                               {u.firstName} {u.lastName}
                             </p>
-                            <p className="text-muted-foreground text-xs">
+                            <p className="text-muted-foreground truncate text-xs">
                               {u.email}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 pl-11 sm:pl-0">
                           <RoleBadge
                             role={
                               u.role as

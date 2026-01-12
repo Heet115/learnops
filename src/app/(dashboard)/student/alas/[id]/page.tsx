@@ -162,7 +162,7 @@ export default async function StudentALAPage({ params }: PageProps) {
       ]}
     >
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/student/alas">
               <ArrowLeft className="h-4 w-4" />
@@ -172,19 +172,19 @@ export default async function StudentALAPage({ params }: PageProps) {
             <BookOpen className="h-5 w-5 text-blue-600" />
           </div>
           <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold">{ala.title}</h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-xl font-bold sm:text-2xl">{ala.title}</h2>
               {getStatusBadge()}
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm sm:text-base">
               {ala.subjectOfferingId?.subjectId?.code} -{" "}
               {ala.subjectOfferingId?.subjectId?.name}
             </p>
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="space-y-6 md:col-span-2">
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="space-y-6 lg:col-span-2">
             <Card>
               <CardHeader className="border-b">
                 <div className="flex items-center gap-2">

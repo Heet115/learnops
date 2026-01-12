@@ -273,7 +273,7 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <div className="flex-1">
           <DataTableFilter
             filters={filterConfigs}
@@ -300,195 +300,203 @@ export function StudentALAsList({ alas }: StudentALAsListProps) {
         </div>
       ) : (
         <>
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <SimpleSortableHeader<SortableALA>
-                  label="Title"
-                  sortKey="title"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader<SortableALA>
-                  label="Subject"
-                  sortKey="subjectCode"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader<SortableALA>
-                  label="Deadline"
-                  sortKey="deadline"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader<SortableALA>
-                  label="Marks"
-                  sortKey="maxMarks"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader<SortableALA>
-                  label="Type"
-                  sortKey="type"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <SimpleSortableHeader<SortableALA>
-                  label="Status"
-                  sortKey="statusLabel"
-                  currentSortKey={sortKey}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                <TableHead className="w-[100px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedData.map((ala) => {
-                const status = getStatus(ala);
-                const config = statusConfig[status];
-                const deadline = formatDeadline(ala.deadline);
-                const now = new Date();
-                const deadlineDate = new Date(ala.deadline);
-                const lateDeadline = ala.lateDeadline
-                  ? new Date(ala.lateDeadline)
-                  : null;
-                const isInLateWindow =
-                  ala.allowLateSubmission &&
-                  lateDeadline &&
-                  deadlineDate < now &&
-                  lateDeadline > now;
-                const canSubmit =
-                  !ala.isLocked &&
-                  (deadlineDate > now || isInLateWindow) &&
-                  ala.submission?.status !== "submitted" &&
-                  ala.submission?.status !== "graded";
+          <div className="overflow-x-auto rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <SimpleSortableHeader<SortableALA>
+                    label="Title"
+                    sortKey="title"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[200px]"
+                  />
+                  <SimpleSortableHeader<SortableALA>
+                    label="Subject"
+                    sortKey="subjectCode"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[100px]"
+                  />
+                  <SimpleSortableHeader<SortableALA>
+                    label="Deadline"
+                    sortKey="deadline"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[120px]"
+                  />
+                  <SimpleSortableHeader<SortableALA>
+                    label="Marks"
+                    sortKey="maxMarks"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[80px]"
+                  />
+                  <SimpleSortableHeader<SortableALA>
+                    label="Type"
+                    sortKey="type"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[100px]"
+                  />
+                  <SimpleSortableHeader<SortableALA>
+                    label="Status"
+                    sortKey="statusLabel"
+                    currentSortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="min-w-[100px]"
+                  />
+                  <TableHead className="min-w-[100px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map((ala) => {
+                  const status = getStatus(ala);
+                  const config = statusConfig[status];
+                  const deadline = formatDeadline(ala.deadline);
+                  const now = new Date();
+                  const deadlineDate = new Date(ala.deadline);
+                  const lateDeadline = ala.lateDeadline
+                    ? new Date(ala.lateDeadline)
+                    : null;
+                  const isInLateWindow =
+                    ala.allowLateSubmission &&
+                    lateDeadline &&
+                    deadlineDate < now &&
+                    lateDeadline > now;
+                  const canSubmit =
+                    !ala.isLocked &&
+                    (deadlineDate > now || isInLateWindow) &&
+                    ala.submission?.status !== "submitted" &&
+                    ala.submission?.status !== "graded";
 
-                return (
-                  <TableRow key={ala._id} className="group">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
-                          <FileText className="h-4 w-4 text-blue-600" />
+                  return (
+                    <TableRow key={ala._id} className="group">
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                            <FileText className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <span className="max-w-[180px] truncate font-medium">
+                            {ala.title}
+                          </span>
                         </div>
-                        <span className="max-w-[180px] truncate font-medium">
-                          {ala.title}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className="border-violet-500/30 bg-violet-500/10 text-violet-600"
-                      >
-                        <BookMarked className="mr-1.5 h-3 w-3" />
-                        {ala.subjectOfferingId?.subjectId?.code || "-"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div
-                        className={`flex items-center gap-1.5 text-sm tabular-nums ${deadline.urgent ? "font-medium text-rose-600" : "text-muted-foreground"}`}
-                      >
-                        <Calendar className="h-3.5 w-3.5" />
-                        {deadline.text}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {status === "graded" ? (
-                        <div className="flex flex-col gap-0.5">
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className="border-violet-500/30 bg-violet-500/10 text-violet-600"
+                        >
+                          <BookMarked className="mr-1.5 h-3 w-3" />
+                          {ala.subjectOfferingId?.subjectId?.code || "-"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div
+                          className={`flex items-center gap-1.5 text-sm tabular-nums ${deadline.urgent ? "font-medium text-rose-600" : "text-muted-foreground"}`}
+                        >
+                          <Calendar className="h-3.5 w-3.5" />
+                          {deadline.text}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {status === "graded" ? (
+                          <div className="flex flex-col gap-0.5">
+                            <Badge
+                              variant="outline"
+                              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                            >
+                              <Award className="mr-1.5 h-3 w-3" />
+                              {ala.submission?.isLate &&
+                              ala.submission?.adjustedMarks !== undefined
+                                ? ala.submission.adjustedMarks
+                                : ala.submission?.marks}
+                              /{ala.maxMarks}
+                            </Badge>
+                            {ala.submission?.isLate &&
+                            ala.submission?.latePenaltyApplied ? (
+                              <span className="text-[10px] text-orange-600">
+                                Original: {ala.submission.marks} (-
+                                {ala.submission.latePenaltyApplied}%)
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : (
                           <Badge
                             variant="outline"
-                            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                            className="border-amber-500/30 bg-amber-500/10 text-amber-600"
                           >
                             <Award className="mr-1.5 h-3 w-3" />
-                            {ala.submission?.isLate &&
-                            ala.submission?.adjustedMarks !== undefined
-                              ? ala.submission.adjustedMarks
-                              : ala.submission?.marks}
-                            /{ala.maxMarks}
-                          </Badge>
-                          {ala.submission?.isLate &&
-                          ala.submission?.latePenaltyApplied ? (
-                            <span className="text-[10px] text-orange-600">
-                              Original: {ala.submission.marks} (-
-                              {ala.submission.latePenaltyApplied}%)
-                            </span>
-                          ) : null}
-                        </div>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="border-amber-500/30 bg-amber-500/10 text-amber-600"
-                        >
-                          <Award className="mr-1.5 h-3 w-3" />
-                          {ala.maxMarks}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {ala.isGroupSubmission ? (
-                        <Badge
-                          variant="outline"
-                          className="gap-1 border-blue-500/30 bg-blue-500/10 text-blue-600"
-                        >
-                          <Users className="h-3 w-3" />
-                          Group
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">Individual</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <Badge variant="outline" className={config.className}>
-                          <span
-                            className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${config.dotColor}`}
-                          />
-                          {config.label}
-                        </Badge>
-                        {/* Show late submission indicator for submitted/graded late submissions */}
-                        {ala.submission?.isLate && (
-                          <Badge
-                            variant="outline"
-                            className="border-orange-500/30 bg-orange-500/10 text-[10px] text-orange-600"
-                          >
-                            <Clock className="mr-1 h-2.5 w-2.5" />
-                            Late
+                            {ala.maxMarks}
                           </Badge>
                         )}
-                        {/* Show late penalty info for pending ALAs with late submission allowed */}
-                        {status === "pending" &&
-                          ala.allowLateSubmission &&
-                          ala.latePenaltyPercent && (
-                            <span className="text-muted-foreground text-[10px]">
-                              Late: -{ala.latePenaltyPercent}%
-                            </span>
+                      </TableCell>
+                      <TableCell>
+                        {ala.isGroupSubmission ? (
+                          <Badge
+                            variant="outline"
+                            className="gap-1 border-blue-500/30 bg-blue-500/10 text-blue-600"
+                          >
+                            <Users className="h-3 w-3" />
+                            Group
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">Individual</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <Badge variant="outline" className={config.className}>
+                            <span
+                              className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${config.dotColor}`}
+                            />
+                            {config.label}
+                          </Badge>
+                          {/* Show late submission indicator for submitted/graded late submissions */}
+                          {ala.submission?.isLate && (
+                            <Badge
+                              variant="outline"
+                              className="border-orange-500/30 bg-orange-500/10 text-[10px] text-orange-600"
+                            >
+                              <Clock className="mr-1 h-2.5 w-2.5" />
+                              Late
+                            </Badge>
                           )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        asChild
-                        variant={canSubmit ? "default" : "outline"}
-                        size="sm"
-                        className="opacity-0 transition-opacity group-hover:opacity-100"
-                      >
-                        <Link href={`/student/alas/${ala._id}`}>
-                          {canSubmit ? "Submit" : "View"}
-                          <ArrowRight className="ml-1 h-3 w-3" />
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                          {/* Show late penalty info for pending ALAs with late submission allowed */}
+                          {status === "pending" &&
+                            ala.allowLateSubmission &&
+                            ala.latePenaltyPercent && (
+                              <span className="text-muted-foreground text-[10px]">
+                                Late: -{ala.latePenaltyPercent}%
+                              </span>
+                            )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          asChild
+                          variant={canSubmit ? "default" : "outline"}
+                          size="sm"
+                          className="opacity-0 transition-opacity group-hover:opacity-100"
+                        >
+                          <Link href={`/student/alas/${ala._id}`}>
+                            {canSubmit ? "Submit" : "View"}
+                            <ArrowRight className="ml-1 h-3 w-3" />
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
           <PaginationControls
             pageIndex={currentPage}
             pageSize={pageSize}

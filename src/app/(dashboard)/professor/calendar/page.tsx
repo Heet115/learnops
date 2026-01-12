@@ -46,8 +46,8 @@ export default async function ProfessorCalendarPage() {
     >
       <div className="space-y-6">
         <div className="space-y-1">
-          <h2 className="text-2xl font-bold">Calendar</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-xl font-bold sm:text-2xl">Calendar</h2>
+          <p className="text-muted-foreground text-sm sm:text-base">
             View all your ALA deadlines across classes
           </p>
         </div>

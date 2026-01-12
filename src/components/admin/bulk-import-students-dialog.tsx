@@ -701,21 +701,21 @@ export function BulkImportStudentsDialog({
 
           {step === "results" && importResult && (
             <div className="space-y-4 p-1 py-4">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-card rounded-xl border p-3 text-center">
-                  <p className="text-2xl font-bold">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div className="bg-card rounded-xl border p-2 text-center sm:p-3">
+                  <p className="text-xl font-bold sm:text-2xl">
                     {importResult.totalProcessed}
                   </p>
                   <p className="text-muted-foreground text-xs">Total</p>
                 </div>
-                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-center">
-                  <p className="text-2xl font-bold text-emerald-600">
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-2 text-center sm:p-3">
+                  <p className="text-xl font-bold text-emerald-600 sm:text-2xl">
                     {importResult.successCount}
                   </p>
                   <p className="text-muted-foreground text-xs">Success</p>
                 </div>
-                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-center">
-                  <p className="text-2xl font-bold text-red-600">
+                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-2 text-center sm:p-3">
+                  <p className="text-xl font-bold text-red-600 sm:text-2xl">
                     {importResult.failedCount}
                   </p>
                   <p className="text-muted-foreground text-xs">Failed</p>

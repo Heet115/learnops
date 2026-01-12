@@ -45,16 +45,16 @@ export default async function HodAnnouncementsPage() {
       breadcrumbs={[{ label: "HOD", href: "/hod" }, { label: "Announcements" }]}
     >
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10">
               <Megaphone className="h-5 w-5 text-violet-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">
+              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
                 Announcements
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm sm:text-base">
                 View and create announcements
               </p>
             </div>

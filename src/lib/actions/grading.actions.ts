@@ -185,13 +185,14 @@ export async function gradeSubmission(
   );
 
   // Notify student and all group members about grading
-  const { notifySubmissionGraded } = await import("@/lib/actions/notification.actions");
+  const { notifySubmissionGraded } =
+    await import("@/lib/actions/notification.actions");
   await notifySubmissionGraded(
     submissionId,
     ala.title,
     data.marks,
     ala.maxMarks,
-    submission.isLate ? adjustedMarks : undefined
+    submission.isLate ? adjustedMarks : undefined,
   );
 
   revalidatePath("/professor/submissions");
@@ -264,7 +265,8 @@ export async function rejectSubmission(submissionId: string, reason: string) {
   );
 
   // Notify student and all group members about rejection
-  const { notifySubmissionRejected } = await import("@/lib/actions/notification.actions");
+  const { notifySubmissionRejected } =
+    await import("@/lib/actions/notification.actions");
   await notifySubmissionRejected(submissionId, ala.title, reason);
 
   revalidatePath("/professor/submissions");

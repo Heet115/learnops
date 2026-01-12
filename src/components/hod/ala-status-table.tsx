@@ -238,7 +238,7 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
         />
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <div className="flex-1">
             <DataTableFilter
               filters={filterConfigs}
@@ -263,145 +263,152 @@ export function ALAStatusTable({ data }: ALAStatusTableProps) {
           />
         ) : (
           <>
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <SimpleSortableHeader<SortableALAStatus>
-                    label="ALA"
-                    sortKey="title"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<SortableALAStatus>
-                    label="Subject"
-                    sortKey="subject"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<SortableALAStatus>
-                    label="Class"
-                    sortKey="class"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<SortableALAStatus>
-                    label="Deadline"
-                    sortKey="deadline"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<SortableALAStatus>
-                    label="Status"
-                    sortKey="statusLabel"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<SortableALAStatus>
-                    label="Progress"
-                    sortKey="graded"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                    className="text-right"
-                  />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((ala) => (
-                  <TableRow
-                    key={ala._id}
-                    className="group hover:bg-muted/50 transition-colors"
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
-                          <FileText className="h-4 w-4 text-blue-600" />
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <SimpleSortableHeader<SortableALAStatus>
+                      label="ALA"
+                      sortKey="title"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      className="min-w-[180px]"
+                    />
+                    <SimpleSortableHeader<SortableALAStatus>
+                      label="Subject"
+                      sortKey="subject"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      className="min-w-[100px]"
+                    />
+                    <SimpleSortableHeader<SortableALAStatus>
+                      label="Class"
+                      sortKey="class"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      className="min-w-[100px]"
+                    />
+                    <SimpleSortableHeader<SortableALAStatus>
+                      label="Deadline"
+                      sortKey="deadline"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      className="min-w-[130px]"
+                    />
+                    <SimpleSortableHeader<SortableALAStatus>
+                      label="Status"
+                      sortKey="statusLabel"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      className="min-w-[100px]"
+                    />
+                    <SimpleSortableHeader<SortableALAStatus>
+                      label="Progress"
+                      sortKey="graded"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      className="min-w-[150px] text-right"
+                    />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.map((ala) => (
+                    <TableRow
+                      key={ala._id}
+                      className="group hover:bg-muted/50 transition-colors"
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                            <FileText className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <span className="max-w-[180px] truncate font-medium">
+                            {ala.title}
+                          </span>
                         </div>
-                        <span className="max-w-[180px] truncate font-medium">
-                          {ala.title}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className="border-violet-500/30 bg-violet-500/10 text-violet-600"
-                      >
-                        <BookMarked className="mr-1.5 h-3 w-3" />
-                        {ala.subject}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 text-sm">
-                        <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
-                        {ala.class}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-muted-foreground flex items-center gap-1.5 text-sm tabular-nums">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {formatDeadline(ala.deadline)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {ala.isLocked ? (
+                      </TableCell>
+                      <TableCell>
                         <Badge
                           variant="outline"
-                          className="border-muted-foreground/30 text-muted-foreground gap-1"
+                          className="border-violet-500/30 bg-violet-500/10 text-violet-600"
                         >
-                          <Lock className="h-3 w-3" />
-                          Locked
+                          <BookMarked className="mr-1.5 h-3 w-3" />
+                          {ala.subject}
                         </Badge>
-                      ) : ala.isPast ? (
-                        <Badge
-                          variant="outline"
-                          className="gap-1 border-red-500/30 bg-red-500/10 text-red-600"
-                        >
-                          <AlertCircle className="h-3 w-3" />
-                          Overdue
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-                        >
-                          <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          Active
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Badge
-                          variant="outline"
-                          className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 tabular-nums"
-                        >
-                          {ala.graded}
-                        </Badge>
-                        <span className="text-muted-foreground">/</span>
-                        <span className="tabular-nums">{ala.total}</span>
-                        {ala.pending > 0 && (
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 text-sm">
+                          <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
+                          {ala.class}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-muted-foreground flex items-center gap-1.5 text-sm tabular-nums">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {formatDeadline(ala.deadline)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {ala.isLocked ? (
                           <Badge
                             variant="outline"
-                            className="ml-1 border-amber-500/30 bg-amber-500/10 text-amber-600"
+                            className="border-muted-foreground/30 text-muted-foreground gap-1"
                           >
-                            {ala.pending} pending
+                            <Lock className="h-3 w-3" />
+                            Locked
+                          </Badge>
+                        ) : ala.isPast ? (
+                          <Badge
+                            variant="outline"
+                            className="gap-1 border-red-500/30 bg-red-500/10 text-red-600"
+                          >
+                            <AlertCircle className="h-3 w-3" />
+                            Overdue
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                          >
+                            <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            Active
                           </Badge>
                         )}
-                        {ala.graded === ala.total && ala.total > 0 && (
-                          <CheckCircle className="ml-1 h-4 w-4 text-emerald-500" />
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Badge
+                            variant="outline"
+                            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 tabular-nums"
+                          >
+                            {ala.graded}
+                          </Badge>
+                          <span className="text-muted-foreground">/</span>
+                          <span className="tabular-nums">{ala.total}</span>
+                          {ala.pending > 0 && (
+                            <Badge
+                              variant="outline"
+                              className="ml-1 border-amber-500/30 bg-amber-500/10 text-amber-600"
+                            >
+                              {ala.pending} pending
+                            </Badge>
+                          )}
+                          {ala.graded === ala.total && ala.total > 0 && (
+                            <CheckCircle className="ml-1 h-4 w-4 text-emerald-500" />
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
             <PaginationControls
               pageIndex={currentPage}
               pageSize={pageSize}

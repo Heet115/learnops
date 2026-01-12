@@ -316,7 +316,7 @@ export function StudentProfileDialog({
               </TabsList>
 
               <TabsContent value="identity" className="mt-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="studentId" className="text-sm">
                       Student ID <span className="text-destructive">*</span>
@@ -366,7 +366,7 @@ export function StudentProfileDialog({
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="fatherName" className="text-sm">
                       Father&apos;s Name
@@ -397,7 +397,7 @@ export function StudentProfileDialog({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                   <div className="space-y-2">
                     <Label htmlFor="gender" className="text-sm">
                       Gender
@@ -432,7 +432,7 @@ export function StudentProfileDialog({
                       placeholder="Select date"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="col-span-2 space-y-2 sm:col-span-1">
                     <Label htmlFor="bloodGroup" className="text-sm">
                       Blood Group
                     </Label>
@@ -459,7 +459,7 @@ export function StudentProfileDialog({
               </TabsContent>
 
               <TabsContent value="academic" className="mt-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="courseId" className="text-sm">
                       Course
@@ -513,7 +513,7 @@ export function StudentProfileDialog({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="batch" className="text-sm">
                       Batch
@@ -547,7 +547,7 @@ export function StudentProfileDialog({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="rollNumber" className="text-sm">
                       Roll Number
@@ -595,7 +595,7 @@ export function StudentProfileDialog({
                     disabled={isLoading}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="primaryMobile" className="text-sm">
                       Primary Mobile
@@ -670,7 +670,7 @@ export function StudentProfileDialog({
                     disabled={isLoading}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="presentCity" className="text-sm">
                       City / District
@@ -706,7 +706,7 @@ export function StudentProfileDialog({
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="presentCountry" className="text-sm">
                       Country

@@ -34,10 +34,10 @@ export default async function StudentAnnouncementsPage() {
   };
 
   const urgentCount = announcements.filter(
-    (a: { priority: string }) => a.priority === "urgent"
+    (a: { priority: string }) => a.priority === "urgent",
   ).length;
   const highPriorityCount = announcements.filter(
-    (a: { priority: string }) => a.priority === "high"
+    (a: { priority: string }) => a.priority === "high",
   ).length;
 
   return (
@@ -50,21 +50,21 @@ export default async function StudentAnnouncementsPage() {
       ]}
     >
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10">
               <Megaphone className="h-5 w-5 text-violet-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">
+              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
                 Announcements
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm sm:text-base">
                 Stay updated with important messages
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {urgentCount > 0 && (
               <Badge
                 variant="outline"

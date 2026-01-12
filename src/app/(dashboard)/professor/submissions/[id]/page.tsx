@@ -135,25 +135,27 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
       ]}
     >
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/professor/submissions">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
           <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold">
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-xl font-bold sm:text-2xl">
                 {student?.firstName} {student?.lastName}
               </h2>
               {getStatusBadge()}
             </div>
-            <p className="text-muted-foreground">{ala?.title}</p>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              {ala?.title}
+            </p>
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="space-y-6 md:col-span-2">
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="space-y-6 lg:col-span-2">
             {/* Submitted Files */}
             <Card>
               <CardHeader className="border-b">

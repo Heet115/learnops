@@ -44,8 +44,10 @@ export default async function StudentTimelinePage() {
               <History className="h-5 w-5 text-violet-600" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Submission Timeline</h2>
-              <p className="text-muted-foreground">
+              <h2 className="text-xl font-bold sm:text-2xl">
+                Submission Timeline
+              </h2>
+              <p className="text-muted-foreground text-sm sm:text-base">
                 Track your submission history and status changes
               </p>
             </div>

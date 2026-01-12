@@ -143,22 +143,22 @@ export default async function ProfessorSubjectsPage() {
       breadcrumbs={[{ label: "Professor" }, { label: "My Subjects" }]}
     >
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-bold">My Subjects</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-xl font-bold sm:text-2xl">My Subjects</h2>
               <Badge variant="secondary" className="gap-1">
                 <TrendingUp className="h-3 w-3" />
                 {subjects.length} total
               </Badge>
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm sm:text-base">
               Subjects assigned to you this semester
             </p>
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {statCards.map((stat) => (
             <Card
               key={stat.title}
@@ -199,7 +199,7 @@ export default async function ProfessorSubjectsPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {subjects.map(
               (offering: {
                 _id: string;

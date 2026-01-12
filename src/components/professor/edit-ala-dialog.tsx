@@ -164,7 +164,7 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label className="flex items-center gap-2">
                   <Calendar className="text-muted-foreground h-4 w-4" />
@@ -215,7 +215,7 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
 
             {allowLateSubmission && (
               <div className="bg-muted/30 space-y-4 rounded-lg border p-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="grid gap-2">
                     <Label>Late Deadline</Label>
                     <DateTimePicker
@@ -321,7 +321,10 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
                         onChange={() => setGroupFormation("student")}
                         className="h-4 w-4"
                       />
-                      <label htmlFor="edit-formation-student" className="text-sm">
+                      <label
+                        htmlFor="edit-formation-student"
+                        className="text-sm"
+                      >
                         Students form groups
                       </label>
                     </div>
@@ -335,7 +338,10 @@ export function EditALADialog({ ala, open, onOpenChange }: EditALADialogProps) {
                         onChange={() => setGroupFormation("professor")}
                         className="h-4 w-4"
                       />
-                      <label htmlFor="edit-formation-professor" className="text-sm">
+                      <label
+                        htmlFor="edit-formation-professor"
+                        className="text-sm"
+                      >
                         Professor assigns groups
                       </label>
                     </div>

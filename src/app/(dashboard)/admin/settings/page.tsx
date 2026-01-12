@@ -67,13 +67,13 @@ export default async function AdminSettingsPage() {
     >
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold">Settings</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-xl font-bold sm:text-2xl">Settings</h2>
+          <p className="text-muted-foreground text-sm sm:text-base">
             System configuration and information
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           {systemInfo.map((info) => (
             <Card key={info.title}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -155,7 +155,7 @@ export default async function AdminSettingsPage() {
             <CardDescription>Common administrative tasks</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-lg border p-4">
                 <h4 className="mb-1 font-medium">Deadline Reminders</h4>
                 <p className="text-muted-foreground mb-3 text-sm">

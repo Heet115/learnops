@@ -25,7 +25,7 @@ async function requireAnnouncementCreator() {
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!role || !["admin", "hod", "professor"].includes(role)) {
     throw new Error(
-      "Unauthorized: Only admin, HOD, or professor can create announcements"
+      "Unauthorized: Only admin, HOD, or professor can create announcements",
     );
   }
   return { clerkId: userId, role: role as "admin" | "hod" | "professor" };
@@ -41,7 +41,7 @@ async function getUserDbId(clerkId: string) {
 // Helper to get target name for display
 async function getTargetName(
   targetType: string,
-  targetId?: mongoose.Types.ObjectId
+  targetId?: mongoose.Types.ObjectId,
 ): Promise<string> {
   if (targetType === "all") return "All Users";
 
@@ -50,9 +50,7 @@ async function getTargetName(
   await connectDB();
 
   if (targetType === "department") {
-    const dept = await Department.findById(targetId)
-      .select("name code")
-      .lean();
+    const dept = await Department.findById(targetId).select("name code").lean();
     return dept ? `${dept.name} (${dept.code})` : "Department";
   }
   if (targetType === "class") {
@@ -175,9 +173,7 @@ export async function getAnnouncementsForUser() {
     const now = new Date();
 
     // Build target conditions based on user role and assignments
-    const targetConditions: Record<string, unknown>[] = [
-      { targetType: "all" },
-    ];
+    const targetConditions: Record<string, unknown>[] = [{ targetType: "all" }];
 
     // Department-based targeting
     if (user.departmentId) {
@@ -322,7 +318,7 @@ export async function getAnnouncementsForUser() {
       announcements.map(async (ann) => ({
         ...ann,
         targetName: await getTargetName(ann.targetType, ann.targetId),
-      }))
+      })),
     );
 
     return JSON.parse(JSON.stringify(enrichedAnnouncements));
@@ -352,7 +348,7 @@ export async function getAllAnnouncements() {
       announcements.map(async (ann) => ({
         ...ann,
         targetName: await getTargetName(ann.targetType, ann.targetId),
-      }))
+      })),
     );
 
     return {
@@ -380,7 +376,7 @@ export async function getMyAnnouncements() {
       announcements.map(async (ann) => ({
         ...ann,
         targetName: await getTargetName(ann.targetType, ann.targetId),
-      }))
+      })),
     );
 
     return {
@@ -408,7 +404,10 @@ export async function getAnnouncementById(id: string) {
 
   const enriched = {
     ...announcement,
-    targetName: await getTargetName(announcement.targetType, announcement.targetId),
+    targetName: await getTargetName(
+      announcement.targetType,
+      announcement.targetId,
+    ),
   };
 
   return JSON.parse(JSON.stringify(enriched));
@@ -417,7 +416,7 @@ export async function getAnnouncementById(id: string) {
 // Update announcement
 export async function updateAnnouncement(
   id: string,
-  input: UpdateAnnouncementInput
+  input: UpdateAnnouncementInput,
 ) {
   try {
     const { clerkId, role } = await requireAnnouncementCreator();
@@ -447,7 +446,8 @@ export async function updateAnnouncement(
     if (validated.title) updateData.title = validated.title;
     if (validated.content) updateData.message = validated.content;
     if (validated.priority) updateData.priority = validated.priority;
-    if (validated.isActive !== undefined) updateData.isActive = validated.isActive;
+    if (validated.isActive !== undefined)
+      updateData.isActive = validated.isActive;
 
     if (validated.expiresAt) {
       updateData.expiresAt = new Date(validated.expiresAt);
@@ -523,7 +523,7 @@ export async function toggleAnnouncementPublish(id: string) {
     const updated = await Announcement.findByIdAndUpdate(
       id,
       { isPublished: !announcement.isPublished },
-      { new: true }
+      { new: true },
     );
 
     revalidatePath("/admin/announcements");

@@ -383,8 +383,8 @@ export function SubjectOfferingsTable({
   return (
     <>
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex-1">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 flex-1">
             <DataTableFilter
               filters={filterConfigs}
               values={filters}
@@ -418,7 +418,7 @@ export function SubjectOfferingsTable({
           </div>
         ) : (
           <>
-            <div className="rounded-lg border">
+            <div className="overflow-x-auto rounded-lg border">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50 hover:bg-muted/50">

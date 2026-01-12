@@ -179,7 +179,7 @@ export function GradingForm({
           <div>
             <p className="text-muted-foreground mb-3 text-sm">Update grade:</p>
             <form onSubmit={handleGrade} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-2">
                   <Label htmlFor="marks" className="flex items-center gap-2">
                     <Award className="text-muted-foreground h-4 w-4" />
@@ -296,7 +296,7 @@ export function GradingForm({
         )}
 
         <form onSubmit={handleGrade} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="marks" className="flex items-center gap-2">
                 <Award className="text-muted-foreground h-4 w-4" />

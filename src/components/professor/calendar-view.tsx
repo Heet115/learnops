@@ -90,7 +90,9 @@ export function ProfessorCalendarView() {
     const days = [];
 
     for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(<div key={`empty-${i}`} className="bg-muted/30 h-24" />);
+      days.push(
+        <div key={`empty-${i}`} className="bg-muted/30 h-20 sm:h-24" />,
+      );
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -104,7 +106,7 @@ export function ProfessorCalendarView() {
           key={day}
           onClick={() => setSelectedDate(dateStr)}
           className={cn(
-            "border-border/50 hover:bg-accent/50 h-24 border p-1 text-left transition-colors",
+            "border-border/50 hover:bg-accent/50 h-20 border p-1 text-left transition-colors sm:h-24",
             isToday && "bg-primary/10",
             isSelected && "ring-primary ring-2",
           )}
@@ -164,26 +166,28 @@ export function ProfessorCalendarView() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="mb-1 grid grid-cols-7">
-            {DAYS.map((day) => (
-              <div
-                key={day}
-                className="text-muted-foreground py-2 text-center text-sm font-medium"
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7">
-            {loading
-              ? Array.from({ length: 35 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="bg-muted/30 border-border/50 h-24 animate-pulse border"
-                  />
-                ))
-              : renderCalendarDays()}
+        <CardContent className="overflow-x-auto">
+          <div className="min-w-[500px]">
+            <div className="mb-1 grid grid-cols-7">
+              {DAYS.map((day) => (
+                <div
+                  key={day}
+                  className="text-muted-foreground py-2 text-center text-sm font-medium"
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7">
+              {loading
+                ? Array.from({ length: 35 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="bg-muted/30 border-border/50 h-20 animate-pulse border sm:h-24"
+                    />
+                  ))
+                : renderCalendarDays()}
+            </div>
           </div>
         </CardContent>
       </Card>

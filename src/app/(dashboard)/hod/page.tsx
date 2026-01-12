@@ -99,13 +99,13 @@ export default async function HodDashboard() {
         {/* Welcome Section */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-bold tracking-tight">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
                 Welcome back, {dbUser?.firstName || "Head of Department"}
               </h2>
               <Sparkles className="h-5 w-5 text-yellow-500" />
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm sm:text-base">
               Monitor your department&apos;s performance and activities
             </p>
           </div>
@@ -118,7 +118,7 @@ export default async function HodDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {statCards.map((stat) => (
             <Card
               key={stat.title}

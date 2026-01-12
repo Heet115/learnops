@@ -66,7 +66,7 @@ export async function markAsRead(notificationId: string) {
 
   await Notification.findOneAndUpdate(
     { _id: notificationId, userId: user._id },
-    { isRead: true }
+    { isRead: true },
   );
 
   revalidatePath("/");
@@ -84,7 +84,7 @@ export async function markAllAsRead() {
 
   await Notification.updateMany(
     { userId: user._id, isRead: false },
-    { isRead: true }
+    { isRead: true },
   );
 
   revalidatePath("/");
@@ -126,7 +126,6 @@ export async function deleteAllRead() {
   revalidatePath("/");
   return { success: true, count: result.deletedCount };
 }
-
 
 // ==================== NOTIFICATION CREATORS ====================
 
@@ -224,7 +223,7 @@ async function createBatchNotifications(
     relatedId?: string;
     relatedType?: "ala" | "submission" | "group" | "announcement";
     metadata?: Record<string, unknown>;
-  }
+  },
 ) {
   const notifications = [];
 
@@ -326,7 +325,7 @@ export async function notifyDeadlineReminder(alaId: string, studentId: string) {
   };
 
   const hoursLeft = Math.round(
-    (new Date(ala.deadline).getTime() - Date.now()) / (60 * 60 * 1000)
+    (new Date(ala.deadline).getTime() - Date.now()) / (60 * 60 * 1000),
   );
   const timeMessage =
     hoursLeft <= 1
@@ -349,7 +348,6 @@ export async function notifyDeadlineReminder(alaId: string, studentId: string) {
   });
 }
 
-
 // ==================== SUBMISSION NOTIFICATIONS ====================
 
 // Notify when submission is graded (includes group members)
@@ -358,7 +356,7 @@ export async function notifySubmissionGraded(
   alaTitle: string,
   marks: number,
   maxMarks: number,
-  adjustedMarks?: number
+  adjustedMarks?: number,
 ) {
   await connectDB();
 
@@ -367,16 +365,17 @@ export async function notifySubmissionGraded(
 
   // Get all recipients (submitter + group members)
   const recipientIds: string[] = [submission.studentId.toString()];
-  
+
   if (submission.groupMembers && submission.groupMembers.length > 0) {
     submission.groupMembers.forEach((memberId: mongoose.Types.ObjectId) => {
       recipientIds.push(memberId.toString());
     });
   }
 
-  const marksDisplay = adjustedMarks !== undefined 
-    ? `${adjustedMarks}/${maxMarks} (adjusted from ${marks})`
-    : `${marks}/${maxMarks}`;
+  const marksDisplay =
+    adjustedMarks !== undefined
+      ? `${adjustedMarks}/${maxMarks} (adjusted from ${marks})`
+      : `${marks}/${maxMarks}`;
 
   await createBatchNotifications(recipientIds, {
     type: "submission_graded",
@@ -397,7 +396,7 @@ export async function notifySubmissionGraded(
 export async function notifySubmissionRejected(
   submissionId: string,
   alaTitle: string,
-  reason: string
+  reason: string,
 ) {
   await connectDB();
 
@@ -406,7 +405,7 @@ export async function notifySubmissionRejected(
 
   // Get all recipients (submitter + group members)
   const recipientIds: string[] = [submission.studentId.toString()];
-  
+
   if (submission.groupMembers && submission.groupMembers.length > 0) {
     submission.groupMembers.forEach((memberId: mongoose.Types.ObjectId) => {
       recipientIds.push(memberId.toString());
@@ -434,7 +433,7 @@ export async function notifyGroupInvite(
   invitedStudentId: string,
   groupName: string,
   inviterName: string,
-  alaTitle: string
+  alaTitle: string,
 ) {
   await connectDB();
 
@@ -457,7 +456,7 @@ export async function notifyGroupInvite(
 export async function notifyGroupJoined(
   groupId: string,
   joinedStudentName: string,
-  excludeStudentId: string
+  excludeStudentId: string,
 ) {
   await connectDB();
 
@@ -470,7 +469,7 @@ export async function notifyGroupJoined(
   const memberIds = group.members
     .filter(
       (m: { status: string; studentId: mongoose.Types.ObjectId }) =>
-        m.status === "accepted" && m.studentId.toString() !== excludeStudentId
+        m.status === "accepted" && m.studentId.toString() !== excludeStudentId,
     )
     .map((m: { studentId: mongoose.Types.ObjectId }) => m.studentId.toString());
 
@@ -493,7 +492,7 @@ export async function notifyGroupJoined(
 export async function notifyGroupLeft(
   groupId: string,
   leftStudentName: string,
-  excludeStudentId: string
+  excludeStudentId: string,
 ) {
   await connectDB();
 
@@ -506,7 +505,7 @@ export async function notifyGroupLeft(
   const memberIds = group.members
     .filter(
       (m: { status: string; studentId: mongoose.Types.ObjectId }) =>
-        m.status === "accepted" && m.studentId.toString() !== excludeStudentId
+        m.status === "accepted" && m.studentId.toString() !== excludeStudentId,
     )
     .map((m: { studentId: mongoose.Types.ObjectId }) => m.studentId.toString());
 
@@ -525,7 +524,6 @@ export async function notifyGroupLeft(
   });
 }
 
-
 // ==================== ANNOUNCEMENT NOTIFICATIONS ====================
 
 // Create announcement and notify target users
@@ -543,7 +541,10 @@ export async function createAnnouncement(data: {
 
   const role = (sessionClaims?.metadata as { role?: string })?.role;
   if (!role || !["admin", "hod", "professor"].includes(role)) {
-    return { success: false, error: "Only admin, HOD, or professor can create announcements" };
+    return {
+      success: false,
+      error: "Only admin, HOD, or professor can create announcements",
+    };
   }
 
   await connectDB();
@@ -552,7 +553,11 @@ export async function createAnnouncement(data: {
 
   // Validate target based on role
   if (role === "professor" && data.targetType !== "subject_offering") {
-    return { success: false, error: "Professors can only create announcements for their subject offerings" };
+    return {
+      success: false,
+      error:
+        "Professors can only create announcements for their subject offerings",
+    };
   }
 
   // Create announcement
@@ -562,7 +567,9 @@ export async function createAnnouncement(data: {
     createdBy: user._id,
     createdByRole: role,
     targetType: data.targetType,
-    targetId: data.targetId ? new mongoose.Types.ObjectId(data.targetId) : undefined,
+    targetId: data.targetId
+      ? new mongoose.Types.ObjectId(data.targetId)
+      : undefined,
     priority: data.priority || "normal",
     publishAt: data.publishAt,
     expiresAt: data.expiresAt,
@@ -576,7 +583,10 @@ export async function createAnnouncement(data: {
 
   revalidatePath("/admin/announcements");
   revalidatePath("/professor/announcements");
-  return { success: true, announcement: JSON.parse(JSON.stringify(announcement)) };
+  return {
+    success: true,
+    announcement: JSON.parse(JSON.stringify(announcement)),
+  };
 }
 
 // Send notifications for an announcement
@@ -585,7 +595,7 @@ export async function sendAnnouncementNotifications(announcementId: string) {
 
   const announcement = await Announcement.findById(announcementId).populate(
     "createdBy",
-    "firstName lastName"
+    "firstName lastName",
   );
   if (!announcement || !announcement.isPublished) return;
 
@@ -718,7 +728,6 @@ export async function getAnnouncements(limit = 10) {
   return JSON.parse(JSON.stringify(announcements));
 }
 
-
 // ==================== CRON JOB FUNCTIONS ====================
 
 // Batch create deadline reminders (called by cron job)
@@ -827,7 +836,9 @@ export async function publishScheduledAnnouncements() {
   let published = 0;
 
   for (const announcement of announcements) {
-    await Announcement.findByIdAndUpdate(announcement._id, { isPublished: true });
+    await Announcement.findByIdAndUpdate(announcement._id, {
+      isPublished: true,
+    });
     await sendAnnouncementNotifications(announcement._id.toString());
     published++;
   }
@@ -841,7 +852,7 @@ export async function publishScheduledAnnouncements() {
 export async function sendSystemNotification(
   userIds: string[],
   title: string,
-  message: string
+  message: string,
 ) {
   await connectDB();
 
@@ -856,7 +867,7 @@ export async function sendSystemNotification(
 export async function sendSystemNotificationToRole(
   role: "admin" | "hod" | "professor" | "student",
   title: string,
-  message: string
+  message: string,
 ) {
   await connectDB();
 

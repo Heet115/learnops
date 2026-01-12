@@ -107,15 +107,15 @@ export default async function ALADetailPage({ params }: PageProps) {
       ]}
     >
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/professor/alas">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
           <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold">{ala.title}</h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-xl font-bold sm:text-2xl">{ala.title}</h2>
               <Badge variant="outline" className={status.className}>
                 <span
                   className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${status.dotColor}`}
@@ -123,7 +123,7 @@ export default async function ALADetailPage({ params }: PageProps) {
                 {status.label}
               </Badge>
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm sm:text-base">
               {ala.subjectOfferingId?.subjectId?.code} -{" "}
               {ala.subjectOfferingId?.subjectId?.name} |{" "}
               {ala.subjectOfferingId?.classId?.name}
@@ -131,8 +131,8 @@ export default async function ALADetailPage({ params }: PageProps) {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="space-y-6 md:col-span-2">
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="space-y-6 lg:col-span-2">
             <Card>
               <CardHeader className="border-b">
                 <div className="flex items-center gap-2">

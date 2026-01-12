@@ -384,7 +384,8 @@ export async function createGroupByStudent(
   });
 
   // Send notifications to invited students
-  const { notifyGroupInvite } = await import("@/lib/actions/notification.actions");
+  const { notifyGroupInvite } =
+    await import("@/lib/actions/notification.actions");
   const inviterName = `${creator.firstName} ${creator.lastName}`;
   for (const invitedId of data.inviteIds) {
     await notifyGroupInvite(
@@ -392,7 +393,7 @@ export async function createGroupByStudent(
       invitedId,
       data.name,
       inviterName,
-      ala.title
+      ala.title,
     );
   }
 
@@ -448,7 +449,8 @@ export async function respondToGroupInvite(groupId: string, accept: boolean) {
     group.members[memberIndex].joinedAt = new Date();
 
     // Notify other group members that someone joined
-    const { notifyGroupJoined } = await import("@/lib/actions/notification.actions");
+    const { notifyGroupJoined } =
+      await import("@/lib/actions/notification.actions");
     const studentName = `${student.firstName} ${student.lastName}`;
     await notifyGroupJoined(groupId, studentName, studentId);
   } else {
@@ -466,14 +468,14 @@ export async function getStudentPendingInvites() {
   const { id: studentId } = await getUserDbId(clerkId!);
 
   const groups = await Group.find({
-    "members": {
+    members: {
       $elemMatch: {
         studentId: studentId,
-        status: "pending"
-      }
+        status: "pending",
+      },
     },
     // Exclude groups created by this student (they sent the invite, not received)
-    createdBy: { $ne: studentId }
+    createdBy: { $ne: studentId },
   })
     .populate({
       path: "alaId",
@@ -514,9 +516,12 @@ export async function cancelInvite(groupId: string, studentId: string) {
   // Only creator or leader can cancel invites
   const isCreator = group.createdBy.toString() === currentUserId;
   const isLeader = group.leaderId?.toString() === currentUserId;
-  
+
   if (!isCreator && !isLeader) {
-    return { success: false, error: "Only the group creator or leader can cancel invites" };
+    return {
+      success: false,
+      error: "Only the group creator or leader can cancel invites",
+    };
   }
 
   if (group.isLocked) {
@@ -530,21 +535,32 @@ export async function cancelInvite(groupId: string, studentId: string) {
   };
 
   if (ala.isLocked || new Date(ala.deadline) < new Date()) {
-    return { success: false, error: "Cannot cancel - deadline passed or locked" };
+    return {
+      success: false,
+      error: "Cannot cancel - deadline passed or locked",
+    };
   }
 
   // Find the pending member
   const memberIndex = group.members.findIndex(
-    (m) => m.studentId.toString() === studentId && m.status === "pending"
+    (m) => m.studentId.toString() === studentId && m.status === "pending",
   );
 
   if (memberIndex === -1) {
-    return { success: false, error: "No pending invitation found for this student" };
+    return {
+      success: false,
+      error: "No pending invitation found for this student",
+    };
   }
 
   // Remove the pending member
   await Group.findByIdAndUpdate(groupId, {
-    $pull: { members: { studentId: new mongoose.Types.ObjectId(studentId), status: "pending" } }
+    $pull: {
+      members: {
+        studentId: new mongoose.Types.ObjectId(studentId),
+        status: "pending",
+      },
+    },
   });
 
   revalidatePath(`/student/alas/${ala._id}`);
@@ -585,7 +601,8 @@ export async function leaveGroup(groupId: string) {
     await Group.findByIdAndDelete(groupId);
   } else {
     // Notify other group members that someone left
-    const { notifyGroupLeft } = await import("@/lib/actions/notification.actions");
+    const { notifyGroupLeft } =
+      await import("@/lib/actions/notification.actions");
     await notifyGroupLeft(groupId, studentName, studentId);
 
     // Remove student from group
@@ -832,7 +849,8 @@ export async function inviteMemberByLeader(groupId: string, studentId: string) {
   }
 
   // Send notification to invited student
-  const { notifyGroupInvite } = await import("@/lib/actions/notification.actions");
+  const { notifyGroupInvite } =
+    await import("@/lib/actions/notification.actions");
   const alaDoc = await ALA.findById(ala._id);
   const inviterName = `${user.firstName} ${user.lastName}`;
   await notifyGroupInvite(
@@ -840,7 +858,7 @@ export async function inviteMemberByLeader(groupId: string, studentId: string) {
     studentId,
     group.name,
     inviterName,
-    alaDoc?.title || "ALA"
+    alaDoc?.title || "ALA",
   );
 
   revalidatePath(`/student/alas/${ala._id}`);

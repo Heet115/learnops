@@ -172,7 +172,7 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="name" className="flex items-center gap-2">
                   <Calendar className="text-muted-foreground h-3.5 w-3.5" />
@@ -230,7 +230,7 @@ export function CreateSemesterDialog({ courses }: CreateSemesterDialogProps) {
                   (Optional)
                 </span>
               </Label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <DatePicker
                   id="startDate"
                   label=""

@@ -19,15 +19,15 @@ export default async function DashboardPage() {
 
   // Fallback if no role assigned
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center p-4">
       <div className="space-y-4 text-center">
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-xl font-bold sm:text-2xl">
           Welcome, {user?.firstName || "User"}!
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm sm:text-base">
           Your account has not been assigned a role yet.
         </p>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground text-xs sm:text-sm">
           Please contact your administrator.
         </p>
       </div>

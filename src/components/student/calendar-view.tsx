@@ -143,7 +143,7 @@ export function CalendarView() {
           key={day}
           onClick={() => setSelectedDate(dateStr)}
           className={cn(
-            "border-border/50 hover:bg-accent/50 h-24 border p-1 text-left transition-colors",
+            "border-border/50 hover:bg-accent/50 h-20 border p-1 text-left transition-colors sm:h-24",
             isToday && "bg-primary/10",
             isSelected && "ring-primary ring-2",
           )}
@@ -186,6 +186,7 @@ export function CalendarView() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_350px]">
+      {/* Calendar Grid - scrollable on mobile */}
       {/* Calendar Grid */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
@@ -204,9 +205,9 @@ export function CalendarView() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="overflow-x-auto">
           {/* Day headers */}
-          <div className="mb-1 grid grid-cols-7">
+          <div className="mb-1 grid min-w-[500px] grid-cols-7">
             {DAYS.map((day) => (
               <div
                 key={day}
@@ -217,12 +218,12 @@ export function CalendarView() {
             ))}
           </div>
           {/* Calendar grid */}
-          <div className="grid grid-cols-7">
+          <div className="grid min-w-[500px] grid-cols-7">
             {loading
               ? Array.from({ length: 35 }).map((_, i) => (
                   <div
                     key={i}
-                    className="bg-muted/30 border-border/50 h-24 animate-pulse border"
+                    className="bg-muted/30 border-border/50 h-20 animate-pulse border sm:h-24"
                   />
                 ))
               : renderCalendarDays()}
@@ -320,7 +321,7 @@ export function CalendarView() {
           {/* Legend */}
           <div className="mt-6 border-t pt-4">
             <p className="mb-2 text-sm font-medium">Legend</p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-2">
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 rounded bg-yellow-500" />
                 <span>Pending</span>

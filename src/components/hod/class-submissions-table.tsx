@@ -192,7 +192,7 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
         />
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <div className="flex-1">
             <DataTableFilter
               filters={filterConfigs}
@@ -217,127 +217,132 @@ export function ClassSubmissionsTable({ data }: ClassSubmissionsTableProps) {
           />
         ) : (
           <>
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <SimpleSortableHeader<SortableClassSubmission>
-                    label="Class"
-                    sortKey="name"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<SortableClassSubmission>
-                    label="Course"
-                    sortKey="course"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                  <SimpleSortableHeader<SortableClassSubmission>
-                    label="Students"
-                    sortKey="students"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                    className="text-center"
-                  />
-                  <SimpleSortableHeader<SortableClassSubmission>
-                    label="Submitted"
-                    sortKey="submitted"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                    className="text-center"
-                  />
-                  <SimpleSortableHeader<SortableClassSubmission>
-                    label="Graded"
-                    sortKey="graded"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                    className="text-center"
-                  />
-                  <SimpleSortableHeader<SortableClassSubmission>
-                    label="Progress"
-                    sortKey="progressPercent"
-                    currentSortKey={sortKey}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                  />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((cls, index) => {
-                  return (
-                    <TableRow
-                      key={index}
-                      className="group hover:bg-muted/50 transition-colors"
-                    >
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
-                            <GraduationCap className="h-4 w-4 text-blue-600" />
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <SimpleSortableHeader<SortableClassSubmission>
+                      label="Class"
+                      sortKey="name"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      className="min-w-[150px]"
+                    />
+                    <SimpleSortableHeader<SortableClassSubmission>
+                      label="Course"
+                      sortKey="course"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      className="min-w-[150px]"
+                    />
+                    <SimpleSortableHeader<SortableClassSubmission>
+                      label="Students"
+                      sortKey="students"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      className="min-w-[90px] text-center"
+                    />
+                    <SimpleSortableHeader<SortableClassSubmission>
+                      label="Submitted"
+                      sortKey="submitted"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      className="min-w-[100px] text-center"
+                    />
+                    <SimpleSortableHeader<SortableClassSubmission>
+                      label="Graded"
+                      sortKey="graded"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      className="min-w-[120px] text-center"
+                    />
+                    <SimpleSortableHeader<SortableClassSubmission>
+                      label="Progress"
+                      sortKey="progressPercent"
+                      currentSortKey={sortKey}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      className="min-w-[120px]"
+                    />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedData.map((cls, index) => {
+                    return (
+                      <TableRow
+                        key={index}
+                        className="group hover:bg-muted/50 transition-colors"
+                      >
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                              <GraduationCap className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <span className="font-medium">{cls.name}</span>
                           </div>
-                          <span className="font-medium">{cls.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="border-violet-500/30 bg-violet-500/10 text-violet-600"
-                        >
-                          <Layers className="mr-1.5 h-3 w-3" />
-                          {cls.course}
-                        </Badge>
-                        <span className="text-muted-foreground ml-2 text-xs">
-                          {cls.semester}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge
-                          variant="outline"
-                          className="border-blue-500/30 bg-blue-500/10 text-blue-600"
-                        >
-                          <Users className="mr-1.5 h-3 w-3" />
-                          {cls.students}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center tabular-nums">
-                        {cls.submitted}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge
-                          variant="outline"
-                          className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
-                        >
-                          {cls.graded}
-                        </Badge>
-                        {cls.pending > 0 && (
+                        </TableCell>
+                        <TableCell>
                           <Badge
                             variant="outline"
-                            className="ml-1.5 border-amber-500/30 bg-amber-500/10 text-amber-600"
+                            className="border-violet-500/30 bg-violet-500/10 text-violet-600"
                           >
-                            {cls.pending} pending
+                            <Layers className="mr-1.5 h-3 w-3" />
+                            {cls.course}
                           </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Progress
-                            value={cls.progressPercent}
-                            className="h-2 w-20"
-                          />
-                          <span className="text-muted-foreground w-10 text-xs tabular-nums">
-                            {cls.progressPercent}%
+                          <span className="text-muted-foreground ml-2 text-xs">
+                            {cls.semester}
                           </span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge
+                            variant="outline"
+                            className="border-blue-500/30 bg-blue-500/10 text-blue-600"
+                          >
+                            <Users className="mr-1.5 h-3 w-3" />
+                            {cls.students}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center tabular-nums">
+                          {cls.submitted}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge
+                            variant="outline"
+                            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600"
+                          >
+                            {cls.graded}
+                          </Badge>
+                          {cls.pending > 0 && (
+                            <Badge
+                              variant="outline"
+                              className="ml-1.5 border-amber-500/30 bg-amber-500/10 text-amber-600"
+                            >
+                              {cls.pending} pending
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Progress
+                              value={cls.progressPercent}
+                              className="h-2 w-20"
+                            />
+                            <span className="text-muted-foreground w-10 text-xs tabular-nums">
+                              {cls.progressPercent}%
+                            </span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
             <PaginationControls
               pageIndex={currentPage}
               pageSize={pageSize}

@@ -195,7 +195,7 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="code" className="flex items-center gap-2">
                   <Code2 className="text-muted-foreground h-3.5 w-3.5" />
@@ -261,7 +261,7 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
                 <GraduationCap className="text-muted-foreground h-3.5 w-3.5" />
                 Course Type
               </Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {courseTypes.map((type) => (
                   <button
                     key={type.value}
@@ -285,7 +285,7 @@ export function CreateCourseDialog({ departments }: CreateCourseDialogProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="duration" className="flex items-center gap-2">
                   <Clock className="text-muted-foreground h-3.5 w-3.5" />

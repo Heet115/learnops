@@ -77,7 +77,9 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
     const result = await respondToGroupInvite(groupId, accept);
 
     if (result.success) {
-      toast.success(accept ? "Joined group successfully!" : "Invitation declined");
+      toast.success(
+        accept ? "Joined group successfully!" : "Invitation declined",
+      );
       setLocalInvites(localInvites.filter((i) => i._id !== groupId));
       router.refresh();
     } else {
@@ -95,15 +97,20 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
     const now = new Date();
     const diff = date.getTime() - now.getTime();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    
+
     if (days < 0) return { text: "Expired", urgent: true, expired: true };
     if (days === 0) return { text: "Due today", urgent: true, expired: false };
-    if (days === 1) return { text: "Due tomorrow", urgent: true, expired: false };
-    if (days <= 3) return { text: `${days} days left`, urgent: true, expired: false };
-    return { 
-      text: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }), 
-      urgent: false, 
-      expired: false 
+    if (days === 1)
+      return { text: "Due tomorrow", urgent: true, expired: false };
+    if (days <= 3)
+      return { text: `${days} days left`, urgent: true, expired: false };
+    return {
+      text: date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      urgent: false,
+      expired: false,
     };
   };
 
@@ -118,7 +125,8 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
             <div>
               <CardTitle className="text-blue-700">Group Invitations</CardTitle>
               <CardDescription>
-                {localInvites.length} pending invitation{localInvites.length !== 1 ? "s" : ""} waiting for your response
+                {localInvites.length} pending invitation
+                {localInvites.length !== 1 ? "s" : ""} waiting for your response
               </CardDescription>
             </div>
           </div>
@@ -141,11 +149,11 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
           return (
             <div
               key={invite._id}
-              className="group relative overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md"
+              className="group bg-card relative overflow-hidden rounded-xl border transition-all hover:shadow-md"
             >
               {/* Gradient accent */}
               <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-blue-500 to-violet-500" />
-              
+
               <div className="p-4">
                 {/* Header with group name and deadline */}
                 <div className="mb-3 flex items-start justify-between">
@@ -156,7 +164,8 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
                     <div>
                       <h4 className="font-semibold">{invite.name}</h4>
                       <p className="text-muted-foreground text-sm">
-                        Invited by {invite.createdBy.firstName} {invite.createdBy.lastName}
+                        Invited by {invite.createdBy.firstName}{" "}
+                        {invite.createdBy.lastName}
                       </p>
                     </div>
                   </div>
@@ -178,7 +187,7 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
                 {/* ALA Info */}
                 <Link
                   href={`/student/alas/${invite.alaId._id}`}
-                  className="mb-4 flex items-center gap-3 rounded-lg border bg-muted/30 p-3 transition-colors hover:bg-muted/50"
+                  className="bg-muted/30 hover:bg-muted/50 mb-4 flex items-center gap-3 rounded-lg border p-3 transition-colors"
                 >
                   <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-500/10">
                     <BookOpen className="h-4 w-4 text-blue-600" />
@@ -186,16 +195,21 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
                   <div className="flex-1">
                     <p className="text-sm font-medium">{invite.alaId.title}</p>
                     <p className="text-muted-foreground text-xs">
-                      {invite.alaId.subjectOfferingId?.subjectId?.code} - {invite.alaId.subjectOfferingId?.subjectId?.name}
+                      {invite.alaId.subjectOfferingId?.subjectId?.code} -{" "}
+                      {invite.alaId.subjectOfferingId?.subjectId?.name}
                     </p>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  <ChevronRight className="text-muted-foreground h-4 w-4" />
                 </Link>
 
                 {/* Members */}
                 <div className="mb-4">
-                  <p className="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wide">
-                    Group Members ({acceptedMembers.length} joined{pendingMembers.length > 1 ? `, ${pendingMembers.length - 1} pending` : ""})
+                  <p className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
+                    Group Members ({acceptedMembers.length} joined
+                    {pendingMembers.length > 1
+                      ? `, ${pendingMembers.length - 1} pending`
+                      : ""}
+                    )
                   </p>
                   <div className="flex items-center gap-2">
                     <TooltipProvider>
@@ -203,7 +217,7 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
                         {acceptedMembers.slice(0, 5).map((member) => (
                           <Tooltip key={member.studentId._id}>
                             <TooltipTrigger asChild>
-                              <Avatar className="h-8 w-8 border-2 border-background">
+                              <Avatar className="border-background h-8 w-8 border-2">
                                 <AvatarFallback className="bg-emerald-500/10 text-xs text-emerald-600">
                                   {member.studentId.firstName[0]}
                                   {member.studentId.lastName[0]}
@@ -211,12 +225,15 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
                               </Avatar>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>{member.studentId.firstName} {member.studentId.lastName}</p>
+                              <p>
+                                {member.studentId.firstName}{" "}
+                                {member.studentId.lastName}
+                              </p>
                             </TooltipContent>
                           </Tooltip>
                         ))}
                         {acceptedMembers.length > 5 && (
-                          <Avatar className="h-8 w-8 border-2 border-background">
+                          <Avatar className="border-background h-8 w-8 border-2">
                             <AvatarFallback className="bg-muted text-xs">
                               +{acceptedMembers.length - 5}
                             </AvatarFallback>
@@ -225,7 +242,9 @@ export function GroupInvitations({ invitations }: GroupInvitationsProps) {
                       </div>
                     </TooltipProvider>
                     <span className="text-muted-foreground text-sm">
-                      {acceptedMembers.map((m) => m.studentId.firstName).join(", ")}
+                      {acceptedMembers
+                        .map((m) => m.studentId.firstName)
+                        .join(", ")}
                     </span>
                   </div>
                 </div>
