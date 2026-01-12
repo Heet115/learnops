@@ -250,11 +250,11 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
                           </div>
                           <div>
                             <p className="font-medium">
-                              {request.requestedBy.firstName}{" "}
-                              {request.requestedBy.lastName}
+                              {request.requestedBy?.firstName ?? "Unknown"}{" "}
+                              {request.requestedBy?.lastName ?? "User"}
                             </p>
                             <p className="text-muted-foreground text-xs">
-                              {request.requestedBy.email}
+                              {request.requestedBy?.email ?? "User deleted"}
                             </p>
                           </div>
                         </div>
@@ -338,9 +338,9 @@ export function ProfileRequestsTable({ requests }: ProfileRequestsTableProps) {
               <div>
                 <DialogTitle>Review Profile Update Request</DialogTitle>
                 <DialogDescription>
-                  {selectedRequest?.requestedBy.firstName}{" "}
-                  {selectedRequest?.requestedBy.lastName} (
-                  {selectedRequest?.requestedBy.email})
+                  {selectedRequest?.requestedBy?.firstName ?? "Unknown"}{" "}
+                  {selectedRequest?.requestedBy?.lastName ?? "User"} (
+                  {selectedRequest?.requestedBy?.email ?? "User deleted"})
                 </DialogDescription>
               </div>
             </div>
