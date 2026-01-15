@@ -57,6 +57,12 @@ SubjectOfferingSchema.index(
 // Index for professor queries
 SubjectOfferingSchema.index({ professorId: 1, semesterId: 1, academicYear: 1 });
 
+// Index for class queries (student ALAs)
+SubjectOfferingSchema.index({ classId: 1, isActive: 1 });
+
+// Index for semester queries (HOD analytics)
+SubjectOfferingSchema.index({ semesterId: 1, isActive: 1 });
+
 export const SubjectOffering =
   mongoose.models.SubjectOffering ||
   mongoose.model<ISubjectOffering>("SubjectOffering", SubjectOfferingSchema);

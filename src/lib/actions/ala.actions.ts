@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { connectDB, User, SubjectOffering } from "@/lib/db";
 import { ALA } from "@/lib/db/models/ala.model";
 import {
@@ -10,73 +9,12 @@ import {
   UpdateALAInput,
 } from "@/lib/validations/ala.validation";
 import { revalidatePath } from "next/cache";
-import { v2 as cloudinary } from "cloudinary";
 import { logActivity } from "./activity.actions";
-
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-// Extract public_id from Cloudinary URL
-function extractPublicIdFromUrl(url: string): string | null {
-  try {
-    const urlObj = new URL(url);
-    const pathParts = urlObj.pathname.split("/upload/");
-    if (pathParts.length < 2) return null;
-
-    let publicIdWithExt = pathParts[1];
-    // Remove version if present (v1234567890/)
-    if (publicIdWithExt.match(/^v\d+\//)) {
-      publicIdWithExt = publicIdWithExt.replace(/^v\d+\//, "");
-    }
-
-    // Remove file extension
-    const lastDotIndex = publicIdWithExt.lastIndexOf(".");
-    if (lastDotIndex > 0) {
-      return publicIdWithExt.substring(0, lastDotIndex);
-    }
-    return publicIdWithExt;
-  } catch {
-    return null;
-  }
-}
-
-async function deleteFromCloudinary(url: string): Promise<boolean> {
-  const publicId = extractPublicIdFromUrl(url);
-  if (!publicId) {
-    console.warn("Could not extract public_id from URL:", url);
-    return false;
-  }
-
-  try {
-    // Try as raw first (for documents like PDF, DOCX)
-    let result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: "raw",
-    });
-
-    if (result.result === "ok") return true;
-
-    // Try as image if raw didn't work
-    result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: "image",
-    });
-
-    return result.result === "ok" || result.result === "not found";
-  } catch (error) {
-    console.error("Cloudinary delete error:", error);
-    return false;
-  }
-}
+import { requireRole } from "@/lib/auth";
+import { deleteFromCloudinary } from "@/lib/cloudinary";
 
 async function requireProfessor() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "professor") {
-    throw new Error("Unauthorized: Professor access required");
-  }
+  const { userId } = await requireRole(["professor"]);
   return userId;
 }
 
@@ -166,6 +104,64 @@ export async function getALAsByProfessor() {
     .lean();
 
   return JSON.parse(JSON.stringify(alas));
+}
+
+// Get paginated ALAs for professor
+export async function getPaginatedALAsByProfessor(options: {
+  page?: number;
+  limit?: number;
+  status?: "active" | "locked" | "past" | "all";
+  search?: string;
+} = {}) {
+  const clerkId = await requireProfessor();
+  const professorId = await getProfessorDbId(clerkId!);
+
+  const { page = 1, limit = 20, status, search } = options;
+  const skip = (page - 1) * limit;
+  const now = new Date();
+
+  const query: Record<string, unknown> = { professorId, isActive: true };
+
+  if (status === "active") {
+    query.isLocked = false;
+    query.deadline = { $gt: now };
+  } else if (status === "locked") {
+    query.isLocked = true;
+  } else if (status === "past") {
+    query.deadline = { $lt: now };
+  }
+
+  if (search) {
+    query.title = { $regex: search, $options: "i" };
+  }
+
+  const [alas, total] = await Promise.all([
+    ALA.find(query)
+      .populate({
+        path: "subjectOfferingId",
+        select: "subjectId classId semesterId academicYear",
+        populate: [
+          { path: "subjectId", select: "name code" },
+          { path: "classId", select: "name" },
+          { path: "semesterId", select: "name number" },
+        ],
+      })
+      .sort({ deadline: 1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    ALA.countDocuments(query),
+  ]);
+
+  return {
+    alas: JSON.parse(JSON.stringify(alas)),
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 }
 
 export async function getALAById(id: string) {

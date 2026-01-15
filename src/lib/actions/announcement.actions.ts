@@ -18,16 +18,11 @@ import {
 } from "@/lib/validations/announcement.validation";
 import { revalidatePath } from "next/cache";
 import { logActivity } from "./activity.actions";
+import { requireRole } from "@/lib/auth";
 
 // Helper to check if user can create announcements (admin, hod, professor)
 async function requireAnnouncementCreator() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (!role || !["admin", "hod", "professor"].includes(role)) {
-    throw new Error(
-      "Unauthorized: Only admin, HOD, or professor can create announcements",
-    );
-  }
+  const { userId, role } = await requireRole(["admin", "hod", "professor"]);
   return { clerkId: userId, role: role as "admin" | "hod" | "professor" };
 }
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/nextjs/server";
 import { connectDB, User, Class, Semester, Course } from "@/lib/db";
 import {
   createUserSchema,
@@ -10,15 +10,11 @@ import {
 } from "@/lib/validations/user.validation";
 import { revalidatePath } from "next/cache";
 import { logActivity } from "./activity.actions";
+import { requireRole } from "@/lib/auth";
 
 // Check if current user is admin
 async function requireAdmin() {
-  const { sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-
-  if (role !== "admin") {
-    throw new Error("Unauthorized: Admin access required");
-  }
+  await requireRole(["admin"]);
 }
 
 // Helper to get departmentId from classId by traversing the hierarchy
@@ -110,6 +106,47 @@ export async function getAllUsers() {
 
   const users = await User.find().sort({ createdAt: -1 }).lean();
   return JSON.parse(JSON.stringify(users));
+}
+
+// Get paginated users
+export async function getPaginatedUsers(options: {
+  page?: number;
+  limit?: number;
+  role?: string;
+  search?: string;
+  isActive?: boolean;
+} = {}) {
+  await requireAdmin();
+  await connectDB();
+
+  const { page = 1, limit = 20, role, search, isActive } = options;
+  const skip = (page - 1) * limit;
+
+  const query: Record<string, unknown> = {};
+  if (role && role !== "all") query.role = role;
+  if (typeof isActive === "boolean") query.isActive = isActive;
+  if (search) {
+    query.$or = [
+      { firstName: { $regex: search, $options: "i" } },
+      { lastName: { $regex: search, $options: "i" } },
+      { email: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  const [users, total] = await Promise.all([
+    User.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    User.countDocuments(query),
+  ]);
+
+  return {
+    users: JSON.parse(JSON.stringify(users)),
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 }
 
 // Get users by role

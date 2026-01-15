@@ -1,42 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
-import { v2 as cloudinary } from "cloudinary";
 import { NextRequest, NextResponse } from "next/server";
-
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-// Extract public_id from Cloudinary URL
-function extractPublicIdFromUrl(url: string): string | null {
-  try {
-    // URL format: https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/v{version}/{public_id}.{format}
-    // For raw files: https://res.cloudinary.com/{cloud_name}/raw/upload/v{version}/{folder}/{filename}
-    const urlObj = new URL(url);
-    const pathParts = urlObj.pathname.split("/upload/");
-    if (pathParts.length < 2) return null;
-
-    // Get everything after /upload/ and remove version if present
-    let publicIdWithExt = pathParts[1];
-    if (publicIdWithExt.startsWith("v")) {
-      const versionEnd = publicIdWithExt.indexOf("/");
-      if (versionEnd > 0) {
-        publicIdWithExt = publicIdWithExt.substring(versionEnd + 1);
-      }
-    }
-
-    // Remove file extension for the public_id
-    const lastDotIndex = publicIdWithExt.lastIndexOf(".");
-    if (lastDotIndex > 0) {
-      return publicIdWithExt.substring(0, lastDotIndex);
-    }
-    return publicIdWithExt;
-  } catch {
-    return null;
-  }
-}
+import { cloudinary, extractPublicIdFromUrl } from "@/lib/cloudinary";
 
 export async function POST(request: NextRequest) {
   try {

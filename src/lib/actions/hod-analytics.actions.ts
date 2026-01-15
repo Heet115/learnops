@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import {
   connectDB,
   User,
@@ -12,12 +11,11 @@ import {
   Subject,
   Class,
 } from "@/lib/db";
+import { requireRole } from "@/lib/auth";
 
 // Helper to get HOD's department scope
 async function getHodScope() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "hod") throw new Error("Unauthorized");
+  const { userId } = await requireRole(["hod"]);
 
   await connectDB();
   const hod = await User.findOne({ clerkId: userId, isActive: true });

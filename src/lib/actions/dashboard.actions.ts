@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import {
   connectDB,
   User,
@@ -13,13 +12,12 @@ import {
   Subject,
   Class,
 } from "@/lib/db";
+import { requireRole } from "@/lib/auth";
 
 // ==================== PROFESSOR DASHBOARD ====================
 
 export async function getProfessorDashboardStats() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "professor") throw new Error("Unauthorized");
+  const { userId } = await requireRole(["professor"]);
 
   await connectDB();
   const professor = await User.findOne({ clerkId: userId, isActive: true });
@@ -69,9 +67,7 @@ export async function getProfessorDashboardStats() {
 }
 
 export async function getProfessorRecentSubmissions() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "professor") throw new Error("Unauthorized");
+  const { userId } = await requireRole(["professor"]);
 
   await connectDB();
   const professor = await User.findOne({ clerkId: userId, isActive: true });
@@ -94,9 +90,7 @@ export async function getProfessorRecentSubmissions() {
 }
 
 export async function getProfessorSubjects() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "professor") throw new Error("Unauthorized");
+  const { userId } = await requireRole(["professor"]);
 
   await connectDB();
   const professor = await User.findOne({ clerkId: userId, isActive: true });
@@ -117,9 +111,7 @@ export async function getProfessorSubjects() {
 // ==================== STUDENT DASHBOARD ====================
 
 export async function getStudentDashboardStats() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "student") throw new Error("Unauthorized");
+  const { userId } = await requireRole(["student"]);
 
   await connectDB();
   const student = await User.findOne({ clerkId: userId, isActive: true });
@@ -185,9 +177,7 @@ export async function getStudentDashboardStats() {
 }
 
 export async function getStudentUpcomingDeadlines() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "student") throw new Error("Unauthorized");
+  const { userId } = await requireRole(["student"]);
 
   await connectDB();
   const student = await User.findOne({ clerkId: userId, isActive: true });
@@ -231,9 +221,7 @@ export async function getStudentUpcomingDeadlines() {
 }
 
 export async function getStudentRecentGrades() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "student") throw new Error("Unauthorized");
+  const { userId } = await requireRole(["student"]);
 
   await connectDB();
   const student = await User.findOne({ clerkId: userId, isActive: true });
@@ -262,9 +250,7 @@ export async function getStudentRecentGrades() {
 // ==================== HOD DASHBOARD ====================
 
 export async function getHodDashboardStats() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "hod") throw new Error("Unauthorized");
+  const { userId } = await requireRole(["hod"]);
 
   await connectDB();
   const hod = await User.findOne({ clerkId: userId, isActive: true });
@@ -340,9 +326,7 @@ export async function getHodDashboardStats() {
 }
 
 export async function getHodDepartmentOverview() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "hod") throw new Error("Unauthorized");
+  const { userId } = await requireRole(["hod"]);
 
   await connectDB();
   const hod = await User.findOne({ clerkId: userId, isActive: true });
@@ -381,9 +365,7 @@ export async function getHodDepartmentOverview() {
 // ==================== ADMIN DASHBOARD (Enhanced) ====================
 
 export async function getAdminDashboardStats() {
-  const { sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "admin") throw new Error("Unauthorized");
+  await requireRole(["admin"]);
 
   await connectDB();
 
@@ -419,9 +401,7 @@ export async function getAdminDashboardStats() {
 }
 
 export async function getAdminRecentUsers() {
-  const { sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "admin") throw new Error("Unauthorized");
+  await requireRole(["admin"]);
 
   await connectDB();
 

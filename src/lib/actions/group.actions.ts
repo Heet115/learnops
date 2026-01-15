@@ -1,27 +1,19 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import mongoose from "mongoose";
 import { connectDB, User, ALA, Group } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { requireRole } from "@/lib/auth";
 
 // ============ HELPER FUNCTIONS ============
 
 async function requireProfessor() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "professor") {
-    throw new Error("Unauthorized: Professor access required");
-  }
+  const { userId } = await requireRole(["professor"]);
   return userId;
 }
 
 async function requireStudent() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "student") {
-    throw new Error("Unauthorized: Student access required");
-  }
+  const { userId } = await requireRole(["student"]);
   return userId;
 }
 

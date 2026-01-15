@@ -1,16 +1,12 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { connectDB, User, ALA, Submission } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { logActivity } from "./activity.actions";
+import { requireRole } from "@/lib/auth";
 
 async function requireProfessor() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "professor") {
-    throw new Error("Unauthorized: Professor access required");
-  }
+  const { userId } = await requireRole(["professor"]);
   return userId;
 }
 
@@ -55,6 +51,65 @@ export async function getProfessorSubmissions(status?: string) {
     .lean();
 
   return JSON.parse(JSON.stringify(submissions));
+}
+
+// Get paginated submissions for professor
+export async function getPaginatedProfessorSubmissions(options: {
+  page?: number;
+  limit?: number;
+  status?: "submitted" | "graded" | "rejected" | "all";
+  alaId?: string;
+  search?: string;
+} = {}) {
+  const clerkId = await requireProfessor();
+  const professorId = await getProfessorDbId(clerkId!);
+
+  const { page = 1, limit = 20, status, alaId } = options;
+  const skip = (page - 1) * limit;
+
+  // Get professor's ALAs
+  const alaQuery: Record<string, unknown> = { professorId, isActive: true };
+  if (alaId) alaQuery._id = alaId;
+  
+  const alas = await ALA.find(alaQuery).select("_id");
+  const alaIds = alas.map((a) => a._id);
+
+  // Build submission query
+  const query: Record<string, unknown> = { alaId: { $in: alaIds } };
+  if (status && status !== "all") query.status = status;
+
+  const [submissions, total] = await Promise.all([
+    Submission.find(query)
+      .populate({
+        path: "alaId",
+        select: "title deadline maxMarks subjectOfferingId isGroupSubmission",
+        populate: {
+          path: "subjectOfferingId",
+          select: "subjectId classId",
+          populate: [
+            { path: "subjectId", select: "name code" },
+            { path: "classId", select: "name" },
+          ],
+        },
+      })
+      .populate("studentId", "firstName lastName email")
+      .populate("groupMembers", "firstName lastName")
+      .sort({ submittedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Submission.countDocuments(query),
+  ]);
+
+  return {
+    submissions: JSON.parse(JSON.stringify(submissions)),
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 }
 
 // Get submissions for a specific ALA

@@ -1,6 +1,6 @@
 "use server";
 
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/nextjs/server";
 import { connectDB, User, Class, StudentProfile } from "@/lib/db";
 import {
   bulkStudentImportSchema,
@@ -9,6 +9,7 @@ import {
   ParsedStudentRow,
 } from "@/lib/validations/bulk-import.validation";
 import { revalidatePath } from "next/cache";
+import { requireRole } from "@/lib/auth";
 
 // Generate a secure random password
 function generatePassword(length = 12): string {
@@ -96,11 +97,7 @@ function normalizeBloodGroup(bg?: string): BloodGroupType | undefined {
 }
 
 async function requireAdmin() {
-  const { sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "admin") {
-    throw new Error("Unauthorized: Admin access required");
-  }
+  await requireRole(["admin"]);
 }
 
 // Validate parsed rows against existing data

@@ -70,6 +70,9 @@ const UserSchema = new Schema<IUser>(
 
 // Compound indexes
 UserSchema.index({ role: 1, departmentId: 1 });
+UserSchema.index({ role: 1, isActive: 1 });
+UserSchema.index({ classId: 1, isActive: 1 });
+UserSchema.index({ departmentId: 1, isActive: 1 });
 
 export const User: Model<IUser> =
   mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

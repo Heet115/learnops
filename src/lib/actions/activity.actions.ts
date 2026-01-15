@@ -9,6 +9,7 @@ import {
   getActivitiesSchema,
 } from "@/lib/validations/activity.validation";
 import type { ActivityAction, EntityType } from "@/lib/db";
+import { requireRole } from "@/lib/auth";
 
 // Helper to get current user's DB ID
 async function getCurrentUserDbId(): Promise<string | null> {
@@ -194,12 +195,7 @@ export async function getStudentSubmissionTimeline(studentId?: string) {
 
 // Get admin audit trail
 export async function getAdminAuditTrail(input: GetActivitiesInput = {}) {
-  const { sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-
-  if (role !== "admin") {
-    throw new Error("Unauthorized: Admin access required");
-  }
+  await requireRole(["admin"]);
 
   // Admin actions to track (administrative actions only)
   const adminActions: ActivityAction[] = [

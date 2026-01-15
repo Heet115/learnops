@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import mongoose from "mongoose";
 import {
   connectDB,
@@ -11,21 +10,12 @@ import {
   Group,
 } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { v2 as cloudinary } from "cloudinary";
 import { logActivity } from "./activity.actions";
-
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import { requireRole } from "@/lib/auth";
+import { deleteFromCloudinary } from "@/lib/cloudinary";
 
 async function requireStudent() {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "student") {
-    throw new Error("Unauthorized: Student access required");
-  }
+  const { userId } = await requireRole(["student"]);
   return userId;
 }
 
@@ -551,55 +541,46 @@ export async function getStudentSubmissions() {
   return JSON.parse(JSON.stringify(submissions));
 }
 
-function extractPublicIdFromUrl(url: string): string | null {
-  try {
-    const urlObj = new URL(url);
-    const pathParts = urlObj.pathname.split("/upload/");
-    if (pathParts.length < 2) return null;
-    let publicIdWithExt = pathParts[1];
-    // Remove version if present (v1234567890/)
-    if (publicIdWithExt.match(/^v\d+\//)) {
-      publicIdWithExt = publicIdWithExt.replace(/^v\d+\//, "");
-    }
-    // Remove file extension
-    const lastDotIndex = publicIdWithExt.lastIndexOf(".");
-    if (lastDotIndex > 0) {
-      return publicIdWithExt.substring(0, lastDotIndex);
-    }
-    return publicIdWithExt;
-  } catch {
-    return null;
-  }
-}
+// Get paginated submissions for student
+export async function getPaginatedStudentSubmissions(options: {
+  page?: number;
+  limit?: number;
+  status?: "submitted" | "graded" | "rejected" | "all";
+} = {}) {
+  const clerkId = await requireStudent();
+  const student = await getStudentDbUser(clerkId!);
 
-async function deleteFromCloudinary(fileUrl: string): Promise<boolean> {
-  const publicId = extractPublicIdFromUrl(fileUrl);
-  if (!publicId) {
-    console.warn("Could not extract public_id from URL:", fileUrl);
-    return false;
-  }
+  const { page = 1, limit = 20, status } = options;
+  const skip = (page - 1) * limit;
 
-  try {
-    // Try as raw first (for documents like PDF, DOCX)
-    let result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: "raw",
-    });
+  const query: Record<string, unknown> = { studentId: student._id };
+  if (status && status !== "all") query.status = status;
 
-    if (result.result === "ok") return true;
+  const [submissions, total] = await Promise.all([
+    Submission.find(query)
+      .populate({
+        path: "alaId",
+        select: "title deadline maxMarks subjectOfferingId",
+        populate: {
+          path: "subjectOfferingId",
+          select: "subjectId",
+          populate: { path: "subjectId", select: "name code" },
+        },
+      })
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Submission.countDocuments(query),
+  ]);
 
-    // Try as image if raw didn't work
-    result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: "image",
-    });
-
-    if (result.result === "ok") return true;
-
-    // Try as auto
-    result = await cloudinary.uploader.destroy(publicId);
-
-    return result.result === "ok" || result.result === "not found";
-  } catch (error) {
-    console.error("Cloudinary delete error:", error);
-    return false;
-  }
+  return {
+    submissions: JSON.parse(JSON.stringify(submissions)),
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 }

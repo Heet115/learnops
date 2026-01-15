@@ -49,7 +49,7 @@ import {
   ALLOWED_RESOURCE_TYPES,
   MAX_RESOURCE_SIZE,
   validateFile,
-} from "@/lib/cloudinary";
+} from "@/lib/cloudinary-client";
 import { toast } from "sonner";
 
 interface Resource {

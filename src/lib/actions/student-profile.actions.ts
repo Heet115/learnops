@@ -21,22 +21,18 @@ import {
 } from "@/lib/validations/student-profile.validation";
 import { createNotification } from "./notification.actions";
 import { revalidatePath } from "next/cache";
+import { requireRole } from "@/lib/auth";
 
 async function requireAdmin() {
-  const { sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "admin") {
-    throw new Error("Unauthorized: Admin access required");
-  }
+  await requireRole(["admin"]);
 }
 
 async function getCurrentUser() {
-  const { sessionClaims } = await auth();
-  const clerkId = sessionClaims?.sub;
-  if (!clerkId) throw new Error("Unauthorized");
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
 
   await connectDB();
-  const user = await User.findOne({ clerkId });
+  const user = await User.findOne({ clerkId: userId });
   if (!user) throw new Error("User not found");
 
   return user;

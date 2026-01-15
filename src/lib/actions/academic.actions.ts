@@ -1,6 +1,5 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import {
   connectDB,
   Department,
@@ -41,13 +40,10 @@ import {
   AssignClassCoordinatorInput,
 } from "@/lib/validations/academic.validation";
 import { revalidatePath } from "next/cache";
+import { requireRole } from "@/lib/auth";
 
 async function requireAdmin() {
-  const { sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "admin") {
-    throw new Error("Unauthorized: Admin access required");
-  }
+  await requireRole(["admin"]);
 }
 
 // ==================== DEPARTMENTS ====================

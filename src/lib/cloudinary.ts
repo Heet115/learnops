@@ -1,105 +1,65 @@
-// Cloudinary folder structure for LearnOps
-// learnops/
-// ├── alas/{alaId}/resources/     - ALA study materials
-// ├── submissions/{alaId}/{odId}/ - Student submissions
-// └── profiles/                   - User profile images
+import { v2 as cloudinary } from "cloudinary";
 
-export const CLOUDINARY_FOLDERS = {
-  ALA_RESOURCES: (alaId: string) => `learnops/alas/${alaId}/resources`,
-  SUBMISSIONS: (alaId: string, visitorId: string) =>
-    `learnops/submissions/${alaId}/${visitorId}`,
-  PROFILES: "learnops/profiles",
-} as const;
+cloudinary.config({
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-interface UploadOptions {
-  file: File;
-  folder: string;
-}
-
-interface UploadResult {
-  success: boolean;
-  url?: string;
-  publicId?: string;
-  error?: string;
-}
-
-export async function uploadToCloudinary({
-  file,
-  folder,
-}: UploadOptions): Promise<UploadResult> {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("folder", folder);
-
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Upload failed");
-    }
-
-    return {
-      success: true,
-      url: data.url,
-      publicId: data.publicId,
-    };
-  } catch (error) {
-    console.error("Cloudinary upload error:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Upload failed",
-    };
-  }
-}
+export { cloudinary };
 
 // Extract public_id from Cloudinary URL
 export function extractPublicIdFromUrl(url: string): string | null {
   try {
-    // URL format: https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/v{version}/{public_id}.{format}
-    const regex = /\/upload\/(?:v\d+\/)?(.+)\.[^.]+$/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
+    const urlObj = new URL(url);
+    const pathParts = urlObj.pathname.split("/upload/");
+    if (pathParts.length < 2) return null;
+
+    let publicIdWithExt = pathParts[1];
+    // Remove version if present (v1234567890/)
+    if (publicIdWithExt.match(/^v\d+\//)) {
+      publicIdWithExt = publicIdWithExt.replace(/^v\d+\//, "");
+    }
+
+    // Remove file extension
+    const lastDotIndex = publicIdWithExt.lastIndexOf(".");
+    if (lastDotIndex > 0) {
+      return publicIdWithExt.substring(0, lastDotIndex);
+    }
+    return publicIdWithExt;
   } catch {
     return null;
   }
 }
 
-// File validation helpers
-export const ALLOWED_RESOURCE_TYPES = [
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.ms-powerpoint",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-];
-
-export const ALLOWED_SUBMISSION_TYPES = [
-  ...ALLOWED_RESOURCE_TYPES,
-  "application/zip",
-  "application/x-zip-compressed",
-];
-
-export const MAX_RESOURCE_SIZE = 10 * 1024 * 1024; // 10MB
-export const MAX_SUBMISSION_SIZE = 30 * 1024 * 1024; // 30MB
-
-export function validateFile(
-  file: File,
-  allowedTypes: string[],
-  maxSize: number,
-): { valid: boolean; error?: string } {
-  if (!allowedTypes.includes(file.type)) {
-    return { valid: false, error: "File type not allowed" };
+export async function deleteFromCloudinary(url: string): Promise<boolean> {
+  const publicId = extractPublicIdFromUrl(url);
+  if (!publicId) {
+    console.warn("Could not extract public_id from URL:", url);
+    return false;
   }
-  if (file.size > maxSize) {
-    return {
-      valid: false,
-      error: `File size must be less than ${maxSize / (1024 * 1024)}MB`,
-    };
+
+  try {
+    // Try as raw first (for documents like PDF, DOCX)
+    let result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: "raw",
+    });
+
+    if (result.result === "ok") return true;
+
+    // Try as image if raw didn't work
+    result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: "image",
+    });
+
+    if (result.result === "ok") return true;
+
+    // Try as auto
+    result = await cloudinary.uploader.destroy(publicId);
+
+    return result.result === "ok" || result.result === "not found";
+  } catch (error) {
+    console.error("Cloudinary delete error:", error);
+    return false;
   }
-  return { valid: true };
 }

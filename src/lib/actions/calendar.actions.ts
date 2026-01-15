@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { connectDB, User, ALA, Submission, SubjectOffering } from "@/lib/db";
+import { requireRole, getUserRole } from "@/lib/auth";
 
 export interface CalendarEvent {
   id: string;
@@ -23,9 +24,7 @@ export async function getStudentCalendarEvents(
   startDate: string,
   endDate: string,
 ): Promise<CalendarEvent[]> {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "student") return [];
+  const { userId } = await requireRole(["student"]);
 
   await connectDB();
   const student = await User.findOne({ clerkId: userId, isActive: true });
@@ -153,9 +152,7 @@ export async function getProfessorCalendarEvents(
   startDate: string,
   endDate: string,
 ): Promise<CalendarEvent[]> {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== "professor") return [];
+  const { userId } = await requireRole(["professor"]);
 
   await connectDB();
   const professor = await User.findOne({ clerkId: userId, isActive: true });
@@ -235,8 +232,8 @@ export async function getProfessorCalendarEvents(
 
 // Get calendar summary (counts by date)
 export async function getCalendarSummary(month: number, year: number) {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const { userId } = await auth();
+  const role = await getUserRole();
   if (!userId) return {};
 
   await connectDB();
@@ -278,8 +275,8 @@ export async function getCalendarSummary(month: number, year: number) {
 
 // Get upcoming deadlines (next N days)
 export async function getUpcomingDeadlines(days: number = 7) {
-  const { sessionClaims, userId } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const { userId } = await auth();
+  const role = await getUserRole();
   if (!userId || role !== "student") return [];
 
   const now = new Date();
