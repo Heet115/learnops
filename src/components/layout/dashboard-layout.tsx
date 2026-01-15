@@ -43,10 +43,10 @@ export function DashboardLayout({
     <SidebarProvider>
       <AppSidebar role={role} user={user} />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center justify-between gap-2">
-          <div className="flex items-center justify-between gap-2 px-4">
-            <div className="flex items-center gap-2 px-4">
-              <SidebarTrigger className="-ml-1" />
+        <header className="sticky top-0 z-40 flex h-16 rounded-t-xl shrink-0 items-center justify-between gap-2 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+          <div className="flex items-center justify-between rounded-t-xl gap-2 px-4">
+            <div className="flex items-center rounded-t-xl gap-2 px-4">
+              <SidebarTrigger className="-ml-1 transition-modern hover:bg-accent" />
               <Separator
                 orientation="vertical"
                 className="mr-2 data-[orientation=vertical]:h-4"
@@ -62,7 +62,7 @@ export function DashboardLayout({
                         <BreadcrumbSeparator className="hidden md:block" />
                       )}
                       {item.href ? (
-                        <BreadcrumbLink href={item.href}>
+                        <BreadcrumbLink href={item.href} className="transition-modern hover:text-primary">
                           {item.label}
                         </BreadcrumbLink>
                       ) : (
@@ -84,7 +84,7 @@ export function DashboardLayout({
             <ModeToggle />
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0 md:p-6 md:pt-4">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );
