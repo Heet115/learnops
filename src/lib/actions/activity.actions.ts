@@ -112,7 +112,7 @@ export async function getRecentActivities(limit = 10) {
   await connectDB();
 
   // Only show administrative actions
-  const adminActions = [
+  const adminActions: ActivityAction[] = [
     "user_created",
     "user_updated",
     "user_deactivated",

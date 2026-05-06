@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { connectDB, User, IUser, Class, Semester, Course } from "@/lib/db";
+import type { UserRole } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 // Helper to get departmentId from classId by traversing the hierarchy
@@ -36,7 +37,7 @@ export async function getUserByClerkId(clerkId: string): Promise<IUser | null> {
   return User.findOne({ clerkId, isActive: true });
 }
 
-export async function getUsersByRole(role: string): Promise<IUser[]> {
+export async function getUsersByRole(role: UserRole): Promise<IUser[]> {
   await connectDB();
   return User.find({ role, isActive: true }).sort({ createdAt: -1 });
 }

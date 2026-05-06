@@ -2,6 +2,7 @@
 
 import { clerkClient } from "@clerk/nextjs/server";
 import { connectDB, User, Class, Semester, Course } from "@/lib/db";
+import type { UserRole } from "@/lib/db";
 import {
   createUserSchema,
   updateUserSchema,
@@ -109,13 +110,15 @@ export async function getAllUsers() {
 }
 
 // Get paginated users
-export async function getPaginatedUsers(options: {
-  page?: number;
-  limit?: number;
-  role?: string;
-  search?: string;
-  isActive?: boolean;
-} = {}) {
+export async function getPaginatedUsers(
+  options: {
+    page?: number;
+    limit?: number;
+    role?: string;
+    search?: string;
+    isActive?: boolean;
+  } = {},
+) {
   await requireAdmin();
   await connectDB();
 
@@ -150,7 +153,7 @@ export async function getPaginatedUsers(options: {
 }
 
 // Get users by role
-export async function getUsersByRole(role: string) {
+export async function getUsersByRole(role: UserRole) {
   await requireAdmin();
   await connectDB();
 

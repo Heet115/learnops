@@ -12,7 +12,7 @@ import {
   Announcement,
   SubjectOffering,
 } from "@/lib/db";
-import type { NotificationType } from "@/lib/db";
+import type { NotificationType, UserRole } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { pushNotificationToUser } from "@/lib/sse";
 import { shouldNotify } from "./notification-preferences.actions";
@@ -539,7 +539,7 @@ export async function createAnnouncement(data: {
   const { userId: clerkId, sessionClaims } = await auth();
   if (!clerkId) return { success: false, error: "Unauthorized" };
 
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const role = (sessionClaims?.metadata as { role?: UserRole })?.role;
   if (!role || !["admin", "hod", "professor"].includes(role)) {
     return {
       success: false,
@@ -547,12 +547,15 @@ export async function createAnnouncement(data: {
     };
   }
 
+  // Type assertion after validation
+  const creatorRole = role as "admin" | "hod" | "professor";
+
   await connectDB();
   const user = await User.findOne({ clerkId, isActive: true });
   if (!user) return { success: false, error: "User not found" };
 
   // Validate target based on role
-  if (role === "professor" && data.targetType !== "subject_offering") {
+  if (creatorRole === "professor" && data.targetType !== "subject_offering") {
     return {
       success: false,
       error:
@@ -565,7 +568,7 @@ export async function createAnnouncement(data: {
     title: data.title,
     message: data.message,
     createdBy: user._id,
-    createdByRole: role,
+    createdByRole: creatorRole,
     targetType: data.targetType,
     targetId: data.targetId
       ? new mongoose.Types.ObjectId(data.targetId)
